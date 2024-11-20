@@ -1,34 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import { fetchUserData } from '../../api/userService';
+import React from 'react';
+// import { useQuery } from '@tanstack/react-query';
+// import { fetchUser, User } from './api/userApi';
 
-const UserProfile: React.FC = () => {
-  const [userData, setUserData] = useState(null);
+const HomePage: React.FC = () => {
+  // const { data, isLoading, error } = useQuery<User>({
+  //   queryKey: ['user'],
+  //   queryFn: () => fetchUser(),
+  // });
 
-  useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const data = await fetchUserData('12345');
-        setUserData(data);
-      } catch (error) {
-        console.error('Failed to fetch user data');
-      }
-    };
+  // // 로딩 상태 처리
+  // if (isLoading) return <div>Loading...</div>;
 
-    loadUserData();
-  }, []);
+  // // 에러 상태 처리
+  // if (error instanceof Error) return <div>Error: {error.message}</div>;
 
   return (
     <div>
-      {userData ? (
-        <div>
-          {/* <h1>{userData.name}</h1>
-          <p>{userData.email}</p> */}
-        </div>
-      ) : (
-        <p>Loading...</p>
-      )}
+      <h1>Home</h1>
+      <div>
+        {/* <p>ID: {data?.id}</p>
+        <p>Name: {data?.name}</p> */}
+      </div>
     </div>
   );
 };
 
-export default UserProfile;
+export default HomePage;

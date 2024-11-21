@@ -5,7 +5,7 @@ import CategoryWrapper from '../../common/CategoryWrapper';
 import PostList from '../../common/PostList';
 import ScrollToTopButton from '../../common/ScrollToTopButton';
 
-const CommunityPage = () => {
+const CategoryBasedPostsPage = () => {
   const location = useLocation();
   const initialCategory = location.state?.selectedCategory || '생활용품'; // 전달받은 상태 또는 기본값
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
@@ -29,7 +29,7 @@ const CommunityPage = () => {
   );
 };
 
-export default CommunityPage;
+export default CategoryBasedPostsPage;
 
 const CommunityPageContainer = styled.div`
   display: flex;

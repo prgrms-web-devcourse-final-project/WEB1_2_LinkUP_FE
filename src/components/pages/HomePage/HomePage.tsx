@@ -1,5 +1,4 @@
 import React from 'react';
-import Header from '../../common/Header';
 import styled from 'styled-components';
 import RecommendProduct from './RecommendProduct';
 import PopularProduct from './PopularProduct';
@@ -111,7 +110,6 @@ const HomePage: React.FC = () => {
   ];
   return (
     <>
-      <Header />
       <ContainerBox>
         <Container>
           <PopularProduct product={popularProduct} />

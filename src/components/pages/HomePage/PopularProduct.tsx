@@ -1,22 +1,27 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 interface PopularProductProps {
   product: {
+    id: number;
     image: string;
     stars: number;
   };
 }
 
-const PopularProduct: React.FC<PopularProductProps> = ({ product }) => (
-  <Popular>
-    <PopularImg src={product.image} alt="상단 인기 상품" />
-    <PopularStar>{'⭐'.repeat(product.stars)}</PopularStar>
-  </Popular>
-);
+const PopularProduct: React.FC<PopularProductProps> = ({ product }) => {
+  return (
+    <Popular>
+      <Link to={`/products/${product.id}`}>
+        <PopularImg src={product.image} alt="상단 인기 상품" />
+        <PopularStar>{'⭐'.repeat(product.stars)}</PopularStar>
+      </Link>
+    </Popular>
+  );
+};
 
 const Popular = styled.div`
-  background-color: gray;
   width: 80%;
   height: 250px;
   align-items: center;

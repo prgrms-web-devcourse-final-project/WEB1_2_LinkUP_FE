@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 interface Product {
@@ -48,19 +49,21 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
       <CardWrapper>
         {products.map((product) => (
           <Card key={product.id}>
-            <ProductImg src={product.image} alt={product.name} />
-            <ProductWrapper>
-              <ProductName>{product.name}</ProductName>
-              <ProductStar>{'⭐'.repeat(product.stars)}</ProductStar>
-              <PriceWrapper>
-                <OriginalPrice>
-                  ${product.originalPrice.toFixed(2)}
-                </OriginalPrice>
-                <DiscountedPrice>
-                  ${product.discountedPrice.toFixed(2)}
-                </DiscountedPrice>
-              </PriceWrapper>
-            </ProductWrapper>
+            <StyledLink to={`/products/${product.id}`}>
+              <ProductImg src={product.image} alt={product.name} />
+              <ProductWrapper>
+                <ProductName>{product.name}</ProductName>
+                <ProductStar>{'⭐'.repeat(product.stars)}</ProductStar>
+                <PriceWrapper>
+                  <OriginalPrice>
+                    ${product.originalPrice.toFixed(2)}
+                  </OriginalPrice>
+                  <DiscountedPrice>
+                    ${product.discountedPrice.toFixed(2)}
+                  </DiscountedPrice>
+                </PriceWrapper>
+              </ProductWrapper>
+            </StyledLink>
             <LikeButton>♡</LikeButton>
           </Card>
         ))}
@@ -74,7 +77,6 @@ const Recommend = styled.div`
   width: 80%;
   height: auto;
   margin: 0 auto;
-  background-color: gray;
 `;
 
 const RecommendTitle = styled.h2`
@@ -107,7 +109,18 @@ const Card = styled.div`
   align-items: center;
   position: relative;
 `;
-
+const StyledLink = styled(Link)`
+  text-decoration: none;
+  &:link {
+    color: inherit;
+  }
+  &:visited {
+    color: inherit;
+  }
+  &:active {
+    color: inherit;
+  }
+`;
 const ProductImg = styled.img`
   width: 90%;
   height: 200px;

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 interface Product {
@@ -14,39 +15,44 @@ interface PopularProductsListProps {
   products: Product[];
 }
 
-const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => (
-  <Recommend>
-    <RecommendTitle>
-      실시간 인기 상품(전체 물건에서 댓글많이 달린 순)
-    </RecommendTitle>
-    <CardWrapper>
-      {products.map((product) => (
-        <Card key={product.id}>
-          <ProductImg src={product.image} alt={product.name} />
-          <ProductWrapper>
-            <ProductName>{product.name}</ProductName>
-            <ProductStar>{'⭐'.repeat(product.stars)}</ProductStar>
-            <PriceWrapper>
-              <OriginalPrice>${product.originalPrice.toFixed(2)}</OriginalPrice>
-              <DiscountedPrice>
-                ${product.discountedPrice.toFixed(2)}
-              </DiscountedPrice>
-            </PriceWrapper>
-          </ProductWrapper>
-          <LikeButton>♡</LikeButton>
-        </Card>
-      ))}
-    </CardWrapper>
-  </Recommend>
-);
+const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => {
+  return (
+    <Recommend>
+      <RecommendTitle>
+        실시간 인기 상품(전체 물건에서 댓글많이 달린 순)
+      </RecommendTitle>
 
+      <CardWrapper>
+        {products.map((product) => (
+          <Card key={product.id}>
+            <StyledLink to={`/products/${product.id}`}>
+              <ProductImg src={product.image} alt={product.name} />
+              <ProductWrapper>
+                <ProductName>{product.name}</ProductName>
+                <ProductStar>{'⭐'.repeat(product.stars)}</ProductStar>
+                <PriceWrapper>
+                  <OriginalPrice>
+                    ${product.originalPrice.toFixed(2)}
+                  </OriginalPrice>
+                  <DiscountedPrice>
+                    ${product.discountedPrice.toFixed(2)}
+                  </DiscountedPrice>
+                </PriceWrapper>
+              </ProductWrapper>
+            </StyledLink>
+            <LikeButton>♡</LikeButton>
+          </Card>
+        ))}
+      </CardWrapper>
+    </Recommend>
+  );
+};
 const Recommend = styled.div`
   display: flex;
   flex-wrap: wrap;
   width: 80%;
   height: auto;
   margin: 0 auto;
-  background-color: gray;
 `;
 
 const RecommendTitle = styled.h2`
@@ -79,7 +85,18 @@ const Card = styled.div`
   align-items: center;
   position: relative;
 `;
-
+const StyledLink = styled(Link)`
+  text-decoration: none;
+  &:link {
+    color: inherit;
+  }
+  &:visited {
+    color: inherit;
+  }
+  &:active {
+    color: inherit;
+  }
+`;
 const ProductImg = styled.img`
   width: 90%;
   height: 200px;

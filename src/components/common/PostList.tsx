@@ -4,10 +4,12 @@ import { mockCommunityPosts } from '../../mocks/communityPosts';
 import WriteButton from './WriteButton';
 import SearchBar from './SearchBar';
 import Pagination from './Pagination';
+import { useNavigate } from 'react-router-dom';
 
 const POSTS_PER_PAGE = 6; // 한 페이지에 표시할 게시글 수
 
 const PostList = ({ selectedCategory }: { selectedCategory: string }) => {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState(''); // 입력된 검색어
   const [searchQuery, setSearchQuery] = useState(''); // 실제 검색 실행 시의 검색어
@@ -53,10 +55,15 @@ const PostList = ({ selectedCategory }: { selectedCategory: string }) => {
     setCurrentPage(1);
   }, [selectedCategory]);
 
+  // 글 작성 버튼 클릭 핸들러
+  const handleWriteButtonClick = () => {
+    navigate('/community/create', { state: { selectedCategory } }); // 카테고리 정보 전달
+  };
+
   return (
     <Container>
       <ActionsContainer>
-        <WriteButton />
+        <WriteButton onClick={handleWriteButtonClick} />
         <SearchBar
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}

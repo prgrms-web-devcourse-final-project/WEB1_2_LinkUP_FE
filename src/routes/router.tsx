@@ -6,6 +6,7 @@ import HomePage from '../components/pages/HomePage/HomePage';
 import CommunityPage from '../components/pages/community/CommunityPage';
 import Layout from '../components/common/Layout';
 import SignInPage from '../components/pages/login/SignInPage';
+import SignUpPage from '../components/pages/login/SignUpPage';
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,7 @@ const router = createBrowserRouter([
     path: '/signin',
     element: <SignInPage />,
   },
+  { path: '/signup', element: <SignUpPage /> },
   { path: '*', element: <NotFoundPage /> }, // 404 페이지
 ]);
 

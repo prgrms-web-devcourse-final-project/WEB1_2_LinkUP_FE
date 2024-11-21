@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 const SignInPage = () => {
+  const navigate = useNavigate();
   return (
     <Wrapper>
       <LeftContent>Image</LeftContent>
@@ -14,7 +16,13 @@ const SignInPage = () => {
         <LoginButton>Login</LoginButton>
         <SNSButton>계정으로 로그인</SNSButton>
         <AuthButtonWrapper>
-          <AuthButton>회원가입 하기</AuthButton>
+          <AuthButton
+            onClick={() => {
+              navigate('/signup');
+            }}
+          >
+            회원가입 하기
+          </AuthButton>
           <AuthButton>비밀번호 찾기</AuthButton>
         </AuthButtonWrapper>
       </RightContent>

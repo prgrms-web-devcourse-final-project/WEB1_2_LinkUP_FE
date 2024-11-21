@@ -8,6 +8,7 @@ import Layout from '../components/common/Layout';
 import SignInPage from '../components/pages/login/SignInPage';
 import SignUpPage from '../components/pages/login/SignUpPage';
 import FindPasswordPage from '../components/pages/login/FindPasswordPage';
+import ResetPasswordPage from '../components/pages/login/ResetPasswordPage';
 
 const router = createBrowserRouter([
   {
@@ -31,6 +32,7 @@ const router = createBrowserRouter([
   },
   { path: '/signup', element: <SignUpPage /> },
   { path: '/findpassword', element: <FindPasswordPage /> },
+  { path: '/resetpassword', element: <ResetPasswordPage /> },
   { path: '*', element: <NotFoundPage /> }, // 404 페이지
 ]);
 

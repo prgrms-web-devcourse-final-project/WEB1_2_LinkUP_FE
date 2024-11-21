@@ -56,9 +56,18 @@ const LoginButton = styled.div`
 
 const StyledInput = styled.input`
   width: calc(100% - 20px);
-  height: 35px;
+  height: 25px;
+  border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 13px;
+  padding: 5px 10px;
+  box-shadow: none;
+  outline: none;
+  transition: border-color 0.3s ease;
+
+  &:focus {
+    border-color: #000;
+  }
 `;
 
 const Subtitle = styled.div`

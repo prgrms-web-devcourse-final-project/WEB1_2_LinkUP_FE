@@ -1,22 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { mockCommunityPosts } from '../../mocks/communityPosts';
+import WriteButton from './WriteButton';
+import SearchBar from './SearchBar';
 import Pagination from './Pagination';
 
 const POSTS_PER_PAGE = 6; // 한 페이지에 표시할 게시글 수
 
 const PostList = ({ selectedCategory }: { selectedCategory: string }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState(''); // 입력된 검색어
+  const [searchQuery, setSearchQuery] = useState(''); // 실제 검색 실행 시의 검색어
 
-  // 선택된 카테고리의 게시글 필터링
-  const filteredPosts = mockCommunityPosts
+  // 선택된 카테고리에 따른 게시글 필터링
+  const categoryFilteredPosts = mockCommunityPosts
     .filter((post) =>
       post.categories.some((category) => category.name === selectedCategory)
     )
-    .sort((a, b) => {
-      // 최신순 정렬 (createdAt 기준)
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    ); // 최신순 정렬
+
+  // 검색 실행 시 필터링된 게시글
+  const filteredPosts = categoryFilteredPosts
+    .filter((post) =>
+      post.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    ); // 최신순 정렬
 
   // 페이지네이션 계산
   const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
@@ -26,14 +40,39 @@ const PostList = ({ selectedCategory }: { selectedCategory: string }) => {
     startIndex + POSTS_PER_PAGE
   );
 
-  // 카테고리 변경 시 페이지를 1페이지로 초기화
+  // 검색 실행 핸들러
+  const handleSearch = () => {
+    setSearchQuery(searchTerm); // 검색어 설정
+    setCurrentPage(1); // 검색 실행 시 페이지 초기화
+  };
+
+  // 카테고리 변경 시 검색 초기화 및 페이지 초기화
   useEffect(() => {
+    setSearchQuery(''); // 검색 쿼리 초기화
+    setSearchTerm(''); // 검색 입력 초기화
     setCurrentPage(1);
   }, [selectedCategory]);
 
   return (
     <Container>
-      {currentPosts.length > 0 ? (
+      <ActionsContainer>
+        <WriteButton />
+        <SearchBar
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onSearch={handleSearch} // 검색 실행 핸들러
+        />
+      </ActionsContainer>
+
+      {categoryFilteredPosts.length === 0 ? (
+        <NoPostMessage>
+          선택된 카테고리에 해당하는 게시글이 없습니다.
+        </NoPostMessage>
+      ) : filteredPosts.length === 0 ? (
+        <NoPostMessage>
+          &apos;{searchQuery}&apos;의 검색 결과가 존재하지 않습니다.
+        </NoPostMessage>
+      ) : (
         currentPosts.map((post) => (
           <PostItem key={post.postId}>
             <PostImage src={post.images[0]} alt={post.title} />
@@ -41,27 +80,29 @@ const PostList = ({ selectedCategory }: { selectedCategory: string }) => {
               <PostTitle>{post.title}</PostTitle>
               <PostDetails>
                 <PostAuthor>{post.authorId}</PostAuthor>
-                <PostCreatedAt>
-                  {new Date(post.createdAt).toLocaleString('ko-KR', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false,
-                  })}
-                </PostCreatedAt>
-                {'~'}
-                <PostCloseAt>
-                  {new Date(post.closeAt).toLocaleString('ko-KR', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false,
-                  })}
-                </PostCloseAt>
+                <PostDate>
+                  <PostCreatedAt>
+                    {new Date(post.createdAt).toLocaleString('ko-KR', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false,
+                    })}
+                  </PostCreatedAt>
+                  {'~'}
+                  <PostCloseAt>
+                    {new Date(post.closeAt).toLocaleString('ko-KR', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false,
+                    })}
+                  </PostCloseAt>
+                </PostDate>
                 <PostJoinStatus>
                   참여 현황: {post.currentQuantity} / {post.requiredQuantity}
                 </PostJoinStatus>
@@ -70,17 +111,15 @@ const PostList = ({ selectedCategory }: { selectedCategory: string }) => {
             </PostContent>
           </PostItem>
         ))
-      ) : (
-        <NoPostMessage>
-          선택된 카테고리에 해당하는 게시글이 없습니다.
-        </NoPostMessage>
       )}
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={(page) => setCurrentPage(page)}
-      />
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
+      )}
     </Container>
   );
 };
@@ -90,6 +129,14 @@ const Container = styled.div`
   flex-direction: column;
   margin: 20px auto;
   max-width: 800px;
+`;
+
+const ActionsContainer = styled.div`
+  display: flex;
+  justify-content: flex-end; /* 오른쪽 정렬 */
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 20px; /* 버튼과 검색바 사이의 간격 */
 `;
 
 const PostItem = styled.div`
@@ -164,12 +211,18 @@ const PostAuthor = styled.span`
   font-weight: 400;
 `;
 
+const PostDate = styled.span`
+  font-weight: 400;
+`;
+
 const PostCreatedAt = styled.span`
   font-weight: 400;
+  margin-right: 10px;
 `;
 
 const PostCloseAt = styled.span`
   font-weight: 400;
+  margin-left: 10px;
 `;
 
 const PostJoinStatus = styled.div`

@@ -1,21 +1,111 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 const ResetPasswordPage = () => {
+  const navigate = useNavigate();
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showModal, setShowModal] = useState(false);
+
+  const handleConfirm = () => {
+    if (password === confirmPassword && password.length >= 8) {
+      setShowModal(true);
+    } else {
+      alert('비밀번호가 일치하지 않거나 유효하지 않습니다.');
+    }
+  };
+
   return (
-    <Wrapper>
-      <LeftContent>Image</LeftContent>
-      <RightContent>
-        <Title>비밀번호 재설정</Title>
-        <Subtitle>password</Subtitle>
-        <StyledInput placeholder="비밀번호 입력 (8 ~ 16자리)" />
-        <Subtitle>confirm password</Subtitle>
-        <StyledInput placeholder="비밀번호 확인" />
-        <LoginButton>Confirm</LoginButton>
-      </RightContent>
-    </Wrapper>
+    <>
+      <Wrapper>
+        <LeftContent>Image</LeftContent>
+        <RightContent>
+          <Title>비밀번호 재설정</Title>
+          <Subtitle>password</Subtitle>
+          <StyledInput
+            type="password"
+            placeholder="비밀번호 입력 (8 ~ 16자리)"
+            value={password}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setPassword(e.target.value)
+            }
+          />
+          <Subtitle>confirm password</Subtitle>
+          <StyledInput
+            type="password"
+            placeholder="비밀번호 확인"
+            value={confirmPassword}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setConfirmPassword(e.target.value)
+            }
+          />
+          <LoginButton onClick={handleConfirm}>Confirm</LoginButton>
+        </RightContent>
+      </Wrapper>
+
+      {showModal && (
+        <ModalOverlay>
+          <ModalContent>
+            <ModalText>비밀번호가 변경되었습니다.</ModalText>
+            <NaviButton
+              onClick={() => {
+                navigate('/signin');
+              }}
+            >
+              Back to Login
+            </NaviButton>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+    </>
   );
 };
+
+const NaviButton = styled.div`
+  background-color: #000;
+  color: #fff;
+  border-radius: 5px;
+  width: calc(100% - 40px);
+  height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 35px;
+  cursor: pointer;
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  width: 432px;
+  height: 332px;
+  background-color: white;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  flex-direction: column;
+  z-index: 1001;
+`;
+
+const ModalText = styled.div`
+  font-size: 18px;
+  font-weight: 800;
+  color: #333;
+`;
 
 const LoginButton = styled.div`
   background-color: #000;
@@ -51,11 +141,13 @@ const Subtitle = styled.div`
   font-weight: 500;
   margin-top: 10px;
 `;
+
 const Title = styled.div`
   font-size: 30px;
   font-weight: 900;
   margin-bottom: 20px;
 `;
+
 const LeftContent = styled.div`
   flex: 6;
   background-color: lightblue;

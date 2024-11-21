@@ -1,4 +1,4 @@
-import axiosInstance from '../../../api/axiosInstance';
+import axiosInstance from '../../../../api/axiosInstance';
 export type User = {
   id: string;
   name: string;

@@ -21,11 +21,11 @@ const router = createBrowserRouter([
         path: '/community',
         element: <CommunityPage />,
       },
-      {
-        path: '/signin',
-        element: <SignInPage />,
-      },
     ],
+  },
+  {
+    path: '/signin',
+    element: <SignInPage />,
   },
   { path: '*', element: <NotFoundPage /> }, // 404 페이지
 ]);

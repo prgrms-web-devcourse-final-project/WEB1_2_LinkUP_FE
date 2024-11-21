@@ -4,6 +4,7 @@ import ErrorPage from './ErrorPage';
 import NotFoundPage from './NotFoundPage';
 import HomePage from '../components/pages/HomePage/HomePage';
 import CommunityPage from '../components/pages/community/CommunityPage';
+import PostCreatePage from '../components/pages/community/PostCreatePage';
 import Layout from '../components/common/Layout';
 
 const router = createBrowserRouter([
@@ -19,6 +20,10 @@ const router = createBrowserRouter([
       {
         path: '/community',
         element: <CommunityPage />,
+      },
+      {
+        path: '/community/create',
+        element: <PostCreatePage />,
       },
     ],
   },

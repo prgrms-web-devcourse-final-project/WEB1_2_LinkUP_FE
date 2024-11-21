@@ -23,7 +23,13 @@ const SignInPage = () => {
           >
             회원가입 하기
           </AuthButton>
-          <AuthButton>비밀번호 찾기</AuthButton>
+          <AuthButton
+            onClick={() => {
+              navigate('/findpassword');
+            }}
+          >
+            비밀번호 찾기
+          </AuthButton>
         </AuthButtonWrapper>
       </RightContent>
     </Wrapper>

@@ -68,9 +68,8 @@ const RecommendTitle = styled.h2`
 `;
 
 const CardWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   width: 100%;
   gap: 20px;
   margin-top: 20px;

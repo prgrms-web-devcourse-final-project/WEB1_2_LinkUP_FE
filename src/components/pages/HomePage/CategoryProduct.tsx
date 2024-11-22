@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -21,7 +21,7 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
   products,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('생활용품');
 
   const handleToggle = () => setIsExpanded(!isExpanded);
   const handleCategoryClick = (category: string) => {
@@ -29,11 +29,20 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
     setIsExpanded(false);
   };
 
+  //임의로 8개만 선택
+  const getRandomProducts = (products: Product[]): Product[] => {
+    const shuffled = [...products].sort(() => 0.5 - Math.random()); // Shuffle the array
+    return shuffled.slice(0, 8);
+  };
+  const displayedProducts = useMemo(
+    () => getRandomProducts(products),
+    [products]
+  );
   return (
     <Recommend>
       <CategoryWrapper>
         <RecommendTitle onClick={handleToggle}>
-          {selectedCategory || '카테고리 별 상품'}
+          {selectedCategory}
         </RecommendTitle>
         <CategoryContainer isExpanded={isExpanded}>
           {categories.map((category) => (
@@ -47,7 +56,7 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
         </CategoryContainer>
       </CategoryWrapper>
       <CardWrapper>
-        {products.map((product) => (
+        {displayedProducts.map((product) => (
           <Card key={product.id}>
             <StyledLink to={`/products/${product.id}`}>
               <ProductImg src={product.image} alt={product.name} />
@@ -68,6 +77,11 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
           </Card>
         ))}
       </CardWrapper>
+      <MoreButtonWrapper>
+        <StyledMoreButton to={`/products?category=${selectedCategory}`}>
+          더보기
+        </StyledMoreButton>
+      </MoreButtonWrapper>
     </Recommend>
   );
 };
@@ -88,9 +102,8 @@ const RecommendTitle = styled.h2`
 `;
 
 const CardWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   width: 100%;
   gap: 20px;
   margin-top: 20px;
@@ -211,5 +224,29 @@ const CategoryItem = styled.div`
     text-decoration: underline;
   }
 `;
+const MoreButtonWrapper = styled.div`
+  position: relative;
+  margin-top: 30px;
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+`;
 
+const StyledMoreButton = styled(Link)`
+  position: absolute;
+  right: 20px;
+  display: inline-block;
+  padding: 10px 30px;
+  background-color: black;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 16px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: gray;
+  }
+`;
 export default CategoryProduct;

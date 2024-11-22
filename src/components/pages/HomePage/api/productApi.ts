@@ -6,6 +6,7 @@ export type Product = {
   originalPrice: number;
   discountedPrice: number;
   image: string;
+  category: string;
 };
 export const getProducts = async (): Promise<Product[]> => {
   try {

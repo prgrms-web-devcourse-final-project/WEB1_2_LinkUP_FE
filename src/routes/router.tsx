@@ -12,6 +12,7 @@ import ResetPasswordPage from '../components/pages/login/ResetPasswordPage';
 import TermsPage from '../components/pages/login/TermsPage';
 import ProductPage from '../components/pages/ProductPage/ProductPage';
 import ProductDetail from '../components/pages/ProductDetailPage/ProductDetail';
+import SettingPage from '../components/pages/myPage/SettingPage';
 
 const router = createBrowserRouter([
   {
@@ -34,6 +35,15 @@ const router = createBrowserRouter([
       {
         path: '/community',
         element: <CommunityPage />,
+      },
+      {
+        path: '/mypage',
+        children: [
+          {
+            path: 'setting',
+            element: <SettingPage />,
+          },
+        ],
       },
     ],
   },

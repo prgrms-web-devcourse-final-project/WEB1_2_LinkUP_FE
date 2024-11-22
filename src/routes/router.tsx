@@ -5,6 +5,8 @@ import NotFoundPage from './NotFoundPage';
 import HomePage from '../components/pages/HomePage/HomePage';
 import CommunityPage from '../components/pages/community/CommunityPage';
 import Layout from '../components/common/Layout';
+import ProductPage from '../components/pages/ProductPage/ProductPage';
+import ProductDetail from '../components/pages/ProductDetailPage/ProductDetail';
 
 const router = createBrowserRouter([
   {
@@ -15,6 +17,14 @@ const router = createBrowserRouter([
       {
         path: '/',
         element: <HomePage />,
+      },
+      {
+        path: '/products',
+        element: <ProductPage />,
+      },
+      {
+        path: '/products/:id',
+        element: <ProductDetail />,
       },
       {
         path: '/community',

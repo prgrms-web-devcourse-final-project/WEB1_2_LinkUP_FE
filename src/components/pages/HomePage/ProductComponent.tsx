@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-
 interface Product {
   id: number;
   name: string;
@@ -11,41 +10,22 @@ interface Product {
   image: string;
 }
 
-interface CategoryProductsProps {
-  categories: string[];
+type ProductComponentProps = {
+  input: string;
   products: Product[];
-}
+};
 
-const CategoryProduct: React.FC<CategoryProductsProps> = ({
-  categories,
+const ProductComponent: React.FC<ProductComponentProps> = ({
+  input,
   products,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
-  const handleToggle = () => setIsExpanded(!isExpanded);
-  const handleCategoryClick = (category: string) => {
-    setSelectedCategory(category);
-    setIsExpanded(false);
-  };
-
   return (
     <Recommend>
-      <CategoryWrapper>
-        <RecommendTitle onClick={handleToggle}>
-          {selectedCategory || '카테고리 별 상품'}
-        </RecommendTitle>
-        <CategoryContainer isExpanded={isExpanded}>
-          {categories.map((category) => (
-            <CategoryItem
-              key={category}
-              onClick={() => handleCategoryClick(category)}
-            >
-              {category}
-            </CategoryItem>
-          ))}
-        </CategoryContainer>
-      </CategoryWrapper>
+      <RecommendTitle>
+        {' '}
+        {input ? `${input}에 대한 검색 결과` : ''}
+      </RecommendTitle>
+
       <CardWrapper>
         {products.map((product) => (
           <Card key={product.id}>
@@ -71,6 +51,7 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
     </Recommend>
   );
 };
+
 const Recommend = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -80,7 +61,6 @@ const Recommend = styled.div`
 `;
 
 const RecommendTitle = styled.h2`
-  text-decoration: underline;
   margin-left: 10px;
   margin-bottom: 20px;
   font-size: 1.5rem;
@@ -178,38 +158,4 @@ const LikeButton = styled.div`
   color: #ccc;
   cursor: pointer;
 `;
-const CategoryWrapper = styled.div`
-  width: 100%;
-  display: flex;
-  align-items: center;
-  position: relative;
-`;
-
-const CategoryContainer = styled.div<{ isExpanded: boolean }>`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  position: absolute;
-  top: 15px;
-  left: 190px;
-  padding: 10px 20px;
-  z-index: 10;
-  visibility: ${(props) => (props.isExpanded ? 'visible' : 'hidden')};
-  opacity: ${(props) => (props.isExpanded ? 1 : 0)};
-  transition:
-    opacity 0.3s ease,
-    visibility 0.3s ease;
-`;
-
-const CategoryItem = styled.div`
-  padding: 5px 10px;
-  border-radius: 5px;
-  width: 120px;
-
-  &:hover {
-    cursor: pointer;
-    text-decoration: underline;
-  }
-`;
-
-export default CategoryProduct;
+export default ProductComponent;

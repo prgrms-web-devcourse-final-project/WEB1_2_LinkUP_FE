@@ -1,44 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
+import InputComponent from './InputComponent';
+import ProductComponent from './ProductComponent';
 import styled from 'styled-components';
-import RecommendProduct from './RecommendProduct';
-import PopularProduct from './PopularProduct';
-import CategoryProduct from './CategoryProduct';
-// import { getProducts, Product } from './api/productApi';
-// import { useQuery } from '@tanstack/react-query';
-// import { fetchUser, User } from './api/userApi';
+import { Product } from './api/productApi';
 
-const HomePage: React.FC = () => {
-  // const { data, isLoading, error } = useQuery<Product>({
-  //   queryKey: ['product'],
-  //   queryFn: () => getProducts(),
-  // });
-
-  // // 로딩 상태 처리
-  // if (isLoading) return <div>Loading...</div>;
-
-  // // 에러 상태 처리
-  // if (error instanceof Error) return <div>Error: {error.message}</div>;
-
-  const categories = [
-    '식료품',
-    '생활용품',
-    '패션/의류',
-    '전자제품',
-    '가구/인테리어',
-    '유아/아동용품',
-    '스포츠/레저',
-    '반려동물 용품',
-    '미용/건강',
-    '자동차/공구',
-  ];
-  const popularProduct = {
-    id: 1,
-    name: '다이슨 드라이기',
-    stars: 5,
-    originalPrice: 95.5,
-    discountedPrice: 79.98,
-    image: 'https://via.placeholder.com/200',
-  };
+const ProductPage = () => {
+  const [input, setInput] = useState('');
+  //   const data = searchProducts(input);
   const products = [
     {
       id: 1,
@@ -105,21 +73,19 @@ const HomePage: React.FC = () => {
       image: 'https://via.placeholder.com/200',
     },
   ];
+  const filtered = products.filter((product: Product) =>
+    product.name.toLowerCase().includes(input.toLowerCase())
+  );
   return (
     <>
       <ContainerBox>
         <Container>
-          <PopularProduct product={popularProduct} />
+          <InputComponent input={input} setInput={setInput} />
         </Container>
       </ContainerBox>
       <ContainerBox>
         <Container>
-          <RecommendProduct products={products} />
-        </Container>
-      </ContainerBox>
-      <ContainerBox>
-        <Container>
-          <CategoryProduct categories={categories} products={products} />
+          <ProductComponent input={input} products={filtered} />
         </Container>
       </ContainerBox>
     </>
@@ -141,4 +107,4 @@ const Container = styled.div`
   width: 100%;
 `;
 
-export default HomePage;
+export default ProductPage;

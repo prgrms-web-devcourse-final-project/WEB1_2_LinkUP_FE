@@ -18,9 +18,7 @@ interface PopularProductsListProps {
 const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => {
   return (
     <Recommend>
-      <RecommendTitle>
-        실시간 인기 상품(전체 물건에서 댓글많이 달린 순)
-      </RecommendTitle>
+      <RecommendTitle>실시간 인기 상품</RecommendTitle>
 
       <CardWrapper>
         {products.map((product) => (
@@ -56,7 +54,6 @@ const Recommend = styled.div`
 `;
 
 const RecommendTitle = styled.h2`
-  text-decoration: underline;
   margin-left: 10px;
   margin-bottom: 20px;
   font-size: 1.5rem;
@@ -149,7 +146,7 @@ const DiscountedPrice = styled.div`
 const LikeButton = styled.div`
   position: absolute;
   bottom: 20px;
-  right: 40px;
+  right: 30px;
   font-size: 25px;
   color: #ccc;
   cursor: pointer;

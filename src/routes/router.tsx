@@ -10,6 +10,8 @@ import SignUpPage from '../components/pages/login/SignUpPage';
 import FindPasswordPage from '../components/pages/login/FindPasswordPage';
 import ResetPasswordPage from '../components/pages/login/ResetPasswordPage';
 import TermsPage from '../components/pages/login/TermsPage';
+import ProductPage from '../components/pages/ProductPage/ProductPage';
+import ProductDetail from '../components/pages/ProductDetailPage/ProductDetail';
 
 const router = createBrowserRouter([
   {
@@ -20,6 +22,14 @@ const router = createBrowserRouter([
       {
         path: '/',
         element: <HomePage />,
+      },
+      {
+        path: '/products',
+        element: <ProductPage />,
+      },
+      {
+        path: '/products/:id',
+        element: <ProductDetail />,
       },
       {
         path: '/community',

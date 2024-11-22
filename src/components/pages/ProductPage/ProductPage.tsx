@@ -1,41 +1,22 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import InputComponent from '../ProductPage/InputComponent';
+import ProductComponent from '../ProductPage/ProductComponent';
 import styled from 'styled-components';
-import RecommendProduct from './RecommendProduct';
-import PopularProduct from './PopularProduct';
-import CategoryProduct from './CategoryProduct';
-// import { getProducts, Product } from './api/productApi';
-// import { useQuery } from '@tanstack/react-query';
-// import { fetchUser, User } from './api/userApi';
+import { Product } from '../HomePage/api/productApi';
+import { useLocation } from 'react-router-dom';
 
-const HomePage: React.FC = () => {
-  // const { data, isLoading, error } = useQuery<Product>({
-  //   queryKey: ['product'],
-  //   queryFn: () => getProducts(),
-  // });
+const ProductPage = () => {
+  const [input, setInput] = useState('');
+  const location = useLocation();
 
-  // // 로딩 상태 처리
-  // if (isLoading) return <div>Loading...</div>;
-
-  // // 에러 상태 처리
-  // if (error instanceof Error) return <div>Error: {error.message}</div>;
-
-  const categories = [
-    '식료품',
-    '생활용품',
-    '패션/의류',
-    '전자제품',
-    '가구/인테리어',
-    '유아/아동용품',
-    '스포츠',
-  ];
-  const popularProduct = {
-    id: '1',
-    name: '다이슨 드라이기',
-    stars: 5,
-    originalPrice: 95.5,
-    discountedPrice: 79.98,
-    image: 'https://via.placeholder.com/200',
-  };
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const category = queryParams.get('category');
+    if (category) {
+      setInput(category);
+    }
+  }, []);
+  //   const data = searchProducts(input);
   const products = [
     {
       id: '1',
@@ -219,21 +200,21 @@ const HomePage: React.FC = () => {
     },
   ];
 
+  const filtered = products.filter(
+    (product: Product) =>
+      product.name.toLowerCase().includes(input.toLowerCase()) ||
+      product.category.toLowerCase().includes(input.toLowerCase())
+  );
   return (
     <>
       <ContainerBox>
         <Container>
-          <PopularProduct product={popularProduct} />
+          <InputComponent input={input} setInput={setInput} />
         </Container>
       </ContainerBox>
       <ContainerBox>
         <Container>
-          <RecommendProduct products={products} />
-        </Container>
-      </ContainerBox>
-      <ContainerBox>
-        <Container>
-          <CategoryProduct categories={categories} products={products} />
+          <ProductComponent input={input} products={filtered} />
         </Container>
       </ContainerBox>
     </>
@@ -255,4 +236,4 @@ const Container = styled.div`
   width: 100%;
 `;
 
-export default HomePage;
+export default ProductPage;

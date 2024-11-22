@@ -13,6 +13,8 @@ import TermsPage from '../components/pages/login/TermsPage';
 import ProductPage from '../components/pages/ProductPage/ProductPage';
 import ProductDetail from '../components/pages/ProductDetailPage/ProductDetail';
 import SetNicknamePage from '../components/pages/login/SetNicknamePage';
+import SetProfilePage from '../components/pages/login/SetProfilePage';
+import LoginCompletePage from '../components/pages/login/LoginCompletePage';
 
 const router = createBrowserRouter([
   {
@@ -47,6 +49,8 @@ const router = createBrowserRouter([
   { path: '/resetpassword', element: <ResetPasswordPage /> },
   { path: '/termsandservice', element: <TermsPage /> },
   { path: '/setnickname', element: <SetNicknamePage /> },
+  { path: '/setprofile', element: <SetProfilePage /> },
+  { path: '/logincomplete', element: <LoginCompletePage /> },
   { path: '*', element: <NotFoundPage /> }, // 404 페이지
 ]);
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-const SetNickname = () => {
+const SetNicknamePage = () => {
   const navigate = useNavigate();
   const [nickname, setNickname] = useState('');
   const [isValidLength, setIsValidLength] = useState(true);
@@ -120,4 +120,4 @@ const Wrapper = styled.div`
   height: 100vh;
 `;
 
-export default SetNickname;
+export default SetNicknamePage;

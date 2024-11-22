@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 function SignUpPage() {
+  const navigate = useNavigate();
   return (
     <Wrapper>
       <LeftContent>Image</LeftContent>
@@ -13,7 +15,13 @@ function SignUpPage() {
         <StyledInput placeholder="비밀번호 입력 (8 ~ 16자리)" />
         <Subtitle>confirm password</Subtitle>
         <StyledInput placeholder="비밀번호 확인" />
-        <LoginButton>Signup</LoginButton>
+        <LoginButton
+          onClick={() => {
+            navigate('/termsandservice');
+          }}
+        >
+          Signup
+        </LoginButton>
       </RightContent>
     </Wrapper>
   );

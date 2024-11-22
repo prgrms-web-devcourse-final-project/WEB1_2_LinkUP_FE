@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 interface PopularProductProps {
   product: {
-    id: number;
+    id: string;
     image: string;
     stars: number;
   };

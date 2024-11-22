@@ -6,10 +6,11 @@ export type Product = {
   originalPrice: number;
   discountedPrice: number;
   image: string;
+  description: string;
 };
-export const getProducts = async (): Promise<Product[]> => {
+export const getProductbyId = async (productId: string): Promise<Product> => {
   try {
-    const URL = `/products`;
+    const URL = `/products/${productId}`;
     const { data } = await axiosInstance.get(URL);
     return data;
   } catch {

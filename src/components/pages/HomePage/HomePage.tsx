@@ -32,7 +32,7 @@ const HomePage: React.FC = () => {
     '자동차/공구',
   ];
   const popularProduct = {
-    id: 1,
+    id: '1',
     name: '다이슨 드라이기',
     stars: 5,
     originalPrice: 95.5,
@@ -41,7 +41,7 @@ const HomePage: React.FC = () => {
   };
   const products = [
     {
-      id: 1,
+      id: '1',
       name: '다이슨 드라이기',
       stars: 5,
       originalPrice: 95.5,
@@ -49,7 +49,7 @@ const HomePage: React.FC = () => {
       image: 'https://via.placeholder.com/200',
     },
     {
-      id: 2,
+      id: '2',
       name: '에어팟 프로',
       stars: 4,
       originalPrice: 250.0,
@@ -57,7 +57,7 @@ const HomePage: React.FC = () => {
       image: 'https://via.placeholder.com/200',
     },
     {
-      id: 3,
+      id: '3',
       name: '샤오미 전기포트',
       stars: 4.5,
       originalPrice: 50.0,
@@ -65,7 +65,7 @@ const HomePage: React.FC = () => {
       image: 'https://via.placeholder.com/200',
     },
     {
-      id: 4,
+      id: '4',
       name: 'LG 모니터',
       stars: 4,
       originalPrice: 300.0,
@@ -73,7 +73,7 @@ const HomePage: React.FC = () => {
       image: 'https://via.placeholder.com/200',
     },
     {
-      id: 5,
+      id: '5',
       name: '삼성 TV',
       stars: 5,
       originalPrice: 1200.0,
@@ -81,7 +81,7 @@ const HomePage: React.FC = () => {
       image: 'https://via.placeholder.com/200',
     },
     {
-      id: 6,
+      id: '6',
       name: '닌텐도 스위치',
       stars: 4.5,
       originalPrice: 350.0,
@@ -89,7 +89,7 @@ const HomePage: React.FC = () => {
       image: 'https://via.placeholder.com/200',
     },
     {
-      id: 7,
+      id: '7',
       name: '닌텐도 스위치',
       stars: 4.5,
       originalPrice: 350.0,
@@ -97,7 +97,7 @@ const HomePage: React.FC = () => {
       image: 'https://via.placeholder.com/200',
     },
     {
-      id: 8,
+      id: '8',
       name: '닌텐도 스위치',
       stars: 4.5,
       originalPrice: 350.0,

@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tsconfigPaths()],
     define: {
-      __VITE_API_URL__: JSON.stringify(env.VITE_API_URL),
+      'process.env': env,
     },
   };
 });

@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaCaretDown } from 'react-icons/fa';
+import {
+  FaCaretDown,
+  FaPlusCircle,
+  FaMinusCircle,
+  FaAngleLeft,
+  FaAngleRight,
+} from 'react-icons/fa';
+import { createPost, PostData } from './api/postApi';
 import CategoryWrapper from '../../common/CategoryWrapper';
 import ScrollToTopButton from '../../common/ScrollToTopButton';
 
@@ -11,11 +18,16 @@ const PostCreatePage = () => {
   const defaultCategory = location.state?.selectedCategory || '생활용품'; // 이전 페이지에서 전달된 카테고리
 
   const [selectedCategory, setSelectedCategory] = useState(defaultCategory);
-  const [quantity, setQuantity] = useState('');
+  const [requiredQuantity, setRequiredQuantity] = useState('');
   const [totalPrice, setTotalPrice] = useState('');
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [deadline, setDeadline] = useState('마감 기한  ');
+  const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [images, setImages] = useState<string[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(-1); // -1: AddImageButton 상태
+  const [urlInput, setUrlInput] = useState('');
+  const [urlError, setUrlError] = useState(false);
 
   const handleDropdownToggle = () => {
     setDropdownVisible(!dropdownVisible);
@@ -26,9 +38,26 @@ const PostCreatePage = () => {
     setDropdownVisible(false);
   };
 
-  const handlePostSubmit = () => {
+  const handlePostSubmit = async () => {
+    if (
+      !title ||
+      !requiredQuantity ||
+      !totalPrice ||
+      deadline === '마감 기한' ||
+      images.length === 0 || // 최소 한 개의 이미지 추가 확인
+      !urlInput ||
+      !content
+    ) {
+      alert('모든 필수 정보를 입력하세요.');
+      return;
+    }
+    if (!isValidUrl(urlInput)) {
+      setUrlError(true);
+      return;
+    }
+
     const parsedTotalPrice = parseInt(totalPrice.replace(/,/g, ''), 10);
-    const parsedQuantity = parseInt(quantity, 10);
+    const parsedRequiredQuantity = parseInt(requiredQuantity, 10);
     const createdAt = new Date(); // 현재 시각을 글 작성 시점으로 설정
 
     // 마감 기한 계산 (현재 시점 + 선택한 마감 기한)
@@ -38,31 +67,40 @@ const PostCreatePage = () => {
       closeAt.setDate(createdAt.getDate() + daysToAdd); // 날짜 계산
     }
 
-    const postData = {
+    const postData: PostData = {
+      title,
+      content,
+      images,
       category: selectedCategory,
-      quantity: parsedQuantity,
-      totalPrice: parsedTotalPrice,
-      unitPrice: Math.floor(parsedTotalPrice / parsedQuantity),
       createdAt: createdAt.toISOString(),
       closeAt: closeAt.toISOString(),
-      content,
+      requiredQuantity: parsedRequiredQuantity,
+      totalPrice: parsedTotalPrice,
+      unitPrice: Math.floor(parsedTotalPrice / parsedRequiredQuantity),
+      url: urlInput,
     };
 
-    // 서버 요청 후 상세 페이지로 이동 (mocking)
-    console.log('POST request:', postData);
+    try {
+      const { postId } = await createPost(postData); // API 호출
 
-    // 이 부분은 아마 postId로 받지 않을까 싶음(추후 수정 필요)
-    navigate(`/community/posts/${Date.now()}`, { state: postData });
+      // 성공적으로 postId를 받으면 해당 포스트로 이동
+      navigate(`/community/posts/${postId}`, { state: postData });
+    } catch (error) {
+      console.error('게시물 생성 중 오류 발생:', error);
+      alert('게시물 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
+    }
   };
 
-  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRequiredQuantityChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
     const numericValue = Number(value);
 
     if (value === '' || numericValue <= 0) {
-      setQuantity(''); // 입력 중 모두 지웠거나, 음수 또는 0인 경우 초기화
+      setRequiredQuantity(''); // 입력 중 모두 지웠거나, 음수 또는 0인 경우 초기화
     } else {
-      setQuantity(value); // 유효한 값 업데이트
+      setRequiredQuantity(value); // 유효한 값 업데이트
     }
   };
 
@@ -87,16 +125,70 @@ const PostCreatePage = () => {
   };
 
   const unitPrice =
-    totalPrice && quantity
+    totalPrice && requiredQuantity
       ? formatCurrency(
           String(
             Math.floor(
               parseInt(totalPrice.replace(/,/g, ''), 10) /
-                parseInt(quantity, 10)
+                parseInt(requiredQuantity, 10)
             )
           )
         )
       : '자동 계산';
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const uploadedImages = Array.from(e.target.files).map((file) =>
+        URL.createObjectURL(file)
+      );
+      setImages((prev) => [...prev, ...uploadedImages]);
+      setCurrentIndex(images.length); // 마지막으로 추가된 이미지로 이동
+    }
+  };
+
+  const handleRemoveImage = () => {
+    if (currentIndex >= 0) {
+      setImages((prev) => prev.filter((_, i) => i !== currentIndex));
+      setCurrentIndex((prev) => Math.max(prev - 1, -1)); // 이전 이미지로 이동
+    }
+  };
+
+  const handleNextImage = () => {
+    if (currentIndex < images.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+    } else if (currentIndex === images.length - 1) {
+      setCurrentIndex(-1); // AddImageButton 상태로 전환
+    }
+  };
+
+  const handlePreviousImage = () => {
+    if (currentIndex === -1) {
+      setCurrentIndex(images.length - 1); // 마지막 이미지로 이동
+    } else {
+      setCurrentIndex((prev) => Math.max(prev - 1, 0));
+    }
+  };
+
+  const handleDotClick = (index: number) => {
+    setCurrentIndex(index);
+  };
+
+  const isValidUrl = (url: string) => {
+    const pattern = new RegExp(
+      '^(https?:\\/\\/)?' +
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|(\\d{1,3}\\.){3}\\d{1,3})' +
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' +
+        '(\\?[;&a-z\\d%_.~+=-]*)?' +
+        '(\\#[-a-z\\d_]*)?$',
+      'i'
+    );
+    return !!pattern.test(url);
+  };
+
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUrlInput(e.target.value);
+    setUrlError(!isValidUrl(e.target.value));
+  };
 
   return (
     <div>
@@ -106,17 +198,76 @@ const PostCreatePage = () => {
           <FormContainer>
             {/* 이미지 업로드 섹션 */}
             <ImageUploadContainer>
-              <ImagePreview>
-                <AddImage>+</AddImage>
-              </ImagePreview>
-              <URLInput placeholder="상품 관련 URL 주소를 입력해주세요." />
+              <ImagePreviewWrapper>
+                {currentIndex === -1 ? (
+                  <AddImageButton>
+                    <FaPlusCircle size={30} />
+                    이미지 추가
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                    />
+                  </AddImageButton>
+                ) : (
+                  <ImagePreview>
+                    <img src={images[currentIndex]} alt="이미지 미리보기" />
+                    <RemoveImageButton onClick={handleRemoveImage}>
+                      <FaMinusCircle size={30} />
+                    </RemoveImageButton>
+                  </ImagePreview>
+                )}
+              </ImagePreviewWrapper>
+              {images.length > 0 && (
+                <>
+                  <PaginationDots>
+                    {images.map((_, index) => (
+                      <span
+                        key={index}
+                        className={currentIndex === index ? 'active' : ''}
+                        onClick={() => handleDotClick(index)}
+                      />
+                    ))}
+                  </PaginationDots>
+                  {currentIndex !== -1 && (
+                    <NextButton onClick={handleNextImage}>
+                      <FaAngleRight size={20} />
+                    </NextButton>
+                  )}
+                  {(currentIndex > 0 ||
+                    (currentIndex === -1 && images.length > 0)) && (
+                    <PreviousButton onClick={handlePreviousImage}>
+                      <FaAngleLeft size={20} />
+                    </PreviousButton>
+                  )}
+                </>
+              )}
+              <UrlInputContainer>
+                <Label htmlFor="urlInput">URL 주소</Label>
+                <URLInput
+                  id="urlInput"
+                  type="text"
+                  placeholder="상품 관련 URL 주소를 입력해주세요."
+                  value={urlInput}
+                  onChange={handleUrlChange}
+                  isError={urlError}
+                />
+                {urlError && (
+                  <ErrorMessage>올바른 URL을 입력해주세요.</ErrorMessage>
+                )}
+              </UrlInputContainer>
             </ImageUploadContainer>
 
             {/* 제목 및 카테고리 섹션 */}
             <DetailsContainer>
               <InputWrapper>
                 <Label>제목</Label>
-                <TextInput placeholder="제목을 입력해주세요." />
+                <TextInput
+                  placeholder="제목을 입력해주세요."
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
               </InputWrapper>
               <InputWrapper>
                 <Label>카테고리 선택</Label>
@@ -136,8 +287,8 @@ const PostCreatePage = () => {
                 <SmallInput
                   type="text" // 숫자만 입력되도록 onChange에서 제어
                   placeholder="수량 입력"
-                  value={quantity}
-                  onChange={handleQuantityChange}
+                  value={requiredQuantity}
+                  onChange={handleRequiredQuantityChange}
                 />
               </InputWrapper>
               <InputWrapper>
@@ -232,30 +383,134 @@ const FormContainer = styled.div`
 `;
 
 const ImageUploadContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 490px;
   margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 20px;
+  position: relative;
 `;
 
-const ImagePreview = styled.div`
-  width: 100%;
-  height: 200px;
-  border: 1px dashed #ccc;
+const ImagePreviewWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 10px;
-  border-radius: 5px;
-`;
-
-const AddImage = styled.div`
-  font-size: 2rem;
-  color: #777;
-`;
-
-const URLInput = styled.input`
+  margin-top: 30px;
   width: 100%;
-  padding: 10px;
+  height: 320px;
+  position: relative;
+`;
+
+const ImagePreview = styled.div`
+  width: 400px;
+  height: 100%;
   border: 1px solid #ccc;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+const AddImageButton = styled.label`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  color: #555;
+  cursor: pointer;
+  margin-top: 15px;
+
+  input {
+    display: none;
+  }
+`;
+
+const RemoveImageButton = styled.button`
+  position: absolute;
+  top: 0px;
+  right: 45px;
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  z-index: 1;
+`;
+
+const NextButton = styled.button`
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #333;
+  cursor: pointer;
+`;
+
+const PreviousButton = styled.button`
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #333;
+  cursor: pointer;
+`;
+
+const PaginationDots = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  gap: 5px;
+
+  span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ddd;
+    cursor: pointer;
+  }
+
+  span.active {
+    background: #000;
+  }
+`;
+
+const UrlInputContainer = styled.div`
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  label {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+`;
+
+const URLInput = styled.input<{ isError: boolean }>`
+  padding: 10px;
+  border: 1px solid ${({ isError }) => (isError ? 'red' : '#ccc')};
   border-radius: 5px;
+`;
+
+const ErrorMessage = styled.span`
+  color: red;
+  font-size: 0.8rem;
+  margin-top: 5px;
 `;
 
 const DetailsContainer = styled.div`
@@ -328,7 +583,7 @@ const DropdownItem = styled.div<{ isSelected: boolean }>`
   text-align: center;
   cursor: pointer;
   background: ${({ isSelected }) => (isSelected ? '#f0f0f0' : '#fff')};
-  font-weight: ${({ isSelected }) => (isSelected ? 'bold' : '')};
+  font-weight: ${({ isSelected }) => (isSelected ? 'bold' : 'normal')};
 
   &:hover {
     background: #eaeaea;

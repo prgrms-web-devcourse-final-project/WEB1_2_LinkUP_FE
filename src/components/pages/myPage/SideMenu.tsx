@@ -23,16 +23,42 @@ const Sidemenu = () => {
           isActive={isActive('/mypage/setting')}
           onClick={() => navigate('/mypage/setting')}
         >
-          <img src="/images/check.png" width={24} height={24} alt="Icon" />
+          <img src="/images/setting_on.png" width={24} height={24} alt="Icon" />
           설정
         </MenuItem>
-        <MenuItem>주문 내역</MenuItem>
-        <MenuItem>찜한 상품</MenuItem>
-        <MenuItem>동네인증</MenuItem>
-        <MenuItem>환불계좌 관리</MenuItem>
-        <MenuItem>알림내역</MenuItem>
-        <MenuItem>나의 게시글</MenuItem>
-        <MenuItem>나의 채팅방 목록</MenuItem>
+        <MenuItem>
+          <img src="/images/orderlist.png" width={24} height={24} alt="Icon" />
+          주문 내역
+        </MenuItem>
+        <MenuItem>
+          <img src="/images/wishlist.png" width={24} height={24} alt="Icon" />
+          찜한 상품
+        </MenuItem>
+        <MenuItem>
+          <img src="/images/location.png" width={24} height={24} alt="Icon" />
+          동네인증
+        </MenuItem>
+        <MenuItem>
+          <img src="/images/refund.png" width={24} height={24} alt="Icon" />
+          환불계좌 관리
+        </MenuItem>
+        <MenuItem>
+          <img
+            src="/images/notification.png"
+            width={24}
+            height={24}
+            alt="Icon"
+          />
+          알림내역
+        </MenuItem>
+        <MenuItem>
+          <img src="/images/myposts.png" width={24} height={24} alt="Icon" />
+          나의 게시글
+        </MenuItem>
+        <MenuItem>
+          <img src="/images/chatlist.png" width={24} height={24} alt="Icon" />
+          나의 채팅방 목록
+        </MenuItem>
       </Menu>
     </Wrapper>
   );

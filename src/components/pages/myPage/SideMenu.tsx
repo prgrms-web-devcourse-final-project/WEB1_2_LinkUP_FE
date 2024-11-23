@@ -23,40 +23,106 @@ const Sidemenu = () => {
           isActive={isActive('/mypage/setting')}
           onClick={() => navigate('/mypage/setting')}
         >
-          <img src="/images/setting_on.png" width={24} height={24} alt="Icon" />
+          <img
+            src={`/images/setting${isActive('/mypage/setting') ? '_on' : ''}.png`}
+            width={24}
+            height={24}
+            alt="Icon"
+          />
           설정
         </MenuItem>
-        <MenuItem>
-          <img src="/images/orderlist.png" width={24} height={24} alt="Icon" />
+        <MenuItem
+          isActive={isActive('/mypage/orderlist')}
+          onClick={() => navigate('/mypage/orderlist')}
+        >
+          <img
+            src={`/images/orderlist${
+              isActive('/mypage/orderlist') ? '_on' : ''
+            }.png`}
+            width={24}
+            height={24}
+            alt="Icon"
+          />
           주문 내역
         </MenuItem>
-        <MenuItem>
-          <img src="/images/wishlist.png" width={24} height={24} alt="Icon" />
+        <MenuItem
+          isActive={isActive('/mypage/wishlist')}
+          onClick={() => navigate('/mypage/wishlist')}
+        >
+          <img
+            src={`/images/wishlist${
+              isActive('/mypage/wishlist') ? '_on' : ''
+            }.png`}
+            width={24}
+            height={24}
+            alt="Icon"
+          />
           찜한 상품
         </MenuItem>
-        <MenuItem>
-          <img src="/images/location.png" width={24} height={24} alt="Icon" />
+        <MenuItem
+          isActive={isActive('/mypage/location')}
+          onClick={() => navigate('/mypage/location')}
+        >
+          <img
+            src={`/images/location${
+              isActive('/mypage/location') ? '_on' : ''
+            }.png`}
+            width={24}
+            height={24}
+            alt="Icon"
+          />
           동네인증
         </MenuItem>
-        <MenuItem>
-          <img src="/images/refund.png" width={24} height={24} alt="Icon" />
+        <MenuItem
+          isActive={isActive('/mypage/refund')}
+          onClick={() => navigate('/mypage/refund')}
+        >
+          <img
+            src={`/images/refund${isActive('/mypage/refund') ? '_on' : ''}.png`}
+            width={24}
+            height={24}
+            alt="Icon"
+          />
           환불계좌 관리
         </MenuItem>
-        <MenuItem>
+        <MenuItem
+          isActive={isActive('/mypage/notification')}
+          onClick={() => navigate('/mypage/notification')}
+        >
           <img
-            src="/images/notification.png"
+            src={`/images/notification${
+              isActive('/mypage/notification') ? '_on' : ''
+            }.png`}
             width={24}
             height={24}
             alt="Icon"
           />
           알림내역
         </MenuItem>
-        <MenuItem>
-          <img src="/images/myposts.png" width={24} height={24} alt="Icon" />
+        <MenuItem
+          isActive={isActive('/mypage/myposts')}
+          onClick={() => navigate('/mypage/myposts')}
+        >
+          <img
+            src={`/images/myposts${isActive('/mypage/myposts') ? '_on' : ''}.png`}
+            width={24}
+            height={24}
+            alt="Icon"
+          />
           나의 게시글
         </MenuItem>
-        <MenuItem>
-          <img src="/images/chatlist.png" width={24} height={24} alt="Icon" />
+        <MenuItem
+          isActive={isActive('/mypage/chatlist')}
+          onClick={() => navigate('/mypage/chatlist')}
+        >
+          <img
+            src={`/images/chatlist${
+              isActive('/mypage/chatlist') ? '_on' : ''
+            }.png`}
+            width={24}
+            height={24}
+            alt="Icon"
+          />
           나의 채팅방 목록
         </MenuItem>
       </Menu>

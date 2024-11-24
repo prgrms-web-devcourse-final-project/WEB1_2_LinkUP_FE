@@ -35,7 +35,7 @@ const Header = () => {
               <StyledLink to="/community">Community</StyledLink>
             </NavItem>
             <NavItem>
-              <StyledLink to="/mypage">My Page</StyledLink>
+              <StyledLink to="/mypage/setting">My Page</StyledLink>
             </NavItem>
             {!isLoggedIn ? (
               <Login>

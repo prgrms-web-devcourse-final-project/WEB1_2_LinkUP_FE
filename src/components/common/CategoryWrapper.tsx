@@ -52,13 +52,13 @@ const CategoryWrapper: React.FC<CategoryWrapperProps> = ({
 
 const Wrapper = styled.div`
   display: flex;
-  overflow-x: auto;
-  white-space: nowrap;
-  padding: 0.5rem 0;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+  width: 100%;
+  justify-content: center;
 `;
-
 const CategoryItem = styled.div<{ active: boolean }>`
-  padding: 1rem 2rem;
+  padding: 1rem 1rem;
   font-weight: ${({ active }) => (active ? 'bold' : 'normal')};
   cursor: pointer;
   position: relative;

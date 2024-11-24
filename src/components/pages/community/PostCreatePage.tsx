@@ -196,148 +196,156 @@ const PostCreatePage = () => {
         <ContentWrapper>
           <Title>공구 모집 및 진행</Title>
           <FormContainer>
-            {/* 이미지 업로드 섹션 */}
-            <ImageUploadContainer>
-              <ImagePreviewWrapper>
-                {currentIndex === -1 ? (
-                  <AddImageButton>
-                    <FaPlusCircle size={30} />
-                    이미지 추가
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                    />
-                  </AddImageButton>
-                ) : (
-                  <ImagePreview>
-                    <img src={images[currentIndex]} alt="이미지 미리보기" />
-                    <RemoveImageButton onClick={handleRemoveImage}>
-                      <FaMinusCircle size={30} />
-                    </RemoveImageButton>
-                  </ImagePreview>
-                )}
-              </ImagePreviewWrapper>
-              {images.length > 0 && (
-                <>
-                  <PaginationDots>
-                    {images.map((_, index) => (
-                      <span
-                        key={index}
-                        className={currentIndex === index ? 'active' : ''}
-                        onClick={() => handleDotClick(index)}
+            <ImageAndDetailsContainer>
+              {/* 이미지 업로드 섹션 */}
+              <ImageUploadContainer>
+                <ImagePreviewWrapper>
+                  {currentIndex === -1 ? (
+                    <AddImageButton>
+                      <FaPlusCircle size={30} />
+                      이미지 추가
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
                       />
-                    ))}
-                  </PaginationDots>
-                  {currentIndex !== -1 && (
-                    <NextButton onClick={handleNextImage}>
-                      <FaAngleRight size={20} />
-                    </NextButton>
+                    </AddImageButton>
+                  ) : (
+                    <ImagePreview>
+                      <img src={images[currentIndex]} alt="이미지 미리보기" />
+                      <RemoveImageButton onClick={handleRemoveImage}>
+                        <FaMinusCircle size={30} />
+                      </RemoveImageButton>
+                    </ImagePreview>
                   )}
-                  {(currentIndex > 0 ||
-                    (currentIndex === -1 && images.length > 0)) && (
-                    <PreviousButton onClick={handlePreviousImage}>
-                      <FaAngleLeft size={20} />
-                    </PreviousButton>
-                  )}
-                </>
-              )}
-              <UrlInputContainer>
-                <Label htmlFor="urlInput">URL 주소</Label>
-                <URLInput
-                  id="urlInput"
-                  type="text"
-                  placeholder="상품 관련 URL 주소를 입력해주세요."
-                  value={urlInput}
-                  onChange={handleUrlChange}
-                  isError={urlError}
-                />
-                {urlError && (
-                  <ErrorMessage>올바른 URL을 입력해주세요.</ErrorMessage>
-                )}
-              </UrlInputContainer>
-            </ImageUploadContainer>
-
-            {/* 제목 및 카테고리 섹션 */}
-            <DetailsContainer>
-              <InputWrapper>
-                <Label>제목</Label>
-                <TextInput
-                  placeholder="제목을 입력해주세요."
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </InputWrapper>
-              <InputWrapper>
-                <Label>카테고리 선택</Label>
-                <CategoryWrapper
-                  selectedCategory={selectedCategory} // 현재 선택된 카테고리를 전달
-                  onCategoryChange={
-                    (category: string) => setSelectedCategory(category) // 카테고리 변경 시 상태 업데이트
-                  }
-                />
-              </InputWrapper>
-            </DetailsContainer>
-
-            {/* 모집 정보 섹션 */}
-            <InfoContainer>
-              <InputWrapper>
-                <Label>참여 필요 수량 선택</Label>
-                <SmallInput
-                  type="text" // 숫자만 입력되도록 onChange에서 제어
-                  placeholder="수량 입력"
-                  value={requiredQuantity}
-                  onChange={handleRequiredQuantityChange}
-                />
-              </InputWrapper>
-              <InputWrapper>
-                <Label>모집 마감 기한 설정</Label>
-                <DropdownWrapper>
-                  <DropdownButton onClick={handleDropdownToggle}>
-                    {deadline}
-                    <FaCaretDown />
-                  </DropdownButton>
-                  {dropdownVisible && (
-                    <DropdownMenu>
-                      {Array.from({ length: 7 }, (_, index) => (
-                        <DropdownItem
+                </ImagePreviewWrapper>
+                {images.length > 0 && (
+                  <>
+                    <PaginationDots>
+                      {images.map((_, index) => (
+                        <span
                           key={index}
-                          onClick={() =>
-                            handleDeadlineSelect(`${index + 1}일  `)
-                          }
-                          isSelected={deadline === `${index + 1}일  `}
-                        >
-                          {index + 1}일
-                        </DropdownItem>
+                          className={currentIndex === index ? 'active' : ''}
+                          onClick={() => handleDotClick(index)}
+                        />
                       ))}
-                    </DropdownMenu>
+                    </PaginationDots>
+                    {currentIndex !== -1 && (
+                      <NextButton onClick={handleNextImage}>
+                        <FaAngleRight size={20} />
+                      </NextButton>
+                    )}
+                    {(currentIndex > 0 ||
+                      (currentIndex === -1 && images.length > 0)) && (
+                      <PreviousButton onClick={handlePreviousImage}>
+                        <FaAngleLeft size={20} />
+                      </PreviousButton>
+                    )}
+                  </>
+                )}
+                <UrlInputContainer>
+                  <Label htmlFor="urlInput">URL 주소</Label>
+                  <URLInput
+                    id="urlInput"
+                    type="text"
+                    placeholder="상품 관련 URL 주소를 입력해주세요."
+                    value={urlInput}
+                    onChange={handleUrlChange}
+                    isError={urlError}
+                  />
+                  {urlError && (
+                    <ErrorMessage>올바른 URL을 입력해주세요.</ErrorMessage>
                   )}
-                </DropdownWrapper>
-              </InputWrapper>
-              <InputWrapper>
-                <Label>총 가격 설정</Label>
-                <SmallInput
-                  type="text" // 숫자만 입력되도록 onChange에서 제어
-                  placeholder="총 가격 입력"
-                  value={totalPrice}
-                  onChange={handleTotalPriceChange}
-                />
-                {' 원'}
-              </InputWrapper>
-              <InputWrapper>
-                <Label>개당 가격</Label>
-                <SmallInput disabled value={unitPrice} />
-                {' 원'}
-              </InputWrapper>
-            </InfoContainer>
+                </UrlInputContainer>
+              </ImageUploadContainer>
+
+              <DetailsAndInfoContainer>
+                {/* 제목 및 카테고리 섹션 */}
+                <DetailsContainer>
+                  <InputWrapper>
+                    <Label>제목</Label>
+                    <TextInput
+                      placeholder="제목을 입력해주세요."
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                    />
+                  </InputWrapper>
+                  <CategoryInputWrapper>
+                    <CategoryLabel>카테고리 선택</CategoryLabel>
+                    <CategoryWrapperStyled
+                      selectedCategory={selectedCategory} // 현재 선택된 카테고리를 전달
+                      onCategoryChange={
+                        (category: string) => setSelectedCategory(category) // 카테고리 변경 시 상태 업데이트
+                      }
+                    />
+                  </CategoryInputWrapper>
+                </DetailsContainer>
+
+                {/* 모집 정보 섹션 */}
+                <InfoContainer>
+                  <InputWrapper>
+                    <Label>참여 필요 수량 선택</Label>
+                    <SmallInput
+                      type="text" // 숫자만 입력되도록 onChange에서 제어
+                      placeholder="수량 입력"
+                      value={requiredQuantity}
+                      onChange={handleRequiredQuantityChange}
+                    />
+                  </InputWrapper>
+                  <InputWrapper>
+                    <Label>모집 마감 기한 설정</Label>
+                    <DropdownWrapper>
+                      <DropdownButton onClick={handleDropdownToggle}>
+                        {deadline}
+                        <FaCaretDown />
+                      </DropdownButton>
+                      {dropdownVisible && (
+                        <DropdownMenu>
+                          {Array.from({ length: 7 }, (_, index) => (
+                            <DropdownItem
+                              key={index}
+                              onClick={() =>
+                                handleDeadlineSelect(`${index + 1}일  `)
+                              }
+                              isSelected={deadline === `${index + 1}일  `}
+                            >
+                              {index + 1}일
+                            </DropdownItem>
+                          ))}
+                        </DropdownMenu>
+                      )}
+                    </DropdownWrapper>
+                  </InputWrapper>
+                  <PriceWrapper>
+                    <InputWrapper>
+                      <Label>총 가격 설정</Label>
+                      <SmallInput
+                        type="text" // 숫자만 입력되도록 onChange에서 제어
+                        placeholder="총 가격 입력"
+                        value={totalPrice}
+                        onChange={handleTotalPriceChange}
+                      />
+                      {' 원'}
+                    </InputWrapper>
+                    <InputWrapper>
+                      <Label>개당 가격</Label>
+                      <SmallInput disabled value={unitPrice} />
+                      {' 원'}
+                    </InputWrapper>
+                  </PriceWrapper>
+                </InfoContainer>
+              </DetailsAndInfoContainer>
+            </ImageAndDetailsContainer>
 
             {/* 내용 작성 섹션 */}
-            <TextArea
-              placeholder="내용을 입력해주세요."
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-            />
+            <TextAreaWrapper>
+              <TextArea
+                placeholder="내용을 입력해주세요."
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+              />
+            </TextAreaWrapper>
 
             {/* 하단 버튼 섹션 */}
             <ButtonContainer>
@@ -376,10 +384,21 @@ const Title = styled.h1`
 `;
 
 const FormContainer = styled.div`
+  display: flex;
+  flex-direction: column; /* 내부 요소를 세로로 정렬 */
   background: #fff;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+const ImageAndDetailsContainer = styled.div`
+  display: flex; /* 가로 정렬 */
+  flex-direction: row; /* 기본값이므로 명시적으로 추가 */
+  align-items: stretch; /* 양쪽 요소의 높이를 동일하게 */
+  justify-content: center; /* 양쪽 여백 균등 배치 */
+  gap: 20px; /* 두 컨테이너 사이 간격 */
+  margin-bottom: 20px; /* 아래 요소와의 간격 */
 `;
 
 const ImageUploadContainer = styled.div`
@@ -387,21 +406,21 @@ const ImageUploadContainer = styled.div`
   flex-direction: column;
   align-items: center;
   width: 490px;
-  margin-bottom: 20px;
+  height: 414px; /* 고정된 높이 설정 */
   border: 1px solid #ccc;
   border-radius: 10px;
   padding: 20px;
   position: relative;
+  box-sizing: border-box; /* 패딩과 보더 포함한 크기 계산 */
 `;
 
 const ImagePreviewWrapper = styled.div`
   display: flex;
-  align-items: center;
+  align-items: center; /* 수직 정렬 */
   justify-content: center;
-  margin-top: 30px;
   width: 100%;
-  height: 320px;
-  position: relative;
+  height: 320px; /* 기준 높이 */
+  position: relative; /* 자식 요소 위치 기준 */
 `;
 
 const ImagePreview = styled.div`
@@ -430,7 +449,10 @@ const AddImageButton = styled.label`
   font-size: 1.2rem;
   color: #555;
   cursor: pointer;
-  margin-top: 15px;
+  border-radius: 10px;
+  width: 400px; /* img의 크기와 동일하게 설정 */
+  height: 100%; /* img의 높이와 동일하게 설정 */
+  background-color: #ececec; /* 요구된 배경색 추가 */
 
   input {
     display: none;
@@ -450,9 +472,8 @@ const RemoveImageButton = styled.button`
 
 const NextButton = styled.button`
   position: absolute;
-  top: 50%;
+  top: calc(50% - 40px);
   right: 10px;
-  transform: translateY(-50%);
   background: none;
   border: none;
   color: #333;
@@ -461,9 +482,8 @@ const NextButton = styled.button`
 
 const PreviousButton = styled.button`
   position: absolute;
-  top: 50%;
+  top: calc(50% - 40px);
   left: 10px;
-  transform: translateY(-50%);
   background: none;
   border: none;
   color: #333;
@@ -492,17 +512,19 @@ const PaginationDots = styled.div`
 const UrlInputContainer = styled.div`
   margin-top: 15px;
   display: flex;
-  flex-direction: column;
+  align-items: center; /* Label과 Input을 같은 줄에 배치 */
   width: 100%;
+  gap: 10px; /* Label과 Input 사이 간격 */
 
   label {
     font-weight: bold;
-    margin-bottom: 5px;
   }
 `;
 
 const URLInput = styled.input<{ isError: boolean }>`
+  flex: 1;
   padding: 10px;
+  background-color: #ececec;
   border: 1px solid ${({ isError }) => (isError ? 'red' : '#ccc')};
   border-radius: 5px;
 `;
@@ -513,33 +535,88 @@ const ErrorMessage = styled.span`
   margin-top: 5px;
 `;
 
+const DetailsAndInfoContainer = styled.div`
+  display: flex;
+  flex-direction: column; /* 세로 정렬 */
+  align-items: flex-start; /* 왼쪽 정렬 */
+  justify-content: space-between; /* 위아래 요소 간격 균등 */
+  width: 490px;
+  height: 414px; /* ImageUploadContainer와 동일한 고정 높이 */
+  flex-grow: 1; /* 가로 공간을 균등 분배 */
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 20px;
+  box-sizing: border-box;
+`;
+
 const DetailsContainer = styled.div`
   display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
+  flex-direction: column; /* 세로 정렬 */
+  gap: 20px; /* 컴포넌트 간 간격 */
+  width: 100%;
 `;
 
 const InputWrapper = styled.div`
-  flex: 1;
+  display: flex;
+  flex-direction: row; /* 가로 배치 */
+  align-items: center; /* 세로 중앙 정렬 */
+  gap: 10px; /* 컴포넌트 간 간격 */
+  width: 100%;
 `;
 
 const Label = styled.label`
-  display: block;
+  font-size: 1.2rem;
   font-weight: bold;
-  margin-bottom: 8px;
+  flex-shrink: 0; /* 라벨 크기를 고정 */
+  text-align: left; /* 라벨 텍스트 왼쪽 정렬 */
 `;
 
 const TextInput = styled.input`
-  width: 100%;
+  width: 80%;
   padding: 10px;
+  background-color: #ececec;
   border: 1px solid #ccc;
   border-radius: 5px;
 `;
 
-const InfoContainer = styled.div`
+const CategoryInputWrapper = styled.div`
+  display: flex;
+  flex-direction: column; /* 라벨과 카테고리를 세로로 배치 */
+`;
+
+const CategoryLabel = styled.label`
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 10px; /* 라벨과 카테고리 사이 간격 */
+`;
+
+const CategoryWrapperStyled = styled(CategoryWrapper)`
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 8px;
+  padding: 10px 0;
+
+  div {
+    padding: 12px !important; /* 강제로 적용 */
+    flex: 1 1 calc(25% - 8px);
+    box-sizing: border-box;
+
+    &:hover {
+      background-color: #f0f0f0 !important; /* 호버 스타일도 강제 */
+    }
+
+    &.active {
+      font-weight: bold !important; /* 활성 상태 스타일 강제 */
+      border-bottom: 2px solid black !important;
+    }
+  }
+`;
+
+const InfoContainer = styled.div`
+  display: flex;
+  flex-direction: column; /* 세로 정렬 */
+  gap: 20px; /* 컴포넌트 간 간격 */
+  width: 100%;
 `;
 
 const SmallInput = styled.input`
@@ -564,6 +641,7 @@ const DropdownButton = styled.button`
   gap: 10px;
   justify-content: center;
   align-items: center;
+  box-sizing: border-box;
 `;
 
 const DropdownMenu = styled.div`
@@ -572,10 +650,12 @@ const DropdownMenu = styled.div`
   top: 100%;
   left: 0;
   right: 0;
+  font-size: 0.9rem;
   border: 1px solid #ccc;
   border-radius: 5px;
   background: #fff;
   z-index: 1000;
+  box-sizing: border-box;
 `;
 
 const DropdownItem = styled.div<{ isSelected: boolean }>`
@@ -590,13 +670,38 @@ const DropdownItem = styled.div<{ isSelected: boolean }>`
   }
 `;
 
+const PriceWrapper = styled.div`
+  display: flex;
+  flex-direction: row; /* 가로 배치 */
+  gap: 20px; /* 두 요소 간 간격 */
+  width: 100%; /* 부모 컨테이너에 맞게 확장 */
+  align-items: center; /* 세로 중앙 정렬 */
+`;
+
+const TextAreaWrapper = styled.div`
+  width: 100%; /* Wrapper 크기는 기존 유지 */
+  max-width: 1100px;
+  margin: 0 auto;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 20px; /* 내부 여백 */
+  margin-bottom: 20px;
+  box-sizing: border-box;
+`;
+
 const TextArea = styled.textarea`
   width: 100%;
-  height: 150px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  margin-bottom: 20px;
+  height: 460px; /* 고정된 높이 */
+  background-color: #ececec;
+  border: none; /* 테두리 제거 */
+  border-radius: 10px;
+  padding: 20px;
+  outline: none; /* 포커스 시 외곽선 제거 */
+  resize: none; /* 크기 조절 비활성화 */
+  font-size: 1rem; /* 텍스트 크기 */
+  line-height: 1.5;
+  color: #333; /* 텍스트 색상 */
+  box-sizing: border-box;
 `;
 
 const ButtonContainer = styled.div`

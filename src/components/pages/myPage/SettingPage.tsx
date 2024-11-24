@@ -1,11 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { styled } from 'styled-components';
 import GS from './GS';
 import Sidemenu from './SideMenu';
 import { SettingPageData } from './mockData';
+import PasswordModal from './Modal/PasswordModal';
 
 const SettingPage = () => {
   const { addressList } = SettingPageData;
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleModalOpen = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
 
   return (
     <GS.Wrapper>
@@ -18,6 +29,7 @@ const SettingPage = () => {
         <NicknameWrapper>
           <Title>닉네임 변경</Title>
           <StyledInput placeholder="최소 2자 이상 ~ 15자 이내, 띄어쓰기 및 특수문자 사용 불가" />
+          <NicknameButton>변경하기</NicknameButton>
         </NicknameWrapper>
         <AddressWrapper>
           <Title>배송지 주소 변경</Title>
@@ -40,12 +52,16 @@ const SettingPage = () => {
         </AddressWrapper>
         <PasswordWrapper>
           <Title>비밀번호 변경</Title>
-          <PasswordButton>비밀번호 변경하기</PasswordButton>
+          <PasswordButton onClick={handleModalOpen}>
+            비밀번호 변경하기
+          </PasswordButton>
         </PasswordWrapper>
         <AuthWrapper>
           <AuthButton>로그아웃</AuthButton>
           <AuthButton>회원탈퇴</AuthButton>
         </AuthWrapper>
+
+        {isModalOpen && <PasswordModal onClose={handleModalClose} />}
       </GS.Content>
     </GS.Wrapper>
   );
@@ -178,6 +194,19 @@ const StyledInput = styled.input`
   &:focus {
     border-color: #000;
   }
+`;
+
+const NicknameButton = styled.div`
+  margin-top: 10px;
+  background-color: #000;
+  color: #fff;
+  border-radius: 5px;
+  padding: 10px 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: 15px;
 `;
 
 const Title = styled.div`

@@ -4,19 +4,14 @@ import GS from './GS';
 import Sidemenu from './SideMenu';
 import { SettingPageData } from './mockData';
 import PasswordModal from './Modal/PasswordModal';
+import LogoutModal from './Modal/LogoutModal';
+import WithdrawModal from './Modal/WithdrawModal';
 
 const SettingPage = () => {
   const { addressList } = SettingPageData;
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleModalOpen = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-  };
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 
   return (
     <GS.Wrapper>
@@ -52,16 +47,52 @@ const SettingPage = () => {
         </AddressWrapper>
         <PasswordWrapper>
           <Title>비밀번호 변경</Title>
-          <PasswordButton onClick={handleModalOpen}>
+          <PasswordButton
+            onClick={() => {
+              setIsPasswordModalOpen(true);
+            }}
+          >
             비밀번호 변경하기
           </PasswordButton>
         </PasswordWrapper>
         <AuthWrapper>
-          <AuthButton>로그아웃</AuthButton>
-          <AuthButton>회원탈퇴</AuthButton>
+          <AuthButton
+            onClick={() => {
+              setIsLogoutModalOpen(true);
+            }}
+          >
+            로그아웃
+          </AuthButton>
+          <AuthButton
+            onClick={() => {
+              setIsWithdrawModalOpen(true);
+            }}
+          >
+            회원탈퇴
+          </AuthButton>
         </AuthWrapper>
 
-        {isModalOpen && <PasswordModal onClose={handleModalClose} />}
+        {isPasswordModalOpen && (
+          <PasswordModal
+            onClose={() => {
+              setIsPasswordModalOpen(false);
+            }}
+          />
+        )}
+        {isLogoutModalOpen && (
+          <LogoutModal
+            onClose={() => {
+              setIsLogoutModalOpen(false);
+            }}
+          />
+        )}
+        {isWithdrawModalOpen && (
+          <WithdrawModal
+            onClose={() => {
+              setIsWithdrawModalOpen(false);
+            }}
+          />
+        )}
       </GS.Content>
     </GS.Wrapper>
   );

@@ -224,6 +224,7 @@ const ProductDetail: React.FC = () => {
 
     if (diff <= 0) {
       setRemainingTime('마감되었습니다.');
+
       return;
     }
 
@@ -240,6 +241,9 @@ const ProductDetail: React.FC = () => {
 
     return () => clearInterval(timer);
   }, []);
+  const isOutOfStock = product.now >= product.stock;
+  const isDeadlinePassed = remainingTime === '마감되었습니다.';
+  const isButtonDisabled = isOutOfStock || isDeadlinePassed;
 
   // 구매 비율 계산
   const purchasePercentage = Math.min((product.now / product.stock) * 100, 100);
@@ -305,7 +309,10 @@ const ProductDetail: React.FC = () => {
               />
             </QuantityWrapper>
             <ButtonWrapper>
-              <PurchaseButton to={`/products/payment/${product.id}`}>
+              <PurchaseButton
+                to={`/products/payment/${product.id}`}
+                disabled={isButtonDisabled}
+              >
                 구매하기
               </PurchaseButton>
               <WishButton
@@ -535,23 +542,29 @@ const ButtonWrapper = styled.div`
   gap: 10px;
 `;
 
-const PurchaseButton = styled(Link)`
+const PurchaseButton = styled(Link)<{ disabled?: boolean }>`
   flex: 2;
   padding: 15px;
-  background-color: #2563eb;
-  color: white;
+  background-color: ${({ disabled }) => (disabled ? '#d1d5db' : '#2563eb')};
+  color: ${({ disabled }) => (disabled ? '#9ca3af' : 'white')};
   border: none;
   border-radius: 5px;
-  cursor: pointer;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
   font-size: 16px;
   font-weight: bold;
   text-decoration: none;
   text-align: center;
+  pointer-events: ${({ disabled }) =>
+    disabled ? 'none' : 'auto'}; /* 비활성화 시 클릭 불가 */
+
   &:hover {
-    cursor: pointer;
-    background-color: white;
-    color: #2563eb;
-    border: 1px solid #2563eb;
+    cursor: ${({ disabled }) =>
+      disabled
+        ? 'not-allowed'
+        : 'pointer'}; /* 비활성화 상태에서 hover 시 커서 변경 */
+    background-color: ${({ disabled }) => (disabled ? '#d1d5db' : 'white')};
+    color: ${({ disabled }) => (disabled ? '#9ca3af' : '#2563eb')};
+    border: ${({ disabled }) => (disabled ? 'none' : '1px solid #2563eb')};
   }
 `;
 

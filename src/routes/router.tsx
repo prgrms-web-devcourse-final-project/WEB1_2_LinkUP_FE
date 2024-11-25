@@ -3,7 +3,8 @@ import React from 'react';
 import ErrorPage from './ErrorPage';
 import NotFoundPage from './NotFoundPage';
 import HomePage from '../components/pages/HomePage/HomePage';
-import CommunityPage from '../components/pages/community/CommunityPage';
+import CategoryBasedPostsPage from '../components/pages/community/CategoryBasedPostsPage';
+import PostCreatePage from '../components/pages/community/PostCreatePage';
 import Layout from '../components/common/Layout';
 import SignInPage from '../components/pages/login/SignInPage';
 import SignUpPage from '../components/pages/login/SignUpPage';
@@ -33,7 +34,11 @@ const router = createBrowserRouter([
       },
       {
         path: '/community',
-        element: <CommunityPage />,
+        element: <CategoryBasedPostsPage />,
+      },
+      {
+        path: '/community/create',
+        element: <PostCreatePage />,
       },
     ],
   },

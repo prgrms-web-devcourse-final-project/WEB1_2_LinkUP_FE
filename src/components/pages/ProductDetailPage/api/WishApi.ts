@@ -1,14 +1,8 @@
 import axiosInstance from '../../../../api/axiosInstance';
-export type Product = {
+export type ProductSchema = {
   id: string;
-  name: string;
-  stars: number;
-  originalPrice: number;
-  discountedPrice: number;
-  image: string;
-  description: string;
 };
-export const addWishList = async (payload: Product) => {
+export const addWishList = async (payload: ProductSchema) => {
   try {
     const URL = `/products/wishlist`;
     const { data } = await axiosInstance.post(URL, payload);

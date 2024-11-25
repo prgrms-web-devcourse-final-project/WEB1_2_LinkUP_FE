@@ -2,13 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import StarRating from '../../common/StarRating';
+import { Product } from './model/productSchema';
 
 interface PopularProductProps {
-  product: {
-    id: string;
-    image: string;
-    stars: number;
-  };
+  product: Product;
 }
 
 const PopularProduct: React.FC<PopularProductProps> = ({ product }) => {

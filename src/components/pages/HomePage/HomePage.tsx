@@ -44,6 +44,7 @@ const HomePage: React.FC = () => {
         comment: 'asd',
       },
     ],
+    likes: false,
   };
   const products = [
     {
@@ -54,7 +55,8 @@ const HomePage: React.FC = () => {
       discountedPrice: 79.98,
       image: 'https://via.placeholder.com/200',
       category: '전자제품',
-      comments: [], // 0개
+      comments: [],
+      likes: false,
     },
     {
       id: '2',
@@ -64,7 +66,8 @@ const HomePage: React.FC = () => {
       discountedPrice: 199.99,
       image: 'https://via.placeholder.com/200',
       category: '전자제품',
-      comments: [{ comment: '좋아요!' }], // 1개
+      comments: [{ comment: '좋아요!' }],
+      likes: false,
     },
     {
       id: '3',
@@ -74,7 +77,8 @@ const HomePage: React.FC = () => {
       discountedPrice: 39.99,
       image: 'https://via.placeholder.com/200',
       category: '전자제품',
-      comments: [{ comment: '좋은 제품이에요!' }, { comment: '가성비 최고!' }], // 2개
+      comments: [{ comment: '좋은 제품이에요!' }, { comment: '가성비 최고!' }],
+      likes: false,
     },
     {
       id: '4',
@@ -88,7 +92,8 @@ const HomePage: React.FC = () => {
         { comment: '화질 좋아요!' },
         { comment: '디자인이 예뻐요!' },
         { comment: '조금 무겁지만 괜찮아요.' },
-      ], // 3개
+      ],
+      likes: false,
     },
     {
       id: '5',
@@ -98,7 +103,8 @@ const HomePage: React.FC = () => {
       discountedPrice: 999.99,
       image: 'https://via.placeholder.com/200',
       category: '전자제품',
-      comments: [], // 0개
+      comments: [],
+      likes: false,
     },
     {
       id: '6',
@@ -108,7 +114,8 @@ const HomePage: React.FC = () => {
       discountedPrice: 299.99,
       image: 'https://via.placeholder.com/200',
       category: '전자제품',
-      comments: [{ comment: '아이들이 너무 좋아해요!' }], // 1개
+      comments: [{ comment: '아이들이 너무 좋아해요!' }],
+      likes: true,
     },
     {
       id: '7',
@@ -118,7 +125,8 @@ const HomePage: React.FC = () => {
       discountedPrice: 4.5,
       image: 'https://via.placeholder.com/200',
       category: '식료품',
-      comments: [], // 0개
+      comments: [],
+      likes: false,
     },
     {
       id: '8',
@@ -128,7 +136,8 @@ const HomePage: React.FC = () => {
       discountedPrice: 12.99,
       image: 'https://via.placeholder.com/200',
       category: '식료품',
-      comments: [{ comment: '맛있어요!' }], // 1개
+      comments: [{ comment: '맛있어요!' }],
+      likes: false,
     },
     {
       id: '9',
@@ -142,7 +151,8 @@ const HomePage: React.FC = () => {
         { comment: '항상 먹는 맛!' },
         { comment: '간편해서 좋아요.' },
         { comment: '가격 대비 최고!' },
-      ], // 3개
+      ],
+      likes: true,
     },
     {
       id: '10',
@@ -152,7 +162,8 @@ const HomePage: React.FC = () => {
       discountedPrice: 99.99,
       image: 'https://via.placeholder.com/200',
       category: '생활용품',
-      comments: [], // 0개
+      comments: [],
+      likes: true,
     },
     {
       id: '11',
@@ -162,7 +173,8 @@ const HomePage: React.FC = () => {
       discountedPrice: 15.99,
       image: 'https://via.placeholder.com/200',
       category: '생활용품',
-      comments: [{ comment: '실용적이에요.' }], // 1개
+      comments: [{ comment: '실용적이에요.' }],
+      likes: false,
     },
     {
       id: '12',
@@ -175,7 +187,8 @@ const HomePage: React.FC = () => {
       comments: [
         { comment: '조명이 예뻐요.' },
         { comment: '편안한 분위기를 만들어줘요.' },
-      ], // 2개
+      ],
+      likes: false,
     },
     {
       id: '13',
@@ -189,7 +202,8 @@ const HomePage: React.FC = () => {
         { comment: '편안해요.' },
         { comment: '디자인이 마음에 들어요.' },
         { comment: '색상이 예뻐요.' },
-      ], // 3개
+      ],
+      likes: false,
     },
     {
       id: '14',
@@ -199,7 +213,8 @@ const HomePage: React.FC = () => {
       discountedPrice: 35.99,
       image: 'https://via.placeholder.com/200',
       category: '패션/의류',
-      comments: [], // 0개
+      comments: [],
+      likes: false,
     },
     {
       id: '15',
@@ -212,7 +227,8 @@ const HomePage: React.FC = () => {
       comments: [
         { comment: '디자인 최고!' },
         { comment: '가죽이 고급스러워요.' },
-      ], // 2개
+      ],
+      likes: true,
     },
     {
       id: '16',
@@ -226,7 +242,8 @@ const HomePage: React.FC = () => {
         { comment: '튼튼해요.' },
         { comment: '디자인이 멋져요.' },
         { comment: '조립이 쉬워요.' },
-      ], // 3개
+      ],
+      likes: true,
     },
     {
       id: '17',
@@ -236,7 +253,8 @@ const HomePage: React.FC = () => {
       discountedPrice: 129.99,
       image: 'https://via.placeholder.com/200',
       category: '가구/인테리어',
-      comments: [], // 0개
+      comments: [],
+      likes: false,
     },
     {
       id: '18',
@@ -249,7 +267,8 @@ const HomePage: React.FC = () => {
       comments: [
         { comment: '스타일리시해요.' },
         { comment: '높이가 딱 좋아요.' },
-      ], // 2개
+      ],
+      likes: true,
     },
     {
       id: '19',
@@ -263,7 +282,8 @@ const HomePage: React.FC = () => {
         { comment: '아기가 잘 사용해요.' },
         { comment: '흡수력이 좋아요.' },
         { comment: '가격이 저렴해요.' },
-      ], // 3개
+      ],
+      likes: true,
     },
     {
       id: '20',
@@ -273,7 +293,8 @@ const HomePage: React.FC = () => {
       discountedPrice: 39.99,
       image: 'https://via.placeholder.com/200',
       category: '유아/아동용품',
-      comments: [], // 0개
+      comments: [],
+      likes: true,
     },
   ];
 

@@ -1,17 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
 import { FaPen } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
 
 interface WriteButtonProps {
-  navigateTo?: string; // 기본 이동 경로
+  onClick: () => void; // 클릭 이벤트 핸들러를 받음
 }
 
-const WriteButton: React.FC<WriteButtonProps> = ({ navigateTo = '/write' }) => {
-  const navigate = useNavigate();
-
+const WriteButton: React.FC<WriteButtonProps> = ({ onClick }) => {
   return (
-    <Button onClick={() => navigate(navigateTo)}>
+    <Button onClick={onClick}>
       <FaPen /> 글 작성
     </Button>
   );

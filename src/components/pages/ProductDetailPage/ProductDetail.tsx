@@ -133,6 +133,7 @@ const ProductDetail: React.FC = () => {
     setNewComment('');
   };
 
+  const least = product.minimum - product.now;
   return (
     <Container>
       <ContentWrapper>
@@ -149,8 +150,11 @@ const ProductDetail: React.FC = () => {
               <DiscountedPrice>
                 ${product.discountedPrice.toFixed(2)}
               </DiscountedPrice>
-              <DiscountInfo>{product.minimum}명부터 할인 적용</DiscountInfo>
+              <DiscountInfo>{product.minimum}개 부터 할인 적용</DiscountInfo>
             </DiscountWrapper>
+            {least > 0 && (
+              <RemainingCount>할인 적용까지 {least}개 남음</RemainingCount>
+            )}
           </PriceWrapper>
           <Description>{product.description}</Description>
           <DeadlineLabel>{remainingTime}</DeadlineLabel>
@@ -252,6 +256,8 @@ const Stars = styled.div`
   font-size: 20px;
   color: #ffaa00;
   margin-bottom: 15px;
+  margin-left: 65%;
+  margin-top: -10%;
 `;
 
 const PriceWrapper = styled.div`
@@ -279,6 +285,22 @@ const DiscountedPrice = styled.div`
   font-weight: bold;
   color: #ff4d4f;
   font-size: 24px;
+`;
+const RemainingCount = styled.div`
+  display: inline-flex;
+  align-items: center;
+  background-color: #fff3f3;
+  border: 1px solid #ffcdd2;
+  border-radius: 20px;
+  padding: 8px 16px;
+  color: #ff4d4f;
+  font-size: 14px;
+  font-weight: 600;
+  &::before {
+    content: '🏷️';
+    margin-right: 8px;
+    font-size: 16px;
+  }
 `;
 
 const Description = styled.p`

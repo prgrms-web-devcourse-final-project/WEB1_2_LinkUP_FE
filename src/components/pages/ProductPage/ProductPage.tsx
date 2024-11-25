@@ -4,9 +4,13 @@ import ProductComponent from '../ProductPage/ProductComponent';
 import styled from 'styled-components';
 import { Product } from '../HomePage/api/productApi';
 import { useLocation } from 'react-router-dom';
+import ScrollToTopButton from '../../common/ScrollToTopButton';
 
 const ProductPage = () => {
   const [input, setInput] = useState('');
+
+  //페이지네이션
+
   const location = useLocation();
 
   useEffect(() => {
@@ -216,6 +220,7 @@ const ProductPage = () => {
         <Container>
           <ProductComponent input={input} products={filtered} />
         </Container>
+        <ScrollToTopButton />
       </ContainerBox>
     </>
   );

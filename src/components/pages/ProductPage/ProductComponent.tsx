@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import Pagination from '../../common/Pagination';
 interface Product {
   id: string;
   name: string;
@@ -19,6 +20,14 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
   input,
   products,
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const PRODUCT_PER_PAGE = 16;
+  const totalPages = Math.ceil(products.length / PRODUCT_PER_PAGE);
+  const startIndex = (currentPage - 1) * PRODUCT_PER_PAGE;
+  const currentProducts = products.slice(
+    startIndex,
+    startIndex + PRODUCT_PER_PAGE
+  );
   return (
     <Recommend>
       <RecommendTitle>
@@ -27,7 +36,7 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
       </RecommendTitle>
 
       <CardWrapper>
-        {products.map((product) => (
+        {currentProducts.map((product) => (
           <Card key={product.id}>
             <StyledLink to={`/products/${product.id}`}>
               <ProductImg src={product.image} alt={product.name} />
@@ -48,6 +57,15 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
           </Card>
         ))}
       </CardWrapper>
+      {totalPages > 1 && (
+        <PagenationWrapper>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => setCurrentPage(page)}
+          />
+        </PagenationWrapper>
+      )}
     </Recommend>
   );
 };
@@ -156,5 +174,10 @@ const LikeButton = styled.div`
   font-size: 25px;
   color: #ccc;
   cursor: pointer;
+`;
+
+const PagenationWrapper = styled.div`
+  margin-top: 20px;
+  margin-left: 46%;
 `;
 export default ProductComponent;

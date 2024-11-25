@@ -273,6 +273,7 @@ const BackButton = styled(Link)`
   transition: all 0.2s;
 
   &:hover {
+    cursor: pointer;
     background-color: #f8fafc;
   }
 `;
@@ -283,6 +284,7 @@ const PayButton = styled(Button)`
   color: white;
 
   &:hover {
+    cursor: pointer;
     background-color: #1d4ed8;
   }
 `;

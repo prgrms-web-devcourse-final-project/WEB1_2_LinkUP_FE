@@ -3,14 +3,9 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import Pagination from '../../common/Pagination';
 import StarRating from '../../common/StarRating';
-interface Product {
-  id: string;
-  name: string;
-  stars: number;
-  originalPrice: number;
-  discountedPrice: number;
-  image: string;
-}
+import Heart from '../../../assets/icons/heart.png';
+import FilledHeart from '../../../assets/icons/filled-heart.png';
+import { Product } from '../HomePage/model/productSchema';
 
 type ProductComponentProps = {
   input: string;
@@ -57,7 +52,7 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
                 </PriceWrapper>
               </ProductWrapper>
             </StyledLink>
-            <LikeButton>♡</LikeButton>
+            <LikeButton likes={product.likes} />
           </Card>
         ))}
       </CardWrapper>
@@ -171,15 +166,22 @@ const DiscountedPrice = styled.div`
   color: #ff4d4f;
 `;
 
-const LikeButton = styled.div`
+const LikeButton = styled.img<{ likes: boolean }>`
   position: absolute;
   bottom: 20px;
   right: 30px;
-  font-size: 25px;
-  color: #ccc;
+  width: 25px;
+  height: 25px;
   cursor: pointer;
-`;
+  content: ${({ likes }) => `url(${likes ? FilledHeart : Heart})`};
+  color: ${({ likes }) => (likes ? 'red ' : 'transparent')};
 
+  &:hover {
+    cursor: pointer;
+    transform: scale(1.2);
+    transition: transform 0.2s ease-in-out;
+  }
+`;
 const PagenationWrapper = styled.div`
   margin-top: 20px;
   margin-left: 46%;

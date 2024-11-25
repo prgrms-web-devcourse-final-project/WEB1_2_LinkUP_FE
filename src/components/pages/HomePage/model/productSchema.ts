@@ -9,6 +9,7 @@ export interface Product {
   originalPrice: number;
   discountedPrice: number;
   image: string;
+  category: string;
   comments: Comment[];
   likes: boolean;
 }

@@ -126,6 +126,7 @@ const Card = styled.div`
   align-items: center;
   position: relative;
   &:hover {
+    cursor: pointer;
     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.4);
     transform: translateY(-5px);
   }
@@ -202,6 +203,7 @@ const LikeButton = styled.img<{ likes: boolean }>`
   color: ${({ likes }) => (likes ? 'red ' : 'transparent')};
 
   &:hover {
+    cursor: pointer;
     transform: scale(1.2);
     transition: transform 0.2s ease-in-out;
   }
@@ -261,6 +263,7 @@ const StyledMoreButton = styled(Link)`
   transition: background-color 0.3s;
 
   &:hover {
+    cursor: pointer;
     background-color: gray;
   }
 `;

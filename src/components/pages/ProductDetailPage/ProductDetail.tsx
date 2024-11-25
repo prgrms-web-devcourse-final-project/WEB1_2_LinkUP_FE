@@ -41,7 +41,12 @@ const ProductDetail: React.FC = () => {
   const [newComment, setNewComment] = useState('');
   const [newCommentStar, setNewCommentStar] = useState(5);
   const [remainingTime, setRemainingTime] = useState('');
+  const [visibleCount, setVisibleCount] = useState(10);
 
+  // 더보기 버튼 클릭 시 댓글 수를 증가시키는 함수
+  const handleShowMore = () => {
+    setVisibleCount((prevCount) => prevCount + 10);
+  };
   const product = {
     id: '1',
     name: '다이슨 드라이기',
@@ -66,6 +71,118 @@ const ProductDetail: React.FC = () => {
       },
       {
         comment: '머리가 정말 빨리 말라서 시간 절약에 도움이 돼요.',
+        star: 5,
+      },
+      {
+        comment: '생각보다 소음이 조금 있어서 아쉬웠어요.',
+        star: 3,
+      },
+      {
+        comment: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
+        star: 5,
+      },
+      {
+        comment: '선물로 줬는데 상대방이 정말 좋아했어요.',
+        star: 5,
+      },
+      {
+        comment: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
+        star: 4,
+      },
+      {
+        comment: '전문가용 드라이기 같은 성능인데, 가정용으로도 적합합니다.',
+        star: 5,
+      },
+      {
+        comment: '살짝 무겁지만, 기능이 좋아서 만족해요.',
+        star: 4,
+      },
+      {
+        comment: '내구성이 좋을 것 같아서 기대 중입니다!',
+        star: 5,
+      },
+      {
+        comment: '생각보다 소음이 조금 있어서 아쉬웠어요.',
+        star: 3,
+      },
+      {
+        comment: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
+        star: 5,
+      },
+      {
+        comment: '선물로 줬는데 상대방이 정말 좋아했어요.',
+        star: 5,
+      },
+      {
+        comment: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
+        star: 4,
+      },
+      {
+        comment: '전문가용 드라이기 같은 성능인데, 가정용으로도 적합합니다.',
+        star: 5,
+      },
+      {
+        comment: '살짝 무겁지만, 기능이 좋아서 만족해요.',
+        star: 4,
+      },
+      {
+        comment: '내구성이 좋을 것 같아서 기대 중입니다!',
+        star: 5,
+      },
+      {
+        comment: '생각보다 소음이 조금 있어서 아쉬웠어요.',
+        star: 3,
+      },
+      {
+        comment: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
+        star: 5,
+      },
+      {
+        comment: '선물로 줬는데 상대방이 정말 좋아했어요.',
+        star: 5,
+      },
+      {
+        comment: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
+        star: 4,
+      },
+      {
+        comment: '전문가용 드라이기 같은 성능인데, 가정용으로도 적합합니다.',
+        star: 5,
+      },
+      {
+        comment: '살짝 무겁지만, 기능이 좋아서 만족해요.',
+        star: 4,
+      },
+      {
+        comment: '내구성이 좋을 것 같아서 기대 중입니다!',
+        star: 5,
+      },
+      {
+        comment: '생각보다 소음이 조금 있어서 아쉬웠어요.',
+        star: 3,
+      },
+      {
+        comment: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
+        star: 5,
+      },
+      {
+        comment: '선물로 줬는데 상대방이 정말 좋아했어요.',
+        star: 5,
+      },
+      {
+        comment: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
+        star: 4,
+      },
+      {
+        comment: '전문가용 드라이기 같은 성능인데, 가정용으로도 적합합니다.',
+        star: 5,
+      },
+      {
+        comment: '살짝 무겁지만, 기능이 좋아서 만족해요.',
+        star: 4,
+      },
+      {
+        comment: '내구성이 좋을 것 같아서 기대 중입니다!',
         star: 5,
       },
       {
@@ -224,13 +341,22 @@ const ProductDetail: React.FC = () => {
             </StarSelector>
             <CommentSubmitButton type="submit">댓글 달기</CommentSubmitButton>
           </CommentInputWrapper>
-        </CommentForm>
-        {product.comments.map((comment, i) => (
-          <Comment key={i}>
-            {comment.comment}
-            <CommentStars>{'⭐'.repeat(comment.star)}</CommentStars>
-          </Comment>
-        ))}
+        </CommentForm>{' '}
+        <div>
+          {product.comments.slice(0, visibleCount).map((comment, index) => (
+            <Comment key={index}>
+              {comment.comment}
+              <CommentStars>{'⭐'.repeat(comment.star)}</CommentStars>
+            </Comment>
+          ))}
+
+          {/* 더보기 버튼*/}
+          <ButtonContainer>
+            {visibleCount < product.comments.length && (
+              <ViewMore onClick={handleShowMore}>더보기</ViewMore>
+            )}
+          </ButtonContainer>
+        </div>
       </CommentSection>
     </Container>
   );
@@ -422,6 +548,7 @@ const PurchaseButton = styled(Link)`
   text-decoration: none;
   text-align: center;
   &:hover {
+    cursor: pointer;
     background-color: white;
     color: #2563eb;
     border: 1px solid #2563eb;
@@ -439,6 +566,7 @@ const WishButton = styled.button`
   font-size: 16px;
   font-weight: bold;
   &:hover {
+    cursor: pointer;
     background-color: #2563eb;
     color: white;
   }
@@ -496,6 +624,26 @@ const Comment = styled.div`
 const CommentStars = styled.div`
   font-size: 16px;
   color: #ffaa00;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
+const ViewMore = styled.button`
+  margin-top: 20px;
+  border: 1px solid black;
+  background-color: transparent;
+  border-radius: 8px;
+  width: 200px;
+  height: 40px;
+  font-size: 14px;
+  &:hover {
+    cursor: pointer;
+    background-color: #2563eb;
+    color: white;
+  }
 `;
 
 export default ProductDetail;

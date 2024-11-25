@@ -1,15 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-
-interface Product {
-  id: string;
-  name: string;
-  stars: number;
-  originalPrice: number;
-  discountedPrice: number;
-  image: string;
-}
+import StarRating from '../../common/StarRating';
+import Heart from '../../../assets/icons/heart.png';
+import FilledHeart from '../../../assets/icons/filled-heart.png';
+import { Product } from './model/productSchema';
 
 interface CategoryProductsProps {
   categories: string[];
@@ -38,6 +33,9 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
     () => getRandomProducts(products),
     [products]
   );
+  useEffect(() => {
+    //fetch상품
+  }, [selectedCategory]);
   return (
     <Recommend>
       <CategoryWrapper>
@@ -62,7 +60,10 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
               <ProductImg src={product.image} alt={product.name} />
               <ProductWrapper>
                 <ProductName>{product.name}</ProductName>
-                <ProductStar>{'⭐'.repeat(product.stars)}</ProductStar>
+                <ProductStar>
+                  {' '}
+                  <StarRating rating={product.stars} />
+                </ProductStar>
                 <PriceWrapper>
                   <OriginalPrice>
                     ${product.originalPrice.toFixed(2)}
@@ -73,7 +74,7 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
                 </PriceWrapper>
               </ProductWrapper>
             </StyledLink>
-            <LikeButton>♡</LikeButton>
+            <LikeButton likes={product.likes} />
           </Card>
         ))}
       </CardWrapper>
@@ -99,6 +100,9 @@ const RecommendTitle = styled.h2`
   margin-bottom: 20px;
   font-size: 1.5rem;
   color: #333;
+  &:hover {
+    cursor: pointer;
+  }
 `;
 
 const CardWrapper = styled.div`
@@ -121,6 +125,11 @@ const Card = styled.div`
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   align-items: center;
   position: relative;
+  &:hover {
+    cursor: pointer;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.4);
+    transform: translateY(-5px);
+  }
 `;
 const StyledLink = styled(Link)`
   text-decoration: none;
@@ -183,13 +192,21 @@ const DiscountedPrice = styled.div`
   color: #ff4d4f;
 `;
 
-const LikeButton = styled.div`
+const LikeButton = styled.img<{ likes: boolean }>`
   position: absolute;
   bottom: 20px;
   right: 30px;
-  font-size: 25px;
-  color: #ccc;
+  width: 25px;
+  height: 25px;
   cursor: pointer;
+  content: ${({ likes }) => `url(${likes ? FilledHeart : Heart})`};
+  color: ${({ likes }) => (likes ? 'red ' : 'transparent')};
+
+  &:hover {
+    cursor: pointer;
+    transform: scale(1.2);
+    transition: transform 0.2s ease-in-out;
+  }
 `;
 const CategoryWrapper = styled.div`
   width: 100%;
@@ -246,6 +263,7 @@ const StyledMoreButton = styled(Link)`
   transition: background-color 0.3s;
 
   &:hover {
+    cursor: pointer;
     background-color: gray;
   }
 `;

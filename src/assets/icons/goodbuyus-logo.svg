@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 180">
+  <!-- Background -->
+  <rect width="400" height="180" fill="transparent"/>
+  
+  <!-- Main Text - GoodBuyUs -->
+  <text x="50" y="100" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#2563EB">
+    Good<tspan fill="#FF4D4F">Buy</tspan>Us
+  </text>
+  
+  <!-- Connected People Symbol -->
+  <g transform="translate(320, 85) scale(0.8)">
+    <circle cx="0" cy="0" r="25" fill="#2563EB" opacity="0.9"/>
+    <circle cx="40" cy="0" r="25" fill="#FF4D4F" opacity="0.9"/>
+    <!-- Intersection/Link Effect -->
+    <circle cx="20" cy="0" r="25" fill="#9333EA" opacity="0.8"/>
+  </g>
+  
+  <!-- Tagline -->
+  <text x="50" y="130" font-family="Arial, sans-serif" font-size="14" fill="#666666">
+    by LinkUp
+  </text>
+  
+  <!-- Shopping Cart Icon -->
+  <path d="M40 70 h10 l5 -15 h20 l5 15 h-40" fill="none" stroke="#2563EB" stroke-width="2"/>
+  <circle cx="45" cy="75" r="3" fill="#2563EB"/>
+  <circle cx="65" cy="75" r="3" fill="#2563EB"/>
+</svg>

@@ -1,5 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import { handlePayment } from './api/paymentApi';
 
 const PaymentForm = () => {
   const product = {
@@ -74,8 +76,14 @@ const PaymentForm = () => {
       </Section>
 
       <ButtonGroup>
-        <BackButton>뒤로 가기</BackButton>
-        <PayButton>결제하기</PayButton>
+        <PayButton
+          onClick={() => {
+            handlePayment();
+          }}
+        >
+          결제하기
+        </PayButton>
+        <BackButton to={`/products/${product.id}`}>뒤로 가기</BackButton>
       </ButtonGroup>
     </Container>
   );
@@ -83,7 +91,7 @@ const PaymentForm = () => {
 
 const Container = styled.div`
   width: 100%;
-  max-width: 480px;
+  max-width: 650px;
   margin: 0 auto;
   padding: 20px;
   background-color: #f8fafc;
@@ -98,7 +106,7 @@ const Section = styled.div`
 `;
 
 const ContentBox = styled.div`
-  padding: 16px;
+  padding: 20px;
 `;
 
 const Title = styled.h2`
@@ -248,10 +256,21 @@ const Button = styled.button`
   transition: all 0.2s;
 `;
 
-const BackButton = styled(Button)`
+const BackButton = styled(Link)`
+  text-decoration: none; /* 링크의 기본 밑줄 제거 */
+  display: flex; /* 버튼 스타일 유지 */
+  justify-content: center;
+  align-items: center;
+
   background-color: white;
   border: 1px solid #e2e8f0;
   color: #475569;
+  border-radius: 8px;
+  padding: 12px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
 
   &:hover {
     background-color: #f8fafc;

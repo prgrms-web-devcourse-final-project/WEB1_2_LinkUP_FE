@@ -1,12 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-const CategoryWrapper = ({
+interface CategoryWrapperProps {
+  selectedCategory: string; // 외부에서 전달된 선택된 카테고리
+  onCategoryChange: (name: string) => void; // 카테고리 변경 핸들러
+}
+
+const CategoryWrapper: React.FC<CategoryWrapperProps> = ({
+  selectedCategory,
   onCategoryChange,
-}: {
-  onCategoryChange: (name: string) => void;
 }) => {
-  // 카테고리 목록을 컴포넌트 내부에 정의
+  // 내부 상태로 선택된 카테고리 관리
+  const [currentCategory, setCurrentCategory] = useState(selectedCategory);
+
+  // 외부 props로 전달된 selectedCategory가 변경될 때 상태 업데이트
+  useEffect(() => {
+    setCurrentCategory(selectedCategory);
+  }, [selectedCategory]);
+
+  // 카테고리 목록
   const categories = [
     '생활용품',
     '식료품',
@@ -17,12 +29,9 @@ const CategoryWrapper = ({
     '스포츠',
   ];
 
-  // 선택된 카테고리를 관리하는 상태
-  const [selectedCategory, setSelectedCategory] = useState('생활용품'); // 기본값: 생활용품
-
   // 카테고리 클릭 핸들러
   const handleCategoryClick = (categoryName: string) => {
-    setSelectedCategory(categoryName);
+    setCurrentCategory(categoryName);
     onCategoryChange(categoryName);
   };
 
@@ -31,7 +40,7 @@ const CategoryWrapper = ({
       {categories.map((category) => (
         <CategoryItem
           key={category}
-          active={category === selectedCategory}
+          active={category === currentCategory}
           onClick={() => handleCategoryClick(category)}
         >
           {category}
@@ -43,13 +52,13 @@ const CategoryWrapper = ({
 
 const Wrapper = styled.div`
   display: flex;
-  overflow-x: auto;
-  white-space: nowrap;
-  padding: 0.5rem 0;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+  width: 100%;
+  justify-content: center;
 `;
-
 const CategoryItem = styled.div<{ active: boolean }>`
-  padding: 1rem 2rem;
+  padding: 1rem 1rem;
   font-weight: ${({ active }) => (active ? 'bold' : 'normal')};
   cursor: pointer;
   position: relative;

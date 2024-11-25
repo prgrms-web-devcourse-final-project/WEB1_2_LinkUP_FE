@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import StarRating from '../../common/StarRating';
 
 interface Product {
   id: string;
@@ -38,6 +39,9 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
     () => getRandomProducts(products),
     [products]
   );
+  useEffect(() => {
+    //fetch상품
+  }, [selectedCategory]);
   return (
     <Recommend>
       <CategoryWrapper>
@@ -62,7 +66,10 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
               <ProductImg src={product.image} alt={product.name} />
               <ProductWrapper>
                 <ProductName>{product.name}</ProductName>
-                <ProductStar>{'⭐'.repeat(product.stars)}</ProductStar>
+                <ProductStar>
+                  {' '}
+                  <StarRating rating={product.stars} />
+                </ProductStar>
                 <PriceWrapper>
                   <OriginalPrice>
                     ${product.originalPrice.toFixed(2)}
@@ -99,6 +106,9 @@ const RecommendTitle = styled.h2`
   margin-bottom: 20px;
   font-size: 1.5rem;
   color: #333;
+  &:hover {
+    cursor: pointer;
+  }
 `;
 
 const CardWrapper = styled.div`

@@ -1,6 +1,10 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import StarRating from '../../common/StarRating';
+interface Comment {
+  comment: string;
+}
 
 interface Product {
   id: string;
@@ -9,6 +13,7 @@ interface Product {
   originalPrice: number;
   discountedPrice: number;
   image: string;
+  comments: Comment[]; // Comment 타입의 배열
 }
 
 interface PopularProductsListProps {
@@ -16,15 +21,17 @@ interface PopularProductsListProps {
 }
 
 const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => {
-  //임의로 8개만 선택
-  const getRandomProducts = (products: Product[]): Product[] => {
-    const shuffled = [...products].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 8);
+  const getTopProducts = (products: Product[]): Product[] => {
+    // comments.length를 기준으로 내림차순 정렬
+    const sortedByComments = [...products].sort(
+      (a, b) => b.comments.length - a.comments.length
+    );
+    // 상위 8개 선택
+    return sortedByComments.slice(0, 8);
   };
-  const displayedProducts = useMemo(
-    () => getRandomProducts(products),
-    [products]
-  );
+
+  const displayedProducts = useMemo(() => getTopProducts(products), [products]);
+
   return (
     <Recommend>
       <RecommendTitle>실시간 인기 상품</RecommendTitle>
@@ -36,7 +43,9 @@ const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => {
               <ProductImg src={product.image} alt={product.name} />
               <ProductWrapper>
                 <ProductName>{product.name}</ProductName>
-                <ProductStar>{'⭐'.repeat(product.stars)}</ProductStar>
+                <ProductStar>
+                  <StarRating rating={product.stars} />
+                </ProductStar>
                 <PriceWrapper>
                   <OriginalPrice>
                     ${product.originalPrice.toFixed(2)}

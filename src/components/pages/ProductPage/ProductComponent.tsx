@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import Pagination from '../../common/Pagination';
+import StarRating from '../../common/StarRating';
 interface Product {
   id: string;
   name: string;
@@ -42,7 +43,10 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
               <ProductImg src={product.image} alt={product.name} />
               <ProductWrapper>
                 <ProductName>{product.name}</ProductName>
-                <ProductStar>{'⭐'.repeat(product.stars)}</ProductStar>
+                <ProductStar>
+                  {' '}
+                  <StarRating rating={product.stars} />
+                </ProductStar>
                 <PriceWrapper>
                   <OriginalPrice>
                     ${product.originalPrice.toFixed(2)}

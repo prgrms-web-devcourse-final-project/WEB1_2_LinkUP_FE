@@ -7,12 +7,11 @@ export type Product = {
   discountedPrice: number;
   image: string;
   category: string;
-  comments?: [];
 };
-export const getProducts = async (): Promise<Product[]> => {
+export const handlePayment = async (): Promise<Product[]> => {
   try {
-    const URL = `/products`;
-    const { data } = await axiosInstance.get(URL);
+    const URL = `/payment`;
+    const { data } = await axiosInstance.post(URL);
     return data;
   } catch {
     throw new Error('상품 정보를 가져오는 데 실패했습니다.');

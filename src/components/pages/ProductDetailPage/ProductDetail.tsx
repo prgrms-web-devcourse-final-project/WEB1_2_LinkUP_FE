@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 // import { useParams } from 'react-router-dom';
 // import { getProductbyId } from './api/productDetailApi';
 import styled from 'styled-components';
+import { addWishList } from './api/WishApi';
+import StarRating from '../../common/StarRating';
+import { addComment } from './api/CommentApi';
 // import { useQuery } from '@tanstack/react-query';
 
 const ProductDetail: React.FC = () => {
@@ -42,7 +45,7 @@ const ProductDetail: React.FC = () => {
   const product = {
     id: '1',
     name: '다이슨 드라이기',
-    stars: 5,
+    stars: 4.7,
     minimum: 5,
     now: 3,
     stock: 10,
@@ -131,6 +134,9 @@ const ProductDetail: React.FC = () => {
 
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    //댓글추가 api 호출
+    addComment({ comment: newComment, star: newCommentStar });
+    //newComment, newCommentStar <- payload로 전송
     setNewComment('');
   };
 
@@ -140,7 +146,9 @@ const ProductDetail: React.FC = () => {
       <ContentWrapper>
         <ImageSection>
           <Image src={product.image} alt={product.name} />
-          <Stars>{'⭐'.repeat(product.stars)}</Stars>
+          <Stars>
+            <StarRating rating={product.stars} />
+          </Stars>
         </ImageSection>
         <InfoSection>
           <Title>{product.name}</Title>
@@ -180,10 +188,17 @@ const ProductDetail: React.FC = () => {
               />
             </QuantityWrapper>
             <ButtonWrapper>
-              <PurchaseButton to={`products/payment/${product.id}`}>
+              <PurchaseButton to={`/products/payment/${product.id}`}>
                 구매하기
               </PurchaseButton>
-              <WishButton type="button">찜하기</WishButton>
+              <WishButton
+                type="button"
+                onClick={() => {
+                  addWishList(product);
+                }}
+              >
+                찜하기
+              </WishButton>
             </ButtonWrapper>
           </ActionWrapper>
         </InfoSection>
@@ -235,6 +250,7 @@ const ContentWrapper = styled.div`
 `;
 
 const ImageSection = styled.div`
+  position: relative;
   flex: 1;
 `;
 
@@ -256,11 +272,11 @@ const Title = styled.h2`
 `;
 
 const Stars = styled.div`
+  position: absolute;
   font-size: 20px;
   color: #ffaa00;
-  margin-bottom: 15px;
-  margin-left: 75%;
-  margin-top: -8%;
+  bottom: 20%;
+  right: 2%;
 `;
 
 const PriceWrapper = styled.div`
@@ -354,20 +370,38 @@ const ActionWrapper = styled.div`
 const QuantityWrapper = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  margin-top: 10px;
+  width: 120px;
+  font-size: 16px;
+  border-radius: 8px;
+  padding: 10px 15px;
 `;
 
 const QuantityLabel = styled.span`
-  font-size: 16px;
+  font-weight: bold;
   color: #333;
 `;
 
 const QuantityInput = styled.input`
-  width: 60px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  font-size: 16px;
   padding: 0 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  transition: border-color 0.3s ease;
+
+  &:focus {
+    border-color: #4a90e2;
+    outline: none;
+  }
+
+  &::placeholder {
+    color: #aaa;
+  }
 `;
 
 const ButtonWrapper = styled.div`
@@ -378,7 +412,7 @@ const ButtonWrapper = styled.div`
 const PurchaseButton = styled(Link)`
   flex: 2;
   padding: 15px;
-  background-color: #ff4d4f;
+  background-color: #2563eb;
   color: white;
   border: none;
   border-radius: 5px;
@@ -389,8 +423,8 @@ const PurchaseButton = styled(Link)`
   text-align: center;
   &:hover {
     background-color: white;
-    color: #ff4d4f;
-    border: 1px solid #ff4d4f;
+    color: #2563eb;
+    border: 1px solid #2563eb;
   }
 `;
 
@@ -398,14 +432,14 @@ const WishButton = styled.button`
   flex: 1;
   padding: 15px;
   background-color: white;
-  color: #ff4d4f;
-  border: 1px solid #ff4d4f;
+  color: #2563eb;
+  border: 1px solid #2563eb;
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
   font-weight: bold;
   &:hover {
-    background-color: #ff4d4f;
+    background-color: #2563eb;
     color: white;
   }
 `;
@@ -442,7 +476,7 @@ const StarSelector = styled.select`
 
 const CommentSubmitButton = styled.button`
   padding: 10px 20px;
-  background-color: #ff4d4f;
+  background-color: #2563eb;
   color: white;
   border: none;
   border-radius: 4px;

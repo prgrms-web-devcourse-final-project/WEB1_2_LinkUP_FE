@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 // import { useParams } from 'react-router-dom';
 // import { getProductbyId } from './api/productDetailApi';
 import styled from 'styled-components';
@@ -117,7 +118,7 @@ const ProductDetail: React.FC = () => {
     calculateRemainingTime(); // 초기 계산
     const timer = setInterval(calculateRemainingTime, 60000); // 1분마다 업데이트
 
-    return () => clearInterval(timer); // 컴포넌트 언마운트 시 타이머 해제
+    return () => clearInterval(timer);
   }, []);
 
   // 구매 비율 계산
@@ -179,7 +180,9 @@ const ProductDetail: React.FC = () => {
               />
             </QuantityWrapper>
             <ButtonWrapper>
-              <PurchaseButton type="button">구매하기</PurchaseButton>
+              <PurchaseButton to={`products/payment/${product.id}`}>
+                구매하기
+              </PurchaseButton>
               <WishButton type="button">찜하기</WishButton>
             </ButtonWrapper>
           </ActionWrapper>
@@ -256,8 +259,8 @@ const Stars = styled.div`
   font-size: 20px;
   color: #ffaa00;
   margin-bottom: 15px;
-  margin-left: 65%;
-  margin-top: -10%;
+  margin-left: 75%;
+  margin-top: -8%;
 `;
 
 const PriceWrapper = styled.div`
@@ -372,7 +375,7 @@ const ButtonWrapper = styled.div`
   gap: 10px;
 `;
 
-const PurchaseButton = styled.button`
+const PurchaseButton = styled(Link)`
   flex: 2;
   padding: 15px;
   background-color: #ff4d4f;
@@ -382,6 +385,13 @@ const PurchaseButton = styled.button`
   cursor: pointer;
   font-size: 16px;
   font-weight: bold;
+  text-decoration: none;
+  text-align: center;
+  &:hover {
+    background-color: white;
+    color: #ff4d4f;
+    border: 1px solid #ff4d4f;
+  }
 `;
 
 const WishButton = styled.button`
@@ -394,6 +404,10 @@ const WishButton = styled.button`
   cursor: pointer;
   font-size: 16px;
   font-weight: bold;
+  &:hover {
+    background-color: #ff4d4f;
+    color: white;
+  }
 `;
 
 const CommentSection = styled.div`

@@ -12,6 +12,7 @@ import ResetPasswordPage from '../components/pages/login/ResetPasswordPage';
 import TermsPage from '../components/pages/login/TermsPage';
 import ProductPage from '../components/pages/ProductPage/ProductPage';
 import ProductDetail from '../components/pages/ProductDetailPage/ProductDetail';
+import PaymentForm from '../components/pages/PaymentInfoPage/PaymentForm';
 
 const router = createBrowserRouter([
   {
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
       {
         path: '/products/:id',
         element: <ProductDetail />,
+      },
+      {
+        path: '/products/payment/:id',
+        element: <PaymentForm />,
       },
       {
         path: '/community',

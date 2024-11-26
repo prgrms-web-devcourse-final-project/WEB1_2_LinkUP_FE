@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import cart from '../../assets/icons/icon.png';
+import logo from '../../assets/icons/goodbuyus-logo.svg';
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -16,7 +17,7 @@ const Header = () => {
       <HeaderContent>
         {/* 로고 */}
         <Logo>
-          <img src="" alt="로고" />
+          <img src={logo} alt="로고" />
         </Logo>
 
         {/* 네비게이션 바 */}
@@ -82,8 +83,10 @@ const HeaderContent = styled.div`
 
 const Logo = styled.div`
   img {
-    height: 40px;
-    width: auto;
+    margin-top: -10%;
+    margin-left: -25%;
+    height: auto;
+    width: 250px;
   }
 `;
 

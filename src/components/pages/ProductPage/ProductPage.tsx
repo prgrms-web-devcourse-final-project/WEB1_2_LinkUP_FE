@@ -10,8 +10,6 @@ import { Product } from '../HomePage/model/productSchema';
 const ProductPage = () => {
   const [input, setInput] = useState('');
 
-  //페이지네이션
-
   const location = useLocation();
 
   useEffect(() => {
@@ -21,7 +19,6 @@ const ProductPage = () => {
       setInput(category);
     }
   }, []);
-  //   const data = searchProducts(input);
 
   const products = [
     {

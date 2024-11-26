@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { handlePayment } from './api/paymentApi';
 
@@ -16,13 +16,22 @@ const PaymentForm = () => {
     image: 'https://via.placeholder.com/200',
   };
 
+  const navigate = useNavigate();
+  const onPaymentSubmit = async () => {
+    try {
+      await handlePayment();
+      navigate('/payment-success');
+    } catch (e) {
+      alert(`결제에 실패하였습니다 ${e}`);
+    }
+  };
   return (
     <Container>
       <Section>
         <Title>주문 상품 정보</Title>
         <ContentBox>
           <FlexRow>
-            <ProductName>{product.name || '상품명 불러오는 중...'}</ProductName>
+            <ProductName>{product.name}</ProductName>
             <Price>₩{product.discountedPrice.toLocaleString()}</Price>
           </FlexRow>
           <FlexRow>
@@ -78,7 +87,7 @@ const PaymentForm = () => {
       <ButtonGroup>
         <PayButton
           onClick={() => {
-            handlePayment();
+            onPaymentSubmit();
           }}
         >
           결제하기

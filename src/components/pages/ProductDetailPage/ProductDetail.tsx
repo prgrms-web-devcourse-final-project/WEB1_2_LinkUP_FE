@@ -241,18 +241,19 @@ const ProductDetail: React.FC = () => {
 
     return () => clearInterval(timer);
   }, []);
+
   const isOutOfStock = product.now >= product.stock;
   const isDeadlinePassed = remainingTime === '마감되었습니다.';
   const isButtonDisabled = isOutOfStock || isDeadlinePassed;
 
   // 구매 비율 계산
   const purchasePercentage = Math.min((product.now / product.stock) * 100, 100);
-
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     if (value > 0) setQuantity(value);
   };
 
+  //댓글 작성
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     //댓글추가 api 호출
@@ -261,7 +262,9 @@ const ProductDetail: React.FC = () => {
     setNewComment('');
   };
 
+  //남은 재고
   const least = product.minimum - product.now;
+
   return (
     <Container>
       <ContentWrapper>

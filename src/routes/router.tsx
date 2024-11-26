@@ -17,6 +17,7 @@ import SetNicknamePage from '../components/pages/login/SetNicknamePage';
 import SetProfilePage from '../components/pages/login/SetProfilePage';
 import LoginCompletePage from '../components/pages/login/LoginCompletePage';
 import PaymentForm from '../components/pages/Payment/PaymentForm';
+import PaymentSuccessPage from '../components/pages/Payment/PaymentSuccessPage';
 
 const router = createBrowserRouter([
   {
@@ -39,6 +40,10 @@ const router = createBrowserRouter([
       {
         path: '/products/payment/:id',
         element: <PaymentForm />,
+      },
+      {
+        path: '/products/payment-success/:id',
+        element: <PaymentSuccessPage />,
       },
       {
         path: '/community',

@@ -1,5 +1,9 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import {
+  Link,
+  useNavigate,
+  //  useParams
+} from 'react-router-dom';
 import styled from 'styled-components';
 import { handlePayment } from './api/paymentApi';
 
@@ -15,7 +19,40 @@ const PaymentForm = () => {
     discountedPrice: 79.98,
     image: 'https://via.placeholder.com/200',
   };
+  //   const { id } = useParams();
+  //   if (!id) {
+  //     return <p>상품 번호가 유실되었습니다.</p>;
+  //   }
+  //   const {
+  //     data: product,
+  //     isLoading,
+  //     isError,
+  //   } = useQuery<Product, Error>({
+  //     queryKey: ['product', id],
+  //     queryFn: () => getProductbyId(id),
+  //   });
+  //   // 로딩 상태 처리
+  //   if (isLoading) {
+  //     return (
+  //       <Container>
+  //         <SuccessSection>
+  //           <Title>상품 정보 로딩 중...</Title>
+  //         </SuccessSection>
+  //       </Container>
+  //     );
+  //   }
 
+  //   // 에러 상태 처리
+  //   if (isError) {
+  //     return (
+  //       <Container>
+  //         <SuccessSection>
+  //           <Title>상품 정보를 불러오지 못했습니다.</Title>
+  //           <Subtitle>잠시 후 다시 시도해주세요.</Subtitle>
+  //         </SuccessSection>
+  //       </Container>
+  //     );
+  //   }
   const navigate = useNavigate();
   const onPaymentSubmit = async () => {
     try {

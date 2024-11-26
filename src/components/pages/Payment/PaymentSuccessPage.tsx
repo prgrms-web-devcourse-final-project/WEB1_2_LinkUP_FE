@@ -23,7 +23,7 @@ const PaymentSuccessPage = () => {
   //     isLoading,
   //     isError,
   //   } = useQuery<Product, Error>({
-  //     queryKey: ['product', '1'],
+  //     queryKey: ['product', id],
   //     queryFn: () => getProductbyId(id),
   //   });
   //   // 로딩 상태 처리

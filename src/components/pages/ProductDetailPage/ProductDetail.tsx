@@ -9,34 +9,40 @@ import { addComment } from './api/CommentApi';
 // import { useQuery } from '@tanstack/react-query';
 
 const ProductDetail: React.FC = () => {
-  //   const { id } = useParams<{ id: string }>();
-
+  //   const { id } = useParams();
+  //   if (!id) {
+  //     return <p>상품 번호가 유실되었습니다.</p>;
+  //   }
   //   const {
   //     data: product,
   //     isLoading,
   //     isError,
-  //     error,
-  //   } = useQuery({
+  //   } = useQuery<Product, Error>({
   //     queryKey: ['product', id],
-  //     queryFn: async () => {
-  //       if (!id) throw new Error('ID가 없습니다');
-  //       return await getProductbyId(id);
-  //     },
-  //     enabled: !!id,
+  //     queryFn: () => getProductbyId(id),
   //   });
-
-  //   if (isLoading) return <p>로딩 중...</p>;
-  //   if (isError) {
+  //   // 로딩 상태 처리
+  //   if (isLoading) {
   //     return (
-  //       <p>
-  //         {error instanceof Error
-  //           ? error.message
-  //           : '상품 정보를 불러오는 데 실패했습니다.'}
-  //       </p>
+  //       <Container>
+  //         <SuccessSection>
+  //           <Title>상품 정보 로딩 중...</Title>
+  //         </SuccessSection>
+  //       </Container>
   //     );
   //   }
 
-  //   if (!product) return null;
+  //   // 에러 상태 처리
+  //   if (isError) {
+  //     return (
+  //       <Container>
+  //         <SuccessSection>
+  //           <Title>상품 정보를 불러오지 못했습니다.</Title>
+  //           <Subtitle>잠시 후 다시 시도해주세요.</Subtitle>
+  //         </SuccessSection>
+  //       </Container>
+  //     );
+  //   }
   const [quantity, setQuantity] = useState(1);
   const [newComment, setNewComment] = useState('');
   const [newCommentStar, setNewCommentStar] = useState(5);

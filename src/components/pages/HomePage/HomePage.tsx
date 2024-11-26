@@ -41,6 +41,8 @@ const HomePage: React.FC = () => {
     category: '전자제품',
     originalPrice: 95.5,
     discountedPrice: 79.98,
+    description:
+      '최고의 성능을 가진 드라이기 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구',
     image: 'https://via.placeholder.com/200',
     comments: [
       {

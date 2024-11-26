@@ -10,6 +10,7 @@ export interface Product {
   discountedPrice: number;
   image: string;
   category: string;
+  // description: string;
   comments: Comment[];
   likes: boolean;
 }

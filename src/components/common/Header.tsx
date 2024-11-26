@@ -17,7 +17,9 @@ const Header = () => {
       <HeaderContent>
         {/* 로고 */}
         <Logo>
-          <img src={logo} alt="로고" />
+          <Link to="/">
+            <img src={logo} alt="로고" />
+          </Link>
         </Logo>
 
         {/* 네비게이션 바 */}

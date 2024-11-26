@@ -5,6 +5,7 @@ import NotFoundPage from './NotFoundPage';
 import HomePage from '../components/pages/HomePage/HomePage';
 import CategoryBasedPostsPage from '../components/pages/community/CategoryBasedPostsPage';
 import PostCreatePage from '../components/pages/community/PostCreatePage';
+import PostDetailPage from '../components/pages/community/PostDetailPage';
 import Layout from '../components/common/Layout';
 import SignInPage from '../components/pages/login/SignInPage';
 import SignUpPage from '../components/pages/login/SignUpPage';
@@ -25,7 +26,6 @@ import SetNicknamePage from '../components/pages/login/SetNicknamePage';
 import SetProfilePage from '../components/pages/login/SetProfilePage';
 import LoginCompletePage from '../components/pages/login/LoginCompletePage';
 import PaymentForm from '../components/pages/Payment/PaymentForm';
-
 
 const router = createBrowserRouter([
   {
@@ -56,6 +56,10 @@ const router = createBrowserRouter([
       {
         path: '/community/create',
         element: <PostCreatePage />,
+      },
+      {
+        path: '/community/posts/:postId',
+        element: <PostDetailPage />,
       },
       {
         path: '/mypage',

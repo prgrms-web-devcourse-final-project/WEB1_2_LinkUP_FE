@@ -83,6 +83,11 @@ const PostList = ({ selectedCategory }: { selectedCategory: string }) => {
     navigate('/community/create', { state: { selectedCategory } }); // 카테고리 정보 전달
   };
 
+  // 포스트 클릭 핸들러
+  const handlePostClick = (postId: string) => {
+    navigate(`/community/posts/${postId}`);
+  };
+
   return (
     <Container>
       <ActionsContainer>
@@ -110,12 +115,15 @@ const PostList = ({ selectedCategory }: { selectedCategory: string }) => {
         </NoPostMessage>
       ) : (
         currentPosts.map((post) => (
-          <PostItem key={post.postId}>
+          <PostItem
+            key={post.postId}
+            onClick={() => handlePostClick(post.postId)} // 포스트 클릭 시 상세 조회로 이동
+          >
             <PostImage src={post.images[0]} alt={post.title} />
             <PostContent>
               <PostTitle>{post.title}</PostTitle>
               <PostDetails>
-                <PostAuthor>{post.authorId}</PostAuthor>
+                <PostAuthor>{post.authorNickname}</PostAuthor>
                 <PostDate>
                   <PostCreatedAt>
                     {new Date(post.createdAt).toLocaleString('ko-KR', {
@@ -186,6 +194,7 @@ const PostItem = styled.div`
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
+  cursor: pointer;
 
   &:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);

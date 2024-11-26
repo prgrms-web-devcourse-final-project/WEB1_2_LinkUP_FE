@@ -148,8 +148,22 @@ const PostCreatePage = () => {
 
   const handleRemoveImage = () => {
     if (currentIndex >= 0) {
-      setImages((prev) => prev.filter((_, i) => i !== currentIndex));
-      setCurrentIndex((prev) => Math.max(prev - 1, -1)); // 이전 이미지로 이동
+      setImages((prev) => {
+        const updatedImages = prev.filter((_, i) => i !== currentIndex);
+
+        // 다음 이미지 또는 이전 이미지로 이동
+        if (updatedImages.length > 0) {
+          const nextIndex =
+            currentIndex >= updatedImages.length
+              ? currentIndex - 1
+              : currentIndex;
+          setCurrentIndex(nextIndex); // 다음 이미지가 없으면 이전 이미지로 이동
+        } else {
+          setCurrentIndex(-1); // 모든 이미지가 제거되었을 때 AddImageButton으로 이동
+        }
+
+        return updatedImages;
+      });
     }
   };
 
@@ -200,6 +214,15 @@ const PostCreatePage = () => {
               {/* 이미지 업로드 섹션 */}
               <ImageUploadContainer>
                 <ImagePreviewWrapper>
+                  <PreviousButtonWrapper>
+                    {images.length > 0 &&
+                      (currentIndex > 0 || currentIndex === -1) && (
+                        <PreviousButton onClick={handlePreviousImage}>
+                          <FaAngleLeft size={20} />
+                        </PreviousButton>
+                      )}
+                  </PreviousButtonWrapper>
+
                   {currentIndex === -1 ? (
                     <AddImageButton>
                       <FaPlusCircle size={30} />
@@ -219,9 +242,19 @@ const PostCreatePage = () => {
                       </RemoveImageButton>
                     </ImagePreview>
                   )}
+
+                  <NextButtonWrapper>
+                    {images.length > 0 && currentIndex !== -1 && (
+                      <NextButton onClick={handleNextImage}>
+                        <FaAngleRight size={20} />
+                      </NextButton>
+                    )}
+                  </NextButtonWrapper>
                 </ImagePreviewWrapper>
-                {images.length > 0 && (
-                  <>
+
+                {/* PaginationDots */}
+                <PaginationDotsWrapper>
+                  {images.length > 0 && (
                     <PaginationDots>
                       {images.map((_, index) => (
                         <span
@@ -231,19 +264,9 @@ const PostCreatePage = () => {
                         />
                       ))}
                     </PaginationDots>
-                    {currentIndex !== -1 && (
-                      <NextButton onClick={handleNextImage}>
-                        <FaAngleRight size={20} />
-                      </NextButton>
-                    )}
-                    {(currentIndex > 0 ||
-                      (currentIndex === -1 && images.length > 0)) && (
-                      <PreviousButton onClick={handlePreviousImage}>
-                        <FaAngleLeft size={20} />
-                      </PreviousButton>
-                    )}
-                  </>
-                )}
+                  )}
+                </PaginationDotsWrapper>
+
                 <UrlInputContainer>
                   <Label htmlFor="urlInput">URL 주소</Label>
                   <URLInput
@@ -406,37 +429,39 @@ const ImageUploadContainer = styled.div`
   flex-direction: column;
   align-items: center;
   width: 490px;
-  height: 414px; /* 고정된 높이 설정 */
+  height: 470px; /* 고정된 높이 설정 */
   border: 1px solid #ccc;
   border-radius: 10px;
-  padding: 20px;
+  padding: 20px 11px;
   position: relative;
   box-sizing: border-box; /* 패딩과 보더 포함한 크기 계산 */
 `;
 
 const ImagePreviewWrapper = styled.div`
   display: flex;
-  align-items: center; /* 수직 정렬 */
-  justify-content: center;
+  justify-content: space-between; /* 좌우 버튼 공간 확보 */
+  align-items: center; /* 수직 중앙 정렬 */
   width: 100%;
   height: 320px; /* 기준 높이 */
   position: relative; /* 자식 요소 위치 기준 */
+  overflow: hidden; /* 높이를 벗어난 콘텐츠 숨김 */
 `;
 
 const ImagePreview = styled.div`
+  flex: 1; /* 이미지 영역이 버튼 사이에 위치 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 400px;
   height: 100%;
   border: 1px solid #ccc;
   border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  overflow: hidden; /* 콘텐츠가 영역을 벗어나지 않도록 */
 
   img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    max-width: 100%; /* 부모 너비를 넘지 않도록 */
+    max-height: 100%; /* 부모 높이를 넘지 않도록 */
+    object-fit: contain; /* 비율을 유지하며 부모 크기 안에 맞춤 */
   }
 `;
 
@@ -445,7 +470,6 @@ const AddImageButton = styled.label`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
   font-size: 1.2rem;
   color: #555;
   cursor: pointer;
@@ -470,30 +494,47 @@ const RemoveImageButton = styled.button`
   z-index: 1;
 `;
 
-const NextButton = styled.button`
-  position: absolute;
-  top: calc(50% - 40px);
-  right: 10px;
+const PreviousButtonWrapper = styled.div`
+  flex: 0 0 32px; /* 버튼 고정 너비 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%; /* PreviewWrapper의 높이에 맞춤 */
+`;
+
+const NextButtonWrapper = styled.div`
+  flex: 0 0 32px; /* 버튼 고정 너비 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%; /* PreviewWrapper의 높이에 맞춤 */
+`;
+
+const PreviousButton = styled.button`
   background: none;
   border: none;
   color: #333;
   cursor: pointer;
 `;
 
-const PreviousButton = styled.button`
-  position: absolute;
-  top: calc(50% - 40px);
-  left: 10px;
+const NextButton = styled.button`
   background: none;
   border: none;
   color: #333;
   cursor: pointer;
+`;
+
+const PaginationDotsWrapper = styled.div`
+  width: 100%;
+  height: 54px; /* 높이 설정 */
+  display: flex; /* 플렉스 박스로 변경 */
+  align-items: center; /* 세로 중앙 정렬 */
+  justify-content: center; /* 가로 중앙 정렬 */
 `;
 
 const PaginationDots = styled.div`
   display: flex;
   justify-content: center;
-  margin-top: 10px;
   gap: 5px;
 
   span {
@@ -541,7 +582,7 @@ const DetailsAndInfoContainer = styled.div`
   align-items: flex-start; /* 왼쪽 정렬 */
   justify-content: space-between; /* 위아래 요소 간격 균등 */
   width: 490px;
-  height: 414px; /* ImageUploadContainer와 동일한 고정 높이 */
+  height: 470px; /* ImageUploadContainer와 동일한 고정 높이 */
   flex-grow: 1; /* 가로 공간을 균등 분배 */
   border: 1px solid #ccc;
   border-radius: 10px;
@@ -552,7 +593,7 @@ const DetailsAndInfoContainer = styled.div`
 const DetailsContainer = styled.div`
   display: flex;
   flex-direction: column; /* 세로 정렬 */
-  gap: 20px; /* 컴포넌트 간 간격 */
+  gap: 50px; /* 컴포넌트 간 간격 */
   width: 100%;
 `;
 

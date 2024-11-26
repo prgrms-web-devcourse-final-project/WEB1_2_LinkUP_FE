@@ -1,13 +1,6 @@
 import axiosInstance from '../../../../api/axiosInstance';
-export type Product = {
-  id: string;
-  name: string;
-  stars: number;
-  originalPrice: number;
-  discountedPrice: number;
-  image: string;
-  category: string;
-};
+import { Product } from '../model/productSchema';
+
 export const getProducts = async (): Promise<Product[]> => {
   try {
     const URL = `/products`;

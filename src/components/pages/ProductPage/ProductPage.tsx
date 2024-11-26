@@ -2,11 +2,16 @@ import React, { useEffect, useState } from 'react';
 import InputComponent from '../ProductPage/InputComponent';
 import ProductComponent from '../ProductPage/ProductComponent';
 import styled from 'styled-components';
-import { Product } from '../HomePage/api/productApi';
+
 import { useLocation } from 'react-router-dom';
+import ScrollToTopButton from '../../common/ScrollToTopButton';
+import { Product } from '../HomePage/model/productSchema';
 
 const ProductPage = () => {
   const [input, setInput] = useState('');
+
+  //페이지네이션
+
   const location = useLocation();
 
   useEffect(() => {
@@ -17,6 +22,7 @@ const ProductPage = () => {
     }
   }, []);
   //   const data = searchProducts(input);
+
   const products = [
     {
       id: '1',
@@ -26,6 +32,8 @@ const ProductPage = () => {
       discountedPrice: 79.98,
       image: 'https://via.placeholder.com/200',
       category: '전자제품',
+      comments: [],
+      likes: false,
     },
     {
       id: '2',
@@ -35,6 +43,8 @@ const ProductPage = () => {
       discountedPrice: 199.99,
       image: 'https://via.placeholder.com/200',
       category: '전자제품',
+      comments: [{ comment: '좋아요!' }],
+      likes: false,
     },
     {
       id: '3',
@@ -44,6 +54,8 @@ const ProductPage = () => {
       discountedPrice: 39.99,
       image: 'https://via.placeholder.com/200',
       category: '전자제품',
+      comments: [{ comment: '좋은 제품이에요!' }, { comment: '가성비 최고!' }],
+      likes: false,
     },
     {
       id: '4',
@@ -53,6 +65,12 @@ const ProductPage = () => {
       discountedPrice: 259.99,
       image: 'https://via.placeholder.com/200',
       category: '전자제품',
+      comments: [
+        { comment: '화질 좋아요!' },
+        { comment: '디자인이 예뻐요!' },
+        { comment: '조금 무겁지만 괜찮아요.' },
+      ],
+      likes: false,
     },
     {
       id: '5',
@@ -62,6 +80,8 @@ const ProductPage = () => {
       discountedPrice: 999.99,
       image: 'https://via.placeholder.com/200',
       category: '전자제품',
+      comments: [],
+      likes: false,
     },
     {
       id: '6',
@@ -71,6 +91,8 @@ const ProductPage = () => {
       discountedPrice: 299.99,
       image: 'https://via.placeholder.com/200',
       category: '전자제품',
+      comments: [{ comment: '아이들이 너무 좋아해요!' }],
+      likes: true,
     },
     {
       id: '7',
@@ -80,6 +102,8 @@ const ProductPage = () => {
       discountedPrice: 4.5,
       image: 'https://via.placeholder.com/200',
       category: '식료품',
+      comments: [],
+      likes: false,
     },
     {
       id: '8',
@@ -89,6 +113,8 @@ const ProductPage = () => {
       discountedPrice: 12.99,
       image: 'https://via.placeholder.com/200',
       category: '식료품',
+      comments: [{ comment: '맛있어요!' }],
+      likes: false,
     },
     {
       id: '9',
@@ -98,6 +124,12 @@ const ProductPage = () => {
       discountedPrice: 2.5,
       image: 'https://via.placeholder.com/200',
       category: '식료품',
+      comments: [
+        { comment: '항상 먹는 맛!' },
+        { comment: '간편해서 좋아요.' },
+        { comment: '가격 대비 최고!' },
+      ],
+      likes: true,
     },
     {
       id: '10',
@@ -107,6 +139,8 @@ const ProductPage = () => {
       discountedPrice: 99.99,
       image: 'https://via.placeholder.com/200',
       category: '생활용품',
+      comments: [],
+      likes: true,
     },
     {
       id: '11',
@@ -116,6 +150,8 @@ const ProductPage = () => {
       discountedPrice: 15.99,
       image: 'https://via.placeholder.com/200',
       category: '생활용품',
+      comments: [{ comment: '실용적이에요.' }],
+      likes: false,
     },
     {
       id: '12',
@@ -125,6 +161,11 @@ const ProductPage = () => {
       discountedPrice: 45.99,
       image: 'https://via.placeholder.com/200',
       category: '생활용품',
+      comments: [
+        { comment: '조명이 예뻐요.' },
+        { comment: '편안한 분위기를 만들어줘요.' },
+      ],
+      likes: false,
     },
     {
       id: '13',
@@ -134,6 +175,12 @@ const ProductPage = () => {
       discountedPrice: 16.99,
       image: 'https://via.placeholder.com/200',
       category: '패션/의류',
+      comments: [
+        { comment: '편안해요.' },
+        { comment: '디자인이 마음에 들어요.' },
+        { comment: '색상이 예뻐요.' },
+      ],
+      likes: false,
     },
     {
       id: '14',
@@ -143,6 +190,8 @@ const ProductPage = () => {
       discountedPrice: 35.99,
       image: 'https://via.placeholder.com/200',
       category: '패션/의류',
+      comments: [],
+      likes: false,
     },
     {
       id: '15',
@@ -152,6 +201,11 @@ const ProductPage = () => {
       discountedPrice: 99.99,
       image: 'https://via.placeholder.com/200',
       category: '패션/의류',
+      comments: [
+        { comment: '디자인 최고!' },
+        { comment: '가죽이 고급스러워요.' },
+      ],
+      likes: true,
     },
     {
       id: '16',
@@ -161,6 +215,12 @@ const ProductPage = () => {
       discountedPrice: 199.99,
       image: 'https://via.placeholder.com/200',
       category: '가구/인테리어',
+      comments: [
+        { comment: '튼튼해요.' },
+        { comment: '디자인이 멋져요.' },
+        { comment: '조립이 쉬워요.' },
+      ],
+      likes: true,
     },
     {
       id: '17',
@@ -170,6 +230,8 @@ const ProductPage = () => {
       discountedPrice: 129.99,
       image: 'https://via.placeholder.com/200',
       category: '가구/인테리어',
+      comments: [],
+      likes: false,
     },
     {
       id: '18',
@@ -179,6 +241,11 @@ const ProductPage = () => {
       discountedPrice: 99.99,
       image: 'https://via.placeholder.com/200',
       category: '가구/인테리어',
+      comments: [
+        { comment: '스타일리시해요.' },
+        { comment: '높이가 딱 좋아요.' },
+      ],
+      likes: true,
     },
     {
       id: '19',
@@ -188,6 +255,12 @@ const ProductPage = () => {
       discountedPrice: 25.99,
       image: 'https://via.placeholder.com/200',
       category: '유아/아동용품',
+      comments: [
+        { comment: '아기가 잘 사용해요.' },
+        { comment: '흡수력이 좋아요.' },
+        { comment: '가격이 저렴해요.' },
+      ],
+      likes: true,
     },
     {
       id: '20',
@@ -197,6 +270,8 @@ const ProductPage = () => {
       discountedPrice: 39.99,
       image: 'https://via.placeholder.com/200',
       category: '유아/아동용품',
+      comments: [],
+      likes: true,
     },
   ];
 
@@ -216,6 +291,7 @@ const ProductPage = () => {
         <Container>
           <ProductComponent input={input} products={filtered} />
         </Container>
+        <ScrollToTopButton />
       </ContainerBox>
     </>
   );

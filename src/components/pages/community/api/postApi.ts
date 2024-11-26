@@ -17,7 +17,20 @@ export const defaultPost: Post = {
   updatedAt: '',
   currentQuantity: 0,
   participants: [],
+  comments: [],
 };
+
+// Comment 데이터 타입 정의(클라이언트에서 Comment 생성)
+export type CommentData = {
+  userId: string; // 댓글 작성자 ID
+  createdAt: string; // 댓글 생성일 (ISO 형식)
+  content: string; // 댓글 내용
+};
+
+// Comment 타입 정의(서버에서 받아온 Comment 데이터)
+export interface Comment extends CommentData {
+  commentId: string; // 댓글 고유 ID
+}
 
 // Participant 데이터 타입 정의
 export type Participant = {
@@ -48,6 +61,7 @@ export interface Post extends PostData {
   updatedAt: string; // 수정일 (ISO 형식)
   currentQuantity: number; // 현재 참여 현황
   participants: Participant[]; // 참여자 목록
+  comments: Comment[]; // 댓글 목록
 }
 
 // Post 생성 API
@@ -84,7 +98,6 @@ export const getPosts = async (
 // 특정 포스트 가져오기
 export const fetchPostById = async (postId: string): Promise<Post> => {
   try {
-    // 실제 API 요청 코드
     const response = await axiosInstance.get<Post>(`/api/posts/${postId}`);
     return {
       ...response.data,
@@ -138,5 +151,51 @@ export const cancelJoinPost = async (
   } catch (error) {
     console.error('참여 취소 중 오류 발생:', error);
     throw new Error('참여 취소에 실패했습니다.');
+  }
+};
+
+// 댓글 작성
+export const addComment = async (
+  postId: string,
+  userId: string,
+  content: string
+): Promise<void> => {
+  try {
+    await axiosInstance.post(`/api/posts/${postId}/comments`, {
+      userId,
+      content,
+    });
+  } catch (error) {
+    console.error('댓글 추가 중 오류 발생:', error);
+    throw new Error('댓글 추가에 실패했습니다.');
+  }
+};
+
+// 댓글 삭제
+export const deleteComment = async (
+  postId: string,
+  commentId: string
+): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/api/posts/${postId}/comments/${commentId}`);
+  } catch (error) {
+    console.error('댓글 삭제 중 오류 발생:', error);
+    throw new Error('댓글 삭제에 실패했습니다.');
+  }
+};
+
+// 댓글 수정
+export const updateComment = async (
+  postId: string,
+  commentId: string,
+  content: string
+): Promise<void> => {
+  try {
+    await axiosInstance.put(`/api/posts/${postId}/comments/${commentId}`, {
+      content,
+    });
+  } catch (error) {
+    console.error('댓글 수정 중 오류 발생:', error);
+    throw new Error('댓글 수정에 실패했습니다.');
   }
 };

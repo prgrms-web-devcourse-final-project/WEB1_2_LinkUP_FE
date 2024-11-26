@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Post, defaultPost } from './api/postApi';
-// import { fetchPostById, deletePostsById, joinPost, cancelJoinPost, Post } from './api/postApi'; // 실제 API 사용 관련 주석 처리
+// import { fetchPostById, deletePostsById, joinPost, cancelJoinPost, addComment, deleteComment, updateComment, Post } from './api/postApi'; // 실제 API 사용 관련 주석 처리
 import { mockCommunityPosts } from '../../../mocks/communityPosts';
 import {
   FaBackspace,
@@ -24,6 +24,9 @@ const PostDetailPage = () => {
   const [isAuthor, setIsAuthor] = useState(false); // 현재 사용자가 작성자인지 여부
   const [currentIndex, setCurrentIndex] = useState(0);
   const [remainingTime, setRemainingTime] = useState<string>('');
+  const [newCommentContent, setNewCommentContent] = useState<string>(''); // 댓글 입력 필드
+  const [editCommentId, setEditCommentId] = useState<string | null>(null); // 수정 중인 댓글 ID
+  const [editContent, setEditContent] = useState<string>(''); // 수정 중인 댓글 내용
 
   useEffect(() => {
     if (!postId) {
@@ -203,13 +206,116 @@ const PostDetailPage = () => {
     }
   };
 
+  // 댓글 작성
+  const handleAddComment = async () => {
+    if (!newCommentContent.trim()) {
+      alert('댓글을 입력해주세요.');
+      return;
+    }
+    if (newCommentContent.length > 300) {
+      alert('댓글은 최대 300자까지만 입력 가능합니다.');
+      return;
+    }
+
+    // // 실제 API 적용 예상
+    // try {
+    //     // 댓글 추가 API 호출
+    //     await addComment(postId!, currentUserId, newCommentContent);
+
+    //     // 작성된 댓글 확인을 위해 게시물 데이터를 다시 가져옴
+    //     const updatedPost = await fetchPostById(postId!);
+
+    //     // 새롭게 가져온 댓글 목록으로 상태 업데이트
+    //     setPost((prev) => ({
+    //       ...prev,
+    //       comments: updatedPost.comments, // 최신 댓글 목록으로 업데이트
+    //     }));
+
+    //     setNewCommentContent(''); // 입력 필드 초기화
+    //   } catch (error) {
+    //     console.error('댓글 추가 또는 업데이트 중 오류 발생:', error);
+    //     alert('댓글 추가에 실패했습니다. 다시 시도해주세요.');
+    //   }
+    // };
+
+    try {
+      const newComment = {
+        userId: currentUserId,
+        createdAt: new Date().toISOString(),
+        content: newCommentContent,
+      };
+      setPost((prev) => ({
+        ...prev,
+        comments: [...prev.comments, newComment],
+      }));
+      setNewCommentContent(''); // 입력 필드 초기화
+    } catch (error) {
+      console.error('댓글 추가 중 오류:', error);
+      alert('댓글 추가에 실패했습니다.');
+    }
+  };
+
+  // 댓글 삭제
+  const handleDeleteComment = async (commentId: string) => {
+    if (!window.confirm('이 댓글을 삭제하시겠습니까?')) return;
+
+    try {
+      // await deleteComment(postId!, commentId); // 실제 API 호출
+      setPost((prev) => ({
+        ...prev,
+        comments: prev.comments.filter(
+          (comment) => comment.commentId !== commentId
+        ),
+      }));
+    } catch (error) {
+      console.error('댓글 삭제 중 오류:', error);
+      alert('댓글 삭제에 실패했습니다.');
+    }
+  };
+
+  // 댓글 수정
+  const handleEditComment = (commentId: string, content: string) => {
+    setEditCommentId(commentId); // 수정할 댓글 ID 설정
+    setEditContent(content); // 현재 댓글 내용 불러오기
+  };
+
+  const handleUpdateComment = async () => {
+    if (!editContent.trim()) {
+      alert('수정할 댓글 내용을 입력하세요.');
+      return;
+    }
+
+    if (editContent.length > 300) {
+      alert('댓글은 최대 300자까지만 입력 가능합니다.');
+      return;
+    }
+
+    try {
+      // await updateComment(postId!, editCommentId!, editContent); // 실제 API 호출
+      // const updatedPost = await fetchPostById(postId!); // 수정된 댓글 포함된 새 데이터 조회
+      setPost((prev) => ({
+        ...prev,
+        comments: prev.comments.map((comment) =>
+          comment.commentId === editCommentId
+            ? { ...comment, content: editContent }
+            : comment
+        ),
+      }));
+      setEditCommentId(null); // 수정 모드 해제
+      setEditContent(''); // 입력 필드 초기화
+    } catch (error) {
+      console.error('댓글 수정 중 오류:', error);
+      alert('댓글 수정에 실패했습니다.');
+    }
+  };
+
   if (!post) return <div>Loading...</div>;
 
   return (
     <PostDetailContainer>
       <ContentWrapper>
         <Header>
-          <Title>{post.title}</Title>
+          <Title>공구 모집 및 진행</Title>
           <HeaderWrapper>
             <BackButton onClick={() => navigate(-1)}>
               <FaBackspace size={24} />
@@ -277,8 +383,10 @@ const PostDetailPage = () => {
               </PaginationDotsWrapper>
 
               <UrlContainer>
-                <Label htmlFor="urlInput">URL 주소</Label>
-                <Url>{post.url}</Url>
+                <UrlWrapper>
+                  <Label htmlFor="urlInput">URL 주소</Label>
+                  <Url>{post.url}</Url>
+                </UrlWrapper>
               </UrlContainer>
             </ImageContainer>
 
@@ -359,6 +467,86 @@ const PostDetailPage = () => {
           <TextAreaWrapper>
             <TextArea readOnly value={post.content} />
           </TextAreaWrapper>
+
+          {/* 댓글 컨테이너 */}
+          <CommentsContainer>
+            <CommentsHeader>댓글</CommentsHeader>
+            <CommentsWrapper>
+              {post.comments.map((comment) => (
+                <Comments key={comment.commentId}>
+                  <CommentHeader>
+                    <CommentAuthor>{comment.userId}</CommentAuthor>
+                    <CommentDate>
+                      {new Date(comment.createdAt).toLocaleString()}
+                    </CommentDate>
+                  </CommentHeader>
+                  {editCommentId === comment.commentId ? (
+                    // 수정 모드: 확인 및 취소 버튼만 표시
+                    <EditCommentContainer>
+                      <EditCommentInput
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        maxLength={300} // 브라우저에서 강제 제한
+                      />
+                      <ActionButtonsWrapper>
+                        <CharacterCount overLimit={editContent.length > 300}>
+                          ({editContent.length}/300)
+                        </CharacterCount>
+                        <ActionButton onClick={handleUpdateComment}>
+                          확인
+                        </ActionButton>
+                        <ActionButton onClick={() => setEditCommentId(null)}>
+                          취소
+                        </ActionButton>
+                      </ActionButtonsWrapper>
+                    </EditCommentContainer>
+                  ) : (
+                    // 일반 모드: 수정 및 삭제 버튼만 표시
+                    <>
+                      <CommentContent>{comment.content}</CommentContent>
+                      {comment.userId === currentUserId && (
+                        <CommentActions>
+                          <EditCommentButton
+                            onClick={() =>
+                              handleEditComment(
+                                comment.commentId,
+                                comment.content
+                              )
+                            }
+                          >
+                            수정
+                          </EditCommentButton>
+                          <DeleteCommentButton
+                            onClick={() =>
+                              handleDeleteComment(comment.commentId)
+                            }
+                          >
+                            삭제
+                          </DeleteCommentButton>
+                        </CommentActions>
+                      )}
+                    </>
+                  )}
+                </Comments>
+              ))}
+              <CommentInputContainer>
+                <CommentInput
+                  value={newCommentContent}
+                  onChange={(e) => setNewCommentContent(e.target.value)}
+                  placeholder="댓글 내용을 입력해주세요."
+                  maxLength={300} // 브라우저에서 강제 제한
+                />
+                <ActionButtonsWrapper>
+                  <CharacterCount overLimit={newCommentContent.length > 300}>
+                    ({newCommentContent.length}/300)
+                  </CharacterCount>
+                  <SubmitCommentButton onClick={handleAddComment}>
+                    작성
+                  </SubmitCommentButton>
+                </ActionButtonsWrapper>
+              </CommentInputContainer>
+            </CommentsWrapper>
+          </CommentsContainer>
         </FormContainer>
       </ContentWrapper>
     </PostDetailContainer>
@@ -387,6 +575,8 @@ const Header = styled.div`
 `;
 
 const HeaderWrapper = styled.div`
+  width: 1000px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -536,20 +726,24 @@ const PaginationDots = styled.div`
 
 const UrlContainer = styled.div`
   margin-top: 15px;
+  margin-left: 50px;
   display: flex;
-  align-items: center;
+  align-items: center; /* 세로로 가운데 정렬 */
   width: 100%;
-  gap: 10px;
+`;
 
-  label {
-    font-weight: bold;
-  }
+const UrlWrapper = styled.div`
+  display: flex;
+  align-items: center; /* Label과 Url을 같은 높이에 배치 */
+  gap: 10px; /* Label과 Url 사이 간격 */
+  padding: 10px;
+  border: none;
 `;
 
 const Url = styled.div`
   flex: 1;
   padding: 10px;
-  border: 1px none;
+  border: none;
   border-radius: 5px;
 `;
 
@@ -644,12 +838,13 @@ const Quantity = styled.div`
 
 const TextAreaWrapper = styled.div`
   width: 100%;
-  max-width: 1100px;
+  max-width: 1000px;
   margin: 0 auto;
   border: 1px solid #ccc;
   border-radius: 10px;
   padding: 20px;
   margin-bottom: 20px;
+  box-sizing: border-box;
 `;
 
 const TextArea = styled.textarea`
@@ -680,4 +875,170 @@ const ActionButton = styled.button<{ primary?: boolean }>`
   border: 1px solid #000;
   border-radius: 5px;
   cursor: pointer;
+`;
+
+const CommentsContainer = styled.div`
+  width: 1000px;
+  margin: 0 auto;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+`;
+
+const CommentsHeader = styled.h3`
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-left: 40px;
+  margin-bottom: 0;
+`;
+
+const CommentsWrapper = styled.ul`
+  list-style: none;
+  padding: 20px;
+  margin: 0;
+`;
+
+const Comments = styled.li`
+  margin-bottom: 15px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+`;
+
+const CommentHeader = styled.div`
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  margin-bottom: 10px;
+`;
+
+const CommentAuthor = styled.div`
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #ccc;
+    margin-right: 8px;
+  }
+`;
+
+const CommentDate = styled.span`
+  margin-left: 20px;
+  font-size: 0.9rem;
+  color: #666;
+`;
+
+const CommentContent = styled.p`
+  margin: 10px 0;
+  font-size: 1rem;
+  color: #333;
+  word-wrap: break-word;
+`;
+
+const CommentActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+`;
+
+const EditCommentContainer = styled.div`
+  display: flex;
+  flex-direction: column; /* 세로 배치 */
+  gap: 10px; /* EditCommentInput과 ActionButtonsWrapper 간격 */
+`;
+
+interface CharacterCountProps {
+  overLimit?: boolean;
+}
+
+const CharacterCount = styled.span<CharacterCountProps>`
+  font-size: 0.9rem;
+  color: ${(props) =>
+    props.overLimit ? 'red' : '#666'}; /* 300자를 초과하면 빨간색 */
+  margin-right: 10px; /* 버튼과 간격 */
+`;
+
+const EditCommentInput = styled.textarea`
+  width: 100%; /* CommentContent와 동일한 너비 */
+  min-height: 60px; /* 기본 높이 */
+  max-height: 120px; /* 최대 높이 */
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #ececec; /* 배경색 설정 */
+  font-size: 1rem; /* 글씨 크기 */
+  line-height: 1.5; /* 줄 간격 */
+  color: #333; /* 글씨 색상 */
+  resize: none; /* 크기 조절 비활성화 */
+  font-family: inherit; /* 기본 글꼴 사용 */
+  box-sizing: border-box; /* 패딩 포함 크기 계산 */
+`;
+
+const EditCommentButton = styled.button`
+  padding: 10px 20px;
+  background: #000;
+  color: #fff;
+  border: 1px solid #000;
+  border-radius: 5px;
+  cursor: pointer;
+`;
+
+const DeleteCommentButton = styled.button`
+  padding: 10px 20px;
+  background: #000;
+  color: #fff;
+  border: 1px solid #000;
+  border-radius: 5px;
+  cursor: pointer;
+`;
+
+const CommentInputContainer = styled.div`
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column; /* 세로 정렬 */
+  gap: 10px; /* 요소 간 간격 */
+  box-sizing: border-box; /* 패딩과 보더를 포함한 크기 계산 */
+`;
+
+const CommentInput = styled.textarea`
+  width: 100%;
+  min-height: 60px;
+  max-height: 120px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #ececec;
+  font-size: 1rem; /* CommentContent와 동일한 글꼴 크기 */
+  color: #333; /* CommentContent와 동일한 텍스트 색상 */
+  resize: none; /* 크기 조절 비활성화 */
+  font-family: inherit;
+  box-sizing: border-box; /* 패딩과 보더를 포함한 너비 계산 */
+`;
+
+const SubmitCommentButton = styled.button`
+  padding: 10px 20px;
+  background: #000;
+  color: #fff;
+  border: 1px solid #000;
+  border-radius: 5px;
+  cursor: pointer;
+  align-self: flex-end; /* 오른쪽 정렬 */
+`;
+
+const ActionButtonsWrapper = styled.div`
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 10px;
 `;

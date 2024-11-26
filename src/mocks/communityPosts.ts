@@ -19,6 +19,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '생활용품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00002',
@@ -38,6 +39,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '생활용품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00003',
@@ -57,6 +59,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '생활용품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00004',
@@ -76,6 +79,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '생활용품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00005',
@@ -95,6 +99,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '생활용품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00006',
@@ -114,6 +119,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '생활용품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00007',
@@ -133,6 +139,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '생활용품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00008',
@@ -152,6 +159,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '생활용품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00009',
@@ -178,6 +186,21 @@ export const mockCommunityPosts: Post[] = [
       { userId: 'user-00002', quantity: 2, isCancelled: false },
       { userId: 'user-00003', quantity: 1, isCancelled: true },
     ],
+    comments: [
+      {
+        userId: 'user-00002',
+        createdAt: '2024-11-26T10:08:10',
+        content: '댓글 내용을 이런식으로 입력했을거라고 가정한다.',
+        commentId: 'comment-00001',
+      },
+      {
+        userId: 'user-00001',
+        createdAt: '2024-11-26T10:10:10',
+        content:
+          '로그인한 사용자가 댓글 내용을 이런식으로 입력했을거라고 가정한다.',
+        commentId: 'comment-00002',
+      },
+    ],
   },
   {
     postId: 'communityPost-000010',
@@ -197,6 +220,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '식료품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-000011',
@@ -216,6 +240,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '식료품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-000012',
@@ -235,6 +260,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '식료품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00013',
@@ -254,6 +280,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '식료품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00014',
@@ -273,6 +300,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '식료품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00015',
@@ -292,6 +320,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '식료품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00016',
@@ -311,6 +340,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '식료품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00017',
@@ -330,6 +360,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '식료품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00018',
@@ -349,6 +380,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '식료품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00019',
@@ -368,6 +400,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '식료품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00020',
@@ -387,6 +420,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '식료품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00021',
@@ -406,6 +440,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '식료품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00022',
@@ -425,6 +460,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '식료품',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00023',
@@ -444,6 +480,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '패션/의류',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00024',
@@ -463,6 +500,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '패션/의류',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00025',
@@ -482,6 +520,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '패션/의류',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00026',
@@ -501,6 +540,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '패션/의류',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00027',
@@ -520,6 +560,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '패션/의류',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00028',
@@ -539,6 +580,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '패션/의류',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00029',
@@ -558,6 +600,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '패션/의류',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00030',
@@ -577,6 +620,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '패션/의류',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00031',
@@ -596,6 +640,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '패션/의류',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00032',
@@ -615,6 +660,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '패션/의류',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00033',
@@ -634,6 +680,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '패션/의류',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00034',
@@ -653,6 +700,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '패션/의류',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00035',
@@ -672,6 +720,7 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '패션/의류',
     participants: [],
+    comments: [],
   },
   {
     postId: 'communityPost-00036',
@@ -691,5 +740,6 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '패션/의류',
     participants: [],
+    comments: [],
   },
 ];

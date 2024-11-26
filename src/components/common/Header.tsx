@@ -124,7 +124,7 @@ const NavItem = styled.li`
 const Login = styled.li`
   background-color: black;
   height: 30px;
-  width: 55px;
+  width: 70px;
   border-radius: 5px;
   overflow: hidden;
 
@@ -133,7 +133,7 @@ const Login = styled.li`
     text-decoration: none;
     display: block;
     text-align: center;
-    margin-top: 2px;
+    margin-top: 4px;
     font-weight: bold;
   }
 

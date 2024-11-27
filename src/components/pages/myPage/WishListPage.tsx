@@ -1,10 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Sidemenu from './SideMenu';
 import GS from './GS';
 import { styled } from 'styled-components';
 import { wishHistoryData } from './mockData';
 
+interface WishState {
+  [key: number]: boolean;
+}
+
+interface Wish {
+  id: number;
+  name: string;
+  quantity: number;
+  price: string;
+}
+
 function WishListPage() {
+  const [wishStates, setWishStates] = useState<WishState>(() =>
+    wishHistoryData.reduce((acc: WishState, wish: Wish) => {
+      acc[wish.id] = true;
+      return acc;
+    }, {})
+  );
+
+  const toggleWish = (id: number): void => {
+    setWishStates((prev: WishState) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
   return (
     <GS.Wrapper>
       <Sidemenu />
@@ -24,7 +49,17 @@ function WishListPage() {
                   </WishDetails>
                 </WishWrapper>
                 <Price>{wish.price}</Price>
-                <Actions>하트</Actions>
+                <Actions>
+                  <HeartIcon
+                    src={
+                      wishStates[wish.id]
+                        ? '/images/wish_on.png'
+                        : '/images/wish.png'
+                    }
+                    onClick={() => toggleWish(wish.id)}
+                    alt="찜하기"
+                  />
+                </Actions>
               </WishItem>
             ))}
           </WishList>
@@ -33,6 +68,17 @@ function WishListPage() {
     </GS.Wrapper>
   );
 }
+
+const HeartIcon = styled.img`
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+`;
 
 const Title = styled.div`
   font-size: 16px;

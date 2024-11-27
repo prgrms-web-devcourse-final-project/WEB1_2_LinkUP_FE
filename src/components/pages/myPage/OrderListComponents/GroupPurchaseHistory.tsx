@@ -25,14 +25,16 @@ const GroupPurchaseHistory = () => {
               <ActionButton>상품 페이지 이동</ActionButton>
               {groupPurchase.status === '공구 완료' && (
                 <>
-                  <ReviewButton>리뷰 작성하기</ReviewButton>
                   <QRCodeButton>QR 코드 확인</QRCodeButton>
+                  <ReviewLink>
+                    <ReviewIcon src="/images/qricon.png" alt="review icon" />
+                    <span>리뷰 작성하기</span>
+                  </ReviewLink>
                 </>
               )}
               {groupPurchase.status === '공구 모집중' && (
                 <>
                   <CancelButton>주문 취소하기</CancelButton>
-                  <QRCodeButton>QR 코드 확인</QRCodeButton>
                 </>
               )}
             </Actions>
@@ -42,12 +44,6 @@ const GroupPurchaseHistory = () => {
     </Container>
   );
 };
-
-const QRCodeButton = styled.div`
-  cursor: pointer;
-  display: inline-flex;
-  justify-content: center;
-`;
 
 const GroupPurchaseWrapper = styled.div`
   display: inline-flex;
@@ -122,33 +118,63 @@ const Actions = styled.div`
 
 const ActionButton = styled.div`
   background: #fff;
-  color: #000;
-  border: 1px solid #000;
+  color: #131118;
+  border: 1px solid #131118;
   padding: 10px 10px;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-`;
-
-const ReviewButton = styled.div`
-  background: black;
-  color: #fff;
-  border: 1px solid #000;
-  padding: 10px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  display: inline-flex;
-  justify-content: center;
+  &:hover {
+    background-color: #131118;
+    color: #fff;
+  }
 `;
 
 const CancelButton = styled.div`
-  background: #dc3545;
-  color: #fff;
-  border: 1px solid #dc3545;
+  background: #fff;
+  color: #ff7262;
+  border: 1px solid #ff7262;
   padding: 10px 10px;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   display: inline-flex;
   justify-content: center;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #ff7262;
+    color: #fff;
+  }
+`;
+
+const ReviewLink = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  margin-top: 8px;
+
+  span {
+    border-bottom: 1px solid #000;
+  }
+`;
+
+const ReviewIcon = styled.img`
+  width: 16px;
+  height: 16px;
+`;
+const QRCodeButton = styled.div`
+  background: #fff;
+  color: #131118;
+  border: 1px solid #131118;
+  padding: 10px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  &:hover {
+    background: #131118;
+    color: #fff;
+  }
 `;
 
 export default GroupPurchaseHistory;

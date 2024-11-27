@@ -26,6 +26,7 @@ import SetNicknamePage from '../components/pages/login/SetNicknamePage';
 import SetProfilePage from '../components/pages/login/SetProfilePage';
 import LoginCompletePage from '../components/pages/login/LoginCompletePage';
 import PaymentForm from '../components/pages/Payment/PaymentForm';
+import PostEditPage from '../components/pages/community/PostEditPage';
 
 const router = createBrowserRouter([
   {
@@ -60,6 +61,10 @@ const router = createBrowserRouter([
       {
         path: '/community/posts/:postId',
         element: <PostDetailPage />,
+      },
+      {
+        path: '/community/posts/:postId/edit',
+        element: <PostEditPage />,
       },
       {
         path: '/mypage',

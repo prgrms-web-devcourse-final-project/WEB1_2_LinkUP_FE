@@ -46,6 +46,7 @@ export type PostData = {
   images: string[]; // 이미지 URL 배열
   category: string; // 카테고리명
   createdAt: string; // 생성일 (ISO 형식)
+  updatedAt: string; // 수정일 (ISO 형식)
   closeAt: string; // 마감일 (ISO 형식)
   requiredQuantity: number; // 필요 수량
   totalPrice: number; // 총 가격
@@ -58,7 +59,6 @@ export interface Post extends PostData {
   postId: string; // 글 고유 ID
   authorId: string; // 작성자 ID
   authorNickname: string; // 작성자 닉네임
-  updatedAt: string; // 수정일 (ISO 형식)
   currentQuantity: number; // 현재 참여 현황
   participants: Participant[]; // 참여자 목록
   comments: Comment[]; // 댓글 목록
@@ -197,5 +197,19 @@ export const updateComment = async (
   } catch (error) {
     console.error('댓글 수정 중 오류 발생:', error);
     throw new Error('댓글 수정에 실패했습니다.');
+  }
+};
+
+// 게시글 수정
+export const updatePost = async (
+  postId: string,
+  postData: PostData
+): Promise<void> => {
+  try {
+    await axiosInstance.put(`/api/posts/${postId}`, postData);
+    console.log(`게시물 ${postId} 수정 성공`);
+  } catch (error) {
+    console.error(`게시물 ${postId} 수정 중 오류 발생:`, error);
+    throw new Error('게시물 수정에 실패했습니다.');
   }
 };

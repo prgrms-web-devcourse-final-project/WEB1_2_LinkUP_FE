@@ -21,7 +21,9 @@ const RefundHistory = () => {
               </RefundDetails>
             </RefundWrapper>
             <Price>{refund.price}</Price>
-            <Actions></Actions>
+            <Actions>
+              <ActionButton>상품 페이지 이동</ActionButton>
+            </Actions>
           </RefundItem>
         ))}
       </RefundList>
@@ -95,6 +97,18 @@ const Price = styled.div`
   font-weight: bold;
 `;
 
+const ActionButton = styled.div`
+  background: #fff;
+  color: #131118;
+  border: 1px solid #131118;
+  padding: 10px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  &:hover {
+    background-color: #131118;
+    color: #fff;
+  }
+`;
 const Actions = styled.div`
   display: flex;
   flex-direction: column;

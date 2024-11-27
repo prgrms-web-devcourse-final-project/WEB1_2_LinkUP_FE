@@ -338,6 +338,7 @@ const ContainerBox = styled.div`
   margin-left: auto;
   margin-right: auto;
 `;
+
 const Container = styled.div`
   display: flex;
   align-items: center;

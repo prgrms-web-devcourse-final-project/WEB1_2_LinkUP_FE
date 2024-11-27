@@ -35,19 +35,6 @@ const PopularProduct: React.FC<PopularProductProps> = ({ product }) => {
   );
 };
 
-const BannerContainer = styled.div`
-  height: 300px;
-  display: flex;
-  background-color: #f5f5f5;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  &:hover {
-    cursor: pointer;
-    transform: translateY(-5px);
-  }
-`;
-
 const StyledLink = styled(Link)`
   width: 80%;
   margin: 0 auto;
@@ -61,6 +48,19 @@ const StyledLink = styled(Link)`
   &:active {
     color: inherit;
     text-decoration: none;
+  }
+`;
+
+const BannerContainer = styled.div`
+  height: 300px;
+  display: flex;
+  background-color: #f5f5f5;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  &:hover {
+    cursor: pointer;
+    transform: translateY(-5px);
   }
 `;
 

@@ -131,6 +131,9 @@ const Card = styled.div`
     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.4);
     transform: translateY(-5px);
   }
+  @media (min-width: 768px) and (max-width: 1024px) {
+    width: 130px;
+  }
 `;
 const StyledLink = styled(Link)`
   text-decoration: none;

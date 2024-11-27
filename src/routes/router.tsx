@@ -27,11 +27,17 @@ import SetProfilePage from '../components/pages/login/SetProfilePage';
 import LoginCompletePage from '../components/pages/login/LoginCompletePage';
 import PaymentForm from '../components/pages/Payment/PaymentForm';
 import PaymentSuccessPage from '../components/pages/Payment/PaymentSuccessPage';
+import ScrollToTop from '../components/common/ScrollToTop';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Layout />,
+    element: (
+      <>
+        <Layout />
+        <ScrollToTop />
+      </>
+    ),
     errorElement: <ErrorPage />,
     children: [
       {

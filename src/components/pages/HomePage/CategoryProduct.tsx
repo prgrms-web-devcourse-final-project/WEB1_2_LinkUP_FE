@@ -46,6 +46,7 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
           {categories.map((category) => (
             <CategoryItem
               key={category}
+              isSelected={category == selectedCategory}
               onClick={() => handleCategoryClick(category)}
             >
               {category}
@@ -129,6 +130,9 @@ const Card = styled.div`
     cursor: pointer;
     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.4);
     transform: translateY(-5px);
+  }
+  @media (min-width: 768px) and (max-width: 1024px) {
+    width: 130px;
   }
 `;
 const StyledLink = styled(Link)`
@@ -231,11 +235,12 @@ const CategoryContainer = styled.div<{ isExpanded: boolean }>`
     visibility 0.3s ease;
 `;
 
-const CategoryItem = styled.div`
+const CategoryItem = styled.div<{ isSelected: boolean }>`
   padding: 5px 10px;
   border-radius: 5px;
   width: 120px;
-
+  font-weight: ${(props) => (props.isSelected ? 'bold' : 'normal')};
+  text-decoration: ${(props) => (props.isSelected ? 'underline' : 'none')};
   &:hover {
     cursor: pointer;
     text-decoration: underline;

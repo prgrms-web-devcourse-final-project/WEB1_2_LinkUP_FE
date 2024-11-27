@@ -9,34 +9,40 @@ import { addComment } from './api/CommentApi';
 // import { useQuery } from '@tanstack/react-query';
 
 const ProductDetail: React.FC = () => {
-  //   const { id } = useParams<{ id: string }>();
-
+  //   const { id } = useParams();
+  //   if (!id) {
+  //     return <p>상품 번호가 유실되었습니다.</p>;
+  //   }
   //   const {
   //     data: product,
   //     isLoading,
   //     isError,
-  //     error,
-  //   } = useQuery({
+  //   } = useQuery<Product, Error>({
   //     queryKey: ['product', id],
-  //     queryFn: async () => {
-  //       if (!id) throw new Error('ID가 없습니다');
-  //       return await getProductbyId(id);
-  //     },
-  //     enabled: !!id,
+  //     queryFn: () => getProductbyId(id),
   //   });
-
-  //   if (isLoading) return <p>로딩 중...</p>;
-  //   if (isError) {
+  //   // 로딩 상태 처리
+  //   if (isLoading) {
   //     return (
-  //       <p>
-  //         {error instanceof Error
-  //           ? error.message
-  //           : '상품 정보를 불러오는 데 실패했습니다.'}
-  //       </p>
+  //       <Container>
+  //         <SuccessSection>
+  //           <Title>상품 정보 로딩 중...</Title>
+  //         </SuccessSection>
+  //       </Container>
   //     );
   //   }
 
-  //   if (!product) return null;
+  //   // 에러 상태 처리
+  //   if (isError) {
+  //     return (
+  //       <Container>
+  //         <SuccessSection>
+  //           <Title>상품 정보를 불러오지 못했습니다.</Title>
+  //           <Subtitle>잠시 후 다시 시도해주세요.</Subtitle>
+  //         </SuccessSection>
+  //       </Container>
+  //     );
+  //   }
   const [quantity, setQuantity] = useState(1);
   const [newComment, setNewComment] = useState('');
   const [newCommentStar, setNewCommentStar] = useState(5);
@@ -241,18 +247,19 @@ const ProductDetail: React.FC = () => {
 
     return () => clearInterval(timer);
   }, []);
+
   const isOutOfStock = product.now >= product.stock;
   const isDeadlinePassed = remainingTime === '마감되었습니다.';
   const isButtonDisabled = isOutOfStock || isDeadlinePassed;
 
   // 구매 비율 계산
   const purchasePercentage = Math.min((product.now / product.stock) * 100, 100);
-
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     if (value > 0) setQuantity(value);
   };
 
+  //댓글 작성
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     //댓글추가 api 호출
@@ -261,7 +268,9 @@ const ProductDetail: React.FC = () => {
     setNewComment('');
   };
 
+  //남은 재고
   const least = product.minimum - product.now;
+
   return (
     <Container>
       <ContentWrapper>
@@ -370,7 +379,7 @@ const ProductDetail: React.FC = () => {
 };
 
 const Container = styled.div`
-  width: 100%;
+  width: 90%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
@@ -408,8 +417,12 @@ const Stars = styled.div`
   position: absolute;
   font-size: 20px;
   color: #ffaa00;
-  bottom: 20%;
+  bottom: 21%;
   right: 2%;
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    bottom: 23%;
+  }
 `;
 
 const PriceWrapper = styled.div`
@@ -426,6 +439,9 @@ const DiscountWrapper = styled.div`
 const DiscountInfo = styled.div`
   font-size: 14px;
   color: #888;
+  @media (min-width: 768px) and (max-width: 1024px) {
+    margin-left: -50%;
+  }
 `;
 const OriginalPrice = styled.div`
   text-decoration: line-through;
@@ -453,12 +469,27 @@ const RemainingCount = styled.div`
     margin-right: 8px;
     font-size: 16px;
   }
+  @media (min-width: 768px) and (max-width: 1024px) {
+    width: 220px;
+  }
 `;
 
 const Description = styled.p`
   margin-bottom: 30px;
   line-height: 1.6;
   color: #666;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  @media (min-width: 768px) and (max-width: 1024px) {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 `;
 const DeadlineLabel = styled.div`
   font-size: 16px;

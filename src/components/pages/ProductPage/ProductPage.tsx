@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import InputComponent from '../ProductPage/InputComponent';
 import ProductComponent from '../ProductPage/ProductComponent';
 import styled from 'styled-components';
@@ -6,11 +6,25 @@ import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
 import ScrollToTopButton from '../../common/ScrollToTopButton';
 import { Product } from '../HomePage/model/productSchema';
+// import { useQuery } from '@tanstack/react-query';
+// import { getProducts } from '../HomePage/api/productApi';
 
 const ProductPage = () => {
-  const [input, setInput] = useState('');
+  //   const {
+  //   data: product,
+  //   isLoading,
+  //   isError,
+  // } = useQuery<Product[], Error>({
+  //   queryKey: ['product'],
+  //   queryFn: () => getProducts(),
+  // });
 
-  //페이지네이션
+  // // 로딩 상태 처리
+  // if (isLoading) return <div>Loading...</div>;
+
+  // // 에러 상태 처리
+  // if (isError) return <div>Error</div>;
+  const [input, setInput] = useState('');
 
   const location = useLocation();
 
@@ -21,7 +35,6 @@ const ProductPage = () => {
       setInput(category);
     }
   }, []);
-  //   const data = searchProducts(input);
 
   const products = [
     {
@@ -274,8 +287,16 @@ const ProductPage = () => {
       likes: true,
     },
   ];
+  const getTopProducts = (products: Product[]): Product[] => {
+    const sortedByComments = [...products].sort(
+      (a, b) => b.comments.length - a.comments.length
+    );
+    return sortedByComments;
+  };
 
-  const filtered = products.filter(
+  const displayedProducts = useMemo(() => getTopProducts(products), [products]);
+
+  const filtered = displayedProducts.filter(
     (product: Product) =>
       product.name.toLowerCase().includes(input.toLowerCase()) ||
       product.category.toLowerCase().includes(input.toLowerCase())

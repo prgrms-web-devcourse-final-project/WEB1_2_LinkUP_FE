@@ -138,13 +138,14 @@ const PostDetailPage = () => {
       window.confirm('참여를 확정하시겠습니까? 이후에는 수정이 불가능합니다.')
     ) {
       try {
-        // await joinPost(postId!, currentUserId, quantity);
+        const updatedQuantity = post.currentQuantity + quantity;
+        // await joinPost(postId!, currentUserId, quantity, updatedQuantity);
         alert('참여가 완료되었습니다.');
         setPost((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
-            currentQuantity: prev.currentQuantity + quantity,
+            currentQuantity: updatedQuantity,
             participants: [
               ...prev.participants,
               { userId: currentUserId, quantity, isCancelled: false },
@@ -164,13 +165,14 @@ const PostDetailPage = () => {
       window.confirm('취소 후 다시 참여할 수 없습니다. 정말 취소하시겠습니까?')
     ) {
       try {
-        // await cancelJoinPost(postId!, currentUserId);
+        const updatedQuantity = post.currentQuantity - quantity;
+        // await cancelJoinPost(postId!, currentUserId, updatedQuantity);
         alert('참여가 취소되었습니다.');
         setPost((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
-            currentQuantity: prev.currentQuantity - quantity,
+            currentQuantity: updatedQuantity,
             participants: prev.participants.map((p) =>
               p.userId === currentUserId ? { ...p, isCancelled: true } : p
             ),

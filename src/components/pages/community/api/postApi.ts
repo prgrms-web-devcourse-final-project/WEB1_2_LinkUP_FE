@@ -124,12 +124,14 @@ export const deletePostById = async (postId: string): Promise<void> => {
 export const joinPost = async (
   postId: string,
   userId: string,
-  quantity: number
+  quantity: number,
+  updatedQuantity: number
 ): Promise<void> => {
   try {
     await axiosInstance.put(`/api/posts/${postId}/join`, {
       userId,
       quantity,
+      currentQuantity: updatedQuantity,
       isCancelled: false, // 참여 상태
     });
   } catch (error) {
@@ -141,11 +143,13 @@ export const joinPost = async (
 // 공구 진행 취소하기 API
 export const cancelJoinPost = async (
   postId: string,
-  userId: string
+  userId: string,
+  updatedQuantity: number
 ): Promise<void> => {
   try {
     await axiosInstance.put(`/api/posts/${postId}/cancel`, {
       userId,
+      currentQuantity: updatedQuantity,
       isCancelled: true, // 취소 상태
     });
   } catch (error) {

@@ -379,9 +379,7 @@ const PostCreatePage = () => {
 
             {/* 하단 버튼 섹션 */}
             <ButtonContainer>
-              <Button primary onClick={handlePostSubmit}>
-                확인
-              </Button>
+              <Button onClick={handlePostSubmit}>확인</Button>
               <Button onClick={handleCancel}>취소</Button>
             </ButtonContainer>
           </FormContainer>
@@ -677,6 +675,7 @@ const SmallInput = styled.input`
   width: 100px;
   padding: 10px 0px;
   text-align: center;
+  background-color: #ececec;
   border: 1px solid #ccc;
   border-radius: 5px;
 `;
@@ -764,15 +763,15 @@ const ButtonContainer = styled.div`
   gap: 10px;
 `;
 
-const Button = styled.button<{ primary?: boolean }>`
+const Button = styled.button`
   padding: 10px 20px;
-  background: ${({ primary }) => (primary ? '#000' : '#fff')};
-  color: ${({ primary }) => (primary ? '#fff' : '#000')};
+  background: #000;
+  color: #fff;
   border: 1px solid #000;
   border-radius: 5px;
   cursor: pointer;
 
   &:hover {
-    background: ${({ primary }) => (primary ? '#333' : '#f4f4f4')};
+    background: #333;
   }
 `;

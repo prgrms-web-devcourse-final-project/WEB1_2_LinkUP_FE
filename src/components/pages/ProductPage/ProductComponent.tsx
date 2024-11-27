@@ -104,6 +104,9 @@ const Card = styled.div`
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   align-items: center;
   position: relative;
+  @media (min-width: 768px) and (max-width: 1024px) {
+    width: 130px;
+  }
 `;
 const StyledLink = styled(Link)`
   text-decoration: none;

@@ -28,6 +28,7 @@ import LoginCompletePage from '../components/pages/login/LoginCompletePage';
 import PaymentForm from '../components/pages/Payment/PaymentForm';
 import PaymentSuccessPage from '../components/pages/Payment/PaymentSuccessPage';
 import ScrollToTop from '../components/common/ScrollToTop';
+import PostEditPage from '../components/pages/community/PostEditPage';
 
 const router = createBrowserRouter([
   {
@@ -71,6 +72,10 @@ const router = createBrowserRouter([
       {
         path: '/community/posts/:postId',
         element: <PostDetailPage />,
+      },
+      {
+        path: '/community/posts/:postId/edit',
+        element: <PostEditPage />,
       },
       {
         path: '/mypage',

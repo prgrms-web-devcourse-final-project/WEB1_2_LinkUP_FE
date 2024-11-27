@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   FaCaretDown,
   FaPlusCircle,
@@ -8,16 +8,18 @@ import {
   FaAngleLeft,
   FaAngleRight,
 } from 'react-icons/fa';
-import { createPost, PostData } from './api/postApi';
+import { updatePost, PostData, deletePostById } from './api/postApi';
+// import { fetchPostById, updatePost, PostData, deletePostById } from './api/postApi';
 import CategoryWrapper from '../../common/CategoryWrapper';
 import ScrollToTopButton from '../../common/ScrollToTopButton';
+import { mockCommunityPosts } from '../../../mocks/communityPosts';
 
-const PostCreatePage = () => {
+const PostEditPage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const defaultCategory = location.state?.selectedCategory || '생활용품'; // 이전 페이지에서 전달된 카테고리
+  const { postId } = useParams<{ postId: string }>();
 
-  const [selectedCategory, setSelectedCategory] = useState(defaultCategory);
+  const [post, setPost] = useState<PostData | null>(null); // 수정 대상 포스트 데이터
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [requiredQuantity, setRequiredQuantity] = useState('');
   const [totalPrice, setTotalPrice] = useState('');
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -25,9 +27,61 @@ const PostCreatePage = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [images, setImages] = useState<string[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(-1); // -1: AddImageButton 상태
+  const [currentIndex, setCurrentIndex] = useState(-1);
   const [urlInput, setUrlInput] = useState('');
   const [urlError, setUrlError] = useState(false);
+
+  useEffect(() => {
+    if (!postId) {
+      alert('유효하지 않은 접근입니다.');
+      navigate('/community');
+      return;
+    }
+
+    // 기존 게시글 데이터 로드
+    const loadPost = async () => {
+      try {
+        // 실제 API 요청 (주석 처리된 부분)
+        // const fetchPost = await fetchPostById(postId);
+
+        // Mock 데이터 사용
+        const fetchedPost = mockCommunityPosts.find(
+          (item) => item.postId === postId
+        );
+        if (fetchedPost) {
+          setPost(fetchedPost);
+          setTitle(fetchedPost.title);
+          setContent(fetchedPost.content);
+          setImages(fetchedPost.images || []);
+          setSelectedCategory(fetchedPost.category);
+          setRequiredQuantity(fetchedPost.requiredQuantity.toString());
+          setTotalPrice(fetchedPost.totalPrice.toString());
+          setUrlInput(fetchedPost.url);
+          setDeadline(
+            calculateDeadlineFromNow(fetchedPost.createdAt, fetchedPost.closeAt)
+          );
+        } else {
+          throw new Error('게시물이 존재하지 않습니다.');
+        }
+      } catch (error) {
+        console.error('게시글 불러오기 실패:', error);
+        alert('게시글 정보를 불러오는 데 실패했습니다.');
+        navigate('/community');
+      }
+    };
+
+    loadPost();
+  }, [postId, navigate]);
+
+  // createdAt과 closeAt을 사용해 마감 기한 계산
+  const calculateDeadlineFromNow = (createdAt: string, closeAt: string) => {
+    const createdDate = new Date(createdAt);
+    const closeDate = new Date(closeAt);
+    const diffDays = Math.ceil(
+      (closeDate.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return `${diffDays}일`; // ex: "5일"
+  };
 
   const handleDropdownToggle = () => {
     setDropdownVisible(!dropdownVisible);
@@ -35,10 +89,17 @@ const PostCreatePage = () => {
 
   const handleDeadlineSelect = (day: string) => {
     setDeadline(day);
+    if (post) {
+      const createdDate = new Date(post.createdAt);
+      const daysToAdd = parseInt(day.replace(/[^0-9]/g, ''), 10); // ex: "5일" -> 5
+      const newCloseDate = new Date(createdDate);
+      newCloseDate.setDate(createdDate.getDate() + daysToAdd);
+      setPost({ ...post, closeAt: newCloseDate.toISOString() }); // closeAt 수정
+    }
     setDropdownVisible(false);
   };
 
-  const handlePostSubmit = async () => {
+  const handlePostUpdate = async () => {
     if (
       !title ||
       !requiredQuantity ||
@@ -56,40 +117,36 @@ const PostCreatePage = () => {
       return;
     }
 
-    const parsedTotalPrice = parseInt(totalPrice.replace(/,/g, ''), 10);
-    const parsedRequiredQuantity = parseInt(requiredQuantity, 10);
-    const createdAt = new Date(); // 현재 시각을 글 작성 시점으로 설정
-    const updatedAt = new Date(); // 초기값으로 글 작성 시점과 글 수정 시점을 일치
-
-    // 마감 기한 계산 (현재 시점 + 선택한 마감 기한)
-    const closeAt = new Date();
-    if (deadline !== '마감 기한') {
-      const daysToAdd = parseInt(deadline.replace(/[^0-9]/g, ''), 10); // "1일", "2일" 등의 숫자 추출
-      closeAt.setDate(createdAt.getDate() + daysToAdd); // 날짜 계산
+    // post가 null인 경우 처리
+    if (!post) {
+      alert('게시글 정보를 로드하는 데 실패했습니다.');
+      return;
     }
 
-    const postData: PostData = {
+    const parsedTotalPrice = parseInt(totalPrice.replace(/,/g, ''), 10);
+    const parsedRequiredQuantity = parseInt(requiredQuantity, 10);
+
+    const updatedPost: PostData = {
+      ...post,
       title,
       content,
       images,
       category: selectedCategory,
-      createdAt: createdAt.toISOString(),
-      updatedAt: updatedAt.toISOString(),
-      closeAt: closeAt.toISOString(),
+      closeAt: post.closeAt, // 기존 또는 수정된 closeAt 사용
       requiredQuantity: parsedRequiredQuantity,
       totalPrice: parsedTotalPrice,
       unitPrice: Math.floor(parsedTotalPrice / parsedRequiredQuantity),
       url: urlInput,
+      updatedAt: new Date().toISOString(), // 수정된 시점 설정
     };
 
     try {
-      const { postId } = await createPost(postData); // API 호출
-
-      // 성공적으로 postId를 받으면 해당 포스트로 이동
-      navigate(`/community/posts/${postId}`, { state: postData });
+      await updatePost(postId!, updatedPost); // 게시글 수정 API 호출
+      alert('게시글이 성공적으로 수정되었습니다.');
+      navigate(`/community/posts/${postId}`);
     } catch (error) {
-      console.error('게시물 생성 중 오류 발생:', error);
-      alert('게시물 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
+      console.error('게시글 수정 중 오류 발생:', error);
+      alert('게시글 수정에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -118,7 +175,7 @@ const PostCreatePage = () => {
   };
 
   const handleCancel = () => {
-    navigate('/community', { state: { selectedCategory } }); // // CommunityPage 경로와 state 전달
+    navigate(`/community/posts/${postId}`);
   };
 
   const formatCurrency = (value: string) => {
@@ -204,6 +261,26 @@ const PostCreatePage = () => {
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUrlInput(e.target.value);
     setUrlError(!isValidUrl(e.target.value));
+  };
+
+  const handlePostDelete = async () => {
+    // post가 null인 경우 처리
+    if (!post) {
+      alert('삭제할 게시글이 존재하지 않습니다.');
+      return;
+    }
+
+    const confirmDelete = window.confirm('정말 이 게시글을 삭제하시겠습니까?');
+    if (!confirmDelete) return;
+
+    try {
+      await deletePostById(postId!); // 삭제 API 호출
+      alert('게시글이 성공적으로 삭제되었습니다.');
+      navigate(`/community/posts?category=${selectedCategory}`); // 선택된 카테고리의 목록 페이지로 이동
+    } catch (error) {
+      console.error('게시글 삭제 중 오류 발생:', error);
+      alert('게시글 삭제에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   return (
@@ -379,8 +456,9 @@ const PostCreatePage = () => {
 
             {/* 하단 버튼 섹션 */}
             <ButtonContainer>
-              <Button onClick={handlePostSubmit}>확인</Button>
+              <Button onClick={handlePostUpdate}>확인</Button>
               <Button onClick={handleCancel}>취소</Button>
+              <Button onClick={handlePostDelete}>삭제</Button>
             </ButtonContainer>
           </FormContainer>
         </ContentWrapper>
@@ -390,7 +468,7 @@ const PostCreatePage = () => {
   );
 };
 
-export default PostCreatePage;
+export default PostEditPage;
 
 const PostCreatePageContainer = styled.div`
   display: flex;

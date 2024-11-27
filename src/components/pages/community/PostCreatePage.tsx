@@ -59,6 +59,7 @@ const PostCreatePage = () => {
     const parsedTotalPrice = parseInt(totalPrice.replace(/,/g, ''), 10);
     const parsedRequiredQuantity = parseInt(requiredQuantity, 10);
     const createdAt = new Date(); // 현재 시각을 글 작성 시점으로 설정
+    const updatedAt = new Date(); // 초기값으로 글 작성 시점과 글 수정 시점을 일치
 
     // 마감 기한 계산 (현재 시점 + 선택한 마감 기한)
     const closeAt = new Date();
@@ -73,6 +74,7 @@ const PostCreatePage = () => {
       images,
       category: selectedCategory,
       createdAt: createdAt.toISOString(),
+      updatedAt: updatedAt.toISOString(),
       closeAt: closeAt.toISOString(),
       requiredQuantity: parsedRequiredQuantity,
       totalPrice: parsedTotalPrice,
@@ -268,15 +270,18 @@ const PostCreatePage = () => {
                 </PaginationDotsWrapper>
 
                 <UrlInputContainer>
-                  <Label htmlFor="urlInput">URL 주소</Label>
-                  <URLInput
-                    id="urlInput"
-                    type="text"
-                    placeholder="상품 관련 URL 주소를 입력해주세요."
-                    value={urlInput}
-                    onChange={handleUrlChange}
-                    isError={urlError}
-                  />
+                  <UrlInputWrapper>
+                    <Label htmlFor="urlInput">URL 주소</Label>
+                    <URLInput
+                      id="urlInput"
+                      type="text"
+                      placeholder="상품 관련 URL 주소를 입력해주세요."
+                      value={urlInput}
+                      onChange={handleUrlChange}
+                      isError={urlError}
+                      spellCheck={false}
+                    />
+                  </UrlInputWrapper>
                   {urlError && (
                     <ErrorMessage>올바른 URL을 입력해주세요.</ErrorMessage>
                   )}
@@ -292,6 +297,7 @@ const PostCreatePage = () => {
                       placeholder="제목을 입력해주세요."
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
+                      spellCheck={false}
                     />
                   </InputWrapper>
                   <CategoryInputWrapper>
@@ -367,6 +373,7 @@ const PostCreatePage = () => {
                 placeholder="내용을 입력해주세요."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
+                spellCheck={false}
               />
             </TextAreaWrapper>
 
@@ -429,7 +436,7 @@ const ImageUploadContainer = styled.div`
   flex-direction: column;
   align-items: center;
   width: 490px;
-  height: 470px; /* 고정된 높이 설정 */
+  height: 495px; /* 고정된 높이 설정 */
   border: 1px solid #ccc;
   border-radius: 10px;
   padding: 20px 11px;
@@ -551,18 +558,23 @@ const PaginationDots = styled.div`
 `;
 
 const UrlInputContainer = styled.div`
-  margin-top: 15px;
   display: flex;
-  align-items: center; /* Label과 Input을 같은 줄에 배치 */
+  flex-direction: column;
+  align-items: flex-start; /* 세로로 가운데 정렬 */
   width: 100%;
-  gap: 10px; /* Label과 Input 사이 간격 */
+`;
 
-  label {
-    font-weight: bold;
-  }
+const UrlInputWrapper = styled.div`
+  margin-left: 20px;
+  display: flex;
+  align-items: center; /* Label과 Url을 같은 높이에 배치 */
+  gap: 10px; /* Label과 Url 사이 간격 */
+  padding: 10px;
+  border: none;
 `;
 
 const URLInput = styled.input<{ isError: boolean }>`
+  width: 285px;
   flex: 1;
   padding: 10px;
   background-color: #ececec;
@@ -571,6 +583,7 @@ const URLInput = styled.input<{ isError: boolean }>`
 `;
 
 const ErrorMessage = styled.span`
+  margin-left: 125px;
   color: red;
   font-size: 0.8rem;
   margin-top: 5px;
@@ -582,7 +595,7 @@ const DetailsAndInfoContainer = styled.div`
   align-items: flex-start; /* 왼쪽 정렬 */
   justify-content: space-between; /* 위아래 요소 간격 균등 */
   width: 490px;
-  height: 470px; /* ImageUploadContainer와 동일한 고정 높이 */
+  height: 495px; /* ImageUploadContainer와 동일한 고정 높이 */
   flex-grow: 1; /* 가로 공간을 균등 분배 */
   border: 1px solid #ccc;
   border-radius: 10px;

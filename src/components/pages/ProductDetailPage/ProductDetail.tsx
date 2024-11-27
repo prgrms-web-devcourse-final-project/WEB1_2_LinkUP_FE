@@ -379,7 +379,7 @@ const ProductDetail: React.FC = () => {
 };
 
 const Container = styled.div`
-  width: 100%;
+  width: 90%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
@@ -417,8 +417,12 @@ const Stars = styled.div`
   position: absolute;
   font-size: 20px;
   color: #ffaa00;
-  bottom: 20%;
+  bottom: 21%;
   right: 2%;
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    bottom: 23%;
+  }
 `;
 
 const PriceWrapper = styled.div`
@@ -435,6 +439,9 @@ const DiscountWrapper = styled.div`
 const DiscountInfo = styled.div`
   font-size: 14px;
   color: #888;
+  @media (min-width: 768px) and (max-width: 1024px) {
+    margin-left: -50%;
+  }
 `;
 const OriginalPrice = styled.div`
   text-decoration: line-through;
@@ -462,12 +469,27 @@ const RemainingCount = styled.div`
     margin-right: 8px;
     font-size: 16px;
   }
+  @media (min-width: 768px) and (max-width: 1024px) {
+    width: 220px;
+  }
 `;
 
 const Description = styled.p`
   margin-bottom: 30px;
   line-height: 1.6;
   color: #666;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  @media (min-width: 768px) and (max-width: 1024px) {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 `;
 const DeadlineLabel = styled.div`
   font-size: 16px;

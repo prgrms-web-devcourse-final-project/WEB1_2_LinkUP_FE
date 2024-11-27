@@ -26,7 +26,17 @@ const PopularProduct: React.FC<PopularProductProps> = ({ product }) => {
 
               <ProductCategory>{product.category}</ProductCategory>
             </TitleArea>
-            <ProductDescription> 상품설명- 추후 추가 예정</ProductDescription>
+            <ProductDescription>
+              {' '}
+              상품설명- 추후 추가 예정 상품설명- 추후 추가 예정 상품설명- 추후
+              추가 예정 상품설명- 추후 추가 예정 상품설명- 추후 추가 예정
+              상품설명- 추후 추가 예정 상품설명- 추후 추가 예정 상품설명- 추후
+              추가 예정 상품설명- 추후 추가 예정 상품설명- 추후 추가 예정
+              상품설명- 추후 추가 예정 상품설명- 추후 추가 예정 상품설명- 추후
+              추가 예정 상품설명- 추후 추가 예정 상품설명- 추후 추가 예정
+              상품설명- 추후 추가 예정 상품설명- 추후 추가 예정 상품설명- 추후
+              추가 예정 상품설명- 추후 추가 예정
+            </ProductDescription>
             {/* {product.description} */}
           </ProductHeader>
         </ProductInfoSection>
@@ -105,6 +115,9 @@ const TitleArea = styled.div`
   display: flex;
   align-items: baseline;
   margin-bottom: 15px;
+  @media (min-width: 768px) and (max-width: 1024px) {
+    flex-direction: column;
+  }
 `;
 
 const ProductName = styled.h3`
@@ -117,6 +130,9 @@ const ProductName = styled.h3`
 const ProductCategory = styled.p`
   font-size: 16px;
   color: #666;
+  @media (min-width: 768px) and (max-width: 1024px) {
+    margin-top: -10px;
+  }
 `;
 
 const ProductDescription = styled.p`
@@ -128,5 +144,12 @@ const ProductDescription = styled.p`
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  @media (min-width: 768px) and (max-width: 1024px) {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 `;
 export default PopularProduct;

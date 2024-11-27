@@ -725,14 +725,14 @@ const PaginationDots = styled.div`
 `;
 
 const UrlContainer = styled.div`
-  margin-top: 15px;
-  margin-left: 50px;
   display: flex;
-  align-items: center; /* 세로로 가운데 정렬 */
+  flex-direction: column;
+  align-items: flex-start; /* 세로로 가운데 정렬 */
   width: 100%;
 `;
 
 const UrlWrapper = styled.div`
+  margin-left: 20px;
   display: flex;
   align-items: center; /* Label과 Url을 같은 높이에 배치 */
   gap: 10px; /* Label과 Url 사이 간격 */
@@ -741,6 +741,7 @@ const UrlWrapper = styled.div`
 `;
 
 const Url = styled.div`
+  width: 285px;
   flex: 1;
   padding: 10px;
   border: none;

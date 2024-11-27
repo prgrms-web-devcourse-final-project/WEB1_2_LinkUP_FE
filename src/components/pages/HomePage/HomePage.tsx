@@ -4,21 +4,26 @@ import RecommendProduct from './RecommendProduct';
 import PopularProduct from './PopularProduct';
 import CategoryProduct from './CategoryProduct';
 import ScrollToTopButton from '../../common/ScrollToTopButton';
-// import { getProducts, Product } from './api/productApi';
+// import { getProducts } from './api/productApi';
 // import { useQuery } from '@tanstack/react-query';
 // import { fetchUser, User } from './api/userApi';
+// import { Product } from '../Payment/api/paymentApi';
 
 const HomePage: React.FC = () => {
-  // const { data, isLoading, error } = useQuery<Product>({
-  //   queryKey: ['product'],
-  //   queryFn: () => getProducts(),
-  // });
+  //   const {
+  //     data: product,
+  //     isLoading,
+  //     isError,
+  //   } = useQuery<Product[], Error>({
+  //     queryKey: ['product'],
+  //     queryFn: () => getProducts(),
+  //   });
 
-  // // 로딩 상태 처리
-  // if (isLoading) return <div>Loading...</div>;
+  //   // 로딩 상태 처리
+  //   if (isLoading) return <div>Loading...</div>;
 
-  // // 에러 상태 처리
-  // if (error instanceof Error) return <div>Error: {error.message}</div>;
+  //   // 에러 상태 처리
+  //   if (isError) return <div>Error</div>;
 
   const categories = [
     '식료품',
@@ -36,6 +41,8 @@ const HomePage: React.FC = () => {
     category: '전자제품',
     originalPrice: 95.5,
     discountedPrice: 79.98,
+    description:
+      '최고의 성능을 가진 드라이기 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구',
     image: 'https://via.placeholder.com/200',
     comments: [
       {

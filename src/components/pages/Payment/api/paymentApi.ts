@@ -8,12 +8,12 @@ export type Product = {
   image: string;
   category: string;
 };
-export const handlePayment = async (): Promise<Product[]> => {
+export const handlePayment = async (): Promise<boolean> => {
   try {
     const URL = `/payment`;
     const { data } = await axiosInstance.post(URL);
     return data;
   } catch {
-    throw new Error('상품 정보를 가져오는 데 실패했습니다.');
+    throw new Error('결제에 실패하였습니다.');
   }
 };

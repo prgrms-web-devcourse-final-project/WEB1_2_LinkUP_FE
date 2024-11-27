@@ -2,6 +2,7 @@ import React from 'react';
 import Header from './Header';
 import styled from 'styled-components';
 import { Outlet } from 'react-router-dom';
+import Footer from './Footer';
 
 const Layout: React.FC = () => {
   return (
@@ -10,7 +11,7 @@ const Layout: React.FC = () => {
       <MainContent>
         <Outlet />
       </MainContent>
-      {/* Footer */}
+      <Footer />
     </LayoutContainer>
   );
 };
@@ -18,7 +19,7 @@ const Layout: React.FC = () => {
 const LayoutContainer = styled.div`
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* 화면 전체를 채우기 위해 설정 */
+  min-height: 100vh;
 `;
 
 const MainContent = styled.main`

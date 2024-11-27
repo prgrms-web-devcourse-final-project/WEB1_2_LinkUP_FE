@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Product } from './model/productSchema';
 import StarRating from '../../common/StarRating';
+import { Link } from 'react-router-dom';
 // import { Link } from 'react-router-dom';
 
 interface PopularProductProps {
@@ -10,37 +11,57 @@ interface PopularProductProps {
 
 const PopularProduct: React.FC<PopularProductProps> = ({ product }) => {
   return (
-    <BannerContainer>
-      <ImageWrapper>
-        <ProductImage src={product.image} alt={product.name} />
-      </ImageWrapper>
-      <ProductInfoSection>
-        <Star>
-          <StarRating rating={product.stars} />
-        </Star>
-        <ProductHeader>
-          <TitleArea>
-            <ProductName>{product.name}</ProductName>
+    <StyledLink to={`/products/${product.id}`}>
+      <BannerContainer>
+        <ImageWrapper>
+          <ProductImage src={product.image} alt={product.name} />
+        </ImageWrapper>
+        <ProductInfoSection>
+          <Star>
+            <StarRating rating={product.stars} />
+          </Star>
+          <ProductHeader>
+            <TitleArea>
+              <ProductName>{product.name}</ProductName>
 
-            <ProductCategory>{product.category}</ProductCategory>
-          </TitleArea>
-          <ProductDescription> 상품설명- 추후 추가 예정</ProductDescription>
-          {/* {product.description} */}
-        </ProductHeader>
-      </ProductInfoSection>
-    </BannerContainer>
+              <ProductCategory>{product.category}</ProductCategory>
+            </TitleArea>
+            <ProductDescription> 상품설명- 추후 추가 예정</ProductDescription>
+            {/* {product.description} */}
+          </ProductHeader>
+        </ProductInfoSection>
+      </BannerContainer>
+    </StyledLink>
   );
 };
 
 const BannerContainer = styled.div`
-  width: 80%;
   height: 300px;
-  margin: 0 auto;
   display: flex;
   background-color: #f5f5f5;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  &:hover {
+    cursor: pointer;
+    transform: translateY(-5px);
+  }
+`;
+
+const StyledLink = styled(Link)`
+  width: 80%;
+  margin: 0 auto;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+
+  &:link,
+  &:visited,
+  &:hover,
+  &:active {
+    color: inherit;
+    text-decoration: none;
+  }
 `;
 
 const ImageWrapper = styled.div`
@@ -59,6 +80,7 @@ const ProductImage = styled.img`
 `;
 
 const ProductInfoSection = styled.div`
+  background: linear-gradient(to top, rgba(155, 155, 155, 0.7), transparent);
   flex-grow: 1;
   display: flex;
   flex-direction: column;

@@ -13,9 +13,8 @@ export interface Product {
   minamount: number;
   deadline: string;
   now: number;
-  stock?: number;
+  stock: number;
   description: string;
   reviews: Review[];
-
   likes: boolean;
 }

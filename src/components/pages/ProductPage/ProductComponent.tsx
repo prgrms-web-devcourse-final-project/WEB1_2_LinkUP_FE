@@ -17,17 +17,40 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
   products,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedText, setSelectedText] = useState<'판매 상품' | '마감 상품'>(
+    '판매 상품'
+  );
   const PRODUCT_PER_PAGE = 16;
   const totalPages = Math.ceil(products.length / PRODUCT_PER_PAGE);
+
   const startIndex = (currentPage - 1) * PRODUCT_PER_PAGE;
-  const currentProducts = products.slice(
+  const filteredProducts =
+    selectedText === '마감 상품'
+      ? products.filter((product) => new Date(product.deadline) < new Date())
+      : products;
+
+  const currentProducts = filteredProducts.slice(
     startIndex,
     startIndex + PRODUCT_PER_PAGE
   );
+
   return (
     <Recommend>
       <RecommendTitle>
-        {' '}
+        <TextWrapper>
+          <Text
+            isSelected={selectedText === '판매 상품'}
+            onClick={() => setSelectedText('판매 상품')}
+          >
+            판매 상품
+          </Text>
+          <Text
+            isSelected={selectedText === '마감 상품'}
+            onClick={() => setSelectedText('마감 상품')}
+          >
+            마감 상품
+          </Text>
+        </TextWrapper>
         {input ? `${input}에 대한 검색 결과` : ''}
       </RecommendTitle>
 
@@ -84,6 +107,18 @@ const RecommendTitle = styled.h2`
   color: #333;
 `;
 
+const TextWrapper = styled.div`
+  width: 200px;
+  display: flex;
+  gap: 25px;
+  margin-top: -20%;
+  margin-bottom: 20%;
+`;
+const Text = styled.h2<{ isSelected?: boolean }>`
+  cursor: pointer;
+  text-decoration: ${({ isSelected }) => (isSelected ? 'underline' : 'none')};
+  font-size: 16px;
+`;
 const CardWrapper = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);

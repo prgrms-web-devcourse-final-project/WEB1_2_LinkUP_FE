@@ -7,24 +7,8 @@ import { useLocation } from 'react-router-dom';
 import ScrollToTopButton from '../../common/ScrollToTopButton';
 import { Product } from '../HomePage/model/productSchema';
 import { products } from '../../../mocks/products';
-// import { useQuery } from '@tanstack/react-query';
-// import { getProducts } from '../HomePage/api/productApi';
 
 const ProductPage = () => {
-  //   const {
-  //   data: product,
-  //   isLoading,
-  //   isError,
-  // } = useQuery<Product[], Error>({
-  //   queryKey: ['product'],
-  //   queryFn: () => getProducts(),
-  // });
-
-  // // 로딩 상태 처리
-  // if (isLoading) return <div>Loading...</div>;
-
-  // // 에러 상태 처리
-  // if (isError) return <div>Error</div>;
   const [input, setInput] = useState('');
 
   const location = useLocation();

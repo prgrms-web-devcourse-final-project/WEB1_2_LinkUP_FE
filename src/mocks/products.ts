@@ -7,26 +7,26 @@ export const categories = [
   '유아/아동용품',
   '스포츠',
 ];
-
 export const popularProduct = {
-  id: 11,
-  name: '샤오미 로봇 청소기',
-  rating: 5,
-  originalPrice: 400.0,
-  discountPrice: 349.99,
+  id: 16,
+  name: '키친타올 세트',
+  rating: 4,
+  originalPrice: 12.0,
+  discountPrice: 9.99,
   url: 'https://via.placeholder.com/200',
   category: '생활용품',
-  description: '자율 주행 기술이 탑재된 고성능 로봇 청소기입니다.',
-  minamount: 9,
-  now: 10,
+  description: '흡수력이 뛰어난 고품질 키친타올입니다.',
+  minamount: 6,
+  now: 12,
   stock: 20,
-  deadline: '2024-12-22',
+  deadline: '2024-12-08',
   reviews: [
-    { review: '청소가 훨씬 수월해졌어요!', rating: 5 },
-    { review: '소음이 적어서 만족합니다.', rating: 4 },
+    { review: '가성비 최고입니다.', rating: 4 },
+    { review: '흡수력이 강해서 만족스럽습니다.', rating: 4 },
   ],
-  likes: true,
+  likes: false,
 };
+
 export const products = [
   {
     id: 1,

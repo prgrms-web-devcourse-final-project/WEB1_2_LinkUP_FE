@@ -56,168 +56,100 @@ const ProductDetail: React.FC = () => {
   const product = {
     id: '1',
     name: '다이슨 드라이기',
-    stars: 4.7,
-    minimum: 5,
+    rating: 4.7,
+    minamount: 5,
     now: 3,
     stock: 10,
     originalPrice: 95.5,
-    discountedPrice: 79.98,
-    image: 'https://via.placeholder.com/200',
+    discountPrice: 79.98,
+    url: 'https://via.placeholder.com/200',
     deadline: '2024-12-31',
     description:
       '최고의 성능을 가진 드라이기 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구',
-    comments: [
+    reviews: [
       {
-        comment: '디자인도 예쁘고, 바람 세기도 강해서 너무 만족스럽습니다!',
-        star: 5,
+        review: '디자인도 예쁘고, 바람 세기도 강해서 너무 만족스럽습니다!',
+        rating: 5,
       },
       {
-        comment: '가격이 조금 비싸지만, 성능은 최고예요.',
-        star: 4,
+        review: '가격이 조금 비싸지만, 성능은 최고예요.',
+        rating: 4,
       },
       {
-        comment: '머리가 정말 빨리 말라서 시간 절약에 도움이 돼요.',
-        star: 5,
+        review: '머리가 정말 빨리 말라서 시간 절약에 도움이 돼요.',
+        rating: 5,
       },
       {
-        comment: '생각보다 소음이 조금 있어서 아쉬웠어요.',
-        star: 3,
+        review: '생각보다 소음이 조금 있어서 아쉬웠어요.',
+        rating: 3,
       },
       {
-        comment: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
-        star: 5,
+        review: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
+        rating: 5,
       },
       {
-        comment: '선물로 줬는데 상대방이 정말 좋아했어요.',
-        star: 5,
+        review: '선물로 줬는데 상대방이 정말 좋아했어요.',
+        rating: 5,
       },
       {
-        comment: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
-        star: 4,
+        review: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
+        rating: 4,
       },
       {
-        comment: '전문가용 드라이기 같은 성능인데, 가정용으로도 적합합니다.',
-        star: 5,
+        review: '디자인도 예쁘고, 바람 세기도 강해서 너무 만족스럽습니다!',
+        rating: 5,
       },
       {
-        comment: '살짝 무겁지만, 기능이 좋아서 만족해요.',
-        star: 4,
+        review: '가격이 조금 비싸지만, 성능은 최고예요.',
+        rating: 4,
       },
       {
-        comment: '내구성이 좋을 것 같아서 기대 중입니다!',
-        star: 5,
+        review: '머리가 정말 빨리 말라서 시간 절약에 도움이 돼요.',
+        rating: 5,
       },
       {
-        comment: '생각보다 소음이 조금 있어서 아쉬웠어요.',
-        star: 3,
+        review: '생각보다 소음이 조금 있어서 아쉬웠어요.',
+        rating: 3,
       },
       {
-        comment: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
-        star: 5,
+        review: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
+        rating: 5,
       },
       {
-        comment: '선물로 줬는데 상대방이 정말 좋아했어요.',
-        star: 5,
+        review: '선물로 줬는데 상대방이 정말 좋아했어요.',
+        rating: 5,
       },
       {
-        comment: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
-        star: 4,
+        review: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
+        rating: 4,
       },
       {
-        comment: '전문가용 드라이기 같은 성능인데, 가정용으로도 적합합니다.',
-        star: 5,
+        review: '디자인도 예쁘고, 바람 세기도 강해서 너무 만족스럽습니다!',
+        rating: 5,
       },
       {
-        comment: '살짝 무겁지만, 기능이 좋아서 만족해요.',
-        star: 4,
+        review: '가격이 조금 비싸지만, 성능은 최고예요.',
+        rating: 4,
       },
       {
-        comment: '내구성이 좋을 것 같아서 기대 중입니다!',
-        star: 5,
+        review: '머리가 정말 빨리 말라서 시간 절약에 도움이 돼요.',
+        rating: 5,
       },
       {
-        comment: '생각보다 소음이 조금 있어서 아쉬웠어요.',
-        star: 3,
+        review: '생각보다 소음이 조금 있어서 아쉬웠어요.',
+        rating: 3,
       },
       {
-        comment: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
-        star: 5,
+        review: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
+        rating: 5,
       },
       {
-        comment: '선물로 줬는데 상대방이 정말 좋아했어요.',
-        star: 5,
+        review: '선물로 줬는데 상대방이 정말 좋아했어요.',
+        rating: 5,
       },
       {
-        comment: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
-        star: 4,
-      },
-      {
-        comment: '전문가용 드라이기 같은 성능인데, 가정용으로도 적합합니다.',
-        star: 5,
-      },
-      {
-        comment: '살짝 무겁지만, 기능이 좋아서 만족해요.',
-        star: 4,
-      },
-      {
-        comment: '내구성이 좋을 것 같아서 기대 중입니다!',
-        star: 5,
-      },
-      {
-        comment: '생각보다 소음이 조금 있어서 아쉬웠어요.',
-        star: 3,
-      },
-      {
-        comment: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
-        star: 5,
-      },
-      {
-        comment: '선물로 줬는데 상대방이 정말 좋아했어요.',
-        star: 5,
-      },
-      {
-        comment: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
-        star: 4,
-      },
-      {
-        comment: '전문가용 드라이기 같은 성능인데, 가정용으로도 적합합니다.',
-        star: 5,
-      },
-      {
-        comment: '살짝 무겁지만, 기능이 좋아서 만족해요.',
-        star: 4,
-      },
-      {
-        comment: '내구성이 좋을 것 같아서 기대 중입니다!',
-        star: 5,
-      },
-      {
-        comment: '생각보다 소음이 조금 있어서 아쉬웠어요.',
-        star: 3,
-      },
-      {
-        comment: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
-        star: 5,
-      },
-      {
-        comment: '선물로 줬는데 상대방이 정말 좋아했어요.',
-        star: 5,
-      },
-      {
-        comment: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
-        star: 4,
-      },
-      {
-        comment: '전문가용 드라이기 같은 성능인데, 가정용으로도 적합합니다.',
-        star: 5,
-      },
-      {
-        comment: '살짝 무겁지만, 기능이 좋아서 만족해요.',
-        star: 4,
-      },
-      {
-        comment: '내구성이 좋을 것 같아서 기대 중입니다!',
-        star: 5,
+        review: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
+        rating: 4,
       },
     ],
   };
@@ -269,15 +201,15 @@ const ProductDetail: React.FC = () => {
   };
 
   //남은 재고
-  const least = product.minimum - product.now;
+  const least = product.minamount - product.now;
 
   return (
     <Container>
       <ContentWrapper>
         <ImageSection>
-          <Image src={product.image} alt={product.name} />
+          <Image src={product.url} alt={product.name} />
           <Stars>
-            <StarRating rating={product.stars} />
+            <StarRating rating={product.rating} />
           </Stars>
         </ImageSection>
         <InfoSection>
@@ -287,9 +219,9 @@ const ProductDetail: React.FC = () => {
             <OriginalPrice>${product.originalPrice.toFixed(2)}</OriginalPrice>
             <DiscountWrapper>
               <DiscountedPrice>
-                ${product.discountedPrice.toFixed(2)}
+                ${product.discountPrice.toFixed(2)}
               </DiscountedPrice>
-              <DiscountInfo>{product.minimum}개 부터 할인 적용</DiscountInfo>
+              <DiscountInfo>{product.minamount}개 부터 할인 적용</DiscountInfo>
             </DiscountWrapper>
             {least > 0 && (
               <RemainingCount>할인 적용까지 {least}개 남음</RemainingCount>
@@ -359,16 +291,16 @@ const ProductDetail: React.FC = () => {
           </CommentInputWrapper>
         </CommentForm>{' '}
         <div>
-          {product.comments.slice(0, visibleCount).map((comment, index) => (
+          {product.reviews.slice(0, visibleCount).map((review, index) => (
             <Comment key={index}>
-              {comment.comment}
-              <CommentStars>{'⭐'.repeat(comment.star)}</CommentStars>
+              {review.review}
+              <CommentStars>{'⭐'.repeat(review.rating)}</CommentStars>
             </Comment>
           ))}
 
           {/* 더보기 버튼*/}
           <ButtonContainer>
-            {visibleCount < product.comments.length && (
+            {visibleCount < product.reviews.length && (
               <ViewMore onClick={handleShowMore}>더보기</ViewMore>
             )}
           </ButtonContainer>

@@ -1,19 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-// import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 // import { getProductbyId } from './api/productDetailApi';
 import styled from 'styled-components';
 import { addWishList } from './api/wishApi';
 import StarRating from '../../common/StarRating';
 import { addComment } from './api/commentApi';
 import { submitOrder } from './api/submitApi';
+import { products } from '../../../mocks/products';
 // import { useQuery } from '@tanstack/react-query';
 
 const ProductDetail: React.FC = () => {
-  //   const { id } = useParams();
-  //   if (!id) {
-  //     return <p>상품 번호가 유실되었습니다.</p>;
-  //   }
+  const { id } = useParams();
+  if (!id) {
+    return <p>상품 번호가 유실되었습니다.</p>;
+  }
+  const productId = Number(id);
+  const product = products.find((p) => p.id === productId);
+
+  if (!product) {
+    return <p>해당 상품을 찾을 수 없습니다.</p>;
+  }
   //   const {
   //     data: product,6
   //     isLoading,
@@ -60,107 +66,6 @@ const ProductDetail: React.FC = () => {
   const handleShowMore = () => {
     setVisibleCount((prevCount) => prevCount + 10);
   };
-  const product = {
-    id: 1,
-    name: '다이슨 드라이기',
-    rating: 4.7,
-    minamount: 5,
-    now: 3,
-    stock: 10,
-    originalPrice: 95.5,
-    discountPrice: 79.98,
-    url: 'https://via.placeholder.com/200',
-    deadline: '2024-12-31',
-    description:
-      '최고의 성능을 가진 드라이기 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구',
-    reviews: [
-      {
-        review: '디자인도 예쁘고, 바람 세기도 강해서 너무 만족스럽습니다!',
-        rating: 5,
-      },
-      {
-        review: '가격이 조금 비싸지만, 성능은 최고예요.',
-        rating: 4,
-      },
-      {
-        review: '머리가 정말 빨리 말라서 시간 절약에 도움이 돼요.',
-        rating: 5,
-      },
-      {
-        review: '생각보다 소음이 조금 있어서 아쉬웠어요.',
-        rating: 3,
-      },
-      {
-        review: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
-        rating: 5,
-      },
-      {
-        review: '선물로 줬는데 상대방이 정말 좋아했어요.',
-        rating: 5,
-      },
-      {
-        review: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
-        rating: 4,
-      },
-      {
-        review: '디자인도 예쁘고, 바람 세기도 강해서 너무 만족스럽습니다!',
-        rating: 5,
-      },
-      {
-        review: '가격이 조금 비싸지만, 성능은 최고예요.',
-        rating: 4,
-      },
-      {
-        review: '머리가 정말 빨리 말라서 시간 절약에 도움이 돼요.',
-        rating: 5,
-      },
-      {
-        review: '생각보다 소음이 조금 있어서 아쉬웠어요.',
-        rating: 3,
-      },
-      {
-        review: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
-        rating: 5,
-      },
-      {
-        review: '선물로 줬는데 상대방이 정말 좋아했어요.',
-        rating: 5,
-      },
-      {
-        review: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
-        rating: 4,
-      },
-      {
-        review: '디자인도 예쁘고, 바람 세기도 강해서 너무 만족스럽습니다!',
-        rating: 5,
-      },
-      {
-        review: '가격이 조금 비싸지만, 성능은 최고예요.',
-        rating: 4,
-      },
-      {
-        review: '머리가 정말 빨리 말라서 시간 절약에 도움이 돼요.',
-        rating: 5,
-      },
-      {
-        review: '생각보다 소음이 조금 있어서 아쉬웠어요.',
-        rating: 3,
-      },
-      {
-        review: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
-        rating: 5,
-      },
-      {
-        review: '선물로 줬는데 상대방이 정말 좋아했어요.',
-        rating: 5,
-      },
-      {
-        review: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
-        rating: 4,
-      },
-    ],
-  };
-
   //   마감까지 남은 기한
   const calculateRemainingTime = () => {
     const now = new Date();
@@ -264,7 +169,6 @@ const ProductDetail: React.FC = () => {
             </QuantityWrapper>
             <ButtonWrapper>
               <PurchaseButton
-                //URL 쿼리 스트링을 통한 데이터 전달
                 to={`/products/payment/${product.id}?data =${encodeURIComponent(JSON.stringify(data))} `}
                 disabled={isButtonDisabled}
                 onClick={handleSubmit}

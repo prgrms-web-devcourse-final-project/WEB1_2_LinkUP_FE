@@ -10,11 +10,11 @@ export interface Product {
   discountPrice: number;
   url: string;
   category: string;
-  minamount?: number;
-  deadline?: number;
-  now?: number;
+  minamount: number;
+  deadline: string;
+  now: number;
   stock?: number;
-  // description: string;
+  description: string;
   reviews: Review[];
 
   likes: boolean;

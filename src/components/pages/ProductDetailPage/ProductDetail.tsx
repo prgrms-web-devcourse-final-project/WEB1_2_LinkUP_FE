@@ -54,7 +54,7 @@ const ProductDetail: React.FC = () => {
     setVisibleCount((prevCount) => prevCount + 10);
   };
   const product = {
-    id: '1',
+    id: 1,
     name: '다이슨 드라이기',
     rating: 4.7,
     minamount: 5,
@@ -195,7 +195,7 @@ const ProductDetail: React.FC = () => {
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     //댓글추가 api 호출
-    addComment({ comment: newComment, star: newCommentStar });
+    addComment(product.id, { review: newComment, rating: newCommentStar });
     //newComment, newCommentStar <- payload로 전송
     setNewComment('');
   };
@@ -259,7 +259,7 @@ const ProductDetail: React.FC = () => {
               <WishButton
                 type="button"
                 onClick={() => {
-                  addWishList(product);
+                  addWishList(product.id);
                 }}
               >
                 찜하기

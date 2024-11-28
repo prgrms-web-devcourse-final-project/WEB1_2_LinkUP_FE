@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import Pagination from '../../common/Pagination';
@@ -21,7 +21,6 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
     '판매 상품'
   );
   const PRODUCT_PER_PAGE = 16;
-  const totalPages = Math.ceil(products.length / PRODUCT_PER_PAGE);
 
   const startIndex = (currentPage - 1) * PRODUCT_PER_PAGE;
   const filteredProducts =
@@ -29,6 +28,12 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
       ? products.filter((product) => new Date(product.deadline) < new Date())
       : products;
 
+  const totalPages = Math.ceil(filteredProducts.length / PRODUCT_PER_PAGE);
+
+  // 선택된 탭이 변경되면 페이지를 1로 초기화
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedText]);
   const currentProducts = filteredProducts.slice(
     startIndex,
     startIndex + PRODUCT_PER_PAGE
@@ -56,7 +61,7 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
 
       <CardWrapper>
         {currentProducts.map((product) => (
-          <Card key={product.id}>
+          <Card key={product.id} isSelected={selectedText === '판매 상품'}>
             <StyledLink to={`/products/${product.id}`}>
               <ProductImg src={product.url} alt={product.name} />
               <ProductWrapper>
@@ -111,10 +116,10 @@ const TextWrapper = styled.div`
   width: 200px;
   display: flex;
   gap: 25px;
-  margin-top: -20%;
-  margin-bottom: 20%;
+  margin-top: -15%;
+  margin-bottom: 5%;
 `;
-const Text = styled.h2<{ isSelected?: boolean }>`
+const Text = styled.h2<{ isSelected: boolean }>`
   cursor: pointer;
   text-decoration: ${({ isSelected }) => (isSelected ? 'underline' : 'none')};
   font-size: 16px;
@@ -127,18 +132,38 @@ const CardWrapper = styled.div`
   margin-top: 20px;
 `;
 
-const Card = styled.div`
+const Card = styled.div<{ isSelected: boolean }>`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 15px;
   margin: 10px;
   width: 200px;
-  background-color: white;
+  background-color: ${({ isSelected }) => (isSelected ? 'white' : '#f0f0f0')};
+
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: ${({ isSelected }) =>
+    isSelected ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none'};
+  opacity: ${({ isSelected }) => (isSelected ? 1 : 0.6)};
   align-items: center;
   position: relative;
+  &::after {
+    content: ${({ isSelected }) => (isSelected ? '""' : '"판매 종료"')};
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  &:hover {
+    cursor: pointer;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.4);
+    transform: translateY(-5px);
+  }
   @media (min-width: 768px) and (max-width: 1024px) {
     width: 130px;
   }

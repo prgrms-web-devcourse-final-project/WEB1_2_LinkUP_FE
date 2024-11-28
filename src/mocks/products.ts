@@ -97,7 +97,7 @@ export const products = [
     minamount: 7,
     now: 14,
     stock: 20,
-    deadline: '2024-12-10',
+    deadline: '2024-11-28',
     reviews: [
       { review: '신발이 편안하고 스타일리시합니다.', rating: 5 },
       { review: '가성비가 좋습니다.', rating: 4 },
@@ -154,7 +154,7 @@ export const products = [
     minamount: 8,
     now: 11,
     stock: 20,
-    deadline: '2024-12-18',
+    deadline: '2024-11-28',
     reviews: [
       { review: '화질이 뛰어나서 만족스럽습니다.', rating: 5 },
       { review: '조작이 쉬워서 초보자에게도 추천합니다.', rating: 5 },
@@ -230,7 +230,7 @@ export const products = [
     minamount: 9,
     now: 10,
     stock: 20,
-    deadline: '2024-12-22',
+    deadline: '2024-11-28',
     reviews: [
       { review: '청소가 훨씬 수월해졌어요!', rating: 5 },
       { review: '소음이 적어서 만족합니다.', rating: 4 },
@@ -268,7 +268,7 @@ export const products = [
     minamount: 10,
     now: 5,
     stock: 20,
-    deadline: '2024-12-30',
+    deadline: '2024-11-28',
     reviews: [
       { review: '디자인이 고급스럽고 성능이 대단해요.', rating: 5 },
       { review: '가격이 비싸지만 값어치를 합니다.', rating: 4 },
@@ -287,7 +287,7 @@ export const products = [
     minamount: 8,
     now: 14,
     stock: 20,
-    deadline: '2024-12-15',
+    deadline: '2024-11-28',
     reviews: [
       { review: '운동할 때 정말 유용해요!', rating: 4 },
       { review: '디자인이 멋지고 배터리 성능이 훌륭합니다.', rating: 5 },
@@ -344,7 +344,7 @@ export const products = [
     minamount: 9,
     now: 10,
     stock: 20,
-    deadline: '2024-12-12',
+    deadline: '2024-11-28',
     reviews: [
       { review: '선물용으로 딱 좋아요.', rating: 5 },
       { review: '향이 오래 지속됩니다.', rating: 4 },

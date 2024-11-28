@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom';
 // import { useParams } from 'react-router-dom';
 // import { getProductbyId } from './api/productDetailApi';
 import styled from 'styled-components';
-import { addWishList } from './api/WishApi';
+import { addWishList } from './api/wishApi';
 import StarRating from '../../common/StarRating';
-import { addComment } from './api/CommentApi';
+import { addComment } from './api/commentApi';
+import { submitOrder } from './api/submitApi';
 // import { useQuery } from '@tanstack/react-query';
 
 const ProductDetail: React.FC = () => {
@@ -14,7 +15,7 @@ const ProductDetail: React.FC = () => {
   //     return <p>상품 번호가 유실되었습니다.</p>;
   //   }
   //   const {
-  //     data: product,
+  //     data: product,6
   //     isLoading,
   //     isError,
   //   } = useQuery<Product, Error>({
@@ -48,7 +49,13 @@ const ProductDetail: React.FC = () => {
   const [newCommentStar, setNewCommentStar] = useState(5);
   const [remainingTime, setRemainingTime] = useState('');
   const [visibleCount, setVisibleCount] = useState(10);
+  const [data, setData] = useState({});
 
+  const handleSubmit = () => {
+    submitOrder(product.id, payload).then((res) => {
+      setData(res);
+    });
+  };
   // 더보기 버튼 클릭 시 댓글 수를 증가시키는 함수
   const handleShowMore = () => {
     setVisibleCount((prevCount) => prevCount + 10);
@@ -202,7 +209,13 @@ const ProductDetail: React.FC = () => {
 
   //남은 재고
   const least = product.minamount - product.now;
-
+  const payload = {
+    url: product.url,
+    productName: product.name,
+    price: product.originalPrice,
+    discountPrice: product.discountPrice,
+    amount: quantity,
+  };
   return (
     <Container>
       <ContentWrapper>
@@ -251,8 +264,10 @@ const ProductDetail: React.FC = () => {
             </QuantityWrapper>
             <ButtonWrapper>
               <PurchaseButton
-                to={`/products/payment/${product.id}`}
+                //URL 쿼리 스트링을 통한 데이터 전달
+                to={`/products/payment/${product.id}?data =${encodeURIComponent(JSON.stringify(data))} `}
                 disabled={isButtonDisabled}
+                onClick={handleSubmit}
               >
                 구매하기
               </PurchaseButton>

@@ -1,8 +1,8 @@
 import axiosInstance from '../../../../api/axiosInstance';
-export type Review = {
+export interface Review {
   review: string;
   rating: number;
-};
+}
 export const addComment = async (productId: number, payload: Review) => {
   try {
     const URL = `/review/${productId}`;

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Link,
+  // useLocation,
   useNavigate,
   //  useParams
 } from 'react-router-dom';
@@ -11,14 +12,19 @@ const PaymentForm = () => {
   const product = {
     id: '1',
     name: '다이슨 드라이기',
-    stars: 5,
-    minimum: 5,
+    rating: 5,
+    minamount: 5,
     now: 3,
     stock: 10,
     originalPrice: 95.5,
-    discountedPrice: 79.98,
-    image: 'https://via.placeholder.com/200',
+    discountPrice: 79.98,
+    url: 'https://via.placeholder.com/200',
   };
+  //URL 쿼리 스트링을 통한 데이터 수신
+  // const location = useLocation();
+  // const query = new URLSearchParams(location.search);
+  // const data = query.get('data') || ''; // null일 경우 빈 문자열 반환
+  // const product = JSON.parse(decodeURIComponent(data));
   //   const { id } = useParams();
   //   if (!id) {
   //     return <p>상품 번호가 유실되었습니다.</p>;
@@ -53,11 +59,37 @@ const PaymentForm = () => {
   //       </Container>
   //     );
   //   }
+
   const navigate = useNavigate();
+  const [userName, setName] = useState('');
+  const [basicAddress, setBasicAddress] = useState('');
+  const [detailAddress, setDetailAddress] = useState('');
+  const [needed, setNeeded] = useState('');
+  const [payment, setPayment] = useState('');
+  const payload = {
+    productName: product.name,
+    url: product.url,
+    price: product.discountPrice,
+    // amount : product.amount,
+    finalPrice: product.discountPrice * product.now,
+    // postId : product.postId,
+    payMethod: payment,
+    needed: needed,
+    name: userName,
+    address: {
+      city: basicAddress,
+      detail: detailAddress,
+    },
+  };
+  const handleRadio = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPayment(e.target.value);
+  };
   const onPaymentSubmit = async () => {
     try {
-      await handlePayment();
-      navigate('/payment-success');
+      const paymentResult = await handlePayment(payload);
+      if (paymentResult == 'success') {
+        navigate('/payment-success');
+      }
     } catch (e) {
       alert(`결제에 실패하였습니다 ${e}`);
     }
@@ -69,14 +101,20 @@ const PaymentForm = () => {
         <ContentBox>
           <FlexRow>
             <ProductName>{product.name}</ProductName>
-            <Price>₩{product.discountedPrice.toLocaleString()}</Price>
+            <Price>₩{product.discountPrice.toLocaleString()}</Price>
           </FlexRow>
           <FlexRow>
-            <Quantity>수량: 1개</Quantity>
+            <Quantity>
+              수량: 1개
+              {/* product.amount */}
+            </Quantity>
           </FlexRow>
           <TotalRow>
             <span>합계:</span>
-            <TotalPrice>₩{product.discountedPrice.toLocaleString()}</TotalPrice>
+            <TotalPrice>
+              ₩{product.discountPrice.toLocaleString()}
+              {/* *product.amount */}
+            </TotalPrice>
           </TotalRow>
         </ContentBox>
       </Section>
@@ -86,20 +124,43 @@ const PaymentForm = () => {
         <ContentBox>
           <FormGroup>
             <Label>
-              이름
-              <Input type="text" placeholder="이름 입력" />
+              수령인
+              <Input
+                type="text"
+                placeholder="이름 입력"
+                value={userName}
+                onChange={(e) => setName(e.target.value)}
+              />
             </Label>
           </FormGroup>
           <FormGroup>
             <Label>
-              주소(주소지 근처의 픽업장소 선택)
-              <Input type="text" placeholder="주소 입력" />
+              배송지
+              <InputWrapper>
+                <BasicAddressInput
+                  type="text"
+                  placeholder="기본 주소를 입력해주세요"
+                  value={basicAddress}
+                  onChange={(e) => setBasicAddress(e.target.value)}
+                />
+              </InputWrapper>
             </Label>
+            <DetailAddressInput
+              type="text"
+              placeholder="상세 주소를 입력해주세요"
+              value={detailAddress}
+              onChange={(e) => setDetailAddress(e.target.value)}
+            />
           </FormGroup>
           <FormGroup>
             <Label>
               배송 시 요청사항
-              <TextArea rows={2} placeholder="요청사항 입력" />
+              <TextArea
+                rows={2}
+                placeholder="요청사항 입력"
+                value={needed}
+                onChange={(e) => setNeeded(e.target.value)}
+              />
             </Label>
           </FormGroup>
         </ContentBox>
@@ -110,11 +171,21 @@ const PaymentForm = () => {
         <ContentBox>
           <RadioGroup>
             <RadioLabel>
-              <RadioInput type="radio" name="payment-method" />
+              <RadioInput
+                type="radio"
+                name="payment-method"
+                value="virtual"
+                onChange={handleRadio}
+              />
               <RadioText>가상계좌 입금</RadioText>
             </RadioLabel>
             <RadioLabel>
-              <RadioInput type="radio" name="payment-method" />
+              <RadioInput
+                type="radio"
+                name="payment-method"
+                value="card"
+                onChange={handleRadio}
+              />
               <RadioText>카드 결제</RadioText>
             </RadioLabel>
           </RadioGroup>
@@ -234,7 +305,20 @@ const Input = styled.input`
     color: #94a3b8;
   }
 `;
+const InputWrapper = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+`;
 
+const BasicAddressInput = styled(Input)`
+  flex-grow: 1;
+  cursor: pointer;
+`;
+
+const DetailAddressInput = styled(Input)`
+  margin-top: 8px;
+`;
 const TextArea = styled.textarea`
   width: 100%;
   padding: 10px 12px;

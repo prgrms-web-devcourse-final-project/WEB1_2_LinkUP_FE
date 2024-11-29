@@ -13,7 +13,7 @@ const FindPasswordPage = () => {
           style={{
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
+            objectFit: 'contain',
           }}
         />
       </LeftContent>
@@ -97,6 +97,7 @@ const Title = styled.div`
 `;
 const LeftContent = styled.div`
   flex: 6;
+  background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;

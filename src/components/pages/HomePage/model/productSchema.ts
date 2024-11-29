@@ -1,16 +1,20 @@
-interface Comment {
-  comment: string;
+interface Review {
+  review: string;
 }
 
 export interface Product {
-  id: string;
+  id: number;
   name: string;
-  stars: number;
+  rating: number;
   originalPrice: number;
-  discountedPrice: number;
-  image: string;
+  discountPrice: number;
+  url: string;
   category: string;
-  // description: string;
-  comments: Comment[];
+  minamount: number;
+  deadline: string;
+  now: number;
+  stock: number;
+  description: string;
+  reviews: Review[];
   likes: boolean;
 }

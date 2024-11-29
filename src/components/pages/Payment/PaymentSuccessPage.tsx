@@ -1,78 +1,50 @@
-// import { useQuery } from '@tanstack/react-query';
 import React from 'react';
-import {
-  Link,
-  //  useParams
-} from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-// import { getProductbyId } from '../ProductDetailPage/api/productDetailApi';
-// import { Product } from './api/paymentApi';
+import { products } from '../../../mocks/products';
+// import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 
 const PaymentSuccessPage = () => {
-  const product = {
-    id: '1',
-    name: '다이슨 드라이기',
-    discountedPrice: 79.98,
-  };
-  //   const { id } = useParams();
-  //   if (!id) {
-  //     return <p>제품 번호가 유실되었습니다.</p>;
-  //   }
-  //   const {
-  //     data: product,
-  //     isLoading,
-  //     isError,
-  //   } = useQuery<Product, Error>({
-  //     queryKey: ['product', id],
-  //     queryFn: () => getProductbyId(id),
-  //   });
-  //   // 로딩 상태 처리
-  //   if (isLoading) {
-  //     return (
-  //       <Container>
-  //         <SuccessSection>
-  //           <Title>주문 정보 로딩 중...</Title>
-  //         </SuccessSection>
-  //       </Container>
-  //     );
-  //   }
+  const { id } = useParams();
+  if (!id) {
+    return <p>상품 번호가 유실되었습니다.</p>;
+  }
+  const productId = Number(id);
+  // const { data: product, isLoading, isError } = useProductQuery(productId);
+  const product = products.find((p) => p.id === productId);
 
-  //   // 에러 상태 처리
-  //   if (isError) {
-  //     return (
-  //       <Container>
-  //         <SuccessSection>
-  //           <Title>주문 정보를 불러오지 못했습니다.</Title>
-  //           <Subtitle>잠시 후 다시 시도해주세요.</Subtitle>
-  //         </SuccessSection>
-  //       </Container>
-  //     );
-  //   }
+  if (!product) {
+    return <p>해당 상품을 찾을 수 없습니다.</p>;
+  }
   return (
-    <Container>
-      <SuccessSection>
-        <Title>결제 완료</Title>
-        <Subtitle>주문해주셔서 감사합니다!</Subtitle>
+    <>
+      {/* <QueryHandler isLoading={isLoading} isError={isError}> */}
+      <Container>
+        <SuccessSection>
+          <Title>결제 완료</Title>
+          <Subtitle>주문해주셔서 감사합니다!</Subtitle>
 
-        <OrderSummary>
-          <SummaryRow>
-            <Label>상품명</Label>
-            <Value>{product?.name}</Value>
-          </SummaryRow>
-          <SummaryRow>
-            <Label>결제 금액</Label>
-            <Value>₩{product?.discountedPrice.toLocaleString()}</Value>
-          </SummaryRow>
-        </OrderSummary>
-      </SuccessSection>
+          <OrderSummary>
+            <SummaryRow>
+              <Label>상품명</Label>
+              <Value>{product?.name}</Value>
+            </SummaryRow>
+            <SummaryRow>
+              <Label>결제 금액</Label>
+              <Value>₩{product?.discountPrice.toLocaleString()}</Value>
+            </SummaryRow>
+          </OrderSummary>
+        </SuccessSection>
 
-      <ButtonGroup>
-        <OrderDetailButton to={`/orders/${product?.id}`}>
-          주문 내역 보기
-        </OrderDetailButton>
-        <BackButton to="/">메인으로 돌아가기</BackButton>
-      </ButtonGroup>
-    </Container>
+        <ButtonGroup>
+          <OrderDetailButton to={`/orders/${product?.id}`}>
+            주문 내역 보기
+          </OrderDetailButton>
+          <BackButton to="/">메인으로 돌아가기</BackButton>
+        </ButtonGroup>
+      </Container>
+      {/* </QueryHandler> */}
+    </>
   );
 };
 

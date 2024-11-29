@@ -14,7 +14,7 @@ const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => {
   const getTopProducts = (products: Product[]): Product[] => {
     // comments.length를 기준으로 내림차순 정렬
     const sortedByComments = [...products].sort(
-      (a, b) => b.comments.length - a.comments.length
+      (a, b) => b.reviews.length - a.reviews.length
     );
     // 상위 8개 선택
     return sortedByComments.slice(0, 8);
@@ -30,18 +30,18 @@ const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => {
         {displayedProducts.map((product) => (
           <Card key={product.id}>
             <StyledLink to={`/products/${product.id}`}>
-              <ProductImg src={product.image} alt={product.name} />
+              <ProductImg src={product.url} alt={product.name} />
               <ProductWrapper>
                 <ProductName>{product.name}</ProductName>
                 <ProductStar>
-                  <StarRating rating={product.stars} />
+                  <StarRating rating={product.rating} />
                 </ProductStar>
                 <PriceWrapper>
                   <OriginalPrice>
                     ${product.originalPrice.toFixed(2)}
                   </OriginalPrice>
                   <DiscountedPrice>
-                    ${product.discountedPrice.toFixed(2)}
+                    ${product.discountPrice.toFixed(2)}
                   </DiscountedPrice>
                 </PriceWrapper>
               </ProductWrapper>

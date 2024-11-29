@@ -6,12 +6,41 @@ import { SettingPageData } from './mockData';
 import PasswordModal from './Modal/PasswordModal';
 import LogoutModal from './Modal/LogoutModal';
 import WithdrawModal from './Modal/WithdrawModal';
+import { useDaumPostcodePopup } from 'react-daum-postcode';
 
 const SettingPage = () => {
   const { addressList } = SettingPageData;
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [newAddress, setNewAddress] = useState('');
+  const [newName, setNewName] = useState('');
+  const [newPhone, setNewPhone] = useState('');
+  const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
+
+  const postcodeScriptUrl =
+    'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+  const open = useDaumPostcodePopup(postcodeScriptUrl);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleComplete = (data: any) => {
+    setNewAddress(data.zonecode + ' ' + data.jibunAddress);
+  };
+
+  const handleAddAddress = () => {
+    if (newName && newPhone && newAddress) {
+      addressList.push({
+        id: Date.now(),
+        name: newName,
+        address: newAddress,
+        phone: newPhone,
+      });
+      setNewName('');
+      setNewPhone('');
+      setNewAddress('');
+      setIsAddingNewAddress(false);
+    }
+  };
 
   return (
     <GS.Wrapper>
@@ -28,7 +57,40 @@ const SettingPage = () => {
         </NicknameWrapper>
         <AddressWrapper>
           <Title>배송지 주소 변경</Title>
-          <AddAddressButton>Add New Address</AddAddressButton>
+          {isAddingNewAddress ? (
+            <NewAddressForm>
+              <StyledInput
+                placeholder="이름 입력"
+                value={newName}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setNewName(e.target.value)
+                }
+              />
+              <StyledInput
+                placeholder="핸드폰 번호 입력"
+                value={newPhone}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setNewPhone(e.target.value)
+                }
+              />
+              <AddressSearchButton
+                onClick={() => {
+                  open({ onComplete: handleComplete });
+                }}
+              >
+                주소 검색
+              </AddressSearchButton>
+              {newAddress && <AddressPreview>{newAddress}</AddressPreview>}
+              <CompleteButton onClick={handleAddAddress}>완료</CompleteButton>
+              <CancelButton onClick={() => setIsAddingNewAddress(false)}>
+                취소
+              </CancelButton>
+            </NewAddressForm>
+          ) : (
+            <AddAddressButton onClick={() => setIsAddingNewAddress(true)}>
+              Add New Address
+            </AddAddressButton>
+          )}
           <AddressList>
             {addressList.map((item) => (
               <AddressItem key={item.id}>
@@ -97,6 +159,49 @@ const SettingPage = () => {
     </GS.Wrapper>
   );
 };
+
+const NewAddressForm = styled.div`
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+const AddressSearchButton = styled.div`
+  background-color: #000;
+  color: #fff;
+  border-radius: 5px;
+  padding: 10px 20px;
+  text-align: center;
+  cursor: pointer;
+  width: 350px;
+`;
+
+const AddressPreview = styled.div`
+  margin-top: 5px;
+  font-size: 12px;
+  color: #555;
+`;
+
+const CompleteButton = styled.div`
+  background-color: green;
+  color: #fff;
+  border-radius: 5px;
+  padding: 10px 20px;
+  text-align: center;
+  cursor: pointer;
+  width: 350px;
+`;
+
+const CancelButton = styled.div`
+  background-color: red;
+  color: #fff;
+  border-radius: 5px;
+  padding: 10px 20px;
+  text-align: center;
+  cursor: pointer;
+  width: 350px;
+`;
 
 const EditButton = styled.div`
   display: inline-flex;

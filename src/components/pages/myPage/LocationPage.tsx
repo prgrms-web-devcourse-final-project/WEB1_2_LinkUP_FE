@@ -56,6 +56,7 @@ function LocationPage() {
               latitude={location.latitude}
               longitude={location.longitude}
               appKey={import.meta.env.VITE_KAKAO_KEY} // 카카오 JavaScript 키
+              width={600}
             />
           ) : (
             <p>위치 정보를 불러오는 중...</p>

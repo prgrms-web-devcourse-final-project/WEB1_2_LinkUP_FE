@@ -45,6 +45,9 @@ const StyledInput = styled.input`
   ::placeholder {
     color: #888;
   }
+  @media (min-width: 576px) and (max-width: 767px) {
+    font-size: 1rem;
+  }
 `;
 
 export default InputComponent;

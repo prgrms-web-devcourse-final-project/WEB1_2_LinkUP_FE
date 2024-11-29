@@ -95,42 +95,46 @@ const PaymentForm = () => {
             <FormGroup>
               <Label>
                 수령인
-                <Input
-                  type="text"
-                  placeholder="이름 입력"
-                  value={userName}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </Label>
-            </FormGroup>
-            <FormGroup>
-              <Label>
-                배송지
                 <InputWrapper>
-                  <BasicAddressInput
+                  <Input
                     type="text"
-                    placeholder="기본 주소를 입력해주세요"
-                    value={basicAddress}
-                    onChange={(e) => setBasicAddress(e.target.value)}
+                    placeholder="이름 입력"
+                    value={userName}
+                    onChange={(e) => setName(e.target.value)}
                   />
                 </InputWrapper>
               </Label>
-              <DetailAddressInput
-                type="text"
-                placeholder="상세 주소를 입력해주세요"
-                value={detailAddress}
-                onChange={(e) => setDetailAddress(e.target.value)}
-              />
+            </FormGroup>
+            <FormGroup>
+              <Label>배송지</Label>
+              <InputWrapper>
+                <BasicAddressInput
+                  type="text"
+                  placeholder="기본 주소를 입력해주세요"
+                  value={basicAddress}
+                  onChange={(e) => setBasicAddress(e.target.value)}
+                />
+              </InputWrapper>
+              <InputWrapper>
+                <DetailAddressInput
+                  type="text"
+                  placeholder="상세 주소를 입력해주세요"
+                  value={detailAddress}
+                  onChange={(e) => setDetailAddress(e.target.value)}
+                />
+              </InputWrapper>
             </FormGroup>
             <FormGroup>
               <Label>
                 배송 시 요청사항
-                <TextArea
-                  rows={2}
-                  placeholder="요청사항 입력"
-                  value={needed}
-                  onChange={(e) => setNeeded(e.target.value)}
-                />
+                <InputWrapper>
+                  <TextArea
+                    rows={2}
+                    placeholder="요청사항 입력"
+                    value={needed}
+                    onChange={(e) => setNeeded(e.target.value)}
+                  />
+                </InputWrapper>
               </Label>
             </FormGroup>
           </ContentBox>

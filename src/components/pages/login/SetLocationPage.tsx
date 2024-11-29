@@ -1,14 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { styled } from 'styled-components';
+import styled from 'styled-components';
 
-const FindPasswordPage = () => {
+function SetLocationPage() {
   const navigate = useNavigate();
   return (
     <Wrapper>
       <LeftContent>
         <img
-          src="/images/login7.jpg"
+          src="/images/login10.jpg"
           alt="Login background"
           style={{
             width: '100%',
@@ -18,44 +18,24 @@ const FindPasswordPage = () => {
         />
       </LeftContent>
       <RightContent>
-        <BackButton
+        <Title>
+          우리동네를 인증하고
+          <br />
+          공동구매를 시작하세요
+        </Title>
+        <Subtitle>위치서비스를 허용해주세요</Subtitle>
+
+        <LoginButton
           onClick={() => {
-            navigate(-1);
+            navigate('/setnickname');
           }}
         >
-          <img
-            src="/images/arrow-left.png"
-            alt="left arrow"
-            style={{ width: '20px', height: '20px' }}
-          />
-          Back
-        </BackButton>
-        <Title>비밀번호 찾기</Title>
-        <Description>
-          등록된 이메일 주소를 입력하고 확인 버튼을 클릭해주세요
-        </Description>
-        <Subtitle>email address</Subtitle>
-        <StyledInput placeholder="이메일 입력" />
-
-        <LoginButton>확인</LoginButton>
+          Next
+        </LoginButton>
       </RightContent>
     </Wrapper>
   );
-};
-
-const BackButton = styled.div`
-  margin-bottom: 35px;
-  display: inline-flex;
-  align-items: center;
-`;
-
-const Description = styled.div`
-  margin-bottom: 20px;
-  color: #a4a1aa;
-  font-size: 14px;
-  font-weight: 500;
-  margin-top: 10px;
-`;
+}
 
 const LoginButton = styled.div`
   background-color: #000;
@@ -70,22 +50,6 @@ const LoginButton = styled.div`
   cursor: pointer;
 `;
 
-const StyledInput = styled.input`
-  width: calc(100% - 40px);
-  height: 25px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 13px;
-  padding: 5px 10px;
-  box-shadow: none;
-  outline: none;
-  transition: border-color 0.3s ease;
-
-  &:focus {
-    border-color: #000;
-  }
-`;
-
 const Subtitle = styled.div`
   font-size: 12px;
   font-weight: 500;
@@ -94,6 +58,7 @@ const Subtitle = styled.div`
 const Title = styled.div`
   font-size: 30px;
   font-weight: 900;
+  margin-bottom: 20px;
 `;
 const LeftContent = styled.div`
   flex: 6;
@@ -119,4 +84,4 @@ const Wrapper = styled.div`
   height: 100vh;
 `;
 
-export default FindPasswordPage;
+export default SetLocationPage;

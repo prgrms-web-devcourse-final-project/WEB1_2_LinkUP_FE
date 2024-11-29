@@ -6,7 +6,17 @@ const SignInPage = () => {
   const navigate = useNavigate();
   return (
     <Wrapper>
-      <LeftContent>Image</LeftContent>
+      <LeftContent>
+        <img
+          src="/images/login1.jpg"
+          alt="Login background"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        />
+      </LeftContent>
       <RightContent>
         <Title>Welcome 👋🏼</Title>
         <Subtitle>email address</Subtitle>
@@ -14,7 +24,14 @@ const SignInPage = () => {
         <Subtitle>password</Subtitle>
         <StyledInput placeholder="비밀번호 입력 (8 ~ 16자리)" />
         <LoginButton>Login</LoginButton>
-        <SNSButton>계정으로 로그인</SNSButton>
+        <SNSButton>
+          <img
+            src="/images/googlelogo.png"
+            alt="Google Logo"
+            style={{ width: '50px', height: '17px' }}
+          />
+          계정으로 로그인
+        </SNSButton>
         <AuthButtonWrapper>
           <AuthButton
             onClick={() => {
@@ -60,6 +77,7 @@ const SNSButton = styled.div`
   border-radius: 5px;
   font-size: 13px;
   cursor: pointer;
+  gap: 5px;
 `;
 
 const LoginButton = styled.div`
@@ -76,7 +94,7 @@ const LoginButton = styled.div`
 `;
 
 const StyledInput = styled.input`
-  width: calc(100% - 20px);
+  width: calc(100% - 40px);
   height: 25px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -103,10 +121,10 @@ const Title = styled.div`
 `;
 const LeftContent = styled.div`
   flex: 6;
-  background-color: lightblue;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 `;
 
 const RightContent = styled.div`

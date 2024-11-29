@@ -6,14 +6,28 @@ function SignUpPage() {
   const navigate = useNavigate();
   return (
     <Wrapper>
-      <LeftContent>Image</LeftContent>
+      <LeftContent>
+        <img
+          src="/images/login4.jpg"
+          alt="Login background"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        />
+      </LeftContent>
       <RightContent>
         <Title>회원가입</Title>
-        <Subtitle>email address</Subtitle>
+        <Subtitle>Name</Subtitle>
+        <StyledInput placeholder="이름 입력" />
+        <Subtitle>Phone Number</Subtitle>
+        <StyledInput placeholder="휴대폰 번호 입력" />
+        <Subtitle>Email Address</Subtitle>
         <StyledInput placeholder="이메일 입력" />
-        <Subtitle>password</Subtitle>
+        <Subtitle>Password</Subtitle>
         <StyledInput placeholder="비밀번호 입력 (8 ~ 16자리)" />
-        <Subtitle>confirm password</Subtitle>
+        <Subtitle>Confirm Password</Subtitle>
         <StyledInput placeholder="비밀번호 확인" />
         <LoginButton
           onClick={() => {
@@ -41,7 +55,7 @@ const LoginButton = styled.div`
 `;
 
 const StyledInput = styled.input`
-  width: calc(100% - 20px);
+  width: calc(100% - 40px);
   height: 25px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -68,10 +82,10 @@ const Title = styled.div`
 `;
 const LeftContent = styled.div`
   flex: 6;
-  background-color: lightblue;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 `;
 
 const RightContent = styled.div`

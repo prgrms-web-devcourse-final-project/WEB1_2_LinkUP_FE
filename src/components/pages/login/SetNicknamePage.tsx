@@ -21,7 +21,17 @@ const SetNicknamePage = () => {
 
   return (
     <Wrapper>
-      <LeftContent>Image</LeftContent>
+      <LeftContent>
+        <img
+          src="/images/login5.jpg"
+          alt="Login background"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        />
+      </LeftContent>
       <RightContent>
         <Title>
           굿바이어스에서 사용할
@@ -98,10 +108,10 @@ const Title = styled.div`
 
 const LeftContent = styled.div`
   flex: 6;
-  background-color: lightblue;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 `;
 
 const RightContent = styled.div`

@@ -41,7 +41,17 @@ const TermsPage = () => {
 
   return (
     <Wrapper>
-      <LeftContent>Image</LeftContent>
+      <LeftContent>
+        <img
+          src="/images/login2.jpg"
+          alt="Login background"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        />
+      </LeftContent>
       <RightContent>
         <Title>
           서비스 약관에
@@ -116,7 +126,7 @@ const TermsPage = () => {
         <LoginButton
           onClick={() => {
             if (terms.age && terms.service && terms.finance && terms.privacy) {
-              navigate('/neighborhood');
+              navigate('/setlocation');
             } else {
               alert('필수 항목을 모두 동의해주세요.');
             }
@@ -184,10 +194,10 @@ const Title = styled.div`
 
 const LeftContent = styled.div`
   flex: 6;
-  background-color: lightblue;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 `;
 
 const RightContent = styled.div`

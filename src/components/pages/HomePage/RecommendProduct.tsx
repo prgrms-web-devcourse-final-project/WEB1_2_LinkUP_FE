@@ -100,6 +100,9 @@ const Card = styled.div`
   @media (min-width: 768px) and (max-width: 1024px) {
     width: 130px;
   }
+  @media (min-width: 576px) and (max-width: 767px) {
+    width: 80px;
+  }
 `;
 const StyledLink = styled(Link)`
   text-decoration: none;
@@ -119,6 +122,10 @@ const ProductImg = styled.img`
   background-color: #e0e0e0;
   border-radius: 8px;
   object-fit: cover;
+  @media (min-width: 576px) and (max-width: 767px) {
+    width: 100px;
+    height: 100px;
+  }
 `;
 
 const ProductWrapper = styled.div`
@@ -132,6 +139,9 @@ const ProductName = styled.div`
   font-weight: bold;
   margin-top: 10px;
   text-align: left;
+  @media (min-width: 576px) and (max-width: 767px) {
+    font-size: 12px;
+  }
 `;
 
 const ProductStar = styled.div`
@@ -140,6 +150,9 @@ const ProductStar = styled.div`
   text-align: left;
   margin-left: -5px;
   margin-top: 5px;
+  @media (min-width: 576px) and (max-width: 767px) {
+    display: none;
+  }
 `;
 
 const PriceWrapper = styled.div`
@@ -154,12 +167,22 @@ const OriginalPrice = styled.div`
   text-decoration: line-through;
   color: #999;
   font-size: 14px;
+  @media (min-width: 576px) and (max-width: 767px) {
+    font-size: 10px;
+    position: absolute;
+    bottom: 25px;
+  }
 `;
 
 const DiscountedPrice = styled.div`
   font-size: 16px;
   font-weight: bold;
   color: #ff4d4f;
+  @media (min-width: 576px) and (max-width: 767px) {
+    font-size: 12px;
+    position: absolute;
+    bottom: 10px;
+  }
 `;
 
 const LikeButton = styled.img<{ likes: boolean }>`
@@ -176,6 +199,12 @@ const LikeButton = styled.img<{ likes: boolean }>`
     cursor: pointer;
     transform: scale(1.2);
     transition: transform 0.2s ease-in-out;
+  }
+  @media (min-width: 576px) and (max-width: 767px) {
+    bottom: 10px;
+    right: 10px;
+    width: 18px;
+    height: 18px;
   }
 `;
 const MoreButtonWrapper = styled.div`

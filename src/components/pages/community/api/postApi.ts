@@ -69,7 +69,6 @@ export type CreatePostInput = Omit<
   | 'currentQuantity'
   | 'participants'
   | 'comments'
-  | 'status'
   | 'cancelledUsers'
 > & {
   period?: number;
@@ -137,8 +136,8 @@ export const createPost = async (
     createdAt,
     updatedAt,
     closeAt: '',
-    authorId: 'mock-author-id',
-    authorNickname: 'mock-author-nickname',
+    authorId: 'user-00001',
+    authorNickname: '사용자 A',
     currentQuantity: 0,
     participants: [],
     comments: [],

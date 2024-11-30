@@ -20,6 +20,8 @@ export const mockCommunityPosts: Post[] = [
     category: '생활용품',
     participants: [],
     comments: [],
+    status: 'NOT_APPROVED', // 초기 상태를 '승인 대기'로 설정
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00002',
@@ -40,6 +42,8 @@ export const mockCommunityPosts: Post[] = [
     category: '생활용품',
     participants: [],
     comments: [],
+    status: 'NOT_APPROVED', // 초기 상태를 '승인 대기'로 설정
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00003',
@@ -60,6 +64,8 @@ export const mockCommunityPosts: Post[] = [
     category: '생활용품',
     participants: [],
     comments: [],
+    status: 'NOT_APPROVED', // 초기 상태를 '승인 대기'로 설정
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00004',
@@ -80,6 +86,8 @@ export const mockCommunityPosts: Post[] = [
     category: '생활용품',
     participants: [],
     comments: [],
+    status: 'NOT_APPROVED', // 초기 상태를 '승인 대기'로 설정
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00005',
@@ -100,6 +108,8 @@ export const mockCommunityPosts: Post[] = [
     category: '생활용품',
     participants: [],
     comments: [],
+    status: 'NOT_APPROVED', // 초기 상태를 '승인 대기'로 설정
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00006',
@@ -120,6 +130,8 @@ export const mockCommunityPosts: Post[] = [
     category: '생활용품',
     participants: [],
     comments: [],
+    status: 'NOT_APPROVED', // 초기 상태를 '승인 대기'로 설정
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00007',
@@ -139,12 +151,38 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '생활용품',
     participants: [
-      { userId: 'user-00002', quantity: 2, isCancelled: false },
-      { userId: 'user-00001', quantity: 2, isCancelled: false },
-      { userId: 'user-00003', quantity: 1, isCancelled: true },
-      { userId: 'user-00004', quantity: 1, isCancelled: false },
+      {
+        userId: 'user-00002',
+        quantity: 2,
+        isCancelled: false,
+        isPaymentCompleted: true,
+        isRequiredRefund: false,
+      },
+      {
+        userId: 'user-00001',
+        quantity: 2,
+        isCancelled: false,
+        isPaymentCompleted: false,
+        isRequiredRefund: false,
+      },
+      {
+        userId: 'user-00003',
+        quantity: 1,
+        isCancelled: true,
+        isPaymentCompleted: false,
+        isRequiredRefund: false,
+      },
+      {
+        userId: 'user-00004',
+        quantity: 1,
+        isCancelled: false,
+        isPaymentCompleted: false,
+        isRequiredRefund: false,
+      },
     ],
     comments: [],
+    status: 'PAYMENT_STANDBY',
+    cancelledUsers: ['user-00003'],
   },
   {
     postId: 'communityPost-00008',
@@ -164,8 +202,20 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '생활용품',
     participants: [
-      { userId: 'user-00001', quantity: 2, isCancelled: false },
-      { userId: 'user-00003', quantity: 1, isCancelled: true },
+      {
+        userId: 'user-00001',
+        quantity: 2,
+        isCancelled: false,
+        isPaymentCompleted: false,
+        isRequiredRefund: false,
+      },
+      {
+        userId: 'user-00003',
+        quantity: 1,
+        isCancelled: true,
+        isPaymentCompleted: false,
+        isRequiredRefund: false,
+      },
     ],
     comments: [
       {
@@ -182,6 +232,8 @@ export const mockCommunityPosts: Post[] = [
         commentId: 'comment-00002',
       },
     ],
+    status: 'APPROVED',
+    cancelledUsers: ['user-00003'],
   },
   {
     postId: 'communityPost-00009',
@@ -205,8 +257,20 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '생활용품',
     participants: [
-      { userId: 'user-00002', quantity: 2, isCancelled: false },
-      { userId: 'user-00003', quantity: 1, isCancelled: true },
+      {
+        userId: 'user-00002',
+        quantity: 2,
+        isCancelled: false,
+        isPaymentCompleted: false,
+        isRequiredRefund: false,
+      },
+      {
+        userId: 'user-00003',
+        quantity: 1,
+        isCancelled: true,
+        isPaymentCompleted: false,
+        isRequiredRefund: false,
+      },
     ],
     comments: [
       {
@@ -223,6 +287,8 @@ export const mockCommunityPosts: Post[] = [
         commentId: 'comment-00002',
       },
     ],
+    status: 'APPROVED',
+    cancelledUsers: ['user-00003'],
   },
   {
     postId: 'communityPost-000010',
@@ -243,6 +309,8 @@ export const mockCommunityPosts: Post[] = [
     category: '식료품',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-000011',
@@ -263,6 +331,8 @@ export const mockCommunityPosts: Post[] = [
     category: '식료품',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-000012',
@@ -283,6 +353,8 @@ export const mockCommunityPosts: Post[] = [
     category: '식료품',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00013',
@@ -303,6 +375,8 @@ export const mockCommunityPosts: Post[] = [
     category: '식료품',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00014',
@@ -323,6 +397,8 @@ export const mockCommunityPosts: Post[] = [
     category: '식료품',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00015',
@@ -343,6 +419,8 @@ export const mockCommunityPosts: Post[] = [
     category: '식료품',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00016',
@@ -363,6 +441,8 @@ export const mockCommunityPosts: Post[] = [
     category: '식료품',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00017',
@@ -383,6 +463,8 @@ export const mockCommunityPosts: Post[] = [
     category: '식료품',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00018',
@@ -403,6 +485,8 @@ export const mockCommunityPosts: Post[] = [
     category: '식료품',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00019',
@@ -423,6 +507,8 @@ export const mockCommunityPosts: Post[] = [
     category: '식료품',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00020',
@@ -443,6 +529,8 @@ export const mockCommunityPosts: Post[] = [
     category: '식료품',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00021',
@@ -463,6 +551,8 @@ export const mockCommunityPosts: Post[] = [
     category: '식료품',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00022',
@@ -483,6 +573,8 @@ export const mockCommunityPosts: Post[] = [
     category: '식료품',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00023',
@@ -503,6 +595,8 @@ export const mockCommunityPosts: Post[] = [
     category: '패션/의류',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00024',
@@ -523,6 +617,8 @@ export const mockCommunityPosts: Post[] = [
     category: '패션/의류',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00025',
@@ -543,6 +639,8 @@ export const mockCommunityPosts: Post[] = [
     category: '패션/의류',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00026',
@@ -563,6 +661,8 @@ export const mockCommunityPosts: Post[] = [
     category: '패션/의류',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00027',
@@ -583,6 +683,8 @@ export const mockCommunityPosts: Post[] = [
     category: '패션/의류',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00028',
@@ -603,6 +705,8 @@ export const mockCommunityPosts: Post[] = [
     category: '패션/의류',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00029',
@@ -623,6 +727,8 @@ export const mockCommunityPosts: Post[] = [
     category: '패션/의류',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00030',
@@ -643,6 +749,8 @@ export const mockCommunityPosts: Post[] = [
     category: '패션/의류',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00031',
@@ -663,6 +771,8 @@ export const mockCommunityPosts: Post[] = [
     category: '패션/의류',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00032',
@@ -683,6 +793,8 @@ export const mockCommunityPosts: Post[] = [
     category: '패션/의류',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00033',
@@ -703,6 +815,8 @@ export const mockCommunityPosts: Post[] = [
     category: '패션/의류',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00034',
@@ -723,6 +837,8 @@ export const mockCommunityPosts: Post[] = [
     category: '패션/의류',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00035',
@@ -743,6 +859,8 @@ export const mockCommunityPosts: Post[] = [
     category: '패션/의류',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00036',
@@ -763,6 +881,8 @@ export const mockCommunityPosts: Post[] = [
     category: '패션/의류',
     participants: [],
     comments: [],
+    status: 'APPROVED',
+    cancelledUsers: [],
   },
   {
     postId: 'communityPost-00037',
@@ -786,8 +906,20 @@ export const mockCommunityPosts: Post[] = [
     unitPrice: 2000,
     category: '생활용품',
     participants: [
-      { userId: 'user-00002', quantity: 2, isCancelled: false },
-      { userId: 'user-00003', quantity: 1, isCancelled: true },
+      {
+        userId: 'user-00002',
+        quantity: 2,
+        isCancelled: false,
+        isPaymentCompleted: false,
+        isRequiredRefund: false,
+      },
+      {
+        userId: 'user-00003',
+        quantity: 1,
+        isCancelled: true,
+        isPaymentCompleted: false,
+        isRequiredRefund: false,
+      },
     ],
     comments: [
       {
@@ -804,5 +936,59 @@ export const mockCommunityPosts: Post[] = [
         commentId: 'comment-00002',
       },
     ],
+    status: 'APPROVED',
+    cancelledUsers: ['user-00003'],
+  },
+  {
+    postId: 'communityPost-00038',
+    title: '생활용품 관련 공구 글 11 제목이 아주 길어질 거야 테스트를 해보자',
+    content:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+    images: ['https://picsum.photos/id/38/200/300'],
+    url: 'https://www.naver.com',
+    authorId: 'user-00001',
+    authorNickname: '사용자 A',
+    currentQuantity: 5,
+    requiredQuantity: 5,
+    createdAt: '2024-11-28T06:00:00',
+    updatedAt: '2024-11-28T06:00:00',
+    closeAt: '2024-12-05T06:00:00',
+    totalPrice: 10000,
+    unitPrice: 2000,
+    category: '생활용품',
+    participants: [
+      {
+        userId: 'user-00002',
+        quantity: 2,
+        isCancelled: false,
+        isPaymentCompleted: true,
+        isRequiredRefund: false,
+      },
+      {
+        userId: 'user-00001',
+        quantity: 2,
+        isCancelled: false,
+        isPaymentCompleted: true,
+        isRequiredRefund: false,
+      },
+      {
+        userId: 'user-00003',
+        quantity: 1,
+        isCancelled: true,
+        isPaymentCompleted: false,
+        isRequiredRefund: false,
+      },
+      {
+        userId: 'user-00004',
+        quantity: 1,
+        isCancelled: false,
+        isPaymentCompleted: false,
+        isRequiredRefund: false,
+      },
+    ],
+    comments: [],
+    status: 'PAYMENT_STANDBY',
+    stateUpdatedAt: '2024-12-01T06:00:00',
+    cancelledUsers: ['user-00003'],
   },
 ];

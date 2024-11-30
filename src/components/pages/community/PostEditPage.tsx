@@ -8,7 +8,7 @@ import {
   FaAngleLeft,
   FaAngleRight,
 } from 'react-icons/fa';
-import { updatePost, PostData, deletePostById } from './api/postApi';
+import { updatePost, Post, deletePostById, defaultPost } from './api/postApi';
 // import { fetchPostById, updatePost, PostData, deletePostById } from './api/postApi';
 import CategoryWrapper from '../../common/CategoryWrapper';
 import ScrollToTopButton from '../../common/ScrollToTopButton';
@@ -18,7 +18,7 @@ const PostEditPage = () => {
   const navigate = useNavigate();
   const { postId } = useParams<{ postId: string }>();
 
-  const [post, setPost] = useState<PostData | null>(null); // 수정 대상 포스트 데이터
+  const [post, setPost] = useState<Post>(defaultPost); // 수정 대상 포스트 데이터
   const [selectedCategory, setSelectedCategory] = useState('');
   const [requiredQuantity, setRequiredQuantity] = useState('');
   const [totalPrice, setTotalPrice] = useState('');
@@ -126,7 +126,7 @@ const PostEditPage = () => {
     const parsedTotalPrice = parseInt(totalPrice.replace(/,/g, ''), 10);
     const parsedRequiredQuantity = parseInt(requiredQuantity, 10);
 
-    const updatedPost: PostData = {
+    const updatedPost: Post = {
       ...post,
       title,
       content,

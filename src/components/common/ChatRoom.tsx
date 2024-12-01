@@ -15,15 +15,22 @@ interface Message {
   type?: 'date';
 }
 
+interface Participant {
+  userId: string;
+  nickname: string;
+}
+
 interface ChatRoomProps {
   chatRoomId: string;
 }
 
 const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [participants, setParticipants] = useState<Participant[]>([]);
   const [input, setInput] = useState('');
   const currentUserId = 'user-00001'; // Mock 로그인 사용자 ID
   const chatBoxRef = useRef<HTMLDivElement>(null);
+  const [authorId, setAuthorId] = useState<string>('');
 
   useEffect(() => {
     // 채팅방 정보 및 초기 메시지 가져오기
@@ -31,12 +38,18 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId }) => {
       try {
         const { participants, authorNickname } =
           await fetchChatRoomDetails(chatRoomId);
+        setParticipants(participants);
+
+        const author = participants.find((p) => p.nickname === authorNickname);
+        if (author) setAuthorId(author.userId);
+
         const participantNicknames = participants.map((p) => p.nickname);
 
         // 입장 메시지 추가
         const joinMessage: Message = {
           senderId: 'system',
-          content: `'${[...participantNicknames, authorNickname].join(', ')}'님께서 채팅방에 입장하셨습니다.`,
+          content: `'${[...participantNicknames].join(', ')}'님께서
+채팅방에 입장하셨습니다.`,
           timestamp: null, // timestamp 표시하지 않음
         };
 
@@ -45,33 +58,30 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId }) => {
           senderId: 'system',
           content: `
 안내사항: 환불 및 이탈 관련 정책
-1. 환불 및 수령 시간/위치 조율
-2. 환불 및 비용 부담
-3. 이탈자에 대한 페널티 제도
-(세부 내용은 생략)
-안내사항: 환불 및 이탈 관련 정책
-1. 환불 및 수령 시간/위치 조율
-- 공구 진행 중(최종 승인 이후)인 채팅방에서 수령 위치 및 시간을
-조율합니다.
-- 이탈자가 발생하거나 환불 요청이 있을 경우, 이탈자는 채팅방에서
-환불 의사를 명확히 표시해야 하며, 모든 참여 인원이 동의한 경우에
-한해 환불이 진행됩니다.
-2. 환불 및 비용 부담
-- 환불 진행 시, 전체 환불 처리 및 해당 인원에 대한 신고 접수가
-이루어지며, 이로 인해 발생하는 모든 비용(공구 물품 반송 등)은
-이탈자 본인이 전액 부담합니다.
-- 이는 이탈로 인해 다른 참여 인원들이 피해를 보는 것을 방지하기
-위함입니다.
-3. 이탈자에 대한 페널티 제도
-- 이탈 행위가 반복될 경우, 아래와 같은 경고 시스템이 적용됩니다.
-  - 1회 경고: 계정 일주일 정지
-  - 3회 경고: 계정 한 달 정지
-  - 5회 경고: 계정 영구 정지
-- 페널티 부여에 관한 사항은 내부 논의를 통해 결정됩니다.
-💡 주의: 본 안내사항을 숙지하지 않아 발생하는 불이익은 본인에게 책임이
-         있습니다.
+  1. 환불 및 수령 시간/위치 조율
+    - 공구 진행 중(최종 승인 이후)인 채팅방에서
+    수령 위치 및 시간을 조율합니다.
+    - 이탈자가 발생하거나 환불 요청이 있을 경우,
+      이탈자는 채팅방에서 환불 의사를 명확히
+      표시해야 하며, 모든 참여 인원이 동의한
+      경우에 한해 환불이 진행됩니다.
+  2. 환불 및 비용 부담
+    - 환불 진행 시, 전체 환불 처리 및 해당 인원에
+      대한 신고 접수가 이루어지며, 이로 인해
+      발생하는 모든 비용(공구 물품 반송 등)은
+      이탈자 본인이 전액 부담합니다.
+  3. 이탈자에 대한 페널티 제도
+    - 이탈 행위가 반복될 경우, 아래와 같은
+      경고 시스템이 적용됩니다.
+      - 1회 경고: 계정 일주일 정지
+      - 3회 경고: 계정 한 달 정지
+      - 5회 경고: 계정 영구 정지
 
-공구 진행에 차질이 없도록 적극적인 협조 부탁드립니다. 😊`,
+  💡 주의: 본 안내사항을 숙지하지 않아 발생하는
+              불이익은 본인에게 책임이 있습니다.
+
+공구 진행에 차질이 없도록 적극적인 협조
+부탁드립니다. 😊`,
           timestamp: null,
         };
 
@@ -84,6 +94,19 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId }) => {
 
     fetchRoomDetails();
   }, [chatRoomId]);
+
+  const getNicknameDisplay = (senderId: string): string => {
+    if (senderId === 'system') return '';
+    const participant = participants.find((p) => p.userId === senderId);
+    if (!participant) return senderId;
+
+    if (senderId === authorId) {
+      return senderId === currentUserId
+        ? '나(방장)'
+        : `${participant.nickname}(방장)`;
+    }
+    return senderId === currentUserId ? '나' : participant.nickname;
+  };
 
   useEffect(() => {
     // WebSocket 연결
@@ -169,6 +192,9 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId }) => {
     <ChatRoomContainer>
       <ChatMessagesContainer>
         {formattedMessages.map((msg, index) => {
+          const isGroupNotice =
+            msg.senderId === 'system' &&
+            msg.content?.includes('안내사항: 환불 및 이탈 관련 정책');
           if (msg.type === 'date') {
             return (
               <DateSeparator key={`date-${index}`}>{msg.content}</DateSeparator>
@@ -178,11 +204,17 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId }) => {
             <MessageWrapper
               key={index}
               isCurrentUser={msg.senderId === currentUserId}
+              isSystemMessage={msg.senderId === 'system'}
             >
               <SenderName>
-                {msg.senderId === currentUserId ? '나' : msg.senderId}
+                {msg.senderId === 'system'
+                  ? ''
+                  : getNicknameDisplay(msg.senderId)}
               </SenderName>
-              <MessageContent isCurrentUser={msg.senderId === currentUserId}>
+              <MessageContent
+                isCurrentUser={msg.senderId === currentUserId}
+                isGroupNotice={isGroupNotice}
+              >
                 {msg.content}
               </MessageContent>
               {msg.timestamp && (
@@ -239,11 +271,14 @@ const DateSeparator = styled.div`
   font-weight: bold;
 `;
 
-const MessageWrapper = styled.div<{ isCurrentUser: boolean }>`
+const MessageWrapper = styled.div<{
+  isCurrentUser: boolean;
+  isSystemMessage?: boolean;
+}>`
   display: flex;
   flex-direction: column;
-  align-items: ${({ isCurrentUser }) =>
-    isCurrentUser ? 'flex-end' : 'flex-start'};
+  align-items: ${({ isCurrentUser, isSystemMessage }) =>
+    isSystemMessage ? 'center' : isCurrentUser ? 'flex-end' : 'flex-start'};
   margin-bottom: 12px;
 `;
 
@@ -254,15 +289,20 @@ const SenderName = styled.div`
   margin-bottom: 4px;
 `;
 
-const MessageContent = styled.div<{ isCurrentUser: boolean }>`
+const MessageContent = styled.div<{
+  isCurrentUser: boolean;
+  isGroupNotice?: boolean;
+}>`
   max-width: 70%;
-  background-color: ${({ isCurrentUser }) =>
-    isCurrentUser ? '#d9f9d9' : '#e9e9e9'};
+  background-color: ${({ isCurrentUser, isGroupNotice }) =>
+    isGroupNotice ? '#cecece' : isCurrentUser ? '#d9f9d9' : '#e9e9e9'};
   color: #333;
   padding: 10px;
   border-radius: 12px;
   word-wrap: break-word;
   font-size: 1rem;
+  white-space: pre-wrap; /* 줄바꿈 유지 */
+  text-align: ${({ isGroupNotice }) => (isGroupNotice ? 'left' : 'inherit')};
 `;
 
 const Timestamp = styled.div`

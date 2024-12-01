@@ -15,6 +15,7 @@ import {
 export const fetchChatRoomDetails = async (
   chatRoomId: string
 ): Promise<{
+  chatRoomId: string;
   participants: { userId: string; nickname: string }[];
   authorNickname: string;
   chatRoomTitle: string;
@@ -22,7 +23,12 @@ export const fetchChatRoomDetails = async (
   try {
     // 실제 API 사용
     // const response = await axiosInstance.get(`/chat/${chatRoomId}`);
-    // return response.data;
+    // return {
+    //   chatRoomId,
+    //   participants: response.data.participants,
+    //   authorNickname: response.data.authorNickname,
+    //   chatRoomTitle: response.data.chatRoomTitle,
+    // };
 
     // Mock 데이터 기반:
     return mockFetchChatRoomDetails(chatRoomId);

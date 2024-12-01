@@ -23,7 +23,7 @@ const SetNicknamePage = () => {
     <Wrapper>
       <LeftContent>
         <img
-          src="/images/login5.jpg"
+          src="/images/login5.jpeg"
           alt="Login background"
           style={{
             width: '100%',

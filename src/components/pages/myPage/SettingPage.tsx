@@ -17,11 +17,11 @@ const SettingPage = () => {
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
 
   const postcodeScriptUrl =
     'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
   const open = useDaumPostcodePopup(postcodeScriptUrl);
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleComplete = (data: any) => {
     setNewAddress(data.zonecode + ' ' + data.jibunAddress);
@@ -42,13 +42,42 @@ const SettingPage = () => {
     }
   };
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (reader.result) {
+          setProfileImage(reader.result.toString());
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <GS.Wrapper>
       <Sidemenu />
       <GS.Content>
         <ProfileWrapper>
-          <img src="/images/origin.png" width={80} height={80} />
-          <EditProfileButton>Edit Profile</EditProfileButton>
+          <img
+            src={profileImage || '/images/origin.png'}
+            alt="Profile"
+            width={80}
+            height={80}
+          />
+          <EditProfileButton
+            onClick={() => document.getElementById('fileInput')?.click()}
+          >
+            Edit Profile
+          </EditProfileButton>
+          <input
+            id="fileInput"
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleImageUpload}
+          />
         </ProfileWrapper>
         <NicknameWrapper>
           <Title>닉네임 변경</Title>

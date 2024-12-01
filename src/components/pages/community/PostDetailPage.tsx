@@ -360,8 +360,34 @@ const PostDetailPage = () => {
 
   // 결제하기 페이지로 이동
   const handlePayment = () => {
-    if (post.status === POST_STATUS.PAYMENT_STANDBY) {
-      navigate(`/community/posts/${postId}/payment`);
+    if (
+      post.status === POST_STATUS.PAYMENT_STANDBY &&
+      post.authorId === currentUserId
+    ) {
+      navigate(`/community/posts/${postId}/payment/author`, {
+        state: {
+          post: {
+            images: post.images,
+            title: post.title,
+            unitPrice: post.unitPrice,
+          },
+          quantity,
+        },
+      });
+    } else if (
+      post.status === POST_STATUS.PAYMENT_STANDBY &&
+      post.authorId !== currentUserId
+    ) {
+      navigate(`/community/posts/${postId}/payment/participant`, {
+        state: {
+          post: {
+            images: post.images,
+            title: post.title,
+            unitPrice: post.unitPrice,
+          },
+          quantity,
+        },
+      });
     } else {
       alert('현재 결제할 수 없는 상태입니다.');
     }

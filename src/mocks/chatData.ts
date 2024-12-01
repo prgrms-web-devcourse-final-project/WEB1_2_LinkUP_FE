@@ -23,33 +23,33 @@ const mockChatRooms = [
       {
         senderId: 'user-00002',
         content: '안녕하세요! 공구 관련 문의드립니다.',
-        timestamp: '2024-12-02T21:00:00',
+        timestamp: '2024-12-01T21:00:00',
       },
       {
         senderId: 'user-00001',
         content: '안녕하세요! 무엇이 궁금하신가요?',
-        timestamp: '2024-12-02T21:01:00',
+        timestamp: '2024-12-01T21:01:00',
       },
       {
         senderId: 'user-00002',
         content: '혹시 물품 배분 위치는 어디가 될까요?',
-        timestamp: '2024-12-02T21:02:00',
+        timestamp: '2024-12-01T21:02:00',
       },
       {
         senderId: 'user-00001',
         content: '"임의의 주소지"에서 배분할 예정입니다!',
-        timestamp: '2024-12-02T21:03:00',
+        timestamp: '2024-12-01T21:03:00',
       },
       {
         senderId: 'user-00004',
         content: '"배분일과 배분시각은 어떻게 될까요?',
-        timestamp: '2024-12-03T00:01:00',
+        timestamp: '2024-12-02T00:01:00',
       },
       {
         senderId: 'user-00001',
         content:
           '"임의의 날짜"에 배송이 완료될 예정이라 크게 변동이 없다면, 그 다음날 오후 8시쯤 어떠실까요?',
-        timestamp: '2024-12-03T00:03:00',
+        timestamp: '2024-12-02T00:03:00',
       },
     ],
   },
@@ -67,6 +67,7 @@ export const mockFetchChatRoomDetails = (chatRoomId: string) => {
   if (!authorNickname) throw new Error('Author not found in participants.');
 
   return Promise.resolve({
+    chatRoomId,
     participants,
     authorNickname,
     chatRoomTitle,

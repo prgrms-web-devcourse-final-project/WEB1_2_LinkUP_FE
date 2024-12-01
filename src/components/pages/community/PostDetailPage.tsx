@@ -18,11 +18,10 @@ import {
   FaBackspace,
   FaAngleLeft,
   FaAngleRight,
-  FaCommentDots,
   FaPlusCircle,
   FaMinusCircle,
 } from 'react-icons/fa';
-import { connectWebSocket } from '../../../utils/webSocket';
+import { webSocketService } from '../../../utils/webSocket';
 
 // 로그인된 사용자의 ID (Mock 처리)
 const currentUserId = 'user-00001'; // 실제 구현 시, 인증된 사용자 ID를 받아와야 함
@@ -33,8 +32,6 @@ const PostDetailPage = () => {
   const queryClient = useQueryClient();
 
   const [post, setPost] = useState<Post>(defaultPost);
-  const [ws, setWs] = useState<WebSocket | null>(null); // WebSocket 상태 추가
-
   const [quantity, setQuantity] = useState(1); // 기본 최소 수량
   const [isAuthor, setIsAuthor] = useState(false); // 현재 사용자가 작성자인지 여부
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -98,7 +95,8 @@ const PostDetailPage = () => {
 
   useEffect(() => {
     if (postId) {
-      const socket = connectWebSocket(`/community/posts/${postId}`, (data) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const handleIncomingData = (data: any) => {
         if (data.type === 'STATUS_UPDATE') {
           setPost((prev) => ({ ...prev, status: data.status }));
         } else if (data.type === 'USER_UPDATE') {
@@ -108,11 +106,19 @@ const PostDetailPage = () => {
             cancelledUsers: data.cancelledUsers,
           }));
         }
-      });
-      setWs(socket);
-    }
+      };
 
-    return () => ws?.close();
+      webSocketService.connect(
+        handleIncomingData,
+        () => console.log('WebSocket connected'),
+        () => console.log('WebSocket disconnected'),
+        (error) => console.error('WebSocket error:', error)
+      );
+
+      return () => {
+        webSocketService.close();
+      };
+    }
   }, [postId]);
 
   useEffect(() => {
@@ -486,14 +492,7 @@ const PostDetailPage = () => {
                 <DoubleWrapper>
                   <AuthorDetail>
                     <Label>작성자</Label>
-                    <AuthorNicknameAndChatIcon>
-                      {post.authorNickname}{' '}
-                      <ChatIcon
-                        onClick={() => alert('작성자와 1:1 채팅방 생성')}
-                      >
-                        <FaCommentDots />
-                      </ChatIcon>
-                    </AuthorNicknameAndChatIcon>
+                    <AuthorNickname>{post.authorNickname}</AuthorNickname>
                   </AuthorDetail>
                   <CreatedAtDetail>
                     <Label>작성일</Label>{' '}
@@ -572,7 +571,7 @@ const PostDetailPage = () => {
                           p.isPaymentCompleted
                       ) ? (
                         <ActionButton primary onClick={handleRefund}>
-                          환불하기
+                          환불
                         </ActionButton>
                       ) : post.status === POST_STATUS.PAYMENT_STANDBY ? (
                         // 결제 대기 상태에서는 결제/취소 버튼
@@ -580,10 +579,10 @@ const PostDetailPage = () => {
                           {isParticipant && (
                             <>
                               <ActionButton primary onClick={handlePayment}>
-                                결제하기
+                                결제
                               </ActionButton>
                               <ActionButton onClick={handleCancel}>
-                                취소하기
+                                취소
                               </ActionButton>
                             </>
                           )}
@@ -593,11 +592,11 @@ const PostDetailPage = () => {
                         <>
                           {isParticipant ? (
                             <ActionButton onClick={handleCancel}>
-                              취소하기
+                              취소
                             </ActionButton>
                           ) : (
                             <ActionButton primary onClick={handleJoin}>
-                              참여하기
+                              참여
                             </ActionButton>
                           )}
                         </>
@@ -955,10 +954,9 @@ const AuthorDetail = styled.div`
   gap: 5px; /* 내부 요소 간 간격 */
 `;
 
-const AuthorNicknameAndChatIcon = styled.div`
+const AuthorNickname = styled.div`
   display: flex; /* 한 줄로 배치 */
   align-items: center; /* 세로로 가운데 정렬 */
-  gap: 8px; /* 닉네임과 ChatIcon 사이 간격 */
   font-size: 1rem; /* 텍스트 크기 설정 */
 `;
 
@@ -966,11 +964,6 @@ const CreatedAtDetail = styled.div`
   display: flex; /* 가로 배치 */
   flex-direction: column; /* 내부 요소가 한 줄씩 배치되도록 */
   gap: 5px; /* 내부 요소 간 간격 */
-`;
-
-const ChatIcon = styled.span`
-  cursor: pointer;
-  margin-left: 10px;
 `;
 
 const Quantity = styled.div`

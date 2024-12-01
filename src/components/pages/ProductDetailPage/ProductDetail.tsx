@@ -1,227 +1,42 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-// import { useParams } from 'react-router-dom';
-// import { getProductbyId } from './api/productDetailApi';
+import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { addWishList } from './api/WishApi';
+import { addWishList } from './api/wishApi';
 import StarRating from '../../common/StarRating';
-import { addComment } from './api/CommentApi';
-// import { useQuery } from '@tanstack/react-query';
+import { addComment } from './api/commentApi';
+import { submitOrder } from './api/submitApi';
+import { products } from '../../../mocks/products';
+// import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 
 const ProductDetail: React.FC = () => {
-  //   const { id } = useParams();
-  //   if (!id) {
-  //     return <p>상품 번호가 유실되었습니다.</p>;
-  //   }
-  //   const {
-  //     data: product,
-  //     isLoading,
-  //     isError,
-  //   } = useQuery<Product, Error>({
-  //     queryKey: ['product', id],
-  //     queryFn: () => getProductbyId(id),
-  //   });
-  //   // 로딩 상태 처리
-  //   if (isLoading) {
-  //     return (
-  //       <Container>
-  //         <SuccessSection>
-  //           <Title>상품 정보 로딩 중...</Title>
-  //         </SuccessSection>
-  //       </Container>
-  //     );
-  //   }
+  const { id } = useParams();
+  if (!id) {
+    return <p>상품 번호가 유실되었습니다.</p>;
+  }
+  const productId = Number(id);
+  // const { data: product, isLoading, isError } = useProductQuery(productId);
+  const product = products.find((p) => p.id === productId);
 
-  //   // 에러 상태 처리
-  //   if (isError) {
-  //     return (
-  //       <Container>
-  //         <SuccessSection>
-  //           <Title>상품 정보를 불러오지 못했습니다.</Title>
-  //           <Subtitle>잠시 후 다시 시도해주세요.</Subtitle>
-  //         </SuccessSection>
-  //       </Container>
-  //     );
-  //   }
+  if (!product) {
+    return <p>해당 상품을 찾을 수 없습니다.</p>;
+  }
+
   const [quantity, setQuantity] = useState(1);
   const [newComment, setNewComment] = useState('');
   const [newCommentStar, setNewCommentStar] = useState(5);
   const [remainingTime, setRemainingTime] = useState('');
   const [visibleCount, setVisibleCount] = useState(10);
+  const [data, setData] = useState({});
 
+  const handleSubmit = () => {
+    submitOrder(product.id, payload).then((res) => {
+      setData(res);
+    });
+  };
   // 더보기 버튼 클릭 시 댓글 수를 증가시키는 함수
   const handleShowMore = () => {
     setVisibleCount((prevCount) => prevCount + 10);
   };
-  const product = {
-    id: '1',
-    name: '다이슨 드라이기',
-    stars: 4.7,
-    minimum: 5,
-    now: 3,
-    stock: 10,
-    originalPrice: 95.5,
-    discountedPrice: 79.98,
-    image: 'https://via.placeholder.com/200',
-    deadline: '2024-12-31',
-    description:
-      '최고의 성능을 가진 드라이기 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구 어쩌구 저쩌구',
-    comments: [
-      {
-        comment: '디자인도 예쁘고, 바람 세기도 강해서 너무 만족스럽습니다!',
-        star: 5,
-      },
-      {
-        comment: '가격이 조금 비싸지만, 성능은 최고예요.',
-        star: 4,
-      },
-      {
-        comment: '머리가 정말 빨리 말라서 시간 절약에 도움이 돼요.',
-        star: 5,
-      },
-      {
-        comment: '생각보다 소음이 조금 있어서 아쉬웠어요.',
-        star: 3,
-      },
-      {
-        comment: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
-        star: 5,
-      },
-      {
-        comment: '선물로 줬는데 상대방이 정말 좋아했어요.',
-        star: 5,
-      },
-      {
-        comment: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
-        star: 4,
-      },
-      {
-        comment: '전문가용 드라이기 같은 성능인데, 가정용으로도 적합합니다.',
-        star: 5,
-      },
-      {
-        comment: '살짝 무겁지만, 기능이 좋아서 만족해요.',
-        star: 4,
-      },
-      {
-        comment: '내구성이 좋을 것 같아서 기대 중입니다!',
-        star: 5,
-      },
-      {
-        comment: '생각보다 소음이 조금 있어서 아쉬웠어요.',
-        star: 3,
-      },
-      {
-        comment: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
-        star: 5,
-      },
-      {
-        comment: '선물로 줬는데 상대방이 정말 좋아했어요.',
-        star: 5,
-      },
-      {
-        comment: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
-        star: 4,
-      },
-      {
-        comment: '전문가용 드라이기 같은 성능인데, 가정용으로도 적합합니다.',
-        star: 5,
-      },
-      {
-        comment: '살짝 무겁지만, 기능이 좋아서 만족해요.',
-        star: 4,
-      },
-      {
-        comment: '내구성이 좋을 것 같아서 기대 중입니다!',
-        star: 5,
-      },
-      {
-        comment: '생각보다 소음이 조금 있어서 아쉬웠어요.',
-        star: 3,
-      },
-      {
-        comment: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
-        star: 5,
-      },
-      {
-        comment: '선물로 줬는데 상대방이 정말 좋아했어요.',
-        star: 5,
-      },
-      {
-        comment: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
-        star: 4,
-      },
-      {
-        comment: '전문가용 드라이기 같은 성능인데, 가정용으로도 적합합니다.',
-        star: 5,
-      },
-      {
-        comment: '살짝 무겁지만, 기능이 좋아서 만족해요.',
-        star: 4,
-      },
-      {
-        comment: '내구성이 좋을 것 같아서 기대 중입니다!',
-        star: 5,
-      },
-      {
-        comment: '생각보다 소음이 조금 있어서 아쉬웠어요.',
-        star: 3,
-      },
-      {
-        comment: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
-        star: 5,
-      },
-      {
-        comment: '선물로 줬는데 상대방이 정말 좋아했어요.',
-        star: 5,
-      },
-      {
-        comment: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
-        star: 4,
-      },
-      {
-        comment: '전문가용 드라이기 같은 성능인데, 가정용으로도 적합합니다.',
-        star: 5,
-      },
-      {
-        comment: '살짝 무겁지만, 기능이 좋아서 만족해요.',
-        star: 4,
-      },
-      {
-        comment: '내구성이 좋을 것 같아서 기대 중입니다!',
-        star: 5,
-      },
-      {
-        comment: '생각보다 소음이 조금 있어서 아쉬웠어요.',
-        star: 3,
-      },
-      {
-        comment: '배송이 너무 빨라서 놀랐습니다. 제품도 마음에 들어요!',
-        star: 5,
-      },
-      {
-        comment: '선물로 줬는데 상대방이 정말 좋아했어요.',
-        star: 5,
-      },
-      {
-        comment: '그립감이 좋아서 오래 사용해도 손목이 안 아파요.',
-        star: 4,
-      },
-      {
-        comment: '전문가용 드라이기 같은 성능인데, 가정용으로도 적합합니다.',
-        star: 5,
-      },
-      {
-        comment: '살짝 무겁지만, 기능이 좋아서 만족해요.',
-        star: 4,
-      },
-      {
-        comment: '내구성이 좋을 것 같아서 기대 중입니다!',
-        star: 5,
-      },
-    ],
-  };
-
   //   마감까지 남은 기한
   const calculateRemainingTime = () => {
     const now = new Date();
@@ -263,118 +78,131 @@ const ProductDetail: React.FC = () => {
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     //댓글추가 api 호출
-    addComment({ comment: newComment, star: newCommentStar });
+    addComment(product.id, { review: newComment, rating: newCommentStar });
     //newComment, newCommentStar <- payload로 전송
     setNewComment('');
   };
 
   //남은 재고
-  const least = product.minimum - product.now;
-
+  const least = product.minamount - product.now;
+  const payload = {
+    url: product.url,
+    productName: product.name,
+    price: product.originalPrice,
+    discountPrice: product.discountPrice,
+    amount: quantity,
+  };
   return (
-    <Container>
-      <ContentWrapper>
-        <ImageSection>
-          <Image src={product.image} alt={product.name} />
-          <Stars>
-            <StarRating rating={product.stars} />
-          </Stars>
-        </ImageSection>
-        <InfoSection>
-          <Title>{product.name}</Title>
+    <>
+      {/* <QueryHandler isLoading={isLoading} isError={isError}> */}
+      <Container>
+        <ContentWrapper>
+          <ImageSection>
+            <Image src={product.url} alt={product.name} />
+            <Stars>
+              <StarRating rating={product.rating} />
+            </Stars>
+          </ImageSection>
+          <InfoSection>
+            <Title>{product.name}</Title>
 
-          <PriceWrapper>
-            <OriginalPrice>${product.originalPrice.toFixed(2)}</OriginalPrice>
-            <DiscountWrapper>
-              <DiscountedPrice>
-                ${product.discountedPrice.toFixed(2)}
-              </DiscountedPrice>
-              <DiscountInfo>{product.minimum}개 부터 할인 적용</DiscountInfo>
-            </DiscountWrapper>
-            {least > 0 && (
-              <RemainingCount>할인 적용까지 {least}개 남음</RemainingCount>
-            )}
-          </PriceWrapper>
-          <Description>{product.description}</Description>
-          <DeadlineLabel>{remainingTime}</DeadlineLabel>
+            <PriceWrapper>
+              <OriginalPrice>${product.originalPrice.toFixed(2)}</OriginalPrice>
+              <DiscountWrapper>
+                <DiscountedPrice>
+                  ${product.discountPrice.toFixed(2)}
+                </DiscountedPrice>
+                <DiscountInfo>
+                  {product.minamount}개 부터 할인 적용
+                </DiscountInfo>
+              </DiscountWrapper>
+              {least > 0 && (
+                <RemainingCount>할인 적용까지 {least}개 남음</RemainingCount>
+              )}
+            </PriceWrapper>
+            <Description>{product.description}</Description>
+            <DeadlineLabel>{remainingTime}</DeadlineLabel>
 
-          <StockWrapper>
-            <StockLabel>현재 구매 현황</StockLabel>
-            <StockBar>
-              <StockFill style={{ width: `${purchasePercentage}%` }} />
-            </StockBar>
-            <StockStatus>
-              {product.now} / {product.stock} 구매됨
-            </StockStatus>
-          </StockWrapper>
-          <ActionWrapper>
-            <QuantityWrapper>
-              <QuantityLabel>수량</QuantityLabel>
-              <QuantityInput
-                type="number"
-                min="1"
-                value={quantity}
-                onChange={handleQuantityChange}
+            <StockWrapper>
+              <StockLabel>현재 구매 현황</StockLabel>
+              <StockBar>
+                <StockFill style={{ width: `${purchasePercentage}%` }} />
+              </StockBar>
+              <StockStatus>
+                {product.now} / {product.stock} 구매됨
+              </StockStatus>
+            </StockWrapper>
+            <ActionWrapper>
+              <QuantityWrapper>
+                <QuantityLabel>수량</QuantityLabel>
+                <QuantityInput
+                  type="number"
+                  min="1"
+                  value={quantity}
+                  onChange={handleQuantityChange}
+                />
+              </QuantityWrapper>
+              <ButtonWrapper>
+                <PurchaseButton
+                  to={`/products/payment/${product.id}?data =${encodeURIComponent(JSON.stringify(data))} `}
+                  disabled={isButtonDisabled}
+                  onClick={handleSubmit}
+                >
+                  구매하기
+                </PurchaseButton>
+                <WishButton
+                  type="button"
+                  onClick={() => {
+                    addWishList(product.id);
+                  }}
+                >
+                  찜하기
+                </WishButton>
+              </ButtonWrapper>
+            </ActionWrapper>
+          </InfoSection>
+        </ContentWrapper>
+
+        <CommentSection>
+          <CommentForm onSubmit={handleCommentSubmit}>
+            <CommentInputWrapper>
+              <CommentInput
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="댓글을 입력하세요"
               />
-            </QuantityWrapper>
-            <ButtonWrapper>
-              <PurchaseButton
-                to={`/products/payment/${product.id}`}
-                disabled={isButtonDisabled}
+              <StarSelector
+                value={newCommentStar}
+                onChange={(e) => setNewCommentStar(Number(e.target.value))}
               >
-                구매하기
-              </PurchaseButton>
-              <WishButton
-                type="button"
-                onClick={() => {
-                  addWishList(product);
-                }}
-              >
-                찜하기
-              </WishButton>
-            </ButtonWrapper>
-          </ActionWrapper>
-        </InfoSection>
-      </ContentWrapper>
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <option key={num} value={num}>
+                    {'⭐'.repeat(num)}
+                  </option>
+                ))}
+              </StarSelector>
+              <CommentSubmitButton type="submit">댓글 달기</CommentSubmitButton>
+            </CommentInputWrapper>
+          </CommentForm>{' '}
+          <div>
+            {product.reviews.slice(0, visibleCount).map((review, index) => (
+              <Comment key={index}>
+                {review.review}
+                <CommentStars>{'⭐'.repeat(review.rating)}</CommentStars>
+              </Comment>
+            ))}
 
-      <CommentSection>
-        <CommentForm onSubmit={handleCommentSubmit}>
-          <CommentInputWrapper>
-            <CommentInput
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="댓글을 입력하세요"
-            />
-            <StarSelector
-              value={newCommentStar}
-              onChange={(e) => setNewCommentStar(Number(e.target.value))}
-            >
-              {[1, 2, 3, 4, 5].map((num) => (
-                <option key={num} value={num}>
-                  {'⭐'.repeat(num)}
-                </option>
-              ))}
-            </StarSelector>
-            <CommentSubmitButton type="submit">댓글 달기</CommentSubmitButton>
-          </CommentInputWrapper>
-        </CommentForm>{' '}
-        <div>
-          {product.comments.slice(0, visibleCount).map((comment, index) => (
-            <Comment key={index}>
-              {comment.comment}
-              <CommentStars>{'⭐'.repeat(comment.star)}</CommentStars>
-            </Comment>
-          ))}
-
-          {/* 더보기 버튼*/}
-          <ButtonContainer>
-            {visibleCount < product.comments.length && (
-              <ViewMore onClick={handleShowMore}>더보기</ViewMore>
-            )}
-          </ButtonContainer>
-        </div>
-      </CommentSection>
-    </Container>
+            {/* 더보기 버튼*/}
+            <ButtonContainer>
+              {visibleCount < product.reviews.length && (
+                <ViewMore onClick={handleShowMore}>더보기</ViewMore>
+              )}
+            </ButtonContainer>
+          </div>
+        </CommentSection>
+      </Container>
+      {/* </QueryHandler> */}
+    </>
   );
 };
 

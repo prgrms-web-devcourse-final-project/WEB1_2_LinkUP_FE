@@ -1,11 +1,11 @@
 import axiosInstance from '../../../../api/axiosInstance';
-export type Comment = {
-  comment: string;
-  star: number;
-};
-export const addComment = async (payload: Comment) => {
+export interface Review {
+  review: string;
+  rating: number;
+}
+export const addComment = async (productId: number, payload: Review) => {
   try {
-    const URL = `/products/comment`;
+    const URL = `/review/${productId}`;
     const { data } = await axiosInstance.post(URL, payload);
     return data;
   } catch {

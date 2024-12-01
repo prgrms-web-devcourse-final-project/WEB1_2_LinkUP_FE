@@ -1,9 +1,9 @@
 import axiosInstance from '../../../../api/axiosInstance';
 import { Product } from '../../HomePage/model/productSchema';
 
-export const getProductbyId = async (productId: string): Promise<Product> => {
+export const getProductbyId = async (productId: number): Promise<Product> => {
   try {
-    const URL = `/products/${productId}`;
+    const URL = `/homepage/${productId}`;
     const { data } = await axiosInstance.get(URL);
     return data;
   } catch {

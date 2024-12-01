@@ -1,137 +1,171 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Link,
+  // useLocation,
   useNavigate,
-  //  useParams
+  useParams,
 } from 'react-router-dom';
 import styled from 'styled-components';
 import { handlePayment } from './api/paymentApi';
+import { products } from '../../../mocks/products';
+// import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 
 const PaymentForm = () => {
-  const product = {
-    id: '1',
-    name: '다이슨 드라이기',
-    stars: 5,
-    minimum: 5,
-    now: 3,
-    stock: 10,
-    originalPrice: 95.5,
-    discountedPrice: 79.98,
-    image: 'https://via.placeholder.com/200',
-  };
-  //   const { id } = useParams();
-  //   if (!id) {
-  //     return <p>상품 번호가 유실되었습니다.</p>;
-  //   }
-  //   const {
-  //     data: product,
-  //     isLoading,
-  //     isError,
-  //   } = useQuery<Product, Error>({
-  //     queryKey: ['product', id],
-  //     queryFn: () => getProductbyId(id),
-  //   });
-  //   // 로딩 상태 처리
-  //   if (isLoading) {
-  //     return (
-  //       <Container>
-  //         <SuccessSection>
-  //           <Title>상품 정보 로딩 중...</Title>
-  //         </SuccessSection>
-  //       </Container>
-  //     );
-  //   }
+  //URL 쿼리 스트링을 통한 데이터 수신
+  // const location = useLocation();
+  // const query = new URLSearchParams(location.search);
+  // const data = query.get('data') || ''; // null일 경우 빈 문자열 반환
+  // const product = JSON.parse(decodeURIComponent(data));
+  const { id } = useParams();
+  if (!id) {
+    return <p>상품 번호가 유실되었습니다.</p>;
+  }
+  const productId = Number(id);
+  // const { data: product, isLoading, isError } = useProductQuery(productId);
+  const product = products.find((p) => p.id === productId);
+  if (!product) {
+    return <p>해당 상품을 찾을 수 없습니다.</p>;
+  }
 
-  //   // 에러 상태 처리
-  //   if (isError) {
-  //     return (
-  //       <Container>
-  //         <SuccessSection>
-  //           <Title>상품 정보를 불러오지 못했습니다.</Title>
-  //           <Subtitle>잠시 후 다시 시도해주세요.</Subtitle>
-  //         </SuccessSection>
-  //       </Container>
-  //     );
-  //   }
   const navigate = useNavigate();
+  const [userName, setName] = useState('');
+  const [basicAddress, setBasicAddress] = useState('');
+  const [detailAddress, setDetailAddress] = useState('');
+  const [needed, setNeeded] = useState('');
+  const [payment, setPayment] = useState('');
+  const payload = {
+    productName: product.name,
+    url: product.url,
+    price: product.discountPrice,
+    // amount : product.amount,
+    finalPrice: product.discountPrice * product.now,
+    // now를 amount로
+    // postId : product.postId,
+    payMethod: payment,
+    needed: needed,
+    name: userName,
+    address: {
+      city: basicAddress,
+      detail: detailAddress,
+    },
+  };
+  const handleRadio = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPayment(e.target.value);
+  };
   const onPaymentSubmit = async () => {
     try {
-      await handlePayment();
-      navigate('/payment-success');
+      const paymentResult = await handlePayment(payload);
+      if (paymentResult == 'success') {
+        navigate('/payment-success');
+      }
     } catch (e) {
       alert(`결제에 실패하였습니다 ${e}`);
     }
   };
   return (
-    <Container>
-      <Section>
-        <Title>주문 상품 정보</Title>
-        <ContentBox>
-          <FlexRow>
-            <ProductName>{product.name}</ProductName>
-            <Price>₩{product.discountedPrice.toLocaleString()}</Price>
-          </FlexRow>
-          <FlexRow>
-            <Quantity>수량: 1개</Quantity>
-          </FlexRow>
-          <TotalRow>
-            <span>합계:</span>
-            <TotalPrice>₩{product.discountedPrice.toLocaleString()}</TotalPrice>
-          </TotalRow>
-        </ContentBox>
-      </Section>
+    <>
+      {/* <QueryHandler isLoading={isLoading} isError={isError}> */}
+      <Container>
+        <Section>
+          <Title>주문 상품 정보</Title>
+          <ContentBox>
+            <FlexRow>
+              <ProductName>{product.name}</ProductName>
+              <Price>₩{product.discountPrice.toLocaleString()}</Price>
+            </FlexRow>
+            <FlexRow>
+              <Quantity>
+                수량: 1개
+                {/* product.amount */}
+              </Quantity>
+            </FlexRow>
+            <TotalRow>
+              <span>합계:</span>
+              <TotalPrice>
+                ₩{product.discountPrice.toLocaleString()}
+                {/* *product.amount */}
+              </TotalPrice>
+            </TotalRow>
+          </ContentBox>
+        </Section>
 
-      <Section>
-        <Title>배송 정보 확인</Title>
-        <ContentBox>
-          <FormGroup>
-            <Label>
-              이름
-              <Input type="text" placeholder="이름 입력" />
-            </Label>
-          </FormGroup>
-          <FormGroup>
-            <Label>
-              주소(주소지 근처의 픽업장소 선택)
-              <Input type="text" placeholder="주소 입력" />
-            </Label>
-          </FormGroup>
-          <FormGroup>
-            <Label>
-              배송 시 요청사항
-              <TextArea rows={2} placeholder="요청사항 입력" />
-            </Label>
-          </FormGroup>
-        </ContentBox>
-      </Section>
+        <Section>
+          <Title>배송 정보 확인</Title>
+          <ContentBox>
+            <FormGroup>
+              <Label>
+                수령인
+                <Input
+                  type="text"
+                  placeholder="이름 입력"
+                  value={userName}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </Label>
+            </FormGroup>
+            <FormGroup>
+              <Label>
+                배송지
+                <InputWrapper>
+                  <BasicAddressInput
+                    type="text"
+                    placeholder="기본 주소를 입력해주세요"
+                    value={basicAddress}
+                    onChange={(e) => setBasicAddress(e.target.value)}
+                  />
+                </InputWrapper>
+              </Label>
+              <DetailAddressInput
+                type="text"
+                placeholder="상세 주소를 입력해주세요"
+                value={detailAddress}
+                onChange={(e) => setDetailAddress(e.target.value)}
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label>
+                배송 시 요청사항
+                <TextArea
+                  rows={2}
+                  placeholder="요청사항 입력"
+                  value={needed}
+                  onChange={(e) => setNeeded(e.target.value)}
+                />
+              </Label>
+            </FormGroup>
+          </ContentBox>
+        </Section>
 
-      <Section>
-        <Title>결제 정보 확인</Title>
-        <ContentBox>
-          <RadioGroup>
-            <RadioLabel>
-              <RadioInput type="radio" name="payment-method" />
-              <RadioText>가상계좌 입금</RadioText>
-            </RadioLabel>
-            <RadioLabel>
-              <RadioInput type="radio" name="payment-method" />
-              <RadioText>카드 결제</RadioText>
-            </RadioLabel>
-          </RadioGroup>
-        </ContentBox>
-      </Section>
+        <Section>
+          <Title>결제 정보 확인</Title>
+          <ContentBox>
+            <RadioGroup>
+              <RadioLabel>
+                <RadioInput
+                  type="radio"
+                  name="payment-method"
+                  value="card"
+                  onChange={handleRadio}
+                />
+                <RadioText>카드 결제</RadioText>
+              </RadioLabel>
+            </RadioGroup>
+          </ContentBox>
+        </Section>
 
-      <ButtonGroup>
-        <PayButton
-          onClick={() => {
-            onPaymentSubmit();
-          }}
-        >
-          결제하기
-        </PayButton>
-        <BackButton to={`/products/${product.id}`}>뒤로 가기</BackButton>
-      </ButtonGroup>
-    </Container>
+        <ButtonGroup>
+          <PayButton
+            onClick={() => {
+              onPaymentSubmit();
+            }}
+          >
+            결제하기
+          </PayButton>
+          <BackButton to={`/products/${product.id}`}>뒤로 가기</BackButton>
+        </ButtonGroup>
+      </Container>
+      {/* </QueryHandler> */}
+    </>
   );
 };
 
@@ -234,7 +268,20 @@ const Input = styled.input`
     color: #94a3b8;
   }
 `;
+const InputWrapper = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+`;
 
+const BasicAddressInput = styled(Input)`
+  flex-grow: 1;
+  cursor: pointer;
+`;
+
+const DetailAddressInput = styled(Input)`
+  margin-top: 8px;
+`;
 const TextArea = styled.textarea`
   width: 100%;
   padding: 10px 12px;

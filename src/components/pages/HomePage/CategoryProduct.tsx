@@ -58,19 +58,19 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
         {displayedProducts.map((product) => (
           <Card key={product.id}>
             <StyledLink to={`/products/${product.id}`}>
-              <ProductImg src={product.image} alt={product.name} />
+              <ProductImg src={product.url} alt={product.name} />
               <ProductWrapper>
                 <ProductName>{product.name}</ProductName>
                 <ProductStar>
                   {' '}
-                  <StarRating rating={product.stars} />
+                  <StarRating rating={product.rating} />
                 </ProductStar>
                 <PriceWrapper>
                   <OriginalPrice>
                     ${product.originalPrice.toFixed(2)}
                   </OriginalPrice>
                   <DiscountedPrice>
-                    ${product.discountedPrice.toFixed(2)}
+                    ${product.discountPrice.toFixed(2)}
                   </DiscountedPrice>
                 </PriceWrapper>
               </ProductWrapper>

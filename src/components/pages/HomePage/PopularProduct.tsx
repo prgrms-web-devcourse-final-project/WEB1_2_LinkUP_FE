@@ -14,11 +14,11 @@ const PopularProduct: React.FC<PopularProductProps> = ({ product }) => {
     <StyledLink to={`/products/${product.id}`}>
       <BannerContainer>
         <ImageWrapper>
-          <ProductImage src={product.image} alt={product.name} />
+          <ProductImage src={product.url} alt={product.name} />
         </ImageWrapper>
         <ProductInfoSection>
           <Star>
-            <StarRating rating={product.stars} />
+            <StarRating rating={product.rating} />
           </Star>
           <ProductHeader>
             <TitleArea>
@@ -26,17 +26,7 @@ const PopularProduct: React.FC<PopularProductProps> = ({ product }) => {
 
               <ProductCategory>{product.category}</ProductCategory>
             </TitleArea>
-            <ProductDescription>
-              {' '}
-              상품설명- 추후 추가 예정 상품설명- 추후 추가 예정 상품설명- 추후
-              추가 예정 상품설명- 추후 추가 예정 상품설명- 추후 추가 예정
-              상품설명- 추후 추가 예정 상품설명- 추후 추가 예정 상품설명- 추후
-              추가 예정 상품설명- 추후 추가 예정 상품설명- 추후 추가 예정
-              상품설명- 추후 추가 예정 상품설명- 추후 추가 예정 상품설명- 추후
-              추가 예정 상품설명- 추후 추가 예정 상품설명- 추후 추가 예정
-              상품설명- 추후 추가 예정 상품설명- 추후 추가 예정 상품설명- 추후
-              추가 예정 상품설명- 추후 추가 예정
-            </ProductDescription>
+            <ProductDescription> 상품설명- 추후 추가 예정</ProductDescription>
             {/* {product.description} */}
           </ProductHeader>
         </ProductInfoSection>

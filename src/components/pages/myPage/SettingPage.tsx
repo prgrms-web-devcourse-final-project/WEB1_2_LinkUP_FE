@@ -15,7 +15,9 @@ const SettingPage = () => {
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [newAddress, setNewAddress] = useState('');
   const [newName, setNewName] = useState('');
-  const [newPhone, setNewPhone] = useState('');
+  const [phoneFirst, setPhoneFirst] = useState('');
+  const [phoneMiddle, setPhoneMiddle] = useState('');
+  const [phoneLast, setPhoneLast] = useState('');
   const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
 
@@ -28,15 +30,18 @@ const SettingPage = () => {
   };
 
   const handleAddAddress = () => {
-    if (newName && newPhone && newAddress) {
+    if (newName && phoneFirst && phoneMiddle && phoneLast && newAddress) {
+      const fullPhone = `${phoneFirst}-${phoneMiddle}-${phoneLast}`;
       addressList.push({
         id: Date.now(),
         name: newName,
         address: newAddress,
-        phone: newPhone,
+        phone: fullPhone,
       });
       setNewName('');
-      setNewPhone('');
+      setPhoneFirst('');
+      setPhoneMiddle('');
+      setPhoneLast('');
       setNewAddress('');
       setIsAddingNewAddress(false);
     }
@@ -81,39 +86,82 @@ const SettingPage = () => {
         </ProfileWrapper>
         <NicknameWrapper>
           <Title>닉네임 변경</Title>
-          <StyledInput placeholder="최소 2자 이상 ~ 15자 이내, 띄어쓰기 및 특수문자 사용 불가" />
+          <NicknameInput placeholder="최소 2자 이상 ~ 15자 이내, 띄어쓰기 및 특수문자 사용 불가" />
           <NicknameButton>변경하기</NicknameButton>
         </NicknameWrapper>
         <AddressWrapper>
           <Title>배송지 주소 변경</Title>
           {isAddingNewAddress ? (
             <NewAddressForm>
-              <StyledInput
-                placeholder="이름 입력"
-                value={newName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setNewName(e.target.value)
-                }
-              />
-              <StyledInput
-                placeholder="핸드폰 번호 입력"
-                value={newPhone}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setNewPhone(e.target.value)
-                }
-              />
-              <AddressSearchButton
-                onClick={() => {
-                  open({ onComplete: handleComplete });
-                }}
-              >
-                주소 검색
-              </AddressSearchButton>
-              {newAddress && <AddressPreview>{newAddress}</AddressPreview>}
-              <CompleteButton onClick={handleAddAddress}>완료</CompleteButton>
-              <CancelButton onClick={() => setIsAddingNewAddress(false)}>
-                취소
-              </CancelButton>
+              <InputRow>
+                <InputGroup>
+                  <InputLabel>이름</InputLabel>
+                  <StyledInput
+                    placeholder="이름 입력"
+                    value={newName}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setNewName(e.target.value)
+                    }
+                  />
+                </InputGroup>
+
+                <InputGroup>
+                  <InputLabel>휴대폰 번호</InputLabel>
+                  <PhoneInputGroup>
+                    <PhoneInput
+                      placeholder="010"
+                      value={phoneFirst}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setPhoneFirst(e.target.value)
+                      }
+                      maxLength={3}
+                    />
+                    <Separator>-</Separator>
+                    <PhoneInput
+                      placeholder="0000"
+                      value={phoneMiddle}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setPhoneMiddle(e.target.value)
+                      }
+                      maxLength={4}
+                    />
+                    <Separator>-</Separator>
+                    <PhoneInput
+                      placeholder="0000"
+                      value={phoneLast}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setPhoneLast(e.target.value)
+                      }
+                      maxLength={4}
+                    />
+                  </PhoneInputGroup>
+                </InputGroup>
+              </InputRow>
+
+              <AddressRow>
+                <InputGroup>
+                  <InputLabel>주소</InputLabel>
+                  <AddressInputGroup>
+                    <AddressSearchButton
+                      onClick={() => {
+                        open({ onComplete: handleComplete });
+                      }}
+                    >
+                      주소 검색
+                    </AddressSearchButton>
+                    {newAddress && (
+                      <AddressPreview>{newAddress}</AddressPreview>
+                    )}
+                  </AddressInputGroup>
+                </InputGroup>
+              </AddressRow>
+
+              <ButtonGroup>
+                <CompleteButton onClick={handleAddAddress}>완료</CompleteButton>
+                <CancelButton onClick={() => setIsAddingNewAddress(false)}>
+                  취소
+                </CancelButton>
+              </ButtonGroup>
             </NewAddressForm>
           ) : (
             <AddAddressButton onClick={() => setIsAddingNewAddress(true)}>
@@ -190,20 +238,68 @@ const SettingPage = () => {
 };
 
 const NewAddressForm = styled.div`
-  margin-top: 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 5px;
+`;
+
+const Separator = styled.span`
+  color: #000;
+  font-size: 16px;
+`;
+
+const PhoneInput = styled.input`
+  width: 60px;
+  height: 25px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 13px;
+  padding: 5px 10px;
+  box-shadow: none;
+  outline: none;
+  transition: border-color 0.3s ease;
+  text-align: center;
+
+  &:focus {
+    border-color: #000;
+  }
+`;
+
+const PhoneInputGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const InputLabel = styled.div`
+  font-size: 12px;
+  color: #131118;
+  margin-top: 15px;
+  margin-bottom: 5px;
+`;
+const InputGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const InputRow = styled.div`
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
 `;
 
 const AddressSearchButton = styled.div`
   background-color: #000;
   color: #fff;
   border-radius: 5px;
-  padding: 10px 20px;
+  padding: 5px 15px;
   text-align: center;
   cursor: pointer;
-  width: 350px;
+  width: 90px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const AddressPreview = styled.div`
@@ -212,23 +308,53 @@ const AddressPreview = styled.div`
   color: #555;
 `;
 
+const AddressInputGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 15px;
+`;
+
+const AddressRow = styled.div``;
+
 const CompleteButton = styled.div`
-  background-color: green;
-  color: #fff;
+  display: inline-flex;
+  justify-content: center;
+  background-color: #f1f1f1;
+  border: 1px solid #ccc;
   border-radius: 5px;
   padding: 10px 20px;
   text-align: center;
   cursor: pointer;
-  width: 350px;
+  flex: 1;
+  max-width: 175px;
+
+  &:hover {
+    background-color: #ddd;
+  }
 `;
 
 const CancelButton = styled.div`
-  background-color: red;
-  color: #fff;
+  display: inline-flex;
+  justify-content: center;
+  background-color: #ffeded;
+  border: 1px solid #f5c6cb;
   border-radius: 5px;
   padding: 10px 20px;
   text-align: center;
   cursor: pointer;
+  color: #d9534f;
+  flex: 1;
+  max-width: 175px;
+
+  &:hover {
+    background-color: #f8d7da;
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
   width: 350px;
 `;
 
@@ -345,8 +471,7 @@ const AddressWrapper = styled.div`
 `;
 
 const StyledInput = styled.input`
-  margin-top: 10px;
-  width: 350px;
+  width: 150px;
   height: 25px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -372,6 +497,10 @@ const NicknameButton = styled.div`
   justify-content: center;
   cursor: pointer;
   margin-left: 15px;
+`;
+
+const NicknameInput = styled(StyledInput)`
+  width: 350px;
 `;
 
 const Title = styled.div`

@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
+import { postSignUp } from '../../../api/loginApi';
 
 function SignUpPage() {
   const navigate = useNavigate();
+  const [name, setName] = useState<string>('');
+  const [phone, setPhone] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [pw, setPw] = useState<string>('');
+  const [cpw, setCpw] = useState<string>('');
+
   return (
     <Wrapper>
       <LeftContent>
@@ -20,17 +27,64 @@ function SignUpPage() {
       <RightContent>
         <Title>회원가입</Title>
         <Subtitle>Name</Subtitle>
-        <StyledInput placeholder="이름 입력" />
+        <StyledInput
+          placeholder="이름 입력"
+          value={name}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setName(e.target.value);
+          }}
+        />
         <Subtitle>Phone Number</Subtitle>
-        <StyledInput placeholder="휴대폰 번호 입력" />
+        <StyledInput
+          placeholder="휴대폰 번호 입력"
+          value={phone}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setPhone(e.target.value);
+          }}
+        />
         <Subtitle>Email Address</Subtitle>
-        <StyledInput placeholder="이메일 입력" />
+        <StyledInput
+          placeholder="이메일 입력"
+          value={email}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setEmail(e.target.value);
+          }}
+        />
         <Subtitle>Password</Subtitle>
-        <StyledInput placeholder="비밀번호 입력 (8 ~ 16자리)" />
+        <StyledInput
+          placeholder="비밀번호 입력 (8 ~ 16자리)"
+          value={pw}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setPw(e.target.value);
+          }}
+        />
         <Subtitle>Confirm Password</Subtitle>
-        <StyledInput placeholder="비밀번호 확인" />
+        <StyledInput
+          placeholder="비밀번호 확인"
+          value={cpw}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setCpw(e.target.value);
+          }}
+        />
         <LoginButton
-          onClick={() => {
+          onClick={async () => {
+            const staticFile = new File(
+              ['This is a static file content'],
+              'profile.txt',
+              {
+                type: 'text/plain',
+              }
+            );
+            await postSignUp({
+              email: email,
+              password: pw,
+              password_confirm: cpw,
+              nickname: name,
+              name: name,
+              phone: phone,
+              profile: staticFile,
+              address: '',
+            });
             navigate('/termsandservice');
           }}
         >

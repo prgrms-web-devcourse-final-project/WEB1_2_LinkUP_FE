@@ -3,7 +3,7 @@ import { Product } from '../model/productSchema';
 
 export const getProducts = async (): Promise<Product[]> => {
   try {
-    const URL = `/homepage`;
+    const URL = `/goodbuyUs/true`;
     const { data } = await axiosInstance.get(URL);
     return data;
   } catch {

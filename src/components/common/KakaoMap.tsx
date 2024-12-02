@@ -5,9 +5,15 @@ type KakaoMapProps = {
   latitude: number;
   longitude: number;
   appKey: string;
+  width: number;
 };
 
-const KakaoMap: React.FC<KakaoMapProps> = ({ latitude, longitude, appKey }) => {
+const KakaoMap: React.FC<KakaoMapProps> = ({
+  latitude,
+  longitude,
+  appKey,
+  width,
+}) => {
   const mapContainer = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,7 +46,7 @@ const KakaoMap: React.FC<KakaoMapProps> = ({ latitude, longitude, appKey }) => {
     <div
       ref={mapContainer}
       style={{
-        width: '600px',
+        width: `${width}px`,
         height: '350px',
       }}
     ></div>

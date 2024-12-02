@@ -29,6 +29,10 @@ import PaymentForm from '../components/pages/Payment/PaymentForm';
 import PaymentSuccessPage from '../components/pages/Payment/PaymentSuccessPage';
 import ScrollToTop from '../components/common/ScrollToTop';
 import PostEditPage from '../components/pages/community/PostEditPage';
+import PaymentAuthorPage from '../components/pages/community/PaymentAuthorPage';
+import PaymentParticipantPage from '../components/pages/community/PaymentParticipantPage';
+import PaymentCompletePage from '../components/pages/community/PaymentCompletePage';
+import PostManagementPage from '../components/pages/admin/PostManagementPage';
 
 const router = createBrowserRouter([
   {
@@ -76,6 +80,22 @@ const router = createBrowserRouter([
       {
         path: '/community/posts/:postId/edit',
         element: <PostEditPage />,
+      },
+      {
+        path: '/community/posts/:postId/payment/author',
+        element: <PaymentAuthorPage />,
+      },
+      {
+        path: '/community/posts/:postId/payment/participant',
+        element: <PaymentParticipantPage />,
+      },
+      {
+        path: '/community/posts/:postId/payment/complete',
+        element: <PaymentCompletePage />,
+      },
+      {
+        path: '/admin/posts',
+        element: <PostManagementPage />,
       },
       {
         path: '/mypage',

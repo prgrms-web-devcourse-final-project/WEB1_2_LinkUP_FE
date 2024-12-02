@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   FaCaretDown,
   FaPlusCircle,
@@ -8,13 +9,15 @@ import {
   FaAngleLeft,
   FaAngleRight,
 } from 'react-icons/fa';
-import { createPost, PostData } from './api/postApi';
+import { createPost, CreatePostInput } from './api/postApi';
 import CategoryWrapper from '../../common/CategoryWrapper';
 import ScrollToTopButton from '../../common/ScrollToTopButton';
+import { POST_CATEGORIES } from './postCategories';
 
 const PostCreatePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const defaultCategory = location.state?.selectedCategory || '생활용품'; // 이전 페이지에서 전달된 카테고리
 
   const [selectedCategory, setSelectedCategory] = useState(defaultCategory);
@@ -28,6 +31,20 @@ const PostCreatePage = () => {
   const [currentIndex, setCurrentIndex] = useState(-1); // -1: AddImageButton 상태
   const [urlInput, setUrlInput] = useState('');
   const [urlError, setUrlError] = useState(false);
+
+  const createPostMutation = useMutation({
+    mutationFn: (postData: CreatePostInput) => createPost(postData),
+    onSuccess: () => {
+      // 생성 성공 시 목록 업데이트
+      queryClient.invalidateQueries({ queryKey: ['postList'] });
+      alert('포스트가 작성되었습니다. 관리자의 승인을 대기 중입니다.');
+      navigate('/community');
+    },
+    onError: (error) => {
+      console.error('포스트 생성 중 오류 발생:', error);
+      alert('포스트 생성에 실패했습니다.');
+    },
+  });
 
   const handleDropdownToggle = () => {
     setDropdownVisible(!dropdownVisible);
@@ -58,39 +75,32 @@ const PostCreatePage = () => {
 
     const parsedTotalPrice = parseInt(totalPrice.replace(/,/g, ''), 10);
     const parsedRequiredQuantity = parseInt(requiredQuantity, 10);
-    const createdAt = new Date(); // 현재 시각을 글 작성 시점으로 설정
-    const updatedAt = new Date(); // 초기값으로 글 작성 시점과 글 수정 시점을 일치
 
-    // 마감 기한 계산 (현재 시점 + 선택한 마감 기한)
-    const closeAt = new Date();
-    if (deadline !== '마감 기한') {
-      const daysToAdd = parseInt(deadline.replace(/[^0-9]/g, ''), 10); // "1일", "2일" 등의 숫자 추출
-      closeAt.setDate(createdAt.getDate() + daysToAdd); // 날짜 계산
+    // 마감 기한 계산 (Long 타입으로 전송할 기간 설정)
+    const period =
+      deadline !== '마감 기한'
+        ? parseInt(deadline.replace(/[^0-9]/g, ''), 10)
+        : 0;
+
+    if (period <= 0) {
+      alert('마감 기한을 올바르게 설정하세요.');
+      return;
     }
 
-    const postData: PostData = {
-      title,
-      content,
+    const postData: CreatePostInput = {
+      title: title.trim(),
+      content: content.trim(),
       images,
       category: selectedCategory,
-      createdAt: createdAt.toISOString(),
-      updatedAt: updatedAt.toISOString(),
-      closeAt: closeAt.toISOString(),
       requiredQuantity: parsedRequiredQuantity,
       totalPrice: parsedTotalPrice,
       unitPrice: Math.floor(parsedTotalPrice / parsedRequiredQuantity),
-      url: urlInput,
+      url: urlInput.trim(),
+      period, // 마감 기한 (Long 타입)
+      status: 'NOT_APPROVED',
     };
 
-    try {
-      const { postId } = await createPost(postData); // API 호출
-
-      // 성공적으로 postId를 받으면 해당 포스트로 이동
-      navigate(`/community/posts/${postId}`, { state: postData });
-    } catch (error) {
-      console.error('게시물 생성 중 오류 발생:', error);
-      alert('게시물 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
-    }
+    createPostMutation.mutate(postData); // React Query Mutation 호출
   };
 
   const handleRequiredQuantityChange = (
@@ -303,6 +313,7 @@ const PostCreatePage = () => {
                   <CategoryInputWrapper>
                     <CategoryLabel>카테고리 선택</CategoryLabel>
                     <CategoryWrapperStyled
+                      categories={POST_CATEGORIES}
                       selectedCategory={selectedCategory} // 현재 선택된 카테고리를 전달
                       onCategoryChange={
                         (category: string) => setSelectedCategory(category) // 카테고리 변경 시 상태 업데이트

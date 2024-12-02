@@ -8,17 +8,18 @@ import {
   FaAngleLeft,
   FaAngleRight,
 } from 'react-icons/fa';
-import { updatePost, PostData, deletePostById } from './api/postApi';
+import { updatePost, Post, deletePostById, defaultPost } from './api/postApi';
 // import { fetchPostById, updatePost, PostData, deletePostById } from './api/postApi';
 import CategoryWrapper from '../../common/CategoryWrapper';
 import ScrollToTopButton from '../../common/ScrollToTopButton';
 import { mockCommunityPosts } from '../../../mocks/communityPosts';
+import { POST_CATEGORIES } from './postCategories';
 
 const PostEditPage = () => {
   const navigate = useNavigate();
   const { postId } = useParams<{ postId: string }>();
 
-  const [post, setPost] = useState<PostData | null>(null); // 수정 대상 포스트 데이터
+  const [post, setPost] = useState<Post>(defaultPost); // 수정 대상 포스트 데이터
   const [selectedCategory, setSelectedCategory] = useState('');
   const [requiredQuantity, setRequiredQuantity] = useState('');
   const [totalPrice, setTotalPrice] = useState('');
@@ -126,7 +127,7 @@ const PostEditPage = () => {
     const parsedTotalPrice = parseInt(totalPrice.replace(/,/g, ''), 10);
     const parsedRequiredQuantity = parseInt(requiredQuantity, 10);
 
-    const updatedPost: PostData = {
+    const updatedPost: Post = {
       ...post,
       title,
       content,
@@ -276,7 +277,7 @@ const PostEditPage = () => {
     try {
       await deletePostById(postId!); // 삭제 API 호출
       alert('게시글이 성공적으로 삭제되었습니다.');
-      navigate(`/community/posts?category=${selectedCategory}`); // 선택된 카테고리의 목록 페이지로 이동
+      navigate('/community/');
     } catch (error) {
       console.error('게시글 삭제 중 오류 발생:', error);
       alert('게시글 삭제에 실패했습니다. 다시 시도해주세요.');
@@ -380,9 +381,10 @@ const PostEditPage = () => {
                   <CategoryInputWrapper>
                     <CategoryLabel>카테고리 선택</CategoryLabel>
                     <CategoryWrapperStyled
+                      categories={POST_CATEGORIES}
                       selectedCategory={selectedCategory} // 현재 선택된 카테고리를 전달
                       onCategoryChange={
-                        (category: string) => setSelectedCategory(category) // 카테고리 변경 시 상태 업데이트
+                        (id: string) => setSelectedCategory(id) // 카테고리 변경 시 상태 업데이트
                       }
                     />
                   </CategoryInputWrapper>

@@ -80,7 +80,7 @@ const Header = () => {
                   </CartIcon>
                 </LogOut>
               </>
-            )}
+            )}{' '}
           </NavList>
         </NavBar>
       </HeaderContent>
@@ -191,6 +191,7 @@ const NavItem = styled.li`
 
   &:hover {
     background-color: #f4f4f4;
+    border-radius: 8px;
   }
 
   @media (min-width: 576px) and (max-width: 767px) {

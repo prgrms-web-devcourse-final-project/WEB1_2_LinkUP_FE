@@ -24,15 +24,20 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
     setIsExpanded(false);
   };
 
-  //임의로 8개만 선택
+  const filtered = products.filter((product: Product) =>
+    product.category.toLowerCase().includes(selectedCategory.toLowerCase())
+  );
+
   const getRandomProducts = (products: Product[]): Product[] => {
     const shuffled = [...products].sort(() => 0.5 - Math.random()); // Shuffle the array
     return shuffled.slice(0, 8);
   };
+
   const displayedProducts = useMemo(
-    () => getRandomProducts(products),
-    [products]
+    () => getRandomProducts(filtered),
+    [filtered]
   );
+
   useEffect(() => {
     //fetch상품
   }, [selectedCategory]);

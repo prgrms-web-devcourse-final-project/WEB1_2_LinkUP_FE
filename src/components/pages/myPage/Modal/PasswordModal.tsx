@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { styled } from 'styled-components';
-import { postPasswordVerify } from '../../../../api/mypageApi';
+import {
+  postPasswordChange,
+  postPasswordVerify,
+} from '../../../../api/mypageApi';
 
 const PasswordModal = ({ onClose }: { onClose: () => void }) => {
   const [step, setStep] = useState(1);
@@ -14,6 +17,7 @@ const PasswordModal = ({ onClose }: { onClose: () => void }) => {
       setStep(2);
     } else if (step === 2) {
       if (newPassword === confirmPassword) {
+        await postPasswordChange({ newPassword: newPassword });
         onClose();
       } else {
         alert('비밀번호가 일치하지 않습니다.');

@@ -5,3 +5,9 @@ export const postPasswordVerify = async (body: { currentPassword: string }) => {
 
   return response.data;
 };
+
+export const postPasswordChange = async (body: { newPassword: string }) => {
+  const response = await axiosInstance.post(`/mypage/change`, body);
+
+  return response.data;
+};

@@ -1,8 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { orderHistoryData } from '../mockData';
 
 const OrderHistory = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleCancelClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleConfirm = () => {
+    // 주문 취소/환불 로직 추가 예정
+    setIsModalOpen(false);
+  };
+
+  const handleClose = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <Container>
       <OrderList>
@@ -21,19 +36,31 @@ const OrderHistory = () => {
             <Price>{order.price}</Price>
             <Actions>
               <ActionButton>상품 페이지 이동</ActionButton>
+              <CancelButton onClick={handleCancelClick}>
+                주문 취소/환불
+              </CancelButton>
               {order.status === '배송 완료' && (
-                <>
-                  <ReviewButton>리뷰 작성하기</ReviewButton>
-                  <CancelButton>환불하기</CancelButton>
-                </>
-              )}
-              {order.status === '배송 준비 중' && (
-                <CancelButton>주문 취소하기</CancelButton>
+                <ReviewLink>
+                  <ReviewIcon src="/images/qricon.png" alt="review icon" />
+                  <span>리뷰 작성하기</span>
+                </ReviewLink>
               )}
             </Actions>
           </OrderItem>
         ))}
       </OrderList>
+
+      {isModalOpen && (
+        <ModalOverlay>
+          <ModalContent>
+            <ModalText>주문을 취소/환불하시겠습니까?</ModalText>
+            <ModalButtons>
+              <ConfirmButton onClick={handleConfirm}>Yes</ConfirmButton>
+              <CancelModalButton onClick={handleClose}>No</CancelModalButton>
+            </ModalButtons>
+          </ModalContent>
+        </ModalOverlay>
+      )}
     </Container>
   );
 };
@@ -118,33 +145,106 @@ const Actions = styled.div`
 
 const ActionButton = styled.div`
   background: #fff;
-  color: #000;
-  border: 1px solid #000;
+  color: #131118;
+  border: 1px solid #131118;
   padding: 10px 10px;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-`;
-
-const ReviewButton = styled.div`
-  background: black;
-  color: #fff;
-  border: 1px solid #000;
-  padding: 10px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  display: inline-flex;
-  justify-content: center;
+  &:hover {
+    background: #131118;
+    color: #fff;
+  }
 `;
 
 const CancelButton = styled.div`
-  background: #dc3545;
-  color: #fff;
-  border: 1px solid #dc3545;
+  background: #fff;
+  color: #ff7262;
+  border: 1px solid #ff7262;
   padding: 10px 10px;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   display: inline-flex;
   justify-content: center;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #ff7262;
+    color: #fff;
+  }
+`;
+
+const ReviewLink = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  margin-top: 8px;
+
+  span {
+    border-bottom: 1px solid #131118;
+  }
+`;
+
+const ReviewIcon = styled.img`
+  width: 16px;
+  height: 16px;
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 24px;
+  border-radius: 8px;
+  width: 300px;
+  text-align: center;
+`;
+
+const ModalText = styled.p`
+  margin-bottom: 20px;
+  font-size: 16px;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+`;
+
+const ConfirmButton = styled.button`
+  padding: 8px 24px;
+  border-radius: 4px;
+  border: 1px solid #ff7262;
+  background-color: #fff;
+  color: #ff7262;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: #ff7262;
+    color: #fff;
+  }
+`;
+
+const CancelModalButton = styled(ConfirmButton)`
+  border: 1px solid #131118;
+  color: #131118;
+
+  &:hover {
+    background-color: #131118;
+    color: #fff;
+  }
 `;
 
 export default OrderHistory;

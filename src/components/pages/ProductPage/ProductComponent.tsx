@@ -26,7 +26,7 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
   const filteredProducts =
     selectedText === '마감 상품'
       ? products.filter((product) => new Date(product.deadline) < new Date())
-      : products;
+      : products.filter((product) => new Date(product.deadline) > new Date());
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCT_PER_PAGE);
 
@@ -80,7 +80,7 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
                 </PriceWrapper>
               </ProductWrapper>
             </StyledLink>
-            <LikeButton likes={product.likes} />
+            <LikeButton likes={product.available} />
           </Card>
         ))}
       </CardWrapper>

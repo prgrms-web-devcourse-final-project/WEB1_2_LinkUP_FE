@@ -29,7 +29,7 @@ const ProductDetail: React.FC = () => {
   const [data, setData] = useState({});
 
   const handleSubmit = () => {
-    submitOrder(product.id, payload).then((res) => {
+    submitOrder(product.id, quantity).then((res) => {
       setData(res);
     });
   };
@@ -63,12 +63,15 @@ const ProductDetail: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const isOutOfStock = product.now >= product.stock;
+  const isOutOfStock = product.now >= product.currentStock;
   const isDeadlinePassed = remainingTime === '마감되었습니다.';
   const isButtonDisabled = isOutOfStock || isDeadlinePassed;
 
   // 구매 비율 계산
-  const purchasePercentage = Math.min((product.now / product.stock) * 100, 100);
+  const purchasePercentage = Math.min(
+    (product.now / product.currentStock) * 100,
+    100
+  );
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     if (value > 0) setQuantity(value);
@@ -83,15 +86,9 @@ const ProductDetail: React.FC = () => {
     setNewComment('');
   };
 
-  //남은 재고
+  //할인까지 남은 수량
   const least = product.minamount - product.now;
-  const payload = {
-    url: product.url,
-    productName: product.name,
-    price: product.originalPrice,
-    discountPrice: product.discountPrice,
-    amount: quantity,
-  };
+
   return (
     <>
       {/* <QueryHandler isLoading={isLoading} isError={isError}> */}
@@ -130,7 +127,7 @@ const ProductDetail: React.FC = () => {
                 <StockFill style={{ width: `${purchasePercentage}%` }} />
               </StockBar>
               <StockStatus>
-                {product.now} / {product.stock} 구매됨
+                {product.now} / {product.currentStock} 구매됨
               </StockStatus>
             </StockWrapper>
             <ActionWrapper>

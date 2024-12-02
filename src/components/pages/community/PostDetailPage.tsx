@@ -138,13 +138,14 @@ const PostDetailPage = () => {
       window.confirm('참여를 확정하시겠습니까? 이후에는 수정이 불가능합니다.')
     ) {
       try {
-        // await joinPost(postId!, currentUserId, quantity);
+        const updatedQuantity = post.currentQuantity + quantity;
+        // await joinPost(postId!, currentUserId, quantity, updatedQuantity);
         alert('참여가 완료되었습니다.');
         setPost((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
-            currentQuantity: prev.currentQuantity + quantity,
+            currentQuantity: updatedQuantity,
             participants: [
               ...prev.participants,
               { userId: currentUserId, quantity, isCancelled: false },
@@ -164,13 +165,14 @@ const PostDetailPage = () => {
       window.confirm('취소 후 다시 참여할 수 없습니다. 정말 취소하시겠습니까?')
     ) {
       try {
-        // await cancelJoinPost(postId!, currentUserId);
+        const updatedQuantity = post.currentQuantity - quantity;
+        // await cancelJoinPost(postId!, currentUserId, updatedQuantity);
         alert('참여가 취소되었습니다.');
         setPost((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
-            currentQuantity: prev.currentQuantity - quantity,
+            currentQuantity: updatedQuantity,
             participants: prev.participants.map((p) =>
               p.userId === currentUserId ? { ...p, isCancelled: true } : p
             ),
@@ -725,14 +727,14 @@ const PaginationDots = styled.div`
 `;
 
 const UrlContainer = styled.div`
-  margin-top: 15px;
-  margin-left: 50px;
   display: flex;
-  align-items: center; /* 세로로 가운데 정렬 */
+  flex-direction: column;
+  align-items: flex-start; /* 세로로 가운데 정렬 */
   width: 100%;
 `;
 
 const UrlWrapper = styled.div`
+  margin-left: 20px;
   display: flex;
   align-items: center; /* Label과 Url을 같은 높이에 배치 */
   gap: 10px; /* Label과 Url 사이 간격 */
@@ -741,6 +743,7 @@ const UrlWrapper = styled.div`
 `;
 
 const Url = styled.div`
+  width: 285px;
   flex: 1;
   padding: 10px;
   border: none;

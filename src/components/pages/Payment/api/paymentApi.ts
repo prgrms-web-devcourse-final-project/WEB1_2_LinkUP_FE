@@ -3,20 +3,26 @@ export interface PaymentForm {
   productName: string;
   url: string;
   price: number;
-  // amount: number;
-  finalPrice: number;
-  // postId: number;
+  quantity: number;
   payMethod: string;
-  needed: string;
+  deliveryRequestDTO: UserForm;
+}
+
+export interface UserForm {
   name: string;
   address: {
-    city: string;
+    street: string;
     detail: string;
   };
+  needed: string;
 }
-export const handlePayment = async (payload: PaymentForm) => {
+
+export const handlePayment = async (
+  productId: number,
+  payload: PaymentForm
+) => {
   try {
-    const URL = `/api/v1/payments`;
+    const URL = `goodbuyUs/orders/${productId}/payment`;
     const { data } = await axiosInstance.post(URL, payload);
     return data.data.paymentStatus;
   } catch {

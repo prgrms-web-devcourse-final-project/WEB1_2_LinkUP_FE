@@ -12,6 +12,7 @@ import {
 import { createPost, CreatePostInput } from './api/postApi';
 import CategoryWrapper from '../../common/CategoryWrapper';
 import ScrollToTopButton from '../../common/ScrollToTopButton';
+import { POST_CATEGORIES } from './postCategories';
 
 const PostCreatePage = () => {
   const navigate = useNavigate();
@@ -312,6 +313,7 @@ const PostCreatePage = () => {
                   <CategoryInputWrapper>
                     <CategoryLabel>카테고리 선택</CategoryLabel>
                     <CategoryWrapperStyled
+                      categories={POST_CATEGORIES}
                       selectedCategory={selectedCategory} // 현재 선택된 카테고리를 전달
                       onCategoryChange={
                         (category: string) => setSelectedCategory(category) // 카테고리 변경 시 상태 업데이트

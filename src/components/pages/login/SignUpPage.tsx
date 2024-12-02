@@ -68,22 +68,12 @@ function SignUpPage() {
         />
         <LoginButton
           onClick={async () => {
-            const staticFile = new File(
-              ['This is a static file content'],
-              'profile.txt',
-              {
-                type: 'text/plain',
-              }
-            );
             await postSignUp({
               email: email,
               password: pw,
               password_confirm: cpw,
-              nickname: name,
               name: name,
               phone: phone,
-              profile: staticFile,
-              address: '',
             });
             navigate('/termsandservice');
           }}

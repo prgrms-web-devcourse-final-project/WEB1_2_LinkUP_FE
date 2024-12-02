@@ -4,13 +4,10 @@ export const postSignUp = async (body: {
   email: string;
   password: string;
   password_confirm: string;
-  nickname: string;
   name: string;
   phone: string;
-  profile: File;
-  address: string;
 }) => {
-  const response = await axiosInstance.post(`/users`, body);
+  const response = await axiosInstance.post(`/users/checkemail`, body);
 
   return response.data;
 };

@@ -17,3 +17,21 @@ export const postSignIn = async (body: { email: string; password: string }) => {
 
   return response.data;
 };
+
+export const postFindPassword = async (body: { email: string }) => {
+  const response = await axiosInstance.post(`/users/find`, body);
+
+  return response.data;
+};
+
+export const postResetPassword = async (
+  body: { newPassword: string },
+  token: string
+) => {
+  const response = await axiosInstance.post(
+    `/users/reset?token=${token}`,
+    body
+  );
+
+  return response.data;
+};

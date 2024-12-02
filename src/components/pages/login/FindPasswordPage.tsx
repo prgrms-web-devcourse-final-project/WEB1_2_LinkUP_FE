@@ -102,6 +102,7 @@ const BackButton = styled.div`
   margin-bottom: 35px;
   display: inline-flex;
   align-items: center;
+  cursor: pointer;
 `;
 
 const Description = styled.div`

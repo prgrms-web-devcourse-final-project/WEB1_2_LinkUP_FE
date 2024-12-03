@@ -22,9 +22,15 @@ interface Participant {
 
 interface ChatRoomProps {
   chatRoomId: string;
+  webSocketService: typeof webSocketService;
+  isAdmin?: boolean; // 관리자 여부
 }
 
-const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId }) => {
+const ChatRoom: React.FC<ChatRoomProps> = ({
+  chatRoomId,
+  webSocketService,
+  isAdmin = false,
+}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [input, setInput] = useState('');
@@ -126,7 +132,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId }) => {
     return () => {
       webSocketService.close();
     };
-  }, [chatRoomId]);
+  }, [chatRoomId, webSocketService]);
 
   useEffect(() => {
     // 채팅 박스 스크롤 관리
@@ -139,8 +145,8 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId }) => {
     if (!input.trim()) return;
 
     const message: Message = {
-      senderId: currentUserId,
-      content: input.trim(),
+      senderId: isAdmin ? 'system' : currentUserId, // 관리자는 시스템 메시지로 보냄
+      content: isAdmin ? `[관리자 메시지] ${input.trim()}` : input.trim(),
       chatRoomId,
       timestamp: new Date().toISOString(),
     };
@@ -214,10 +220,11 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId }) => {
               <MessageContent
                 isCurrentUser={msg.senderId === currentUserId}
                 isGroupNotice={isGroupNotice}
+                isSystemMessage={msg.senderId === 'system'}
               >
                 {msg.content}
               </MessageContent>
-              {msg.timestamp && (
+              {msg.timestamp && msg.senderId !== 'system' && (
                 <Timestamp>
                   {new Date(msg.timestamp).toLocaleTimeString()}
                 </Timestamp>
@@ -292,10 +299,15 @@ const SenderName = styled.div`
 const MessageContent = styled.div<{
   isCurrentUser: boolean;
   isGroupNotice?: boolean;
+  isSystemMessage?: boolean;
 }>`
   max-width: 70%;
-  background-color: ${({ isCurrentUser, isGroupNotice }) =>
-    isGroupNotice ? '#cecece' : isCurrentUser ? '#d9f9d9' : '#e9e9e9'};
+  background-color: ${({ isCurrentUser, isGroupNotice, isSystemMessage }) =>
+    isGroupNotice || isSystemMessage
+      ? '#cecece'
+      : isCurrentUser
+        ? '#d9f9d9'
+        : '#e9e9e9'};
   color: #333;
   padding: 10px;
   border-radius: 12px;

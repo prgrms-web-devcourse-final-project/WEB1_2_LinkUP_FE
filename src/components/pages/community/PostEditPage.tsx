@@ -11,7 +11,6 @@ import {
 import { updatePost, Post, deletePostById, defaultPost } from './api/postApi';
 // import { fetchPostById, updatePost, PostData, deletePostById } from './api/postApi';
 import CategoryWrapper from '../../common/CategoryWrapper';
-import ScrollToTopButton from '../../common/ScrollToTopButton';
 import { mockCommunityPosts } from '../../../mocks/communityPosts';
 import { POST_CATEGORIES } from './postCategories';
 
@@ -465,7 +464,6 @@ const PostEditPage = () => {
           </FormContainer>
         </ContentWrapper>
       </PostCreatePageContainer>
-      <ScrollToTopButton />
     </div>
   );
 };

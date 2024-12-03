@@ -4,7 +4,6 @@ import ProductComponent from '../ProductPage/ProductComponent';
 import styled from 'styled-components';
 
 import { useLocation } from 'react-router-dom';
-import ScrollToTopButton from '../../common/ScrollToTopButton';
 import { Product } from '../HomePage/model/productSchema';
 import { products } from '../../../mocks/products';
 
@@ -46,7 +45,6 @@ const ProductPage = () => {
         <Container>
           <ProductComponent input={input} products={filtered} />
         </Container>
-        <ScrollToTopButton />
       </ContainerBox>
     </>
   );

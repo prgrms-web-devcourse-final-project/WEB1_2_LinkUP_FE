@@ -11,7 +11,6 @@ import {
 } from 'react-icons/fa';
 import { createPost, CreatePostInput } from './api/postApi';
 import CategoryWrapper from '../../common/CategoryWrapper';
-import ScrollToTopButton from '../../common/ScrollToTopButton';
 import { POST_CATEGORIES } from './postCategories';
 
 const PostCreatePage = () => {
@@ -396,7 +395,6 @@ const PostCreatePage = () => {
           </FormContainer>
         </ContentWrapper>
       </PostCreatePageContainer>
-      <ScrollToTopButton />
     </div>
   );
 };

@@ -57,6 +57,7 @@ const PaymentCompletePage = () => {
           chatRoomId={chatRoomId}
           chatRoomTitle={chatRoomTitle} // 채팅방 제목 전달
           webSocketService={webSocketService} // WebSocket 서비스 전달
+          isAdminPage={false}
         />
       )}
     </PaymentCompleteContainer>

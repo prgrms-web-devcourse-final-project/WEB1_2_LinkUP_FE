@@ -36,6 +36,7 @@ import PaymentCompletePage from '../components/pages/community/PaymentCompletePa
 import PostManagementPage from '../components/pages/admin/PostManagementPage';
 import PostApprovalPage from '../components/pages/admin/PostApprovalPage';
 import ChatRoomManagementPage from '../components/pages/admin/ChatRoomManagementPage';
+import ScrollToTopButton from '../components/common/ScrollToTopButton';
 
 const router = createBrowserRouter([
   {
@@ -44,6 +45,7 @@ const router = createBrowserRouter([
       <>
         <Layout />
         <ScrollToTop />
+        <ScrollToTopButton />
       </>
     ),
     errorElement: <ErrorPage />,

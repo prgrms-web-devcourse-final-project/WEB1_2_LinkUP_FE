@@ -14,7 +14,7 @@ interface ChatRoomModalProps {
   isOpen: boolean;
   onClose: () => void;
   webSocketService: WebSocketService;
-  onDelete: () => void;
+  onDelete?: () => void;
   isAdminPage: boolean; // 관리자 페이지 여부를 나타내는 프롭
 }
 

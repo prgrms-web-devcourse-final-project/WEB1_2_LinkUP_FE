@@ -6,7 +6,6 @@ import CategoryWrapper from '../../../components/common/CategoryWrapper';
 import PostList from '../../../components/common/PostList';
 import { Post } from '../community/api/postApi';
 import { fetchAdminPosts } from './api/adminApi';
-import ScrollToTopButton from '../../common/ScrollToTopButton';
 
 const PostManagementPage = () => {
   const location = useLocation();
@@ -58,7 +57,6 @@ const PostManagementPage = () => {
           />
         </ContentWrapper>
       </PageContainer>
-      <ScrollToTopButton />
     </div>
   );
 };

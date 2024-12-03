@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import RecommendProduct from './RecommendProduct';
 import PopularProduct from './PopularProduct';
 import CategoryProduct from './CategoryProduct';
-import ScrollToTopButton from '../../common/ScrollToTopButton';
 import { categories, popularProduct, products } from '../../../mocks/products';
 // import { QueryHandler, useProductsQuery } from '../../../hooks/useGetProduct';
 
@@ -26,7 +25,6 @@ const HomePage: React.FC = () => {
         <Container>
           <CategoryProduct categories={categories} products={products} />
         </Container>
-        <ScrollToTopButton />
       </ContainerBox>
       {/* </QueryHandler> */}
     </>

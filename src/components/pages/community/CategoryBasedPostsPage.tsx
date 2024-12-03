@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
 import CategoryWrapper from '../../common/CategoryWrapper';
 import PostList from '../../common/PostList';
-import ScrollToTopButton from '../../common/ScrollToTopButton';
 import { POST_CATEGORIES } from './postCategories';
 
 const CategoryBasedPostsPage = () => {
@@ -26,7 +25,6 @@ const CategoryBasedPostsPage = () => {
           <PostList selectedCategory={selectedCategory} posts={[]} />
         </ContentWrapper>
       </CommunityPageContainer>
-      <ScrollToTopButton />
     </div>
   );
 };

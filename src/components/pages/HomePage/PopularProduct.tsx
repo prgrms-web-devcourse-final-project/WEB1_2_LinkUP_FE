@@ -53,6 +53,7 @@ const StyledLink = styled(Link)`
 
 const BannerContainer = styled.div`
   height: 300px;
+  width: 1100px;
   display: flex;
   background-color: #f5f5f5;
   border-radius: 12px;
@@ -62,7 +63,12 @@ const BannerContainer = styled.div`
     cursor: pointer;
     transform: translateY(-5px);
   }
+  @media (min-width: 768px) and (max-width: 1024px) {
+    width: 750px;
+    height: 300px;
+  }
   @media (min-width: 576px) and (max-width: 767px) {
+    width: 550px;
     height: 200px;
   }
 `;

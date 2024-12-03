@@ -23,6 +23,12 @@ export const CardWrapper = styled.div`
   width: 100%;
   gap: 20px;
   margin-top: 20px;
+  @media (min-width: 768px) and (max-width: 1024px) {
+    gap: 5px;
+  }
+  @media (min-width: 576px) and (max-width: 767px) {
+    gap: 10px;
+  }
 `;
 
 export const Card = styled.div`
@@ -67,6 +73,10 @@ export const ProductImg = styled.img`
   background-color: #e0e0e0;
   border-radius: 8px;
   object-fit: cover;
+  @media (min-width: 768px) and (max-width: 1024px) {
+    width: 130px;
+    height: 140px;
+  }
   @media (min-width: 576px) and (max-width: 767px) {
     width: 100px;
     height: 100px;

@@ -1,36 +1,108 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 const FindPasswordPage = () => {
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
   return (
-    <Wrapper>
-      <LeftContent>Image</LeftContent>
-      <RightContent>
-        <BackButton
-          onClick={() => {
-            navigate(-1);
-          }}
-        >
-          Back
-        </BackButton>
-        <Title>비밀번호 찾기</Title>
-        <Description>
-          등록된 이메일 주소를 입력하고 비밀번호 재설정을 위한 코드를
-          확인해주세요
-        </Description>
-        <Subtitle>email address</Subtitle>
-        <StyledInput placeholder="이메일 입력" />
+    <>
+      <Wrapper>
+        <LeftContent>
+          <img
+            src="/images/login7.jpg"
+            alt="Login background"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+            }}
+          />
+        </LeftContent>
+        <RightContent>
+          <BackButton
+            onClick={() => {
+              navigate(-1);
+            }}
+          >
+            <img
+              src="/images/arrow-left.png"
+              alt="left arrow"
+              style={{ width: '20px', height: '20px' }}
+            />
+            Back
+          </BackButton>
+          <Title>비밀번호 찾기</Title>
+          <Description>
+            등록된 이메일 주소를 입력하고 확인 버튼을 클릭해주세요
+          </Description>
+          <Subtitle>email address</Subtitle>
+          <StyledInput placeholder="이메일 입력" />
 
-        <LoginButton>Send OTP</LoginButton>
-      </RightContent>
-    </Wrapper>
+          <LoginButton onClick={() => setShowModal(true)}>확인</LoginButton>
+        </RightContent>
+      </Wrapper>
+      {showModal && (
+        <ModalOverlay>
+          <ModalContent>
+            <ModalText>이메일을 확인해주세요</ModalText>
+            <ModalButton onClick={() => setShowModal(false)}>확인</ModalButton>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+    </>
   );
 };
 
+const ModalButton = styled.button`
+  background-color: #000;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 20px;
+  cursor: pointer;
+  width: 100px;
+  height: 35px;
+  font-size: 14px;
+
+  &:hover {
+    opacity: 0.9;
+  }
+`;
+
+const ModalText = styled.div`
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+`;
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
 const BackButton = styled.div`
   margin-bottom: 35px;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
 `;
 
 const Description = styled.div`
@@ -55,7 +127,7 @@ const LoginButton = styled.div`
 `;
 
 const StyledInput = styled.input`
-  width: calc(100% - 20px);
+  width: calc(100% - 40px);
   height: 25px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -81,10 +153,11 @@ const Title = styled.div`
 `;
 const LeftContent = styled.div`
   flex: 6;
-  background-color: lightblue;
+  background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 `;
 
 const RightContent = styled.div`

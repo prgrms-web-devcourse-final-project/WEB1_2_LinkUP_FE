@@ -53,14 +53,24 @@ const StyledLink = styled(Link)`
 
 const BannerContainer = styled.div`
   height: 300px;
+  width: 1100px;
   display: flex;
   background-color: #f5f5f5;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
   &:hover {
     cursor: pointer;
     transform: translateY(-5px);
+  }
+  @media (min-width: 768px) and (max-width: 1024px) {
+    width: 750px;
+    height: 300px;
+  }
+  @media (min-width: 576px) and (max-width: 767px) {
+    width: 550px;
+    height: 200px;
   }
 `;
 
@@ -71,6 +81,10 @@ const ImageWrapper = styled.div`
   justify-content: center;
   align-items: center;
   background-color: white;
+  @media (min-width: 576px) and (max-width: 767px) {
+    width: 200px;
+    height: 200px;
+  }
 `;
 
 const ProductImage = styled.img`
@@ -94,6 +108,10 @@ const Star = styled.div`
   top: 20px;
   right: 20px;
   font-size: 20px;
+  @media (min-width: 576px) and (max-width: 767px) {
+    font-size: 15px;
+    top: 10px;
+  }
 `;
 const ProductHeader = styled.div`
   display: flex;
@@ -108,6 +126,9 @@ const TitleArea = styled.div`
   @media (min-width: 768px) and (max-width: 1024px) {
     flex-direction: column;
   }
+  @media (min-width: 576px) and (max-width: 767px) {
+    flex-direction: column;
+  }
 `;
 
 const ProductName = styled.h3`
@@ -115,6 +136,9 @@ const ProductName = styled.h3`
   font-weight: 700;
   color: #333;
   margin-right: 15px;
+  @media (min-width: 576px) and (max-width: 767px) {
+    font-size: 19px;
+  }
 `;
 
 const ProductCategory = styled.p`
@@ -122,6 +146,9 @@ const ProductCategory = styled.p`
   color: #666;
   @media (min-width: 768px) and (max-width: 1024px) {
     margin-top: -10px;
+  }
+  @media (min-width: 576px) and (max-width: 767px) {
+    font-size: 12px;
   }
 `;
 
@@ -140,6 +167,9 @@ const ProductDescription = styled.p`
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  @media (min-width: 576px) and (max-width: 767px) {
+    display: none;
   }
 `;
 export default PopularProduct;

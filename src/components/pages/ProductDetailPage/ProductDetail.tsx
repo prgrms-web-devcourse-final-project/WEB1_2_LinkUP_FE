@@ -29,7 +29,7 @@ const ProductDetail: React.FC = () => {
   const [data, setData] = useState({});
 
   const handleSubmit = () => {
-    submitOrder(product.id, payload).then((res) => {
+    submitOrder(product.id, quantity).then((res) => {
       setData(res);
     });
   };
@@ -63,12 +63,15 @@ const ProductDetail: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const isOutOfStock = product.now >= product.stock;
+  const isOutOfStock = product.now >= product.currentStock;
   const isDeadlinePassed = remainingTime === '마감되었습니다.';
   const isButtonDisabled = isOutOfStock || isDeadlinePassed;
 
   // 구매 비율 계산
-  const purchasePercentage = Math.min((product.now / product.stock) * 100, 100);
+  const purchasePercentage = Math.min(
+    (product.now / product.currentStock) * 100,
+    100
+  );
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     if (value > 0) setQuantity(value);
@@ -83,15 +86,9 @@ const ProductDetail: React.FC = () => {
     setNewComment('');
   };
 
-  //남은 재고
+  //할인까지 남은 수량
   const least = product.minamount - product.now;
-  const payload = {
-    url: product.url,
-    productName: product.name,
-    price: product.originalPrice,
-    discountPrice: product.discountPrice,
-    amount: quantity,
-  };
+
   return (
     <>
       {/* <QueryHandler isLoading={isLoading} isError={isError}> */}
@@ -120,6 +117,7 @@ const ProductDetail: React.FC = () => {
                 <RemainingCount>할인 적용까지 {least}개 남음</RemainingCount>
               )}
             </PriceWrapper>
+
             <Description>{product.description}</Description>
             <DeadlineLabel>{remainingTime}</DeadlineLabel>
 
@@ -129,7 +127,7 @@ const ProductDetail: React.FC = () => {
                 <StockFill style={{ width: `${purchasePercentage}%` }} />
               </StockBar>
               <StockStatus>
-                {product.now} / {product.stock} 구매됨
+                {product.now} / {product.currentStock} 구매됨
               </StockStatus>
             </StockWrapper>
             <ActionWrapper>
@@ -222,6 +220,10 @@ const ContentWrapper = styled.div`
 const ImageSection = styled.div`
   position: relative;
   flex: 1;
+  @media (min-width: 576px) and (max-width: 767px) {
+    height: 300px;
+    width: 300px;
+  }
 `;
 
 const InfoSection = styled.div`
@@ -233,6 +235,10 @@ const Image = styled.img`
   height: 400px;
   background-color: #f5f5f5;
   object-fit: cover;
+  @media (min-width: 576px) and (max-width: 767px) {
+    height: 300px;
+    width: 300px;
+  }
 `;
 
 const Title = styled.h2`
@@ -245,11 +251,14 @@ const Stars = styled.div`
   position: absolute;
   font-size: 20px;
   color: #ffaa00;
-  bottom: 21%;
+  bottom: 80px;
   right: 2%;
 
   @media (min-width: 768px) and (max-width: 1024px) {
-    bottom: 23%;
+    bottom: 80px;
+  }
+  @media (min-width: 576px) and (max-width: 767px) {
+    bottom: 10px;
   }
 `;
 
@@ -257,6 +266,9 @@ const PriceWrapper = styled.div`
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
+  @media (min-width: 576px) and (max-width: 767px) {
+    flex-direction: column;
+  }
 `;
 const DiscountWrapper = styled.div`
   display: flex;
@@ -270,17 +282,27 @@ const DiscountInfo = styled.div`
   @media (min-width: 768px) and (max-width: 1024px) {
     margin-left: -50%;
   }
+  @media (min-width: 576px) and (max-width: 767px) {
+    font-size: 12px;
+  }
 `;
 const OriginalPrice = styled.div`
   text-decoration: line-through;
   color: #999;
   font-size: 18px;
+  @media (min-width: 576px) and (max-width: 767px) {
+    font-size: 12px;
+  }
 `;
 
 const DiscountedPrice = styled.div`
   font-weight: bold;
   color: #ff4d4f;
   font-size: 24px;
+  @media (min-width: 576px) and (max-width: 767px) {
+    margin-top: -10px;
+    font-size: 18px;
+  }
 `;
 const RemainingCount = styled.div`
   display: inline-flex;
@@ -311,12 +333,8 @@ const Description = styled.p`
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  @media (min-width: 768px) and (max-width: 1024px) {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  @media (min-width: 576px) and (max-width: 767px) {
+    -webkit-line-clamp: 2;
   }
 `;
 const DeadlineLabel = styled.div`
@@ -357,6 +375,10 @@ const ActionWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
+  @media (min-width: 576px) and (max-width: 767px) {
+    margin-top: -40px;
+    margin-left: -340px;
+  }
 `;
 
 const QuantityWrapper = styled.div`

@@ -27,7 +27,9 @@ export const CardWrapper = styled.div`
     gap: 5px;
   }
   @media (min-width: 576px) and (max-width: 767px) {
-    gap: 10px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 35px;
+    max-width: 400px;
   }
 `;
 
@@ -53,7 +55,7 @@ export const Card = styled.div`
     width: 130px;
   }
   @media (min-width: 576px) and (max-width: 767px) {
-    width: 80px;
+    width: 200px;
   }
 `;
 export const StyledLink = styled(Link)`
@@ -69,7 +71,7 @@ export const StyledLink = styled(Link)`
   }
 `;
 export const ProductImg = styled.img`
-  width: 90%;
+  width: 100%;
   height: 200px;
   background-color: #e0e0e0;
   border-radius: 8px;
@@ -77,10 +79,6 @@ export const ProductImg = styled.img`
   @media (min-width: 768px) and (max-width: 1024px) {
     width: 130px;
     height: 140px;
-  }
-  @media (min-width: 576px) and (max-width: 767px) {
-    width: 100px;
-    height: 100px;
   }
 `;
 
@@ -95,9 +93,6 @@ export const ProductName = styled.div`
   font-weight: bold;
   margin-top: 10px;
   text-align: left;
-  @media (min-width: 576px) and (max-width: 767px) {
-    font-size: 12px;
-  }
 `;
 
 export const ProductStar = styled.div`
@@ -106,9 +101,6 @@ export const ProductStar = styled.div`
   text-align: left;
   margin-left: -5px;
   margin-top: 5px;
-  @media (min-width: 576px) and (max-width: 767px) {
-    display: none;
-  }
 `;
 
 export const PriceWrapper = styled.div`
@@ -123,22 +115,12 @@ export const OriginalPrice = styled.div`
   text-decoration: line-through;
   color: #999;
   font-size: 14px;
-  @media (min-width: 576px) and (max-width: 767px) {
-    font-size: 10px;
-    position: absolute;
-    bottom: 25px;
-  }
 `;
 
 export const DiscountedPrice = styled.div`
   font-size: 16px;
   font-weight: bold;
   color: #ff4d4f;
-  @media (min-width: 576px) and (max-width: 767px) {
-    font-size: 12px;
-    position: absolute;
-    bottom: 10px;
-  }
 `;
 
 export const LikeButton = styled.img<{ likes: boolean }>`
@@ -155,12 +137,6 @@ export const LikeButton = styled.img<{ likes: boolean }>`
     cursor: pointer;
     transform: scale(1.2);
     transition: transform 0.2s ease-in-out;
-  }
-  @media (min-width: 576px) and (max-width: 767px) {
-    bottom: 10px;
-    right: 10px;
-    width: 18px;
-    height: 18px;
   }
 `;
 export const CategoryWrapper = styled.div`

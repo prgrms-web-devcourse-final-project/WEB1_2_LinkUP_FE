@@ -130,6 +130,9 @@ const CardWrapper = styled.div`
   width: 100%;
   gap: 20px;
   margin-top: 20px;
+  @media (min-width: 576px) and (max-width: 767px) {
+    gap: 5px;
+  }
 `;
 
 const Card = styled.div<{ isSelected: boolean }>`
@@ -168,7 +171,7 @@ const Card = styled.div<{ isSelected: boolean }>`
     width: 130px;
   }
   @media (min-width: 576px) and (max-width: 767px) {
-    width: 80px;
+    width: 90px;
   }
 `;
 const StyledLink = styled(Link)`
@@ -190,8 +193,8 @@ const ProductImg = styled.img`
   border-radius: 8px;
   object-fit: cover;
   @media (min-width: 576px) and (max-width: 767px) {
-    width: 100px;
-    height: 100px;
+    width: 110px;
+    height: 110px;
   }
 `;
 

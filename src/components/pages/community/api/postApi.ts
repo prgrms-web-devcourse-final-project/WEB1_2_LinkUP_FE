@@ -3,6 +3,7 @@ import { mockCommunityPosts } from '../../../../mocks/communityPosts';
 
 export interface Comment {
   userId: string;
+  userNickname: string;
   commentId: string;
   createdAt: string;
   content: string;
@@ -20,6 +21,7 @@ export interface Participant {
 export type PostStatus =
   | 'NOT_APPROVED' // 승인 대기
   | 'APPROVED' // 승인 완료
+  | 'REJECTED' // 승인 거절
   | 'COMPLETED' // 모집 완료
   | 'PAYMENT_STANDBY' // 결제 대기
   | 'PAYMENT_COMPLETED'; // 결제 완료
@@ -28,6 +30,7 @@ export type PostStatus =
 export const POST_STATUS: { [key in PostStatus]: PostStatus } = {
   NOT_APPROVED: 'NOT_APPROVED',
   APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
   COMPLETED: 'COMPLETED',
   PAYMENT_STANDBY: 'PAYMENT_STANDBY',
   PAYMENT_COMPLETED: 'PAYMENT_COMPLETED',
@@ -194,6 +197,30 @@ export const updatePostStatus = async (
           new Date(updatedAt).getTime() + period * 24 * 60 * 60 * 1000
         ).toISOString(),
       };
+      break;
+    }
+
+    case 'REJECTED': {
+      // 거절 처리 로직
+      if (post.status === 'NOT_APPROVED' || post.status === 'REJECTED') {
+        // 'NOT_APPROVED' 상태 또는 기존 'REJECTED' 상태인 경우 처리
+        const updatedTitle = post.title.startsWith('(수정요망)')
+          ? post.title
+          : `(수정요망)${post.title}`;
+
+        // 실제 API 사용
+        // const response = await axiosInstance.patch(`/posts/${postId}/status`, {
+        //   status: newStatus,
+        //   title: updatedTitle, // 제목에 수정요망 표시
+        // });
+        // return response.data;
+
+        mockCommunityPosts[postIndex] = {
+          ...post,
+          status: newStatus,
+          title: updatedTitle, // 제목에 수정요망 표시
+        };
+      }
       break;
     }
 
@@ -440,10 +467,11 @@ export const requestRefund = async (postId: string, userId: string) => {
 export const addComment = async (
   postId: string,
   userId: string,
+  userNickname: string,
   content: string
 ): Promise<void> => {
   // 실제 API 사용
-  // await axiosInstance.post(`/posts/${postId}/comments`, { userId, content });
+  // await axiosInstance.post(`/posts/${postId}/comments`, { userId, userNickname, content });
 
   // Mock 데이터 기반:
   const post = mockCommunityPosts.find((item) => item.postId === postId);
@@ -452,6 +480,7 @@ export const addComment = async (
   }
   post.comments.push({
     userId,
+    userNickname,
     commentId: `comment-${new Date().getTime()}`,
     createdAt: new Date().toISOString(),
     content,

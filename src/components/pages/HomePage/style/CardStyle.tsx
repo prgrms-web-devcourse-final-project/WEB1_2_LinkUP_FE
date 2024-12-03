@@ -43,6 +43,7 @@ export const Card = styled.div`
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   align-items: center;
   position: relative;
+  transition: all 0.3s ease-in-out;
   &:hover {
     cursor: pointer;
     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.4);

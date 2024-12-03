@@ -140,13 +140,13 @@ const Card = styled.div<{ isSelected: boolean }>`
   margin: 10px;
   width: 200px;
   background-color: ${({ isSelected }) => (isSelected ? 'white' : '#f0f0f0')};
-
   border-radius: 8px;
   box-shadow: ${({ isSelected }) =>
     isSelected ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none'};
   opacity: ${({ isSelected }) => (isSelected ? 1 : 0.6)};
   align-items: center;
   position: relative;
+  transition: all 0.3s ease-in-out;
   &::after {
     content: ${({ isSelected }) => (isSelected ? '""' : '"판매 종료"')};
     position: absolute;

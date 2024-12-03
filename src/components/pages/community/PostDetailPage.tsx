@@ -25,6 +25,7 @@ import { webSocketService } from '../../../utils/webSocket';
 
 // 로그인된 사용자의 ID (Mock 처리)
 const currentUserId = 'user-00001'; // 실제 구현 시, 인증된 사용자 ID를 받아와야 함
+const currentUserNickname = '사용자 A'; // 실제 구현 시, 인증된 사용자 Nickname을 받아와야 함
 
 const PostDetailPage = () => {
   const { postId } = useParams<{ postId: string }>();
@@ -289,7 +290,13 @@ const PostDetailPage = () => {
 
   // 댓글 작성
   const addCommentMutation = useMutation({
-    mutationFn: () => addComment(postId!, currentUserId, newCommentContent),
+    mutationFn: () =>
+      addComment(
+        postId!,
+        currentUserId,
+        currentUserNickname,
+        newCommentContent
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['postDetail', postId] });
       setNewCommentContent('');
@@ -506,14 +513,7 @@ const PostDetailPage = () => {
               <DetailsContainer>
                 <Detail>
                   <Label>제목</Label>
-                  <DetailText>
-                    {post.title}
-                    {post.status === POST_STATUS.NOT_APPROVED && (
-                      <span style={{ marginLeft: '8px', color: 'red' }}>
-                        관리자의 승인을 대기 중입니다.
-                      </span>
-                    )}
-                  </DetailText>
+                  <DetailText>{post.title}</DetailText>
                 </Detail>
                 <DoubleWrapper>
                   <AuthorDetail>
@@ -646,7 +646,7 @@ const PostDetailPage = () => {
               {post.comments.map((comment) => (
                 <Comments key={comment.commentId}>
                   <CommentHeader>
-                    <CommentAuthor>{comment.userId}</CommentAuthor>
+                    <CommentAuthor>{comment.userNickname}</CommentAuthor>
                     <CommentDate>
                       {new Date(comment.createdAt).toLocaleString()}
                     </CommentDate>
@@ -747,7 +747,7 @@ const Header = styled.div`
 
 const HeaderWrapper = styled.div`
   width: 1000px;
-  margin: 0 auto;
+  margin: 30px auto 0;
   display: flex;
   justify-content: space-between;
   align-items: center;

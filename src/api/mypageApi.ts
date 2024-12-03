@@ -11,3 +11,9 @@ export const postPasswordChange = async (body: { newPassword: string }) => {
 
   return response.data;
 };
+
+export const postLocationChange = async (body: { newAddress: string }) => {
+  const response = await axiosInstance.post(`/mypage/changeneighbor`, body);
+
+  return response.data;
+};

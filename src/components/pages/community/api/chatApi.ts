@@ -1,10 +1,35 @@
 // import axiosInstance from '../../../../api/axiosInstance'; // 기존 Axios 인스턴스 사용
 import {
-  mockDeleteChatRoom,
+  mockFetchChatRooms,
   mockFetchChatMessages,
   mockFetchChatRoomDetails,
   mockSendMessage,
+  mockDeleteChatRoom,
 } from '../../../../mocks/chatData';
+
+/**
+ * 채팅방 목록 가져오기
+ * @returns 채팅방 목록 배열
+ */
+export const fetchChatRooms = async (): Promise<
+  {
+    chatRoomId: string;
+    chatRoomTitle: string;
+    participants: { userId: string; nickname: string }[];
+  }[]
+> => {
+  try {
+    // 실제 API 사용 시
+    // const response = await axiosInstance.get('/chat'); // API 엔드포인트 수정 필요
+    // return response.data;
+
+    // Mock 데이터 기반:
+    return mockFetchChatRooms();
+  } catch (error) {
+    console.error('채팅방 목록 조회 오류:', error);
+    throw new Error('채팅방 목록을 불러올 수 없습니다.');
+  }
+};
 
 /**
  * 채팅방 세부 정보 조회

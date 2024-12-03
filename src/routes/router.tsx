@@ -33,6 +33,7 @@ import PaymentAuthorPage from '../components/pages/community/PaymentAuthorPage';
 import PaymentParticipantPage from '../components/pages/community/PaymentParticipantPage';
 import PaymentCompletePage from '../components/pages/community/PaymentCompletePage';
 import PostManagementPage from '../components/pages/admin/PostManagementPage';
+import PostApprovalPage from '../components/pages/admin/PostApprovalPage';
 
 const router = createBrowserRouter([
   {
@@ -96,6 +97,10 @@ const router = createBrowserRouter([
       {
         path: '/admin/posts',
         element: <PostManagementPage />,
+      },
+      {
+        path: '/admin/approval/:postId',
+        element: <PostApprovalPage />,
       },
       {
         path: '/mypage',

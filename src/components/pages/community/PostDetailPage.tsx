@@ -440,14 +440,7 @@ const PostDetailPage = () => {
             </BackButton>
             <HeaderButtonsWrapper>
               {isAuthor ? (
-                <>
-                  <HeaderButton
-                    onClick={() => navigate(`/community/posts/${postId}/edit`)}
-                  >
-                    글 수정
-                  </HeaderButton>
-                  <HeaderButton onClick={handleDelete}>글 삭제</HeaderButton>
-                </>
+                <HeaderButton onClick={handleDelete}>글 삭제</HeaderButton>
               ) : (
                 <HeaderButton onClick={handleReport}>글 신고</HeaderButton>
               )}

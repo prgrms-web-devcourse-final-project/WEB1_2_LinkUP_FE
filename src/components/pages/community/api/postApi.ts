@@ -172,15 +172,22 @@ export const updatePostStatus = async (
   // 상태별 처리 로직
   switch (newStatus) {
     case 'APPROVED': {
-      if (post.status !== 'NOT_APPROVED') {
+      if (post.status !== 'NOT_APPROVED' && post.status !== 'REJECTED') {
         throw new Error('현재 상태에서 승인할 수 없습니다.');
       }
+
+      // 제목이 "(수정요망)"으로 시작하는 경우만 제거
+      const cleanedTitle = post.title.startsWith('(수정요망)')
+        ? post.title.replace(/^\(수정요망\)/, '').trim()
+        : post.title;
+
       // 승인 시 createdAt, updatedAt 갱신 및 closeAt 설정
       const period = post.period || 0;
 
       // 실제 API 사용
       // const response = await axiosInstance.patch(`/posts/${postId}/status`, {
       //   status: newStatus,
+      //   title: cleanedTitle,
       //   updatedAt,
       //   closeAt: new Date(new Date(updatedAt).getTime() + period * 24 * 60 * 60 * 1000).toISOString(),
       // });
@@ -189,6 +196,7 @@ export const updatePostStatus = async (
       mockCommunityPosts[postIndex] = {
         ...post,
         status: newStatus,
+        title: cleanedTitle,
         createdAt: updatedAt, // 관리자가 승인한 시점으로 갱신
         updatedAt,
 

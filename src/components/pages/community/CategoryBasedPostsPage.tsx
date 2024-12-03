@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import CategoryWrapper from '../../common/CategoryWrapper';
 import PostList from '../../common/PostList';
 import ScrollToTopButton from '../../common/ScrollToTopButton';
+import { POST_CATEGORIES } from './postCategories';
 
 const CategoryBasedPostsPage = () => {
   const location = useLocation();
@@ -16,12 +17,13 @@ const CategoryBasedPostsPage = () => {
         <ContentWrapper>
           <Title>공구 모집 및 진행</Title>
           <CategoryWrapper
+            categories={POST_CATEGORIES}
             selectedCategory={selectedCategory} // 현재 선택된 카테고리를 전달
             onCategoryChange={
-              (categoryName: string) => setSelectedCategory(categoryName) // 카테고리 변경 시 상태 업데이트
+              (categoryId: string) => setSelectedCategory(categoryId) // 카테고리 변경 시 상태 업데이트
             }
           />
-          <PostList selectedCategory={selectedCategory} />
+          <PostList selectedCategory={selectedCategory} posts={[]} />
         </ContentWrapper>
       </CommunityPageContainer>
       <ScrollToTopButton />

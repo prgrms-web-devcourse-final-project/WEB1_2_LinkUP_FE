@@ -1,89 +1,209 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import styled from 'styled-components';
-import { Post, defaultPost } from './api/postApi';
-// import { fetchPostById, deletePostsById, joinPost, cancelJoinPost, addComment, deleteComment, updateComment, Post } from './api/postApi'; // 실제 API 사용 관련 주석 처리
-import { mockCommunityPosts } from '../../../mocks/communityPosts';
+import {
+  fetchPostById,
+  deletePostById,
+  joinPost,
+  cancelJoinPost,
+  addComment,
+  deleteComment,
+  updateComment,
+  Post,
+  defaultPost,
+  POST_STATUS,
+} from './api/postApi'; // 실제 API 사용 관련 주석 처리
 import {
   FaBackspace,
   FaAngleLeft,
   FaAngleRight,
-  FaCommentDots,
   FaPlusCircle,
   FaMinusCircle,
 } from 'react-icons/fa';
+import { webSocketService } from '../../../utils/webSocket';
 
 // 로그인된 사용자의 ID (Mock 처리)
 const currentUserId = 'user-00001'; // 실제 구현 시, 인증된 사용자 ID를 받아와야 함
+const currentUserNickname = '사용자 A'; // 실제 구현 시, 인증된 사용자 Nickname을 받아와야 함
 
 const PostDetailPage = () => {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
   const [post, setPost] = useState<Post>(defaultPost);
   const [quantity, setQuantity] = useState(1); // 기본 최소 수량
   const [isAuthor, setIsAuthor] = useState(false); // 현재 사용자가 작성자인지 여부
   const [currentIndex, setCurrentIndex] = useState(0);
   const [remainingTime, setRemainingTime] = useState<string>('');
+  const [paymentRemainingTime, setPaymentRemainingTime] = useState<string>(''); // 결제 마감 시간 상태 추가
   const [newCommentContent, setNewCommentContent] = useState<string>(''); // 댓글 입력 필드
   const [editCommentId, setEditCommentId] = useState<string | null>(null); // 수정 중인 댓글 ID
   const [editContent, setEditContent] = useState<string>(''); // 수정 중인 댓글 내용
 
+  // 게시물 데이터 가져오기
+  const {
+    data: fetchedPost,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['postDetail', postId] as const,
+    queryFn: () => fetchPostById(postId!),
+    enabled: Boolean(postId),
+  });
+
+  // fetchedPost 상태 처리 및 초기화
   useEffect(() => {
-    if (!postId) {
-      navigate('/community');
-      return;
-    }
+    if (fetchedPost) {
+      setPost(fetchedPost);
 
-    const loadPost = async () => {
-      try {
-        // 실제 API 요청 (주석 처리된 부분)
-        // const fetchedPost = await fetchPostById(postId!);
+      // 참여자 목록에서 현재 사용자의 수량을 찾아 설정
+      const participant = fetchedPost.participants.find(
+        (p) => p.userId === currentUserId && !p.isCancelled
+      );
 
-        // Mock 데이터 사용
-        const fetchedPost = mockCommunityPosts.find(
-          (item) => item.postId === postId
-        );
-        if (fetchedPost) {
-          setPost(fetchedPost);
-          setQuantity(Math.max(1, fetchedPost.currentQuantity)); // 최소 수량 설정
-          setIsAuthor(fetchedPost.authorId === currentUserId); // 작성자 여부 확인
-        } else {
-          throw new Error('게시물이 존재하지 않습니다.');
-        }
-      } catch (error) {
-        console.error('게시물 조회 중 오류 발생:', error);
-        alert('게시물을 불러오는 데 실패했습니다.');
-        navigate('/community');
+      if (participant) {
+        // 이미 결제를 완료한 경우 사용자의 수량을 설정
+        setQuantity(participant.quantity);
+      } else {
+        // 기본 수량을 설정 (참여하지 않은 경우)
+        setQuantity(1);
       }
-    };
 
-    loadPost();
-  }, [postId, navigate]);
+      // 작성자인지 여부 확인
+      setIsAuthor(fetchedPost.authorId === currentUserId);
 
-  useEffect(() => {
-    if (post) {
-      const isCancelled = post.participants.some(
+      // 취소한 사용자인 경우 접근 차단
+      const isCancelled = fetchedPost.participants.some(
         (participant) =>
           participant.userId === currentUserId && participant.isCancelled
       );
 
       if (isCancelled) {
         alert('참여를 취소한 게시물에는 접근할 수 없습니다.');
-        navigate('/community'); // 리다이렉트
+        navigate('/community');
       }
     }
-  }, [post, navigate]);
+  }, [fetchedPost, currentUserId, navigate]);
 
-  const handleDelete = async () => {
+  useEffect(() => {
+    if (isError) {
+      alert('게시물을 불러오는 데 실패했습니다.');
+      navigate('/community');
+    }
+  }, [isError, navigate]);
+
+  useEffect(() => {
+    if (postId) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const handleIncomingData = (data: any) => {
+        if (data.type === 'STATUS_UPDATE') {
+          setPost((prev) => ({ ...prev, status: data.status }));
+        } else if (data.type === 'USER_UPDATE') {
+          setPost((prev) => ({
+            ...prev,
+            participants: data.participants,
+            cancelledUsers: data.cancelledUsers,
+          }));
+        }
+      };
+
+      webSocketService.connect(
+        handleIncomingData,
+        () => console.log('WebSocket connected'),
+        () => console.log('WebSocket disconnected'),
+        (error) => console.error('WebSocket error:', error)
+      );
+
+      return () => {
+        webSocketService.close();
+      };
+    }
+  }, [postId]);
+
+  useEffect(() => {
+    const targetDate = post?.closeAt;
+    if (!targetDate) return;
+
+    const calculateRemainingTime = (endTime: string) => {
+      const now = new Date().getTime();
+      const targetTime = new Date(endTime).getTime();
+      const diff = targetTime - now;
+
+      if (diff <= 0) return '마감되었습니다.';
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor(
+        (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      );
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      return `${days}일 ${hours}시간 ${minutes}분 ${seconds}초 남음`;
+    };
+
+    const updateRemainingTime = () => {
+      const formattedTime = calculateRemainingTime(targetDate);
+      setRemainingTime(formattedTime);
+    };
+
+    updateRemainingTime();
+    const timer = setInterval(updateRemainingTime, 1000);
+
+    return () => clearInterval(timer);
+  }, [post]);
+
+  useEffect(() => {
+    // 결제 마감 시간 계산 및 업데이트
+    if (post.status === POST_STATUS.PAYMENT_STANDBY && post.stateUpdatedAt) {
+      const countdownTarget =
+        new Date(post.stateUpdatedAt).getTime() + 12 * 60 * 60 * 1000; // 12시간 후
+      const calculateRemainingTime = () => {
+        const now = new Date().getTime();
+        const diff = countdownTarget - now;
+
+        if (diff <= 0) return '결제 마감되었습니다.';
+
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        return `${hours}시간 ${minutes}분 ${seconds}초 남음`;
+      };
+
+      const updateRemainingTime = () => {
+        const formattedTime = calculateRemainingTime();
+        setPaymentRemainingTime(formattedTime);
+      };
+
+      updateRemainingTime();
+      const timer = setInterval(updateRemainingTime, 1000);
+
+      return () => clearInterval(timer);
+    } else {
+      setPaymentRemainingTime('');
+    }
+  }, [post]);
+
+  // 게시물 삭제
+  const deletePostMutation = useMutation({
+    mutationFn: (postId: string) => deletePostById(postId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['postList'] });
+      alert('게시물이 삭제되었습니다.');
+      navigate('/community');
+    },
+    onError: (error) => {
+      console.error(error);
+      alert('게시물 삭제에 실패했습니다.');
+    },
+  });
+
+  // 삭제 핸들러
+  const handleDelete = () => {
     if (window.confirm('정말 이 게시물을 삭제하시겠습니까?')) {
-      try {
-        // await deletePostById(postId!); // API 호출
-        alert('게시물이 성공적으로 삭제되었습니다.');
-        navigate('/community'); // 삭제 후 커뮤니티 목록으로 이동
-      } catch (error) {
-        console.error(`게시물 ${postId} 삭제 중 오류 발생:`, error);
-        alert('게시물 삭제 중 문제가 발생했습니다. 다시 시도해주세요.');
-      }
+      deletePostMutation.mutate(postId!); // postId를 전달
     }
   };
 
@@ -102,95 +222,49 @@ const PostDetailPage = () => {
     setCurrentIndex(index);
   };
 
-  const calculateRemainingTime = (endTime: string) => {
-    const now = new Date().getTime();
-    const targetTime = new Date(endTime).getTime();
-    const diff = targetTime - now;
+  // 참여하기
+  const joinMutation = useMutation({
+    mutationFn: () => joinPost(postId!, currentUserId, quantity),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['postDetail', postId] });
+      alert('참여가 완료되었습니다.');
+    },
+    onError: () => {
+      alert('참여에 실패했습니다.');
+    },
+  });
 
-    if (diff <= 0) return '마감되었습니다.';
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    return `${days}일 ${hours}시간 ${minutes}분 ${seconds}초 남음`;
-  };
-
-  useEffect(() => {
-    const targetDate = post?.closeAt; // 모집 마감 시간을 가져옵니다.
-    if (!targetDate) return;
-
-    const updateRemainingTime = () => {
-      const formattedTime = calculateRemainingTime(targetDate);
-      setRemainingTime(formattedTime);
-    };
-
-    updateRemainingTime(); // 초기 계산
-
-    const timer = setInterval(updateRemainingTime, 1000); // 1초마다 업데이트
-
-    return () => clearInterval(timer); // 컴포넌트 언마운트 시 타이머 정리
-  }, [post]);
-
-  const handleJoin = async () => {
-    if (
-      window.confirm('참여를 확정하시겠습니까? 이후에는 수정이 불가능합니다.')
-    ) {
-      try {
-        const updatedQuantity = post.currentQuantity + quantity;
-        // await joinPost(postId!, currentUserId, quantity, updatedQuantity);
-        alert('참여가 완료되었습니다.');
-        setPost((prev) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            currentQuantity: updatedQuantity,
-            participants: [
-              ...prev.participants,
-              { userId: currentUserId, quantity, isCancelled: false },
-            ],
-          };
-        });
-        navigate(0); // 페이지 새로고침
-      } catch (error) {
-        console.error('참여 중 오류 발생:', error);
-        alert('참여 중 문제가 발생했습니다. 다시 시도해주세요.');
-      }
+  const handleJoin = () => {
+    if (post.status === POST_STATUS.APPROVED) {
+      joinMutation.mutate();
+    } else {
+      alert('현재 참여할 수 없는 상태입니다.');
     }
   };
 
-  const handleCancel = async () => {
+  // 참여 취소
+  const cancelMutation = useMutation({
+    mutationFn: () => cancelJoinPost(postId!, currentUserId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['postDetail', postId] });
+      alert('참여가 취소되었습니다.');
+      navigate('/community');
+    },
+    onError: () => {
+      alert('참여 취소에 실패했습니다.');
+    },
+  });
+
+  const handleCancel = () => {
     if (
-      window.confirm('취소 후 다시 참여할 수 없습니다. 정말 취소하시겠습니까?')
+      post.status === POST_STATUS.APPROVED ||
+      post.status === POST_STATUS.PAYMENT_STANDBY
     ) {
-      try {
-        const updatedQuantity = post.currentQuantity - quantity;
-        // await cancelJoinPost(postId!, currentUserId, updatedQuantity);
-        alert('참여가 취소되었습니다.');
-        setPost((prev) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            currentQuantity: updatedQuantity,
-            participants: prev.participants.map((p) =>
-              p.userId === currentUserId ? { ...p, isCancelled: true } : p
-            ),
-          };
-        });
-        navigate(0); // 페이지 새로고침
-      } catch (error) {
-        console.error('참여 취소 중 오류 발생:', error);
-        alert('참여 취소 중 문제가 발생했습니다. 다시 시도해주세요.');
-      }
+      cancelMutation.mutate();
+    } else {
+      alert('현재 취소할 수 없는 상태입니다.');
     }
   };
-
-  const isParticipant =
-    post?.participants?.some(
-      (participant) =>
-        participant.userId === currentUserId && !participant.isCancelled
-    ) || false;
 
   const handleReport = () => {
     navigate(`/community/posts/${postId}/report`);
@@ -208,8 +282,31 @@ const PostDetailPage = () => {
     }
   };
 
+  const isParticipant =
+    post?.participants?.some(
+      (participant) =>
+        participant.userId === currentUserId && !participant.isCancelled
+    ) || false;
+
   // 댓글 작성
-  const handleAddComment = async () => {
+  const addCommentMutation = useMutation({
+    mutationFn: () =>
+      addComment(
+        postId!,
+        currentUserId,
+        currentUserNickname,
+        newCommentContent
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['postDetail', postId] });
+      setNewCommentContent('');
+    },
+    onError: () => {
+      alert('댓글 작성에 실패했습니다.');
+    },
+  });
+
+  const handleAddComment = () => {
     if (!newCommentContent.trim()) {
       alert('댓글을 입력해주세요.');
       return;
@@ -218,60 +315,23 @@ const PostDetailPage = () => {
       alert('댓글은 최대 300자까지만 입력 가능합니다.');
       return;
     }
-
-    // // 실제 API 적용 예상
-    // try {
-    //     // 댓글 추가 API 호출
-    //     await addComment(postId!, currentUserId, newCommentContent);
-
-    //     // 작성된 댓글 확인을 위해 게시물 데이터를 다시 가져옴
-    //     const updatedPost = await fetchPostById(postId!);
-
-    //     // 새롭게 가져온 댓글 목록으로 상태 업데이트
-    //     setPost((prev) => ({
-    //       ...prev,
-    //       comments: updatedPost.comments, // 최신 댓글 목록으로 업데이트
-    //     }));
-
-    //     setNewCommentContent(''); // 입력 필드 초기화
-    //   } catch (error) {
-    //     console.error('댓글 추가 또는 업데이트 중 오류 발생:', error);
-    //     alert('댓글 추가에 실패했습니다. 다시 시도해주세요.');
-    //   }
-    // };
-
-    try {
-      const newComment = {
-        userId: currentUserId,
-        createdAt: new Date().toISOString(),
-        content: newCommentContent,
-      };
-      setPost((prev) => ({
-        ...prev,
-        comments: [...prev.comments, newComment],
-      }));
-      setNewCommentContent(''); // 입력 필드 초기화
-    } catch (error) {
-      console.error('댓글 추가 중 오류:', error);
-      alert('댓글 추가에 실패했습니다.');
-    }
+    addCommentMutation.mutate();
   };
 
   // 댓글 삭제
-  const handleDeleteComment = async (commentId: string) => {
-    if (!window.confirm('이 댓글을 삭제하시겠습니까?')) return;
-
-    try {
-      // await deleteComment(postId!, commentId); // 실제 API 호출
-      setPost((prev) => ({
-        ...prev,
-        comments: prev.comments.filter(
-          (comment) => comment.commentId !== commentId
-        ),
-      }));
-    } catch (error) {
-      console.error('댓글 삭제 중 오류:', error);
+  const deleteCommentMutation = useMutation({
+    mutationFn: (commentId: string) => deleteComment(postId!, commentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['postDetail', postId] });
+    },
+    onError: () => {
       alert('댓글 삭제에 실패했습니다.');
+    },
+  });
+
+  const handleDeleteComment = (commentId: string) => {
+    if (window.confirm('이 댓글을 삭제하시겠습니까?')) {
+      deleteCommentMutation.mutate(commentId);
     }
   };
 
@@ -281,37 +341,93 @@ const PostDetailPage = () => {
     setEditContent(content); // 현재 댓글 내용 불러오기
   };
 
-  const handleUpdateComment = async () => {
+  const updateCommentMutation = useMutation({
+    mutationFn: () => updateComment(postId!, editCommentId!, editContent), // 수정할 댓글 ID와 새로운 내용 전달
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['postDetail', postId] });
+      setEditCommentId(null);
+      setEditContent('');
+    },
+    onError: () => {
+      alert('댓글 수정에 실패했습니다.');
+    },
+  });
+
+  const handleUpdateComment = () => {
     if (!editContent.trim()) {
       alert('수정할 댓글 내용을 입력하세요.');
       return;
     }
-
     if (editContent.length > 300) {
       alert('댓글은 최대 300자까지만 입력 가능합니다.');
       return;
     }
+    updateCommentMutation.mutate();
+  };
 
-    try {
-      // await updateComment(postId!, editCommentId!, editContent); // 실제 API 호출
-      // const updatedPost = await fetchPostById(postId!); // 수정된 댓글 포함된 새 데이터 조회
-      setPost((prev) => ({
-        ...prev,
-        comments: prev.comments.map((comment) =>
-          comment.commentId === editCommentId
-            ? { ...comment, content: editContent }
-            : comment
-        ),
-      }));
-      setEditCommentId(null); // 수정 모드 해제
-      setEditContent(''); // 입력 필드 초기화
-    } catch (error) {
-      console.error('댓글 수정 중 오류:', error);
-      alert('댓글 수정에 실패했습니다.');
+  // 결제하기 페이지로 이동
+  const handlePayment = () => {
+    if (
+      post.status === POST_STATUS.PAYMENT_STANDBY &&
+      post.authorId === currentUserId
+    ) {
+      navigate(`/community/posts/${postId}/payment/author`, {
+        state: {
+          post: {
+            images: post.images,
+            title: post.title,
+            unitPrice: post.unitPrice,
+          },
+          quantity,
+        },
+      });
+    } else if (
+      post.status === POST_STATUS.PAYMENT_STANDBY &&
+      post.authorId !== currentUserId
+    ) {
+      navigate(`/community/posts/${postId}/payment/participant`, {
+        state: {
+          post: {
+            images: post.images,
+            title: post.title,
+            unitPrice: post.unitPrice,
+          },
+          quantity,
+        },
+      });
+    } else {
+      alert('현재 결제할 수 없는 상태입니다.');
     }
   };
 
-  if (!post) return <div>Loading...</div>;
+  // 환불 요청 페이지로 이동
+  const handleRefund = () => {
+    // 현재 사용자가 결제를 완료했는지 확인
+    const participant = post.participants.find(
+      (p) =>
+        p.userId === currentUserId &&
+        !p.isCancelled && // 취소되지 않은 상태
+        p.isPaymentCompleted // 결제 완료 상태
+    );
+
+    if (participant) {
+      // 결제를 완료한 사용자만 이동
+      navigate(`/community/posts/${postId}/refund`);
+    } else {
+      alert('환불 요청은 결제를 완료한 이용자만 가능합니다.');
+    }
+  };
+
+  // 모집 완료 상태에서 참여자만 접근 가능하도록 제한
+  useEffect(() => {
+    if (post.status === POST_STATUS.COMPLETED && !isParticipant) {
+      alert('모집이 완료되어 더 이상 접근할 수 없습니다.');
+      navigate('/community');
+    }
+  }, [post.status, isParticipant, navigate]);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (!post) return <div>게시물이 없습니다.</div>;
 
   return (
     <PostDetailContainer>
@@ -402,14 +518,7 @@ const PostDetailPage = () => {
                 <DoubleWrapper>
                   <AuthorDetail>
                     <Label>작성자</Label>
-                    <AuthorNicknameAndChatIcon>
-                      {post.authorNickname}{' '}
-                      <ChatIcon
-                        onClick={() => alert('작성자와 1:1 채팅방 생성')}
-                      >
-                        <FaCommentDots />
-                      </ChatIcon>
-                    </AuthorNicknameAndChatIcon>
+                    <AuthorNickname>{post.authorNickname}</AuthorNickname>
                   </AuthorDetail>
                   <CreatedAtDetail>
                     <Label>작성일</Label>{' '}
@@ -427,9 +536,18 @@ const PostDetailPage = () => {
                   </Detail>
                 </DoubleWrapper>
 
-                <Detail>
-                  <Label>모집 마감</Label> {remainingTime}
-                </Detail>
+                <DoubleWrapper>
+                  <Detail>
+                    <Label>모집 마감</Label> {remainingTime}
+                  </Detail>
+                  {/* 결제 마감 시간이 추가되는 부분 */}
+                  {post?.status === POST_STATUS.PAYMENT_STANDBY && (
+                    <Detail>
+                      <Label>결제 마감</Label>
+                      <DetailText>{paymentRemainingTime}</DetailText>
+                    </Detail>
+                  )}
+                </DoubleWrapper>
                 <DoubleWrapper>
                   <Detail>
                     <Label>총 가격</Label> {post.totalPrice.toLocaleString()} 원
@@ -444,22 +562,73 @@ const PostDetailPage = () => {
                   <Detail>
                     <Label>수량</Label>{' '}
                     <Quantity>
-                      <FaMinusCircle onClick={() => handleQuantityChange(-1)} />
-                      <span>{quantity}</span>
-                      <FaPlusCircle onClick={() => handleQuantityChange(1)} />
+                      {!isParticipant && ( // 참여자가 아닐 때만 수량 변경 가능
+                        <>
+                          <FaMinusCircle
+                            onClick={() => handleQuantityChange(-1)}
+                          />
+                          <span>{quantity}</span>
+                          <FaPlusCircle
+                            onClick={() => handleQuantityChange(1)}
+                          />
+                        </>
+                      )}
+                      {isParticipant && <span>{quantity}</span>}{' '}
+                      {/* 참여자일 경우 고정된 수량 표시 */}
                     </Quantity>
                   </Detail>
-                  <ActionButtons>
-                    {isParticipant ? (
-                      <ActionButton onClick={handleCancel}>
-                        취소하기
-                      </ActionButton>
-                    ) : (
-                      <ActionButton primary onClick={handleJoin}>
-                        참여하기
-                      </ActionButton>
-                    )}
-                  </ActionButtons>
+                  {isParticipant && ( // 참여자가 된 경우 결제 금액 추가
+                    <Detail>
+                      <Label>결제 금액</Label>{' '}
+                      <PaymentAmount>
+                        {(quantity * post.unitPrice).toLocaleString()} 원
+                      </PaymentAmount>
+                    </Detail>
+                  )}
+
+                  {/* 상태에 따라 렌더링되는 액션 버튼 */}
+                  {post && post.status && (
+                    <ActionButtons>
+                      {/* 환불 요청 버튼 */}
+                      {post.participants.some(
+                        (p) =>
+                          p.userId === currentUserId &&
+                          !p.isCancelled &&
+                          p.isPaymentCompleted
+                      ) ? (
+                        <ActionButton primary onClick={handleRefund}>
+                          환불
+                        </ActionButton>
+                      ) : post.status === POST_STATUS.PAYMENT_STANDBY ? (
+                        // 결제 대기 상태에서는 결제/취소 버튼
+                        <>
+                          {isParticipant && (
+                            <>
+                              <ActionButton primary onClick={handlePayment}>
+                                결제
+                              </ActionButton>
+                              <ActionButton onClick={handleCancel}>
+                                취소
+                              </ActionButton>
+                            </>
+                          )}
+                        </>
+                      ) : post.status === POST_STATUS.APPROVED ? (
+                        // 승인 완료 상태에서는 참여/취소 버튼
+                        <>
+                          {isParticipant ? (
+                            <ActionButton onClick={handleCancel}>
+                              취소
+                            </ActionButton>
+                          ) : (
+                            <ActionButton primary onClick={handleJoin}>
+                              참여
+                            </ActionButton>
+                          )}
+                        </>
+                      ) : null}
+                    </ActionButtons>
+                  )}
                 </DoubleWrapper>
               </DetailsContainer>
             </DetailsAndInfoContainer>
@@ -477,7 +646,7 @@ const PostDetailPage = () => {
               {post.comments.map((comment) => (
                 <Comments key={comment.commentId}>
                   <CommentHeader>
-                    <CommentAuthor>{comment.userId}</CommentAuthor>
+                    <CommentAuthor>{comment.userNickname}</CommentAuthor>
                     <CommentDate>
                       {new Date(comment.createdAt).toLocaleString()}
                     </CommentDate>
@@ -578,7 +747,7 @@ const Header = styled.div`
 
 const HeaderWrapper = styled.div`
   width: 1000px;
-  margin: 0 auto;
+  margin: 30px auto 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -811,10 +980,9 @@ const AuthorDetail = styled.div`
   gap: 5px; /* 내부 요소 간 간격 */
 `;
 
-const AuthorNicknameAndChatIcon = styled.div`
+const AuthorNickname = styled.div`
   display: flex; /* 한 줄로 배치 */
   align-items: center; /* 세로로 가운데 정렬 */
-  gap: 8px; /* 닉네임과 ChatIcon 사이 간격 */
   font-size: 1rem; /* 텍스트 크기 설정 */
 `;
 
@@ -822,11 +990,6 @@ const CreatedAtDetail = styled.div`
   display: flex; /* 가로 배치 */
   flex-direction: column; /* 내부 요소가 한 줄씩 배치되도록 */
   gap: 5px; /* 내부 요소 간 간격 */
-`;
-
-const ChatIcon = styled.span`
-  cursor: pointer;
-  margin-left: 10px;
 `;
 
 const Quantity = styled.div`
@@ -837,6 +1000,12 @@ const Quantity = styled.div`
   svg {
     cursor: pointer;
   }
+`;
+
+const PaymentAmount = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
 `;
 
 const TextAreaWrapper = styled.div`

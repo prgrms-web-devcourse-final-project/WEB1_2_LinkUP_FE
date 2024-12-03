@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
+import { postFindPassword } from '../../../api/loginApi';
 
 const FindPasswordPage = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
+  const [email, setEmail] = useState<string>('');
+
   return (
     <>
       <Wrapper>
@@ -37,9 +40,21 @@ const FindPasswordPage = () => {
             등록된 이메일 주소를 입력하고 확인 버튼을 클릭해주세요
           </Description>
           <Subtitle>email address</Subtitle>
-          <StyledInput placeholder="이메일 입력" />
-
-          <LoginButton onClick={() => setShowModal(true)}>확인</LoginButton>
+          <StyledInput
+            placeholder="이메일 입력"
+            value={email}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setEmail(e.target.value);
+            }}
+          />
+          <LoginButton
+            onClick={async () => {
+              setShowModal(true);
+              await postFindPassword({ email: email });
+            }}
+          >
+            확인
+          </LoginButton>
         </RightContent>
       </Wrapper>
       {showModal && (

@@ -35,6 +35,7 @@ import PaymentParticipantPage from '../components/pages/community/PaymentPartici
 import PaymentCompletePage from '../components/pages/community/PaymentCompletePage';
 import PostManagementPage from '../components/pages/admin/PostManagementPage';
 import PostApprovalPage from '../components/pages/admin/PostApprovalPage';
+import ChatRoomManagementPage from '../components/pages/admin/ChatRoomManagementPage';
 
 const router = createBrowserRouter([
   {
@@ -102,6 +103,10 @@ const router = createBrowserRouter([
       {
         path: '/admin/approval/:postId',
         element: <PostApprovalPage />,
+      },
+      {
+        path: '/admin/chat',
+        element: <ChatRoomManagementPage />,
       },
       {
         path: '/mypage',

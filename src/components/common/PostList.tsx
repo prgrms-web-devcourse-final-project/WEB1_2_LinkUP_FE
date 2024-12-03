@@ -52,10 +52,12 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
   const categoryFilteredPosts = mockCommunityPosts
     .filter((post) => {
       if (selectedCategory === 'NOT_APPROVED') {
-        return post.status === 'NOT_APPROVED';
+        return post.status === 'NOT_APPROVED' || post.status === 'REJECTED';
       }
       return (
-        post.category === selectedCategory && post.status !== 'NOT_APPROVED'
+        post.category === selectedCategory &&
+        post.status !== 'NOT_APPROVED' &&
+        post.status !== 'REJECTED'
       );
     })
     .sort(
@@ -101,7 +103,11 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
 
   // 포스트 클릭 핸들러
   const handlePostClick = (postId: string) => {
-    navigate(`/community/posts/${postId}`);
+    if (selectedCategory === 'NOT_APPROVED') {
+      navigate(`/admin/approval/${postId}`, { state: { postId } }); // 승인 대기 페이지로 이동
+    } else {
+      navigate(`/community/posts/${postId}`); // 일반 포스트 상세 페이지로 이동
+    }
   };
 
   return (

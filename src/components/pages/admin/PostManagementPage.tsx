@@ -19,9 +19,14 @@ const PostManagementPage = () => {
       try {
         const response = await fetchAdminPosts(selectedCategory);
 
-        // '작성글 게시 승인 대기 목록' 카테고리에서는 'NOT_APPROVED' 상태의 포스트만 표시
+        // '작성글 게시 승인 대기 목록' 카테고리에서는 'NOT_APPROVED' 또는 'REJECTED' 상태의 포스트만 표시
         if (selectedCategory === 'NOT_APPROVED') {
-          setPosts(response.filter((post) => post.status === 'NOT_APPROVED'));
+          setPosts(
+            response.filter(
+              (post) =>
+                post.status === 'NOT_APPROVED' || post.status === 'REJECTED'
+            )
+          );
         } else {
           setPosts(response); // 다른 카테고리는 전체 포스트 표시
         }

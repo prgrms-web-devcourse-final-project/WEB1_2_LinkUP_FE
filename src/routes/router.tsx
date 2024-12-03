@@ -29,6 +29,7 @@ import PaymentForm from '../components/pages/Payment/PaymentForm';
 import PaymentSuccessPage from '../components/pages/Payment/PaymentSuccessPage';
 import ScrollToTop from '../components/common/ScrollToTop';
 import PostEditPage from '../components/pages/community/PostEditPage';
+import SetLocationPage from '../components/pages/login/SetLocationPage';
 import PaymentAuthorPage from '../components/pages/community/PaymentAuthorPage';
 import PaymentParticipantPage from '../components/pages/community/PaymentParticipantPage';
 import PaymentCompletePage from '../components/pages/community/PaymentCompletePage';
@@ -144,6 +145,7 @@ const router = createBrowserRouter([
   { path: '/findpassword', element: <FindPasswordPage /> },
   { path: '/resetpassword', element: <ResetPasswordPage /> },
   { path: '/termsandservice', element: <TermsPage /> },
+  { path: '/setlocation', element: <SetLocationPage /> },
   { path: '/setnickname', element: <SetNicknamePage /> },
   { path: '/setprofile', element: <SetProfilePage /> },
   { path: '/logincomplete', element: <LoginCompletePage /> },

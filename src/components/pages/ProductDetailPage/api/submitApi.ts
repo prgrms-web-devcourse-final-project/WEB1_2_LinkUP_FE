@@ -1,13 +1,5 @@
 import axiosInstance from '../../../../api/axiosInstance';
 
-export interface SubmitForm {
-  url: string;
-  productName: string;
-  price: number;
-  discountPrice: number;
-  amount: number;
-}
-
 export interface SubmitResponse {
   url: string;
   productName: string;
@@ -19,11 +11,11 @@ export interface SubmitResponse {
 
 export const submitOrder = async (
   productId: number,
-  payload: SubmitForm
+  amount: number
 ): Promise<SubmitResponse> => {
   try {
-    const URL = `/homepage/order/${productId}`;
-    const { data } = await axiosInstance.post(URL, payload);
+    const URL = `/goodbuyUs/orders/${productId}`;
+    const { data } = await axiosInstance.post(URL, amount);
     return data;
   } catch {
     throw new Error('주문에 실패하였습니다.');

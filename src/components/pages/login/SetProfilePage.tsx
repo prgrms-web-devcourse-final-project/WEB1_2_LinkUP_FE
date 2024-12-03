@@ -19,7 +19,17 @@ const SetProfilePage = () => {
 
   return (
     <Wrapper>
-      <LeftContent>Image</LeftContent>
+      <LeftContent>
+        <img
+          src="/images/login3.jpg"
+          alt="Login background"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+          }}
+        />
+      </LeftContent>
       <RightContent>
         <Title>
           프로필 사진을
@@ -113,10 +123,11 @@ const Title = styled.div`
 
 const LeftContent = styled.div`
   flex: 6;
-  background-color: lightblue;
+  background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 `;
 
 const RightContent = styled.div`

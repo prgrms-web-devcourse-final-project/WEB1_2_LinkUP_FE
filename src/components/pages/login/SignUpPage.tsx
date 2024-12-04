@@ -68,14 +68,23 @@ function SignUpPage() {
         />
         <LoginButton
           onClick={async () => {
-            await postSignUp({
-              email: email,
-              password: pw,
-              password_confirm: cpw,
-              name: name,
-              phone: phone,
-            });
-            navigate('/termsandservice');
+            if (pw !== cpw) {
+              alert('비밀번호가 일치하지 않습니다.');
+            } else {
+              const response = await postSignUp({
+                email: email,
+                password: pw,
+                password_confirm: cpw,
+                name: name,
+                phone: phone,
+              });
+
+              if (response.message === '이메일, 전화번호 중복 확인 완료') {
+                navigate('/termsandservice');
+              } else {
+                alert('이메일 또는 전화번호가 중복 되었습니다.');
+              }
+            }
           }}
         >
           Signup

@@ -15,6 +15,11 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
     <GlobalStyle />
-    <RouterProvider router={router} />
+    <RouterProvider
+      router={router}
+      future={{
+        v7_startTransition: true,
+      }}
+    />
   </QueryClientProvider>
 );

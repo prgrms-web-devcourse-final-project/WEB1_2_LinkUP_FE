@@ -1,5 +1,6 @@
 interface Review {
   review: string;
+  rating: number;
 }
 
 export interface Product {
@@ -16,5 +17,5 @@ export interface Product {
   currentStock: number;
   description: string;
   reviews: Review[];
-  available: boolean;
+  likes: boolean;
 }

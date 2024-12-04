@@ -24,7 +24,7 @@ export const popularProduct = {
     { review: '가성비 최고입니다.', rating: 4 },
     { review: '흡수력이 강해서 만족스럽습니다.', rating: 4 },
   ],
-  available: false,
+  likes: false,
 };
 
 export const products = [
@@ -45,7 +45,7 @@ export const products = [
       { review: '화질이 정말 선명하고 만족스럽습니다.', rating: 5 },
       { review: '디자인도 훌륭합니다.', rating: 5 },
     ],
-    available: true,
+    likes: true,
   },
   {
     id: 2,
@@ -64,7 +64,7 @@ export const products = [
       { review: '청소가 훨씬 쉬워졌습니다.', rating: 4 },
       { review: '흡입력이 강해서 만족합니다.', rating: 5 },
     ],
-    available: false,
+    likes: false,
   },
   {
     id: 3,
@@ -83,7 +83,7 @@ export const products = [
       { review: '음질이 놀랍도록 좋습니다.', rating: 5 },
       { review: '디자인도 세련되고 멋집니다.', rating: 4 },
     ],
-    available: true,
+    likes: true,
   },
   {
     id: 4,
@@ -102,7 +102,7 @@ export const products = [
       { review: '신발이 편안하고 스타일리시합니다.', rating: 5 },
       { review: '가성비가 좋습니다.', rating: 4 },
     ],
-    available: false,
+    likes: false,
   },
   {
     id: 5,
@@ -121,7 +121,7 @@ export const products = [
       { review: '디자인이 정말 예쁩니다.', rating: 4 },
       { review: '사용하기 편리합니다.', rating: 4 },
     ],
-    available: true,
+    likes: true,
   },
   {
     id: 6,
@@ -140,7 +140,7 @@ export const products = [
       { review: '음질이 탁월하고 사용이 편리합니다.', rating: 5 },
       { review: '배터리 성능이 아쉽지만 만족합니다.', rating: 4 },
     ],
-    available: false,
+    likes: false,
   },
   {
     id: 7,
@@ -159,7 +159,7 @@ export const products = [
       { review: '화질이 뛰어나서 만족스럽습니다.', rating: 5 },
       { review: '조작이 쉬워서 초보자에게도 추천합니다.', rating: 5 },
     ],
-    available: true,
+    likes: true,
   },
   {
     id: 8,
@@ -178,7 +178,7 @@ export const products = [
       { review: '운동할 때 정말 편안합니다.', rating: 4 },
       { review: '디자인도 마음에 듭니다.', rating: 5 },
     ],
-    available: false,
+    likes: false,
   },
   {
     id: 9,
@@ -197,7 +197,7 @@ export const products = [
       { review: '게임 성능이 정말 탁월합니다.', rating: 5 },
       { review: '발열이 조금 있지만 만족합니다.', rating: 4 },
     ],
-    available: true,
+    likes: true,
   },
   {
     id: 10,
@@ -216,7 +216,7 @@ export const products = [
       { review: '물맛이 정말 좋아졌습니다.', rating: 5 },
       { review: '디자인도 깔끔하고 만족합니다.', rating: 4 },
     ],
-    available: false,
+    likes: false,
   },
   {
     id: 11,
@@ -235,7 +235,7 @@ export const products = [
       { review: '청소가 훨씬 수월해졌어요!', rating: 5 },
       { review: '소음이 적어서 만족합니다.', rating: 4 },
     ],
-    available: true,
+    likes: true,
   },
   {
     id: 12,
@@ -254,7 +254,7 @@ export const products = [
       { review: '냉장 성능이 정말 좋아요.', rating: 5 },
       { review: '공간이 넉넉해서 편리합니다.', rating: 4 },
     ],
-    available: false,
+    likes: false,
   },
   {
     id: 13,
@@ -273,7 +273,7 @@ export const products = [
       { review: '디자인이 고급스럽고 성능이 대단해요.', rating: 5 },
       { review: '가격이 비싸지만 값어치를 합니다.', rating: 4 },
     ],
-    available: true,
+    likes: true,
   },
   {
     id: 14,
@@ -292,7 +292,7 @@ export const products = [
       { review: '운동할 때 정말 유용해요!', rating: 4 },
       { review: '디자인이 멋지고 배터리 성능이 훌륭합니다.', rating: 5 },
     ],
-    available: false,
+    likes: false,
   },
   {
     id: 15,
@@ -311,7 +311,7 @@ export const products = [
       { review: '건강하게 요리할 수 있어서 좋아요.', rating: 5 },
       { review: '작동이 간편해서 자주 사용합니다.', rating: 4 },
     ],
-    available: true,
+    likes: true,
   },
   {
     id: 16,
@@ -330,7 +330,7 @@ export const products = [
       { review: '가성비 최고입니다.', rating: 4 },
       { review: '흡수력이 강해서 만족스럽습니다.', rating: 4 },
     ],
-    available: false,
+    likes: false,
   },
   {
     id: 17,
@@ -349,7 +349,7 @@ export const products = [
       { review: '선물용으로 딱 좋아요.', rating: 5 },
       { review: '향이 오래 지속됩니다.', rating: 4 },
     ],
-    available: true,
+    likes: true,
   },
   {
     id: 18,
@@ -368,7 +368,7 @@ export const products = [
       { review: '화면이 정말 선명해요.', rating: 5 },
       { review: '카메라가 최고입니다.', rating: 5 },
     ],
-    available: false,
+    likes: false,
   },
   {
     id: 19,
@@ -387,7 +387,7 @@ export const products = [
       { review: '착용감이 아주 편안합니다.', rating: 5 },
       { review: '오랜 시간 신어도 발이 아프지 않아요.', rating: 4 },
     ],
-    available: true,
+    likes: true,
   },
   {
     id: 20,
@@ -406,6 +406,6 @@ export const products = [
       { review: '음질이 정말 좋습니다.', rating: 5 },
       { review: '장시간 착용에도 편안합니다.', rating: 4 },
     ],
-    available: false,
+    likes: false,
   },
 ];

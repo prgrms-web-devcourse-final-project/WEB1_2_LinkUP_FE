@@ -63,11 +63,11 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
         <RecommendTitle onClick={handleToggle}>
           {selectedCategory}
         </RecommendTitle>
-        <CategoryContainer isExpanded={isExpanded}>
+        <CategoryContainer expanded={isExpanded}>
           {categories.map((category) => (
             <CategoryItem
               key={category}
-              isSelected={category == selectedCategory}
+              selected={category == selectedCategory}
               onClick={() => handleCategoryClick(category)}
             >
               {category}
@@ -96,7 +96,7 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
                 </PriceWrapper>
               </ProductWrapper>
             </StyledLink>
-            <LikeButton likes={product.available} />
+            <LikeButton likes={product.likes} />
           </Card>
         ))}
       </CardWrapper>

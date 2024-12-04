@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import InputComponent from '../ProductPage/InputComponent';
 import ProductComponent from '../ProductPage/ProductComponent';
 import styled from 'styled-components';
-
 import { useLocation } from 'react-router-dom';
 import ScrollToTopButton from '../../common/ScrollToTopButton';
 import { Product } from '../HomePage/model/productSchema';

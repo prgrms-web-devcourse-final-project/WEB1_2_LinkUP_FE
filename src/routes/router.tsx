@@ -36,125 +36,136 @@ import PaymentCompletePage from '../components/pages/community/PaymentCompletePa
 import PostManagementPage from '../components/pages/admin/PostManagementPage';
 import PostApprovalPage from '../components/pages/admin/PostApprovalPage';
 
-const router = createBrowserRouter([
+const router = createBrowserRouter(
+  [
+    {
+      path: '/',
+      element: (
+        <>
+          <Layout />
+          <ScrollToTop />
+        </>
+      ),
+      errorElement: <ErrorPage />,
+      children: [
+        {
+          path: '/',
+          element: <HomePage />,
+        },
+        {
+          path: '/products',
+          element: <ProductPage />,
+        },
+        {
+          path: '/products/:id',
+          element: <ProductDetail />,
+        },
+        {
+          path: '/products/payment/:id',
+          element: <PaymentForm />,
+        },
+        {
+          path: '/products/payment-success/:id',
+          element: <PaymentSuccessPage />,
+        },
+        {
+          path: '/community',
+          element: <CategoryBasedPostsPage />,
+        },
+        {
+          path: '/community/create',
+          element: <PostCreatePage />,
+        },
+        {
+          path: '/community/posts/:postId',
+          element: <PostDetailPage />,
+        },
+        {
+          path: '/community/posts/:postId/edit',
+          element: <PostEditPage />,
+        },
+        {
+          path: '/community/posts/:postId/payment/author',
+          element: <PaymentAuthorPage />,
+        },
+        {
+          path: '/community/posts/:postId/payment/participant',
+          element: <PaymentParticipantPage />,
+        },
+        {
+          path: '/community/posts/:postId/payment/complete',
+          element: <PaymentCompletePage />,
+        },
+        {
+          path: '/admin/posts',
+          element: <PostManagementPage />,
+        },
+        {
+          path: '/admin/approval/:postId',
+          element: <PostApprovalPage />,
+        },
+        {
+          path: '/mypage',
+          children: [
+            {
+              path: 'setting',
+              element: <SettingPage />,
+            },
+            {
+              path: 'orderlist',
+              element: <OrderListPage />,
+            },
+            {
+              path: 'wishlist',
+              element: <WishListPage />,
+            },
+            {
+              path: 'location',
+              element: <LocationPage />,
+            },
+            {
+              path: 'refund',
+              element: <RefundPage />,
+            },
+            {
+              path: 'notification',
+              element: <NotificationPage />,
+            },
+            {
+              path: 'myposts',
+              element: <MyPostsPage />,
+            },
+            {
+              path: 'chatlist',
+              element: <ChatListPage />,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      path: '/signin',
+      element: <SignInPage />,
+    },
+    { path: '/signup', element: <SignUpPage /> },
+    { path: '/findpassword', element: <FindPasswordPage /> },
+    { path: '/resetpassword', element: <ResetPasswordPage /> },
+    { path: '/termsandservice', element: <TermsPage /> },
+    { path: '/setlocation', element: <SetLocationPage /> },
+    { path: '/setnickname', element: <SetNicknamePage /> },
+    { path: '/setprofile', element: <SetProfilePage /> },
+    { path: '/logincomplete', element: <LoginCompletePage /> },
+    { path: '*', element: <NotFoundPage /> }, // 404 페이지
+  ],
   {
-    path: '/',
-    element: (
-      <>
-        <Layout />
-        <ScrollToTop />
-      </>
-    ),
-    errorElement: <ErrorPage />,
-    children: [
-      {
-        path: '/',
-        element: <HomePage />,
-      },
-      {
-        path: '/products',
-        element: <ProductPage />,
-      },
-      {
-        path: '/products/:id',
-        element: <ProductDetail />,
-      },
-      {
-        path: '/products/payment/:id',
-        element: <PaymentForm />,
-      },
-      {
-        path: '/products/payment-success/:id',
-        element: <PaymentSuccessPage />,
-      },
-      {
-        path: '/community',
-        element: <CategoryBasedPostsPage />,
-      },
-      {
-        path: '/community/create',
-        element: <PostCreatePage />,
-      },
-      {
-        path: '/community/posts/:postId',
-        element: <PostDetailPage />,
-      },
-      {
-        path: '/community/posts/:postId/edit',
-        element: <PostEditPage />,
-      },
-      {
-        path: '/community/posts/:postId/payment/author',
-        element: <PaymentAuthorPage />,
-      },
-      {
-        path: '/community/posts/:postId/payment/participant',
-        element: <PaymentParticipantPage />,
-      },
-      {
-        path: '/community/posts/:postId/payment/complete',
-        element: <PaymentCompletePage />,
-      },
-      {
-        path: '/admin/posts',
-        element: <PostManagementPage />,
-      },
-      {
-        path: '/admin/approval/:postId',
-        element: <PostApprovalPage />,
-      },
-      {
-        path: '/mypage',
-        children: [
-          {
-            path: 'setting',
-            element: <SettingPage />,
-          },
-          {
-            path: 'orderlist',
-            element: <OrderListPage />,
-          },
-          {
-            path: 'wishlist',
-            element: <WishListPage />,
-          },
-          {
-            path: 'location',
-            element: <LocationPage />,
-          },
-          {
-            path: 'refund',
-            element: <RefundPage />,
-          },
-          {
-            path: 'notification',
-            element: <NotificationPage />,
-          },
-          {
-            path: 'myposts',
-            element: <MyPostsPage />,
-          },
-          {
-            path: 'chatlist',
-            element: <ChatListPage />,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    path: '/signin',
-    element: <SignInPage />,
-  },
-  { path: '/signup', element: <SignUpPage /> },
-  { path: '/findpassword', element: <FindPasswordPage /> },
-  { path: '/resetpassword', element: <ResetPasswordPage /> },
-  { path: '/termsandservice', element: <TermsPage /> },
-  { path: '/setlocation', element: <SetLocationPage /> },
-  { path: '/setnickname', element: <SetNicknamePage /> },
-  { path: '/setprofile', element: <SetProfilePage /> },
-  { path: '/logincomplete', element: <LoginCompletePage /> },
-  { path: '*', element: <NotFoundPage /> }, // 404 페이지
-]);
+    future: {
+      v7_relativeSplatPath: true,
+      v7_fetcherPersist: true,
+      v7_normalizeFormMethod: true,
+      v7_partialHydration: true,
+      v7_skipActionErrorRevalidation: true,
+    },
+  }
+);
 
 export default router;

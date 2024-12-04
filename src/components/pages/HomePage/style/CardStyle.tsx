@@ -123,7 +123,9 @@ export const DiscountedPrice = styled.div`
   color: #ff4d4f;
 `;
 
-export const LikeButton = styled.img<{ likes: boolean }>`
+export const LikeButton = styled.img.withConfig({
+  shouldForwardProp: (prop) => prop !== 'likes',
+})<{ likes: boolean }>`
   position: absolute;
   bottom: 20px;
   right: 30px;
@@ -146,7 +148,9 @@ export const CategoryWrapper = styled.div`
   position: relative;
 `;
 
-export const CategoryContainer = styled.div<{ isExpanded: boolean }>`
+export const CategoryContainer = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'expanded',
+})<{ expanded: boolean }>`
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
@@ -155,19 +159,19 @@ export const CategoryContainer = styled.div<{ isExpanded: boolean }>`
   left: 190px;
   padding: 10px 20px;
   z-index: 10;
-  visibility: ${(props) => (props.isExpanded ? 'visible' : 'hidden')};
-  opacity: ${(props) => (props.isExpanded ? 1 : 0)};
+  visibility: ${(props) => (props.expanded ? 'visible' : 'hidden')};
+  opacity: ${(props) => (props.expanded ? 1 : 0)};
   transition:
     opacity 0.3s ease,
     visibility 0.3s ease;
 `;
 
-export const CategoryItem = styled.div<{ isSelected: boolean }>`
+export const CategoryItem = styled.div<{ selected: boolean }>`
   padding: 5px 10px;
   border-radius: 5px;
   width: 120px;
-  font-weight: ${(props) => (props.isSelected ? 'bold' : 'normal')};
-  text-decoration: ${(props) => (props.isSelected ? 'underline' : 'none')};
+  font-weight: ${(props) => (props.selected ? 'bold' : 'normal')};
+  text-decoration: ${(props) => (props.selected ? 'underline' : 'none')};
   &:hover {
     cursor: pointer;
     text-decoration: underline;

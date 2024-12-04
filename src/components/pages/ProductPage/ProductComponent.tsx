@@ -44,13 +44,13 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
       <RecommendTitle>
         <TextWrapper>
           <Text
-            isSelected={selectedText === '판매 상품'}
+            selected={selectedText === '판매 상품'}
             onClick={() => setSelectedText('판매 상품')}
           >
             판매 상품
           </Text>
           <Text
-            isSelected={selectedText === '마감 상품'}
+            selected={selectedText === '마감 상품'}
             onClick={() => setSelectedText('마감 상품')}
           >
             마감 상품
@@ -61,7 +61,7 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
 
       <CardWrapper>
         {currentProducts.map((product) => (
-          <Card key={product.id} isSelected={selectedText === '판매 상품'}>
+          <Card key={product.id} selected={selectedText === '판매 상품'}>
             <StyledLink to={`/products/${product.id}`}>
               <ProductImg src={product.url} alt={product.name} />
               <ProductWrapper>
@@ -80,7 +80,7 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
                 </PriceWrapper>
               </ProductWrapper>
             </StyledLink>
-            <LikeButton likes={product.available} />
+            <LikeButton likes={product.likes} />
           </Card>
         ))}
       </CardWrapper>
@@ -119,9 +119,11 @@ const TextWrapper = styled.div`
   margin-top: -15%;
   margin-bottom: 5%;
 `;
-const Text = styled.h2<{ isSelected: boolean }>`
+const Text = styled.h2.withConfig({
+  shouldForwardProp: (prop) => prop !== 'selected',
+})<{ selected: boolean }>`
   cursor: pointer;
-  text-decoration: ${({ isSelected }) => (isSelected ? 'underline' : 'none')};
+  text-decoration: ${({ selected }) => (selected ? 'underline' : 'none')};
   font-size: 16px;
 `;
 const CardWrapper = styled.div`
@@ -135,23 +137,25 @@ const CardWrapper = styled.div`
   }
 `;
 
-const Card = styled.div<{ isSelected: boolean }>`
+const Card = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'selected',
+})<{ selected: boolean }>`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 15px;
   margin: 10px;
   width: 200px;
-  background-color: ${({ isSelected }) => (isSelected ? 'white' : '#f0f0f0')};
+  background-color: ${({ selected }) => (selected ? 'white' : '#f0f0f0')};
   border-radius: 8px;
-  box-shadow: ${({ isSelected }) =>
-    isSelected ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none'};
-  opacity: ${({ isSelected }) => (isSelected ? 1 : 0.6)};
+  box-shadow: ${({ selected }) =>
+    selected ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none'};
+  opacity: ${({ selected }) => (selected ? 1 : 0.6)};
   align-items: center;
   position: relative;
   transition: all 0.3s ease-in-out;
   &::after {
-    content: ${({ isSelected }) => (isSelected ? '""' : '"판매 종료"')};
+    content: ${({ selected }) => (selected ? '""' : '"판매 종료"')};
     position: absolute;
     top: 10px;
     left: 50%;
@@ -255,7 +259,9 @@ const DiscountedPrice = styled.div`
   }
 `;
 
-const LikeButton = styled.img<{ likes: boolean }>`
+const LikeButton = styled.img.withConfig({
+  shouldForwardProp: (prop) => prop !== 'likes',
+})<{ likes: boolean }>`
   position: absolute;
   bottom: 20px;
   right: 30px;

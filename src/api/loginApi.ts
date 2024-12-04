@@ -12,6 +12,12 @@ export const postSignUp = async (body: {
   return response.data;
 };
 
+export const postSignUpLocation = async (body: { address: string }) => {
+  const response = await axiosInstance.post(`/users/checkaddress`, body);
+
+  return response.data;
+};
+
 export const postSignIn = async (body: { email: string; password: string }) => {
   const response = await axiosInstance.post(`/users/login`, body);
 

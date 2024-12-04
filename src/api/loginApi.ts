@@ -18,6 +18,12 @@ export const postSignUpLocation = async (body: { address: string }) => {
   return response.data;
 };
 
+export const postSignUpNickname = async (body: { nickname: string }) => {
+  const response = await axiosInstance.post(`/users/checknickname`, body);
+
+  return response.data;
+};
+
 export const postSignIn = async (body: { email: string; password: string }) => {
   const response = await axiosInstance.post(`/users/login`, body);
 

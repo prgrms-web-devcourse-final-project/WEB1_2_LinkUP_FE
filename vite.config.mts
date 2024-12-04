@@ -13,8 +13,9 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         '/api': {
-          target: 'http://localhost:8080/',
-          changeOrigin: true,
+          target: 'http://15.164.5.135:8080', // 백엔드 주소
+          changeOrigin: true, // CORS 우회
+          rewrite: (path) => path.replace(/^\/api/, '/api'), // 이 부분은 경로를 그대로 두어야 함
         },
       },
     },

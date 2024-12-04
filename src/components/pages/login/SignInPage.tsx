@@ -1,20 +1,63 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
+import { postSignIn } from '../../../api/loginApi';
 
 const SignInPage = () => {
   const navigate = useNavigate();
+  const [email, setEmail] = useState<string>('');
+  const [pw, setPw] = useState<string>('');
+
   return (
     <Wrapper>
-      <LeftContent>Image</LeftContent>
+      <LeftContent>
+        <img
+          src="/images/login1.jpg"
+          alt="Login background"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+          }}
+        />
+      </LeftContent>
       <RightContent>
         <Title>Welcome 👋🏼</Title>
         <Subtitle>email address</Subtitle>
-        <StyledInput placeholder="이메일 입력" />
+        <StyledInput
+          placeholder="이메일 입력"
+          value={email}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setEmail(e.target.value);
+          }}
+        />
         <Subtitle>password</Subtitle>
-        <StyledInput placeholder="비밀번호 입력 (8 ~ 16자리)" />
-        <LoginButton>Login</LoginButton>
-        <SNSButton>계정으로 로그인</SNSButton>
+        <StyledInput
+          placeholder="비밀번호 입력 (8 ~ 16자리)"
+          value={pw}
+          type={'password'}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setPw(e.target.value);
+          }}
+        />
+        <LoginButton
+          onClick={async () => {
+            await postSignIn({
+              email: email,
+              password: pw,
+            });
+          }}
+        >
+          Login
+        </LoginButton>
+        <SNSButton>
+          <img
+            src="/images/googlelogo.png"
+            alt="Google Logo"
+            style={{ width: '50px', height: '17px' }}
+          />
+          계정으로 로그인
+        </SNSButton>
         <AuthButtonWrapper>
           <AuthButton
             onClick={() => {
@@ -60,6 +103,7 @@ const SNSButton = styled.div`
   border-radius: 5px;
   font-size: 13px;
   cursor: pointer;
+  gap: 5px;
 `;
 
 const LoginButton = styled.div`
@@ -76,7 +120,7 @@ const LoginButton = styled.div`
 `;
 
 const StyledInput = styled.input`
-  width: calc(100% - 20px);
+  width: calc(100% - 40px);
   height: 25px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -103,10 +147,11 @@ const Title = styled.div`
 `;
 const LeftContent = styled.div`
   flex: 6;
-  background-color: lightblue;
+  background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 `;
 
 const RightContent = styled.div`

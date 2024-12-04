@@ -6,10 +6,19 @@ import WriteButton from './WriteButton';
 import SearchBar from './SearchBar';
 import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
+import { Post } from '../pages/community/api/postApi';
+
+interface PostListProps {
+  posts: Post[];
+  selectedCategory: string;
+}
 
 const POSTS_PER_PAGE = 6; // 한 페이지에 표시할 게시글 수
 
-const PostList = ({ selectedCategory }: { selectedCategory: string }) => {
+const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
+  selectedCategory,
+  hideWriteButton,
+}) => {
   const navigate = useNavigate();
 
   // const [posts, setPosts] = useState<Post[]>([]); // 실제 게시글 데이터
@@ -41,7 +50,16 @@ const PostList = ({ selectedCategory }: { selectedCategory: string }) => {
 
   // 선택된 카테고리에 따른 게시글 필터링
   const categoryFilteredPosts = mockCommunityPosts
-    .filter((post) => post.category === selectedCategory)
+    .filter((post) => {
+      if (selectedCategory === 'NOT_APPROVED') {
+        return post.status === 'NOT_APPROVED' || post.status === 'REJECTED';
+      }
+      return (
+        post.category === selectedCategory &&
+        post.status !== 'NOT_APPROVED' &&
+        post.status !== 'REJECTED'
+      );
+    })
     .sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -85,13 +103,17 @@ const PostList = ({ selectedCategory }: { selectedCategory: string }) => {
 
   // 포스트 클릭 핸들러
   const handlePostClick = (postId: string) => {
-    navigate(`/community/posts/${postId}`);
+    if (selectedCategory === 'NOT_APPROVED') {
+      navigate(`/admin/approval/${postId}`, { state: { postId } }); // 승인 대기 페이지로 이동
+    } else {
+      navigate(`/community/posts/${postId}`); // 일반 포스트 상세 페이지로 이동
+    }
   };
 
   return (
     <Container>
       <ActionsContainer>
-        <WriteButton onClick={handleWriteButtonClick} />
+        {!hideWriteButton && <WriteButton onClick={handleWriteButtonClick} />}
         <SearchBar
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}

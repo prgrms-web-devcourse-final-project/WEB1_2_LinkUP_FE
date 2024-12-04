@@ -3,26 +3,48 @@ import Sidemenu from './SideMenu';
 import GS from './GS';
 import KakaoMap from '../../common/KakaoMap';
 import styled from 'styled-components';
+import { postLocationChange } from '../../../api/mypageApi';
 
 function LocationPage() {
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
+  const [region, setRegion] = useState<string | null>(null);
+  const [called, setCalled] = useState<boolean>(false);
 
   useEffect(() => {
-    if (navigator.geolocation) {
+    if (navigator.geolocation && !called) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           setLocation({ latitude, longitude });
+
+          if (window.kakao) {
+            const geocoder = new window.kakao.maps.services.Geocoder();
+
+            geocoder.coord2RegionCode(
+              longitude,
+              latitude,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (result: any, status: any) => {
+                if (status === window.kakao.maps.services.Status.OK) {
+                  const primaryRegion = result[0]?.region_3depth_name || '';
+                  setRegion(primaryRegion);
+                  setCalled(true);
+                } else {
+                  console.error('주소를 가져오지 못했습니다.');
+                }
+              }
+            );
+          }
         },
         (error) => {
           console.error('위치 정보를 가져올 수 없습니다:', error);
         }
       );
     }
-  }, []);
+  }, [location]);
 
   return (
     <GS.Wrapper>
@@ -35,14 +57,23 @@ function LocationPage() {
               latitude={location.latitude}
               longitude={location.longitude}
               appKey={import.meta.env.VITE_KAKAO_KEY} // 카카오 JavaScript 키
+              width={600}
             />
           ) : (
             <p>위치 정보를 불러오는 중...</p>
           )}
           <AddressDesc>
-            현재 위치가 내 동네로 설정한 00동에 있습니다.
+            현재 위치가 내 동네로 설정한 {region || '00동'}에 있습니다.
           </AddressDesc>
-          <VerfiyButton>동네인증 완료하기</VerfiyButton>
+          <VerfiyButton
+            onClick={async () => {
+              if (region) {
+                await postLocationChange({ newAddress: region });
+              }
+            }}
+          >
+            동네인증 완료하기
+          </VerfiyButton>
         </KakaoMapWrapper>
       </GS.Content>
     </GS.Wrapper>

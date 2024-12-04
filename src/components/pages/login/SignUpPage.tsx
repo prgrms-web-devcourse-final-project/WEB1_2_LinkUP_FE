@@ -1,22 +1,80 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
+import { postSignUp } from '../../../api/loginApi';
 
 function SignUpPage() {
   const navigate = useNavigate();
+  const [name, setName] = useState<string>('');
+  const [phone, setPhone] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [pw, setPw] = useState<string>('');
+  const [cpw, setCpw] = useState<string>('');
+
   return (
     <Wrapper>
-      <LeftContent>Image</LeftContent>
+      <LeftContent>
+        <img
+          src="/images/login4.jpg"
+          alt="Login background"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+          }}
+        />
+      </LeftContent>
       <RightContent>
         <Title>회원가입</Title>
-        <Subtitle>email address</Subtitle>
-        <StyledInput placeholder="이메일 입력" />
-        <Subtitle>password</Subtitle>
-        <StyledInput placeholder="비밀번호 입력 (8 ~ 16자리)" />
-        <Subtitle>confirm password</Subtitle>
-        <StyledInput placeholder="비밀번호 확인" />
+        <Subtitle>Name</Subtitle>
+        <StyledInput
+          placeholder="이름 입력"
+          value={name}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setName(e.target.value);
+          }}
+        />
+        <Subtitle>Phone Number</Subtitle>
+        <StyledInput
+          placeholder="휴대폰 번호 입력"
+          value={phone}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setPhone(e.target.value);
+          }}
+        />
+        <Subtitle>Email Address</Subtitle>
+        <StyledInput
+          placeholder="이메일 입력"
+          value={email}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setEmail(e.target.value);
+          }}
+        />
+        <Subtitle>Password</Subtitle>
+        <StyledInput
+          placeholder="비밀번호 입력 (8 ~ 16자리)"
+          value={pw}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setPw(e.target.value);
+          }}
+        />
+        <Subtitle>Confirm Password</Subtitle>
+        <StyledInput
+          placeholder="비밀번호 확인"
+          value={cpw}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setCpw(e.target.value);
+          }}
+        />
         <LoginButton
-          onClick={() => {
+          onClick={async () => {
+            await postSignUp({
+              email: email,
+              password: pw,
+              password_confirm: cpw,
+              name: name,
+              phone: phone,
+            });
             navigate('/termsandservice');
           }}
         >
@@ -41,7 +99,7 @@ const LoginButton = styled.div`
 `;
 
 const StyledInput = styled.input`
-  width: calc(100% - 20px);
+  width: calc(100% - 40px);
   height: 25px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -68,10 +126,11 @@ const Title = styled.div`
 `;
 const LeftContent = styled.div`
   flex: 6;
-  background-color: lightblue;
+  background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 `;
 
 const RightContent = styled.div`

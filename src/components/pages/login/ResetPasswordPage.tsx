@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
+import { postResetPassword } from '../../../api/loginApi';
 
 const ResetPasswordPage = () => {
   const navigate = useNavigate();
@@ -8,8 +9,9 @@ const ResetPasswordPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showModal, setShowModal] = useState(false);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (password === confirmPassword && password.length >= 8) {
+      await postResetPassword({ newPassword: password }, '1');
       setShowModal(true);
     } else {
       alert('비밀번호가 일치하지 않거나 유효하지 않습니다.');
@@ -17,33 +19,40 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <>
-      <Wrapper>
-        <LeftContent>Image</LeftContent>
-        <RightContent>
-          <Title>비밀번호 재설정</Title>
-          <Subtitle>password</Subtitle>
-          <StyledInput
-            type="password"
-            placeholder="비밀번호 입력 (8 ~ 16자리)"
-            value={password}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setPassword(e.target.value)
-            }
-          />
-          <Subtitle>confirm password</Subtitle>
-          <StyledInput
-            type="password"
-            placeholder="비밀번호 확인"
-            value={confirmPassword}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setConfirmPassword(e.target.value)
-            }
-          />
-          <LoginButton onClick={handleConfirm}>Confirm</LoginButton>
-        </RightContent>
-      </Wrapper>
-
+    <Wrapper>
+      <LeftContent>
+        <img
+          src="/images/login6.jpg"
+          alt="Login background"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+          }}
+        />
+      </LeftContent>
+      <RightContent>
+        <Title>비밀번호 재설정</Title>
+        <Subtitle>password</Subtitle>
+        <StyledInput
+          type="password"
+          placeholder="비밀번호 입력 (8 ~ 16자리)"
+          value={password}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setPassword(e.target.value)
+          }
+        />
+        <Subtitle>confirm password</Subtitle>
+        <StyledInput
+          type="password"
+          placeholder="비밀번호 확인"
+          value={confirmPassword}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setConfirmPassword(e.target.value)
+          }
+        />
+        <LoginButton onClick={handleConfirm}>Confirm</LoginButton>
+      </RightContent>
       {showModal && (
         <ModalOverlay>
           <ModalContent>
@@ -58,7 +67,7 @@ const ResetPasswordPage = () => {
           </ModalContent>
         </ModalOverlay>
       )}
-    </>
+    </Wrapper>
   );
 };
 
@@ -150,10 +159,11 @@ const Title = styled.div`
 
 const LeftContent = styled.div`
   flex: 6;
-  background-color: lightblue;
+  background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 `;
 
 const RightContent = styled.div`

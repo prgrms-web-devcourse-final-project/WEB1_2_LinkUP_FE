@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
+import { postSignIn } from '../../../api/loginApi';
 
 const SignInPage = () => {
   const navigate = useNavigate();
+  const [email, setEmail] = useState<string>('');
+  const [pw, setPw] = useState<string>('');
+
   return (
     <Wrapper>
       <LeftContent>
@@ -20,10 +24,32 @@ const SignInPage = () => {
       <RightContent>
         <Title>Welcome 👋🏼</Title>
         <Subtitle>email address</Subtitle>
-        <StyledInput placeholder="이메일 입력" />
+        <StyledInput
+          placeholder="이메일 입력"
+          value={email}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setEmail(e.target.value);
+          }}
+        />
         <Subtitle>password</Subtitle>
-        <StyledInput placeholder="비밀번호 입력 (8 ~ 16자리)" />
-        <LoginButton>Login</LoginButton>
+        <StyledInput
+          placeholder="비밀번호 입력 (8 ~ 16자리)"
+          value={pw}
+          type={'password'}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setPw(e.target.value);
+          }}
+        />
+        <LoginButton
+          onClick={async () => {
+            await postSignIn({
+              email: email,
+              password: pw,
+            });
+          }}
+        >
+          Login
+        </LoginButton>
         <SNSButton>
           <img
             src="/images/googlelogo.png"

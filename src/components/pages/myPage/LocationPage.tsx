@@ -3,6 +3,7 @@ import Sidemenu from './SideMenu';
 import GS from './GS';
 import KakaoMap from '../../common/KakaoMap';
 import styled from 'styled-components';
+import { postLocationChange } from '../../../api/mypageApi';
 
 function LocationPage() {
   const [location, setLocation] = useState<{
@@ -64,7 +65,15 @@ function LocationPage() {
           <AddressDesc>
             현재 위치가 내 동네로 설정한 {region || '00동'}에 있습니다.
           </AddressDesc>
-          <VerfiyButton>동네인증 완료하기</VerfiyButton>
+          <VerfiyButton
+            onClick={async () => {
+              if (region) {
+                await postLocationChange({ newAddress: region });
+              }
+            }}
+          >
+            동네인증 완료하기
+          </VerfiyButton>
         </KakaoMapWrapper>
       </GS.Content>
     </GS.Wrapper>

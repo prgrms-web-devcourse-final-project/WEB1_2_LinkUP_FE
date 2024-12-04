@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-
 import StarRating from '../../common/StarRating';
-
 import { submitOrder } from './api/submitApi';
 import { products } from '../../../mocks/products';
-import { addComment } from './api/CommentApi';
-import { addWishList } from './api/WishApi';
+import { addComment } from './api/commentApi';
+import { addWishList } from './api/wishApi';
 // import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 
 const ProductDetail: React.FC = () => {

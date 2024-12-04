@@ -61,7 +61,7 @@ const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => {
                 </PriceWrapper>
               </ProductWrapper>
             </StyledLink>
-            <LikeButton likes={product.available} onClick={changeLike} />
+            <LikeButton likes={product.likes} onClick={changeLike} />
           </Card>
         ))}
       </CardWrapper>

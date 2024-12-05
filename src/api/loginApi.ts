@@ -33,17 +33,7 @@ export const postSignUpLast = async (profile: File | null) => {
   const nickname = localStorage.getItem('nickname');
   const address = localStorage.getItem('address');
 
-  let profileBase64: string | null = null;
-  if (profile) {
-    profileBase64 = await new Promise<string | null>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(profile);
-    });
-  }
-
-  const body = {
+  const user = {
     email,
     password,
     password_confirm,
@@ -51,12 +41,32 @@ export const postSignUpLast = async (profile: File | null) => {
     phone,
     nickname,
     address,
-    profile: profileBase64,
   };
 
-  const response = await axiosInstance.post(`/users`, body, {
+  const formData = new FormData();
+  formData.append(
+    'user',
+    new Blob([JSON.stringify(user)], { type: 'application/json' })
+  );
+
+  if (profile) {
+    formData.append('profile', profile);
+  } else {
+    const defaultImageUrl = '/public/images/origin.png';
+
+    const defaultImageBlob = await fetch(defaultImageUrl).then((res) =>
+      res.blob()
+    );
+    const defaultImageFile = new File([defaultImageBlob], 'origin.png', {
+      type: defaultImageBlob.type,
+    });
+
+    formData.append('profile', defaultImageFile);
+  }
+
+  const response = await axiosInstance.post(`/users`, formData, {
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'multipart/form-data',
     },
   });
 

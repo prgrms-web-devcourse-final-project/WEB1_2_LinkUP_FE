@@ -6,11 +6,15 @@ import logo from '../../assets/icons/goodbuyus-logo.svg';
 import menu from '../../assets/icons/menu.svg';
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('jwt');
+    const userRole = localStorage.getItem('roles');
+
     setIsLoggedIn(!!token);
+    setIsAdmin(userRole === 'ROLE_ADMIN');
   }, []);
 
   const toggleMobileMenu = () => {
@@ -55,10 +59,33 @@ const Header = () => {
               </StyledLink>
             </NavItem>
             <NavItem>
-              <StyledLink to="/mypage/setting" onClick={toggleMobileMenu}>
-                My Page
+              <StyledLink
+                to={isAdmin ? '/adminpage' : '/mypage/setting'}
+                onClick={toggleMobileMenu}
+              >
+                {isAdmin ? 'Admin Page' : 'My Page'}
               </StyledLink>
             </NavItem>
+            {isAdmin && (
+              <>
+                <NavItem>
+                  <StyledLink
+                    to="/adminpage/post-management"
+                    onClick={toggleMobileMenu}
+                  >
+                    Post Management
+                  </StyledLink>
+                </NavItem>
+                <NavItem>
+                  <StyledLink
+                    to="/adminpage/chat-management"
+                    onClick={toggleMobileMenu}
+                  >
+                    Chat Management
+                  </StyledLink>
+                </NavItem>
+              </>
+            )}
             {!isLoggedIn ? (
               <Login>
                 <Link to="/signin" onClick={toggleMobileMenu}>

@@ -10,12 +10,12 @@ export interface SubmitResponse {
 }
 
 export const submitOrder = async (
-  productId: number,
+  postId: number,
   amount: number
 ): Promise<SubmitResponse> => {
   try {
-    const URL = `/goodbuyUs/orders/${productId}`;
-    const response = await axiosInstance.post(URL, { amount });
+    const URL = `/goodbuyUs/orders?postId=${postId}`;
+    const response = await axiosInstance.post(URL, amount);
     console.log(response);
     return response.data;
   } catch {

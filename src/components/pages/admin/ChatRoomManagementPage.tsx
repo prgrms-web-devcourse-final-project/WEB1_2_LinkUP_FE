@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ChatRoomModal from '../community/modal/ChatRoomModal'; // 기존 채팅 모달 컴포넌트
 import Pagination from '../../common/Pagination'; // 기존 페이지네이션 컴포넌트
-import {
-  fetchChatRooms,
-  fetchChatRoomDetails,
-  deleteChatRoom,
-} from '../community/api/chatApi';
+import { fetchChatRooms } from '../community/api/chatApi';
 import { FaBackspace } from 'react-icons/fa';
 import { webSocketService } from '../../../utils/webSocket';
 
@@ -15,20 +11,20 @@ const ITEMS_PER_PAGE = 12; // 페이지당 카드 수
 
 const ChatRoomManagementPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [chatRooms, setChatRooms] = useState<
     {
-      chatRoomId: string;
-      chatRoomTitle: string;
-      participants: { userId: string; nickname: string }[];
+      postId: number;
+      roomName: string;
+      chatMembers: string[];
     }[]
   >([]); // 채팅방 데이터
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedRoom, setSelectedRoom] = useState<{
-    chatRoomId: string;
-    chatRoomTitle: string;
-    participants: { userId: string; nickname: string }[];
-  } | null>(null); // 선택된 채팅방
   const [isModalOpen, setModalOpen] = useState(false);
+
+  // URL에서 chatRoomId 동적으로 가져오기
+  const urlParams = new URLSearchParams(location.search);
+  const roomId = urlParams.get('roomId'); // URL에서 roomId 가져오기
 
   // 총 페이지 수 계산
   const totalPages = Math.ceil(chatRooms.length / ITEMS_PER_PAGE);
@@ -53,30 +49,13 @@ const ChatRoomManagementPage = () => {
     startIndex + ITEMS_PER_PAGE
   );
 
-  const handleCardClick = async (chatRoomId: string) => {
-    try {
-      const roomDetails = await fetchChatRoomDetails(chatRoomId); // API 호출로 채팅방 세부 정보 가져오기
-      setSelectedRoom(roomDetails);
-      setModalOpen(true);
-    } catch (error) {
-      console.error('채팅방 세부 정보를 가져오는 중 오류 발생:', error);
-    }
+  const handleCardClick = () => {
+    setModalOpen(true); // 모달 열기
   };
 
-  const handleDeleteRoom = async (chatRoomId: string) => {
-    if (window.confirm('채팅방을 정말 삭제하시겠습니까?')) {
-      try {
-        await deleteChatRoom(chatRoomId); // 채팅방 삭제 API 호출
-        setChatRooms((prev) =>
-          prev.filter((room) => room.chatRoomId !== chatRoomId)
-        );
-        setModalOpen(false);
-        alert('채팅방이 삭제되었습니다.');
-      } catch (error) {
-        console.error('채팅방 삭제 중 오류 발생:', error);
-        alert('채팅방 삭제에 실패했습니다.');
-      }
-    }
+  const closeModal = () => {
+    setModalOpen(false); // 모달 닫기
+    navigate(-1); // URL 복구
   };
 
   return (
@@ -94,13 +73,10 @@ const ChatRoomManagementPage = () => {
         <FormContainer>
           <ChatRoomList>
             {paginatedChatRooms.map((room) => (
-              <ChatRoomCard
-                key={room.chatRoomId}
-                onClick={() => handleCardClick(room.chatRoomId)}
-              >
-                <ChatRoomTitle>{room.chatRoomTitle}</ChatRoomTitle>
+              <ChatRoomCard key={room.postId} onClick={handleCardClick}>
+                <ChatRoomTitle>{room.roomName}</ChatRoomTitle>
                 <Participants>
-                  참여자: {room.participants.map((p) => p.nickname).join(', ')}
+                  참여자: {room.chatMembers.join(', ')}
                 </Participants>
               </ChatRoomCard>
             ))}
@@ -110,14 +86,16 @@ const ChatRoomManagementPage = () => {
             totalPages={totalPages}
             onPageChange={(page) => setCurrentPage(page)}
           />
-          {isModalOpen && selectedRoom && (
+          {isModalOpen && roomId && (
             <ChatRoomModal
-              chatRoomId={selectedRoom.chatRoomId}
-              chatRoomTitle={selectedRoom.chatRoomTitle}
+              chatRoomId={roomId} // roomId는 URL에서 가져옴
+              chatRoomTitle={
+                chatRooms.find((room) => room.postId.toString() === roomId)
+                  ?.roomName || ''
+              }
               isOpen={isModalOpen}
-              onClose={() => setModalOpen(false)}
-              webSocketService={webSocketService} // WebSocket 서비스 객체 필요 시 추가
-              onDelete={() => handleDeleteRoom(selectedRoom.chatRoomId)}
+              onClose={closeModal}
+              webSocketService={webSocketService}
               isAdminPage={true}
             />
           )}

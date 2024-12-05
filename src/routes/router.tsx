@@ -37,6 +37,7 @@ import PostManagementPage from '../components/pages/admin/PostManagementPage';
 import PostApprovalPage from '../components/pages/admin/PostApprovalPage';
 import ChatRoomManagementPage from '../components/pages/admin/ChatRoomManagementPage';
 import ScrollToTopButton from '../components/common/ScrollToTopButton';
+import DepositPage from '../components/pages/community/DepositPage';
 
 const router = createBrowserRouter([
   {
@@ -71,43 +72,47 @@ const router = createBrowserRouter([
         element: <PaymentSuccessPage />,
       },
       {
-        path: '/community',
+        path: '/community/post',
         element: <CategoryBasedPostsPage />,
       },
       {
-        path: '/community/create',
+        path: '/community/post/create',
         element: <PostCreatePage />,
       },
       {
-        path: '/community/posts/:postId',
+        path: '/community/post/:communityPostId',
         element: <PostDetailPage />,
       },
       {
-        path: '/community/posts/:postId/edit',
+        path: '/mypage/post/:communityPostId/edit',
         element: <PostEditPage />,
       },
       {
-        path: '/community/posts/:postId/payment/author',
+        path: '/community/post/:communityPostId/payment/author',
         element: <PaymentAuthorPage />,
       },
       {
-        path: '/community/posts/:postId/payment/participant',
+        path: '/community/post/:communityPostId/payment/participant',
         element: <PaymentParticipantPage />,
       },
       {
-        path: '/community/posts/:postId/payment/complete',
+        path: '/community/post/:communityPostId/payment/deposit',
+        element: <DepositPage />,
+      },
+      {
+        path: '/community/post/:communityPostId/payment/complete',
         element: <PaymentCompletePage />,
       },
       {
-        path: '/admin/posts',
+        path: '/admin/post',
         element: <PostManagementPage />,
       },
       {
-        path: '/admin/approval/:postId',
+        path: '/admin/post/approve/:communityPostId',
         element: <PostApprovalPage />,
       },
       {
-        path: '/admin/chat',
+        path: '/admin/chatlist',
         element: <ChatRoomManagementPage />,
       },
       {

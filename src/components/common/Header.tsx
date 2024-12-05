@@ -10,8 +10,8 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('jwt');
-    const userRole = localStorage.getItem('roles');
+    const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('role');
 
     setIsLoggedIn(!!token);
     setIsAdmin(userRole === 'ROLE_ADMIN');

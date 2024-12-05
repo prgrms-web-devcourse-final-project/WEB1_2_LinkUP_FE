@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { handlePayment } from './api/paymentApi';
 // import { products } from '../../../mocks/products';
@@ -10,17 +10,9 @@ const PaymentForm = () => {
   const location = useLocation();
   const query = new URLSearchParams(location.search);
   const data = query.get('data') || null; // null일 경우 빈 문자열 반환
-  const product_data = data ? JSON.parse(decodeURIComponent(data)) : null;
+  const productData = data ? JSON.parse(decodeURIComponent(data)) : null;
 
-  const { id } = useParams();
-
-  const productId = useMemo(() => {
-    if (!id || isNaN(Number(id))) {
-      return null;
-    }
-    return Number(id);
-  }, [id]);
-
+  const productId = productData.id;
   if (!productId) {
     return <p>잘못된 상품 ID입니다.</p>;
   }
@@ -38,10 +30,8 @@ const PaymentForm = () => {
   const payload = {
     productName: product.name,
     url: product.url,
-    price: product.discountprice,
-    // price : product.discountPrice * product.amount
-    quantity: product_data,
-    //quantity : product.amount
+    price: product.discountprice * productData.amount,
+    quantity: productData.amount,
     payMethod: payment,
     deliveryRequestDTO: {
       name: userName,
@@ -77,16 +67,15 @@ const PaymentForm = () => {
                 <Price>₩{product.discountprice.toLocaleString()}</Price>
               </FlexRow>
               <FlexRow>
-                <Quantity>
-                  수량: 1개
-                  {/* product.amount */}
-                </Quantity>
+                <Quantity>{productData.amount}</Quantity>
               </FlexRow>
               <TotalRow>
                 <span>합계:</span>
                 <TotalPrice>
-                  ₩{product.discountprice.toLocaleString()}
-                  {/* *product.amount */}
+                  {(
+                    product.discountprice * productData.amount
+                  ).toLocaleString()}
+                  원
                 </TotalPrice>
               </TotalRow>
             </ContentBox>

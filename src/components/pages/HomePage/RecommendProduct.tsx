@@ -56,12 +56,8 @@ const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => {
                   <StarRating rating={product.rating} />
                 </ProductStar>
                 <PriceWrapper>
-                  <OriginalPrice>
-                    ${product.originalprice.toFixed(2)}
-                  </OriginalPrice>
-                  <DiscountedPrice>
-                    ${product.discountprice.toFixed(2)}
-                  </DiscountedPrice>
+                  <OriginalPrice>{product.originalprice}원</OriginalPrice>
+                  <DiscountedPrice>{product.discountprice}원</DiscountedPrice>
                 </PriceWrapper>
               </ProductWrapper>
             </StyledLink>

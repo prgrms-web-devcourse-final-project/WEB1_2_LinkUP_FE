@@ -114,19 +114,9 @@ const ProductDetail: React.FC = () => {
               <Title>{product.name}</Title>
 
               <PriceWrapper>
-                <OriginalPrice>
-                  $
-                  {product?.originalprice
-                    ? product.originalprice.toFixed(2)
-                    : '0.00'}
-                </OriginalPrice>
+                <OriginalPrice>{product.originalprice}원</OriginalPrice>
                 <DiscountWrapper>
-                  <DiscountedPrice>
-                    $
-                    {product?.discountprice
-                      ? product.discountprice.toFixed(2)
-                      : '0.00'}
-                  </DiscountedPrice>
+                  <DiscountedPrice>{product.discountprice}원</DiscountedPrice>
                   <DiscountInfo>
                     {product.minamount}개 부터 할인 적용
                   </DiscountInfo>

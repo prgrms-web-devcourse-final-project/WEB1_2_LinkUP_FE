@@ -1,25 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import StarRating from '../../common/StarRating';
 import { submitOrder } from './api/submitApi';
-import { products } from '../../../mocks/products';
+// import { products } from '../../../mocks/products';
 import { addComment } from './api/commentApi';
 import { addWishList } from './api/wishApi';
-// import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
+import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams();
-  if (!id) {
-    return <p>상품 번호가 유실되었습니다.</p>;
-  }
-  const productId = Number(id);
-  // const { data: product, isLoading, isError } = useProductQuery(productId);
-  const product = products.find((p) => p.id === productId);
 
-  if (!product) {
-    return <p>해당 상품을 찾을 수 없습니다.</p>;
+  const productId = useMemo(() => {
+    if (!id || isNaN(Number(id))) {
+      return null;
+    }
+    return Number(id);
+  }, [id]);
+
+  if (!productId) {
+    return <p>잘못된 상품 ID입니다.</p>;
   }
+  const { data: product, isLoading, isError } = useProductQuery(productId || 0);
 
   const [quantity, setQuantity] = useState(1);
   const [newComment, setNewComment] = useState('');
@@ -28,178 +30,196 @@ const ProductDetail: React.FC = () => {
   const [visibleCount, setVisibleCount] = useState(10);
   const [data, setData] = useState({});
 
-  const handleSubmit = () => {
-    submitOrder(product.id, quantity).then((res) => {
-      setData(res);
-    });
-  };
-  // 더보기 버튼 클릭 시 댓글 수를 증가시키는 함수
-  const handleShowMore = () => {
-    setVisibleCount((prevCount) => prevCount + 10);
-  };
-  //   마감까지 남은 기한
-  const calculateRemainingTime = () => {
-    const now = new Date();
-    const deadline = new Date(product.deadline);
-    const diff = deadline.getTime() - now.getTime();
-
-    if (diff <= 0) {
-      setRemainingTime('마감되었습니다.');
-
-      return;
-    }
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-    setRemainingTime(`${days}일 ${hours}시간 ${minutes}분 남음`);
-  };
+  // 렌더링 조건 계산
+  const isOutOfStock = product ? product.now >= product.currentStock : false;
+  const isDeadlinePassed = remainingTime === '마감되었습니다.';
+  const isButtonDisabled = isOutOfStock || isDeadlinePassed;
 
   useEffect(() => {
+    if (!product) return;
+
+    const calculateRemainingTime = () => {
+      const now = new Date();
+      const deadline = new Date(product.deadline);
+      const diff = deadline.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        setRemainingTime('마감되었습니다.');
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor(
+        (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      );
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+      setRemainingTime(`${days}일 ${hours}시간 ${minutes}분 남음`);
+    };
+
     calculateRemainingTime(); // 초기 계산
     const timer = setInterval(calculateRemainingTime, 60000); // 1분마다 업데이트
 
     return () => clearInterval(timer);
-  }, []);
+  }, [product]);
 
-  const isOutOfStock = product.now >= product.currentStock;
-  const isDeadlinePassed = remainingTime === '마감되었습니다.';
-  const isButtonDisabled = isOutOfStock || isDeadlinePassed;
+  // 더보기 버튼 클릭 시 댓글 수를 증가시키는 함수
+  const handleShowMore = () => {
+    setVisibleCount((prevCount) => prevCount + 10);
+  };
+
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (value > 0) setQuantity(value);
+  };
+  const handleSubmit = () => {
+    if (product) {
+      submitOrder(productId, quantity).then((res) => {
+        setData(res);
+      });
+    }
+  };
+
+  //댓글 작성
+  const handleCommentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (product) {
+      addComment(product.id, { review: newComment, rating: newCommentStar });
+      setNewComment('');
+    }
+  };
+  if (!product) {
+    return <p>상품 정보를 불러올 수 없습니다.</p>;
+  }
+  //할인까지 남은 수량
+  const least = product.minamount - product.now;
 
   // 구매 비율 계산
   const purchasePercentage = Math.min(
     (product.now / product.currentStock) * 100,
     100
   );
-  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (value > 0) setQuantity(value);
-  };
-
-  //댓글 작성
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    //댓글추가 api 호출
-    addComment(product.id, { review: newComment, rating: newCommentStar });
-    //newComment, newCommentStar <- payload로 전송
-    setNewComment('');
-  };
-
-  //할인까지 남은 수량
-  const least = product.minamount - product.now;
-
   return (
     <>
-      {/* <QueryHandler isLoading={isLoading} isError={isError}> */}
-      <Container>
-        <ContentWrapper>
-          <ImageSection>
-            <Image src={product.url} alt={product.name} />
-            <Stars>
-              <StarRating rating={product.rating} />
-            </Stars>
-          </ImageSection>
-          <InfoSection>
-            <Title>{product.name}</Title>
+      <QueryHandler isLoading={isLoading} isError={isError}>
+        <Container>
+          <ContentWrapper>
+            <ImageSection>
+              <Image src={product.url} alt={product.name} />
+              <Stars>
+                <StarRating rating={product.rating} />
+              </Stars>
+            </ImageSection>
+            <InfoSection>
+              <Title>{product.name}</Title>
 
-            <PriceWrapper>
-              <OriginalPrice>${product.originalPrice.toFixed(2)}</OriginalPrice>
-              <DiscountWrapper>
-                <DiscountedPrice>
-                  ${product.discountPrice.toFixed(2)}
-                </DiscountedPrice>
-                <DiscountInfo>
-                  {product.minamount}개 부터 할인 적용
-                </DiscountInfo>
-              </DiscountWrapper>
-              {least > 0 && (
-                <RemainingCount>할인 적용까지 {least}개 남음</RemainingCount>
-              )}
-            </PriceWrapper>
+              <PriceWrapper>
+                <OriginalPrice>
+                  $
+                  {product?.originalprice
+                    ? product.originalprice.toFixed(2)
+                    : '0.00'}
+                </OriginalPrice>
+                <DiscountWrapper>
+                  <DiscountedPrice>
+                    $
+                    {product?.discountprice
+                      ? product.discountprice.toFixed(2)
+                      : '0.00'}
+                  </DiscountedPrice>
+                  <DiscountInfo>
+                    {product.minamount}개 부터 할인 적용
+                  </DiscountInfo>
+                </DiscountWrapper>
+                {least > 0 && (
+                  <RemainingCount>할인 적용까지 {least}개 남음</RemainingCount>
+                )}
+              </PriceWrapper>
 
-            <Description>{product.description}</Description>
-            <DeadlineLabel>{remainingTime}</DeadlineLabel>
+              <Description>{product.description}</Description>
+              <DeadlineLabel>{remainingTime}</DeadlineLabel>
 
-            <StockWrapper>
-              <StockLabel>현재 구매 현황</StockLabel>
-              <StockBar>
-                <StockFill style={{ width: `${purchasePercentage}%` }} />
-              </StockBar>
-              <StockStatus>
-                {product.now} / {product.currentStock} 구매됨
-              </StockStatus>
-            </StockWrapper>
-            <ActionWrapper>
-              <QuantityWrapper>
-                <QuantityLabel>수량</QuantityLabel>
-                <QuantityInput
-                  type="number"
-                  min="1"
-                  value={quantity}
-                  onChange={handleQuantityChange}
+              <StockWrapper>
+                <StockLabel>현재 구매 현황</StockLabel>
+                <StockBar>
+                  <StockFill style={{ width: `${purchasePercentage}%` }} />
+                </StockBar>
+                <StockStatus>
+                  {product.now} / {product.currentStock} 구매됨
+                </StockStatus>
+              </StockWrapper>
+              <ActionWrapper>
+                <QuantityWrapper>
+                  <QuantityLabel>수량</QuantityLabel>
+                  <QuantityInput
+                    type="number"
+                    min="1"
+                    value={quantity}
+                    onChange={handleQuantityChange}
+                  />
+                </QuantityWrapper>
+                <ButtonWrapper>
+                  <PurchaseButton
+                    to={`/products/payment/${product.id}?data=${encodeURIComponent(JSON.stringify(data))}`}
+                    disabled={isButtonDisabled}
+                    onClick={handleSubmit}
+                  >
+                    구매하기
+                  </PurchaseButton>
+                  <WishButton
+                    type="button"
+                    onClick={() => {
+                      addWishList(product.id);
+                    }}
+                  >
+                    찜하기
+                  </WishButton>
+                </ButtonWrapper>
+              </ActionWrapper>
+            </InfoSection>
+          </ContentWrapper>
+
+          <CommentSection>
+            <CommentForm onSubmit={handleCommentSubmit}>
+              <CommentInputWrapper>
+                <CommentInput
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="댓글을 입력하세요"
                 />
-              </QuantityWrapper>
-              <ButtonWrapper>
-                <PurchaseButton
-                  to={`/products/payment/${product.id}?data =${encodeURIComponent(JSON.stringify(data))} `}
-                  disabled={isButtonDisabled}
-                  onClick={handleSubmit}
+                <StarSelector
+                  value={newCommentStar}
+                  onChange={(e) => setNewCommentStar(Number(e.target.value))}
                 >
-                  구매하기
-                </PurchaseButton>
-                <WishButton
-                  type="button"
-                  onClick={() => {
-                    addWishList(product.id);
-                  }}
-                >
-                  찜하기
-                </WishButton>
-              </ButtonWrapper>
-            </ActionWrapper>
-          </InfoSection>
-        </ContentWrapper>
+                  {[1, 2, 3, 4, 5].map((num) => (
+                    <option key={num} value={num}>
+                      {'⭐'.repeat(num)}
+                    </option>
+                  ))}
+                </StarSelector>
+                <CommentSubmitButton type="submit">
+                  댓글 달기
+                </CommentSubmitButton>
+              </CommentInputWrapper>
+            </CommentForm>{' '}
+            <div>
+              {product.reviews.slice(0, visibleCount).map((review, index) => (
+                <Comment key={index}>
+                  {review.review}
+                  <CommentStars>{'⭐'.repeat(review.rating)}</CommentStars>
+                </Comment>
+              ))}
 
-        <CommentSection>
-          <CommentForm onSubmit={handleCommentSubmit}>
-            <CommentInputWrapper>
-              <CommentInput
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="댓글을 입력하세요"
-              />
-              <StarSelector
-                value={newCommentStar}
-                onChange={(e) => setNewCommentStar(Number(e.target.value))}
-              >
-                {[1, 2, 3, 4, 5].map((num) => (
-                  <option key={num} value={num}>
-                    {'⭐'.repeat(num)}
-                  </option>
-                ))}
-              </StarSelector>
-              <CommentSubmitButton type="submit">댓글 달기</CommentSubmitButton>
-            </CommentInputWrapper>
-          </CommentForm>{' '}
-          <div>
-            {product.reviews.slice(0, visibleCount).map((review, index) => (
-              <Comment key={index}>
-                {review.review}
-                <CommentStars>{'⭐'.repeat(review.rating)}</CommentStars>
-              </Comment>
-            ))}
-
-            {/* 더보기 버튼*/}
-            <ButtonContainer>
-              {visibleCount < product.reviews.length && (
-                <ViewMore onClick={handleShowMore}>더보기</ViewMore>
-              )}
-            </ButtonContainer>
-          </div>
-        </CommentSection>
-      </Container>
-      {/* </QueryHandler> */}
+              {/* 더보기 버튼*/}
+              <ButtonContainer>
+                {visibleCount < product.reviews.length && (
+                  <ViewMore onClick={handleShowMore}>더보기</ViewMore>
+                )}
+              </ButtonContainer>
+            </div>
+          </CommentSection>
+        </Container>
+      </QueryHandler>
     </>
   );
 };

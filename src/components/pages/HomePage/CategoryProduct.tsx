@@ -24,15 +24,18 @@ import {
 
 interface CategoryProductsProps {
   categories: string[];
-  products: Product[];
+  products: Product[] | undefined;
 }
 
 const CategoryProduct: React.FC<CategoryProductsProps> = ({
   categories,
   products,
 }) => {
+  if (!products) {
+    return <div>No products available</div>;
+  }
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>('생활용품');
+  const [selectedCategory, setSelectedCategory] = useState<string>('LIFESTYLE');
 
   const handleToggle = () => setIsExpanded(!isExpanded);
   const handleCategoryClick = (category: string) => {
@@ -88,10 +91,10 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
                 </ProductStar>
                 <PriceWrapper>
                   <OriginalPrice>
-                    ${product.originalPrice.toFixed(2)}
+                    ${product.originalprice.toFixed(2)}
                   </OriginalPrice>
                   <DiscountedPrice>
-                    ${product.discountPrice.toFixed(2)}
+                    ${product.discountprice.toFixed(2)}
                   </DiscountedPrice>
                 </PriceWrapper>
               </ProductWrapper>

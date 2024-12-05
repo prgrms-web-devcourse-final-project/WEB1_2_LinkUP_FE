@@ -12,8 +12,8 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       proxy: {
-        '/api': {
-          target: 'http://localhost:8080/',
+        '/goodbuyUs': {
+          target: 'http://15.164.5.135:8080',
           changeOrigin: true,
         },
       },

@@ -1,11 +1,16 @@
 export const categories = [
-  '식료품',
-  '생활용품',
-  '패션/의류',
-  '전자제품',
-  '가구/인테리어',
-  '유아/아동용품',
-  '스포츠',
+  'FOOD',
+  'LIFESTYLE',
+  'FASHION',
+  'ELECTRONICS',
+  'FURNITURE',
+  'KIDS',
+  'SPORTS',
+  'PETS',
+  'BEAUTY',
+  'SEASONAL',
+  'HOBBIES',
+  'AUTOMOTIVE',
 ];
 export const popularProduct = {
   id: 16,

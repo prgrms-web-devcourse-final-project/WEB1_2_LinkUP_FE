@@ -4,31 +4,35 @@ import RecommendProduct from './RecommendProduct';
 import PopularProduct from './PopularProduct';
 import CategoryProduct from './CategoryProduct';
 import ScrollToTopButton from '../../common/ScrollToTopButton';
-import { categories, popularProduct, products } from '../../../mocks/products';
-// import { QueryHandler, useProductsQuery } from '../../../hooks/useGetProduct';
+import { categories } from '../../../mocks/products';
+import { QueryHandler, useProductsQuery } from '../../../hooks/useGetProduct';
 
 const HomePage: React.FC = () => {
-  // const { data: products, isLoading, isError } = useProductsQuery();
+  const { data: products, isLoading, isError } = useProductsQuery();
+  const popularProduct = products?.sort(
+    (a, b) => a.currentStock - b.currentStock
+  )[0];
+
   return (
     <>
-      {/* <QueryHandler isLoading={isLoading} isError={isError}> */}
-      <ContainerBox>
-        <Container>
-          <PopularProduct product={popularProduct} />
-        </Container>
-      </ContainerBox>
-      <ContainerBox>
-        <Container>
-          <RecommendProduct products={products} />
-        </Container>
-      </ContainerBox>
-      <ContainerBox>
-        <Container>
-          <CategoryProduct categories={categories} products={products} />
-        </Container>
-        <ScrollToTopButton />
-      </ContainerBox>
-      {/* </QueryHandler> */}
+      <QueryHandler isLoading={isLoading} isError={isError}>
+        <ContainerBox>
+          <Container>
+            <PopularProduct popular={popularProduct} />
+          </Container>
+        </ContainerBox>
+        <ContainerBox>
+          <Container>
+            <RecommendProduct products={products} />
+          </Container>
+        </ContainerBox>
+        <ContainerBox>
+          <Container>
+            <CategoryProduct categories={categories} products={products} />
+          </Container>
+          <ScrollToTopButton />
+        </ContainerBox>
+      </QueryHandler>
     </>
   );
 };

@@ -5,9 +5,10 @@ import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
 import ScrollToTopButton from '../../common/ScrollToTopButton';
 import { Product } from '../HomePage/model/productSchema';
-import { products } from '../../../mocks/products';
+import { QueryHandler, useProductsQuery } from '../../../hooks/useGetProduct';
 
 const ProductPage = () => {
+  const { data: products, isLoading, isError } = useProductsQuery();
   const [input, setInput] = useState('');
 
   const location = useLocation();
@@ -22,12 +23,14 @@ const ProductPage = () => {
 
   const getTopProducts = (products: Product[]): Product[] => {
     const sortedByreviews = [...products].sort(
-      (a, b) => b.reviews.length - a.reviews.length
+      (a, b) => (b.reviews?.length || 0) - (a.reviews?.length || 0)
     );
     return sortedByreviews;
   };
 
-  const displayedProducts = useMemo(() => getTopProducts(products), [products]);
+  const displayedProducts = useMemo(() => {
+    return products ? getTopProducts(products) : [];
+  }, [products]);
 
   const filtered = displayedProducts.filter(
     (product: Product) =>
@@ -36,17 +39,19 @@ const ProductPage = () => {
   );
   return (
     <>
-      <ContainerBox>
-        <Container>
-          <InputComponent input={input} setInput={setInput} />
-        </Container>
-      </ContainerBox>
-      <ContainerBox>
-        <Container>
-          <ProductComponent input={input} products={filtered} />
-        </Container>
-        <ScrollToTopButton />
-      </ContainerBox>
+      <QueryHandler isLoading={isLoading} isError={isError}>
+        <ContainerBox>
+          <Container>
+            <InputComponent input={input} setInput={setInput} />
+          </Container>
+        </ContainerBox>
+        <ContainerBox>
+          <Container>
+            <ProductComponent input={input} products={filtered} />
+          </Container>
+          <ScrollToTopButton />
+        </ContainerBox>
+      </QueryHandler>
     </>
   );
 };

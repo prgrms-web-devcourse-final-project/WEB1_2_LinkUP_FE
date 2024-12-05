@@ -7,8 +7,8 @@ export interface Product {
   id: number;
   name: string;
   rating: number;
-  originalPrice: number;
-  discountPrice: number;
+  originalprice: number;
+  discountprice: number;
   url: string;
   category: string;
   minamount: number;
@@ -18,4 +18,5 @@ export interface Product {
   description: string;
   reviews: Review[];
   likes: boolean;
+  available: boolean;
 }

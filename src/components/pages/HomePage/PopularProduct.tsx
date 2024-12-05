@@ -3,35 +3,47 @@ import styled from 'styled-components';
 import { Product } from './model/productSchema';
 import StarRating from '../../common/StarRating';
 import { Link } from 'react-router-dom';
+import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 // import { Link } from 'react-router-dom';
 
 interface PopularProductProps {
-  product: Product;
+  popular: Product | undefined;
 }
 
-const PopularProduct: React.FC<PopularProductProps> = ({ product }) => {
+const PopularProduct: React.FC<PopularProductProps> = ({ popular }) => {
+  const {
+    data: product,
+    isLoading,
+    isError,
+  } = useProductQuery(popular?.id || 0);
+  if (!product) {
+    return <div>No popular product available</div>;
+  }
   return (
-    <StyledLink to={`/products/${product.id}`}>
-      <BannerContainer>
-        <ImageWrapper>
-          <ProductImage src={product.url} alt={product.name} />
-        </ImageWrapper>
-        <ProductInfoSection>
-          <Star>
-            <StarRating rating={product.rating} />
-          </Star>
-          <ProductHeader>
-            <TitleArea>
-              <ProductName>{product.name}</ProductName>
+    <>
+      <QueryHandler isLoading={isLoading} isError={isError}>
+        <StyledLink to={`/products/${product.id}`}>
+          <BannerContainer>
+            <ImageWrapper>
+              <ProductImage src={product.url} alt={product.name} />
+            </ImageWrapper>
+            <ProductInfoSection>
+              <Star>
+                <StarRating rating={product.rating} />
+              </Star>
+              <ProductHeader>
+                <TitleArea>
+                  <ProductName>{product.name}</ProductName>
 
-              <ProductCategory>{product.category}</ProductCategory>
-            </TitleArea>
-            <ProductDescription> 상품설명- 추후 추가 예정</ProductDescription>
-            {/* {product.description} */}
-          </ProductHeader>
-        </ProductInfoSection>
-      </BannerContainer>
-    </StyledLink>
+                  <ProductCategory>{product.category}</ProductCategory>
+                </TitleArea>
+                <ProductDescription>{product.description}</ProductDescription>
+              </ProductHeader>
+            </ProductInfoSection>
+          </BannerContainer>
+        </StyledLink>
+      </QueryHandler>
+    </>
   );
 };
 

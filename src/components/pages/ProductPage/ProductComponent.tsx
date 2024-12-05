@@ -25,8 +25,8 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
   const startIndex = (currentPage - 1) * PRODUCT_PER_PAGE;
   const filteredProducts =
     selectedText === '마감 상품'
-      ? products.filter((product) => new Date(product.deadline) < new Date())
-      : products.filter((product) => new Date(product.deadline) > new Date());
+      ? products.filter((p) => p.available === false)
+      : products.filter((p) => p.available === true);
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCT_PER_PAGE);
 
@@ -38,7 +38,6 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
     startIndex,
     startIndex + PRODUCT_PER_PAGE
   );
-
   return (
     <Recommend>
       <RecommendTitle>
@@ -72,10 +71,10 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
                 </ProductStar>
                 <PriceWrapper>
                   <OriginalPrice>
-                    ${product.originalPrice.toFixed(2)}
+                    ${product.originalprice.toFixed(2)}
                   </OriginalPrice>
                   <DiscountedPrice>
-                    ${product.discountPrice.toFixed(2)}
+                    ${product.discountprice.toFixed(2)}
                   </DiscountedPrice>
                 </PriceWrapper>
               </ProductWrapper>
@@ -284,7 +283,9 @@ const LikeButton = styled.img.withConfig({
   }
 `;
 const PagenationWrapper = styled.div`
-  margin-top: 20px;
-  margin-left: 46%;
+  margin-top: 100px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
 `;
 export default ProductComponent;

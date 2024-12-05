@@ -19,14 +19,17 @@ import {
   StyledMoreButton,
 } from './style/CardStyle';
 interface PopularProductsListProps {
-  products: Product[];
+  products: Product[] | undefined;
 }
 
 const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => {
+  if (!products) {
+    return <div>No products available</div>;
+  }
   const getTopProducts = (products: Product[]): Product[] => {
     // comments.length를 기준으로 내림차순 정렬
     const sortedByComments = [...products].sort(
-      (a, b) => b.reviews.length - a.reviews.length
+      (a, b) => (b.reviews?.length || 0) - (a.reviews?.length || 0)
     );
     // 상위 8개 선택
     return sortedByComments.slice(0, 8);
@@ -37,6 +40,7 @@ const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => {
   const changeLike = () => {
     //찜하기, 찜 취소하기 api
   };
+
   return (
     <Recommend>
       <RecommendTitle>실시간 인기 상품</RecommendTitle>
@@ -53,10 +57,10 @@ const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => {
                 </ProductStar>
                 <PriceWrapper>
                   <OriginalPrice>
-                    ${product.originalPrice.toFixed(2)}
+                    ${product.originalprice.toFixed(2)}
                   </OriginalPrice>
                   <DiscountedPrice>
-                    ${product.discountPrice.toFixed(2)}
+                    ${product.discountprice.toFixed(2)}
                   </DiscountedPrice>
                 </PriceWrapper>
               </ProductWrapper>

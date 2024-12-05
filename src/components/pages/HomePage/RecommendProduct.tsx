@@ -18,6 +18,8 @@ import {
   StyledLink,
   StyledMoreButton,
 } from './style/CardStyle';
+import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
+
 interface PopularProductsListProps {
   products: Product[] | undefined;
 }
@@ -49,7 +51,13 @@ const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => {
         {displayedProducts.map((product) => (
           <Card key={product.id}>
             <StyledLink to={`/products/${product.id}`}>
-              <ProductImg src={product.url} alt={product.name} />
+              <ProductImg
+                src={product.url || DEFAULT_IMG}
+                alt={product.name}
+                onError={(e) => {
+                  e.currentTarget.src = DEFAULT_IMG;
+                }}
+              />
               <ProductWrapper>
                 <ProductName>{product.name}</ProductName>
                 <ProductStar>

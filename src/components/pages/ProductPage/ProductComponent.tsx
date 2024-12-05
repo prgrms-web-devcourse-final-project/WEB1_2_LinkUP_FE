@@ -6,6 +6,7 @@ import StarRating from '../../common/StarRating';
 import Heart from '../../../assets/icons/heart.png';
 import FilledHeart from '../../../assets/icons/filled-heart.png';
 import { Product } from '../HomePage/model/productSchema';
+import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
 
 type ProductComponentProps = {
   input: string;
@@ -62,7 +63,13 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
         {currentProducts.map((product) => (
           <Card key={product.id} selected={selectedText === '판매 상품'}>
             <StyledLink to={`/products/${product.id}`}>
-              <ProductImg src={product.url} alt={product.name} />
+              <ProductImg
+                src={product.url || DEFAULT_IMG}
+                alt={product.name}
+                onError={(e) => {
+                  e.currentTarget.src = DEFAULT_IMG;
+                }}
+              />
               <ProductWrapper>
                 <ProductName>{product.name}</ProductName>
                 <ProductStar>
@@ -141,7 +148,7 @@ const Card = styled.div.withConfig({
   padding: 15px;
   margin: 10px;
   width: 200px;
-  background-color: ${({ selected }) => (selected ? 'white' : '#f0f0f0')};
+  background-color: ${({ selected }) => (selected ? 'white' : '#474545')};
   border-radius: 8px;
   box-shadow: ${({ selected }) =>
     selected ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none'};
@@ -155,7 +162,7 @@ const Card = styled.div.withConfig({
     top: 10px;
     left: 50%;
     transform: translateX(-50%);
-    color: #fff;
+    color: #474545;
     font-size: 14px;
     font-weight: bold;
     padding: 5px 10px;

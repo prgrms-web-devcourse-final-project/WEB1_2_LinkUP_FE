@@ -3,10 +3,10 @@ import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import StarRating from '../../common/StarRating';
 import { submitOrder } from './api/submitApi';
-// import { products } from '../../../mocks/products';
 import { addComment } from './api/commentApi';
 import { addWishList } from './api/wishApi';
 import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
+import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams();
@@ -105,7 +105,13 @@ const ProductDetail: React.FC = () => {
         <Container>
           <ContentWrapper>
             <ImageSection>
-              <Image src={product.url} alt={product.name} />
+              <Image
+                src={product.url || DEFAULT_IMG}
+                alt={product.name}
+                onError={(e) => {
+                  e.currentTarget.src = DEFAULT_IMG;
+                }}
+              />
               <Stars>
                 <StarRating rating={product.rating} />
               </Stars>

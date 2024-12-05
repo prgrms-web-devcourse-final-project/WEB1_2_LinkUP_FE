@@ -6,19 +6,28 @@ import CategoryProduct from './CategoryProduct';
 import ScrollToTopButton from '../../common/ScrollToTopButton';
 import { categories } from '../../../mocks/products';
 import { QueryHandler, useProductsQuery } from '../../../hooks/useGetProduct';
+import { Link } from 'react-router-dom';
 
 const HomePage: React.FC = () => {
   const { data: products, isLoading, isError } = useProductsQuery();
   const popularProduct = products?.sort(
-    (a, b) => a.currentStock - b.currentStock
-  )[0];
+    (a, b) =>
+      b.originalprice - b.discountprice - (a.originalprice - a.discountprice)
+  )[0]; // 할인율 내림차순
+  console.log(popularProduct);
 
   return (
     <>
       <QueryHandler isLoading={isLoading} isError={isError}>
         <ContainerBox>
           <Container>
-            <PopularProduct popular={popularProduct} />
+            <StyledLink to={`/products/${popularProduct?.id}`}>
+              {' '}
+              <PopularProduct
+                popular={popularProduct}
+                category={popularProduct?.category}
+              />
+            </StyledLink>
           </Container>
         </ContainerBox>
         <ContainerBox>
@@ -36,6 +45,18 @@ const HomePage: React.FC = () => {
     </>
   );
 };
+const StyledLink = styled(Link)`
+  text-decoration: none;
+  color: inherit;
+
+  &:link,
+  &:visited,
+  &:hover,
+  &:active {
+    color: inherit;
+    text-decoration: none;
+  }
+`;
 const ContainerBox = styled.div`
   display: flex;
   margin-top: 5vh;

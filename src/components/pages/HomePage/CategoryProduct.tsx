@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import StarRating from '../../common/StarRating';
-
+import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
 import { Product } from './model/productSchema';
 import {
   Card,
@@ -82,7 +82,13 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
         {displayedProducts.map((product) => (
           <Card key={product.id}>
             <StyledLink to={`/products/${product.id}`}>
-              <ProductImg src={product.url} alt={product.name} />
+              <ProductImg
+                src={product.url || DEFAULT_IMG}
+                alt={product.name}
+                onError={(e) => {
+                  e.currentTarget.src = DEFAULT_IMG;
+                }}
+              />
               <ProductWrapper>
                 <ProductName>{product.name}</ProductName>
                 <ProductStar>

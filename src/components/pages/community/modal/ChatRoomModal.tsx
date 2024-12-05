@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import ChatRoom from '../../../common/ChatRoom'; // 채팅방 컴포넌트
 import {
@@ -6,7 +6,8 @@ import {
   WebSocketService,
 } from '../../../../utils/webSocket';
 import { FaTrashAlt } from 'react-icons/fa';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { deleteChatRoom } from '../api/chatApi';
 
 interface ChatRoomModalProps {
   chatRoomId: string;
@@ -14,7 +15,6 @@ interface ChatRoomModalProps {
   isOpen: boolean;
   onClose: () => void;
   webSocketService: WebSocketService;
-  onDelete?: () => void;
   isAdminPage: boolean; // 관리자 페이지 여부를 나타내는 프롭
 }
 
@@ -23,12 +23,36 @@ const ChatRoomModal: React.FC<ChatRoomModalProps> = ({
   onClose,
   chatRoomId,
   chatRoomTitle,
-  onDelete,
   isAdminPage = false,
 }) => {
+  const navigate = useNavigate();
   const location = useLocation();
 
   const isChatAdminPage = isAdminPage || location.pathname === '/admin/chat';
+
+  // URL 상태 반영
+  useEffect(() => {
+    if (isOpen) {
+      navigate(`?roomId=${chatRoomId}`, { replace: true });
+    } else {
+      navigate(-1); // 원래 페이지로 돌아감
+    }
+  }, [isOpen, chatRoomId, navigate]);
+
+  const handleDelete = async () => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const roomId = urlParams.get('roomId');
+      if (roomId) {
+        await deleteChatRoom(parseInt(roomId)); // 채팅방 삭제 API 호출
+        alert('채팅방이 성공적으로 삭제되었습니다.');
+        onClose(); // 모달 닫기
+      }
+    } catch (error) {
+      console.error('채팅방 삭제 실패:', error);
+      alert('채팅방을 삭제할 수 없습니다.');
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -40,7 +64,7 @@ const ChatRoomModal: React.FC<ChatRoomModalProps> = ({
           <HeaderButtons>
             {/* 삭제 버튼: 관리자 채팅방 관리 페이지에서만 보이도록 조건부 렌더링 */}
             {isChatAdminPage && (
-              <DeleteButton onClick={onDelete}>
+              <DeleteButton onClick={handleDelete}>
                 <FaTrashAlt />
               </DeleteButton>
             )}
@@ -49,7 +73,8 @@ const ChatRoomModal: React.FC<ChatRoomModalProps> = ({
         </ModalHeader>
         <ModalContent>
           <ChatRoom
-            chatRoomId={chatRoomId}
+            chatRoomId={parseInt(chatRoomId, 10)}
+            chatMembers={[]}
             webSocketService={webSocketService}
             isAdmin={isAdminPage}
           />

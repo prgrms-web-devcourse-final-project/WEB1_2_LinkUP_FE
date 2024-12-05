@@ -56,6 +56,8 @@ const SetNicknamePage = () => {
               const response = await postSignUpNickname({ nickname: nickname });
 
               if (response.message === '닉네임 중복 확인 완료') {
+                localStorage.setItem('nickname', nickname);
+
                 navigate('/setprofile');
               } else {
                 alert('닉네임이 중복입니다.');

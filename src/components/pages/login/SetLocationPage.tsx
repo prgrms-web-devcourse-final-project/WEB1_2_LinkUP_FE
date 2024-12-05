@@ -89,6 +89,7 @@ function SetLocationPage() {
               const response = await postSignUpLocation({ address: region });
 
               if (response.message === '주소 확인 완료') {
+                localStorage.setItem('address', region);
                 navigate('/setnickname');
               } else {
                 alert('주소를 다시 확인해주세요.');

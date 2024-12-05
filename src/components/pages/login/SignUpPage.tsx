@@ -80,6 +80,12 @@ function SignUpPage() {
               });
 
               if (response.message === '이메일, 전화번호 중복 확인 완료') {
+                localStorage.setItem('email', email);
+                localStorage.setItem('password', pw);
+                localStorage.setItem('password_confirm', cpw);
+                localStorage.setItem('name', name);
+                localStorage.setItem('phone', phone);
+
                 navigate('/termsandservice');
               } else {
                 alert('이메일 또는 전화번호가 중복 되었습니다.');

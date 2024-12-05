@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
-import { postSignIn } from '../../../api/loginApi';
+import { postSignIn, postSignInSNS } from '../../../api/loginApi';
 
 const SignInPage = () => {
   const navigate = useNavigate();
@@ -50,7 +50,11 @@ const SignInPage = () => {
         >
           Login
         </LoginButton>
-        <SNSButton>
+        <SNSButton
+          onClick={async () => {
+            await postSignInSNS();
+          }}
+        >
           <img
             src="/images/googlelogo.png"
             alt="Google Logo"

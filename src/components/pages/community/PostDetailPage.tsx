@@ -13,7 +13,8 @@ import {
   Post,
   defaultPost,
   POST_STATUS,
-} from './api/postApi'; // 실제 API 사용 관련 주석 처리
+  updatePostStatus,
+} from './api/postApi';
 import {
   FaBackspace,
   FaAngleLeft,
@@ -28,9 +29,17 @@ const currentUserId = 'user-00001'; // 실제 구현 시, 인증된 사용자 ID
 const currentUserNickname = '사용자 A'; // 실제 구현 시, 인증된 사용자 Nickname을 받아와야 함
 
 const PostDetailPage = () => {
-  const { postId } = useParams<{ postId: string }>();
+  const { communityPostId } = useParams<{ communityPostId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const communityPostIdNumber = Number(communityPostId);
+
+  if (!communityPostIdNumber) {
+    alert('잘못된 게시물 ID입니다.');
+    navigate('/community');
+    return null;
+  }
 
   const [post, setPost] = useState<Post>(defaultPost);
   const [quantity, setQuantity] = useState(1); // 기본 최소 수량
@@ -42,15 +51,17 @@ const PostDetailPage = () => {
   const [editCommentId, setEditCommentId] = useState<string | null>(null); // 수정 중인 댓글 ID
   const [editContent, setEditContent] = useState<string>(''); // 수정 중인 댓글 내용
 
+  const queryKey = ['postDetail', communityPostIdNumber];
+
   // 게시물 데이터 가져오기
   const {
     data: fetchedPost,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['postDetail', postId] as const,
-    queryFn: () => fetchPostById(postId!),
-    enabled: Boolean(postId),
+    queryKey,
+    queryFn: () => fetchPostById(communityPostIdNumber),
+    enabled: Boolean(communityPostId),
   });
 
   // fetchedPost 상태 처리 및 초기화
@@ -63,24 +74,17 @@ const PostDetailPage = () => {
         (p) => p.userId === currentUserId && !p.isCancelled
       );
 
-      if (participant) {
-        // 이미 결제를 완료한 경우 사용자의 수량을 설정
-        setQuantity(participant.quantity);
-      } else {
-        // 기본 수량을 설정 (참여하지 않은 경우)
-        setQuantity(1);
-      }
+      setQuantity(participant ? participant.quantity : 1);
 
       // 작성자인지 여부 확인
-      setIsAuthor(fetchedPost.authorId === currentUserId);
+      setIsAuthor(fetchedPost.userId === currentUserId);
 
       // 취소한 사용자인 경우 접근 차단
-      const isCancelled = fetchedPost.participants.some(
-        (participant) =>
-          participant.userId === currentUserId && participant.isCancelled
-      );
-
-      if (isCancelled) {
+      if (
+        fetchedPost.participants.some(
+          (p) => p.userId === currentUserId && p.isCancelled
+        )
+      ) {
         alert('참여를 취소한 게시물에는 접근할 수 없습니다.');
         navigate('/community');
       }
@@ -95,7 +99,7 @@ const PostDetailPage = () => {
   }, [isError, navigate]);
 
   useEffect(() => {
-    if (postId) {
+    if (communityPostId) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const handleIncomingData = (data: any) => {
         if (data.type === 'STATUS_UPDATE') {
@@ -113,14 +117,14 @@ const PostDetailPage = () => {
         handleIncomingData,
         () => console.log('WebSocket connected'),
         () => console.log('WebSocket disconnected'),
-        (error) => console.error('WebSocket error:', error)
+        (error: Error) => console.error('WebSocket error:', error)
       );
 
       return () => {
         webSocketService.close();
       };
     }
-  }, [postId]);
+  }, [communityPostId]);
 
   useEffect(() => {
     const targetDate = post?.closeAt;
@@ -159,6 +163,7 @@ const PostDetailPage = () => {
     if (post.status === POST_STATUS.PAYMENT_STANDBY && post.stateUpdatedAt) {
       const countdownTarget =
         new Date(post.stateUpdatedAt).getTime() + 12 * 60 * 60 * 1000; // 12시간 후
+
       const calculateRemainingTime = () => {
         const now = new Date().getTime();
         const diff = countdownTarget - now;
@@ -188,9 +193,9 @@ const PostDetailPage = () => {
 
   // 게시물 삭제
   const deletePostMutation = useMutation({
-    mutationFn: (postId: string) => deletePostById(postId),
+    mutationFn: deletePostById,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['postList'] });
+      queryClient.invalidateQueries({ queryKey });
       alert('게시물이 삭제되었습니다.');
       navigate('/community');
     },
@@ -203,18 +208,18 @@ const PostDetailPage = () => {
   // 삭제 핸들러
   const handleDelete = () => {
     if (window.confirm('정말 이 게시물을 삭제하시겠습니까?')) {
-      deletePostMutation.mutate(postId!); // postId를 전달
+      deletePostMutation.mutate(communityPostIdNumber);
     }
   };
 
   const handleNextImage = () => {
-    if (post) setCurrentIndex((prev) => (prev + 1) % post.images.length);
+    if (post) setCurrentIndex((prev) => (prev + 1) % post.imageUrls.length);
   };
 
   const handlePreviousImage = () => {
     if (post)
       setCurrentIndex(
-        (prev) => (prev - 1 + post.images.length) % post.images.length
+        (prev) => (prev - 1 + post.imageUrls.length) % post.imageUrls.length
       );
   };
 
@@ -224,10 +229,23 @@ const PostDetailPage = () => {
 
   // 참여하기
   const joinMutation = useMutation({
-    mutationFn: () => joinPost(postId!, currentUserId, quantity),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['postDetail', postId] });
+    mutationFn: () => joinPost(communityPostIdNumber, currentUserId, quantity),
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey });
       alert('참여가 완료되었습니다.');
+
+      const updatedPost = await fetchPostById(communityPostIdNumber);
+      if (
+        updatedPost.currentQuantity === updatedPost.availableNumber &&
+        updatedPost.status === POST_STATUS.APPROVED
+      ) {
+        // 모집이 완료되면 상태를 PAYMENT_STANDBY로 자동 변경
+        await updatePostStatus(
+          communityPostIdNumber,
+          POST_STATUS.PAYMENT_STANDBY
+        );
+        queryClient.invalidateQueries({ queryKey });
+      }
     },
     onError: () => {
       alert('참여에 실패했습니다.');
@@ -244,10 +262,21 @@ const PostDetailPage = () => {
 
   // 참여 취소
   const cancelMutation = useMutation({
-    mutationFn: () => cancelJoinPost(postId!, currentUserId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['postDetail', postId] });
+    mutationFn: () => cancelJoinPost(communityPostIdNumber, currentUserId),
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey });
       alert('참여가 취소되었습니다.');
+
+      const updatedPost = await fetchPostById(communityPostIdNumber);
+      if (
+        updatedPost.status === POST_STATUS.PAYMENT_STANDBY &&
+        updatedPost.currentQuantity < updatedPost.availableNumber
+      ) {
+        // 모집 인원이 줄어들면 다시 APPROVED 상태로 변경
+        await updatePostStatus(communityPostIdNumber, POST_STATUS.APPROVED);
+        queryClient.invalidateQueries({ queryKey });
+      }
+
       navigate('/community');
     },
     onError: () => {
@@ -257,8 +286,7 @@ const PostDetailPage = () => {
 
   const handleCancel = () => {
     if (
-      post.status === POST_STATUS.APPROVED ||
-      post.status === POST_STATUS.PAYMENT_STANDBY
+      [POST_STATUS.APPROVED, POST_STATUS.PAYMENT_STANDBY].includes(post.status)
     ) {
       cancelMutation.mutate();
     } else {
@@ -266,8 +294,19 @@ const PostDetailPage = () => {
     }
   };
 
+  // 진행 취소 핸들러 (포스트 삭제 포함)
+  const handleCancelPost = () => {
+    if (
+      window.confirm(
+        '진행자가 공구 진행 취소를 할 경우, 포스트 자체도 삭제됩니다. 정말 취소하시겠습니까?'
+      )
+    ) {
+      deletePostMutation.mutate(communityPostIdNumber);
+    }
+  };
+
   const handleReport = () => {
-    navigate(`/community/posts/${postId}/report`);
+    navigate(`/community/post/${communityPostId}/report`);
   };
 
   const handleQuantityChange = (change: number) => {
@@ -275,7 +314,7 @@ const PostDetailPage = () => {
       const newQuantity = quantity + change;
       if (
         newQuantity >= 1 &&
-        newQuantity <= post.requiredQuantity - post.currentQuantity
+        newQuantity <= post.availableNumber - post.currentQuantity
       ) {
         setQuantity(newQuantity);
       }
@@ -292,13 +331,15 @@ const PostDetailPage = () => {
   const addCommentMutation = useMutation({
     mutationFn: () =>
       addComment(
-        postId!,
+        communityPostIdNumber,
         currentUserId,
         currentUserNickname,
         newCommentContent
       ),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['postDetail', postId] });
+      queryClient.invalidateQueries({
+        queryKey: ['postDetail', communityPostIdNumber],
+      });
       setNewCommentContent('');
     },
     onError: () => {
@@ -320,9 +361,12 @@ const PostDetailPage = () => {
 
   // 댓글 삭제
   const deleteCommentMutation = useMutation({
-    mutationFn: (commentId: string) => deleteComment(postId!, commentId),
+    mutationFn: (commentId: string) =>
+      deleteComment(communityPostIdNumber, commentId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['postDetail', postId] });
+      queryClient.invalidateQueries({
+        queryKey: ['postDetail', communityPostIdNumber],
+      });
     },
     onError: () => {
       alert('댓글 삭제에 실패했습니다.');
@@ -342,9 +386,12 @@ const PostDetailPage = () => {
   };
 
   const updateCommentMutation = useMutation({
-    mutationFn: () => updateComment(postId!, editCommentId!, editContent), // 수정할 댓글 ID와 새로운 내용 전달
+    mutationFn: () =>
+      updateComment(Number(communityPostId), editCommentId!, editContent), // 수정할 댓글 ID와 새로운 내용 전달
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['postDetail', postId] });
+      queryClient.invalidateQueries({
+        queryKey: ['postDetail', communityPostId],
+      });
       setEditCommentId(null);
       setEditContent('');
     },
@@ -367,36 +414,30 @@ const PostDetailPage = () => {
 
   // 결제하기 페이지로 이동
   const handlePayment = () => {
-    if (
-      post.status === POST_STATUS.PAYMENT_STANDBY &&
-      post.authorId === currentUserId
-    ) {
-      navigate(`/community/posts/${postId}/payment/author`, {
-        state: {
-          post: {
-            images: post.images,
-            title: post.title,
-            unitPrice: post.unitPrice,
-          },
-          quantity,
-        },
-      });
-    } else if (
-      post.status === POST_STATUS.PAYMENT_STANDBY &&
-      post.authorId !== currentUserId
-    ) {
-      navigate(`/community/posts/${postId}/payment/participant`, {
-        state: {
-          post: {
-            images: post.images,
-            title: post.title,
-            unitPrice: post.unitPrice,
-          },
-          quantity,
-        },
+    if (post.status !== POST_STATUS.PAYMENT_STANDBY) {
+      alert('현재 결제할 수 없는 상태입니다.');
+      return;
+    }
+
+    const paymentState = {
+      post: {
+        title: post.title,
+        unitAmount: post.unitAmount,
+        imageUrls: post.imageUrls,
+      },
+      quantity,
+    };
+
+    if (isAuthor) {
+      // 작성자인 경우 PaymentAuthorPage로 이동
+      navigate(`/community/post/${communityPostId}/payment/author`, {
+        state: paymentState,
       });
     } else {
-      alert('현재 결제할 수 없는 상태입니다.');
+      // 참여자인 경우 PaymentParticipantPage로 이동
+      navigate(`/community/post/${communityPostId}/payment/participant`, {
+        state: paymentState,
+      });
     }
   };
 
@@ -412,7 +453,7 @@ const PostDetailPage = () => {
 
     if (participant) {
       // 결제를 완료한 사용자만 이동
-      navigate(`/community/posts/${postId}/refund`);
+      navigate(`/community/post/${communityPostId}/refund`);
     } else {
       alert('환불 요청은 결제를 완료한 이용자만 가능합니다.');
     }
@@ -420,7 +461,7 @@ const PostDetailPage = () => {
 
   // 모집 완료 상태에서 참여자만 접근 가능하도록 제한
   useEffect(() => {
-    if (post.status === POST_STATUS.COMPLETED && !isParticipant) {
+    if (post.status === POST_STATUS.PAYMENT_STANDBY && !isParticipant) {
       alert('모집이 완료되어 더 이상 접근할 수 없습니다.');
       navigate('/community');
     }
@@ -439,10 +480,12 @@ const PostDetailPage = () => {
               <FaBackspace size={24} />
             </BackButton>
             <HeaderButtonsWrapper>
-              {isAuthor ? (
+              {!isAuthor ? (
+                <HeaderButton onClick={handleReport}>글 신고</HeaderButton>
+              ) : !isParticipant ? (
                 <HeaderButton onClick={handleDelete}>글 삭제</HeaderButton>
               ) : (
-                <HeaderButton onClick={handleReport}>글 신고</HeaderButton>
+                ''
               )}
             </HeaderButtonsWrapper>
           </HeaderWrapper>
@@ -454,7 +497,7 @@ const PostDetailPage = () => {
             <ImageContainer>
               <ImagePreviewWrapper>
                 <PreviousButtonWrapper>
-                  {post.images.length > 1 && currentIndex > 0 && (
+                  {post.imageUrls.length > 1 && currentIndex > 0 && (
                     <PreviousButton onClick={handlePreviousImage}>
                       <FaAngleLeft size={20} />
                     </PreviousButton>
@@ -463,14 +506,14 @@ const PostDetailPage = () => {
 
                 <ImagePreview>
                   <img
-                    src={post.images[currentIndex]}
+                    src={post.imageUrls[currentIndex]}
                     alt={`이미지 ${currentIndex + 1}`}
                   />
                 </ImagePreview>
 
                 <NextButtonWrapper>
-                  {post.images.length > 1 &&
-                    currentIndex < post.images.length - 1 && (
+                  {post.imageUrls.length > 1 &&
+                    currentIndex < post.imageUrls.length - 1 && (
                       <NextButton onClick={handleNextImage}>
                         <FaAngleRight size={20} />
                       </NextButton>
@@ -480,9 +523,9 @@ const PostDetailPage = () => {
 
               {/* PaginationDots는 이미지 아래에 위치 */}
               <PaginationDotsWrapper>
-                {post.images.length > 1 && (
+                {post.imageUrls.length > 1 && (
                   <PaginationDots>
-                    {post.images.map((_, index) => (
+                    {post.imageUrls.map((_, index) => (
                       <span
                         key={index}
                         className={currentIndex === index ? 'active' : ''}
@@ -496,7 +539,7 @@ const PostDetailPage = () => {
               <UrlContainer>
                 <UrlWrapper>
                   <Label htmlFor="urlInput">URL 주소</Label>
-                  <Url>{post.url}</Url>
+                  <Url>{post.productUrl}</Url>
                 </UrlWrapper>
               </UrlContainer>
             </ImageContainer>
@@ -511,7 +554,7 @@ const PostDetailPage = () => {
                 <DoubleWrapper>
                   <AuthorDetail>
                     <Label>작성자</Label>
-                    <AuthorNickname>{post.authorNickname}</AuthorNickname>
+                    <AuthorNickname>{post.nickname}</AuthorNickname>
                   </AuthorDetail>
                   <CreatedAtDetail>
                     <Label>작성일</Label>{' '}
@@ -525,7 +568,7 @@ const PostDetailPage = () => {
                   <Detail>
                     <Label>참여 현황</Label> {post.currentQuantity}
                     {' / '}
-                    {post.requiredQuantity}
+                    {post.availableNumber}
                   </Detail>
                 </DoubleWrapper>
 
@@ -543,10 +586,11 @@ const PostDetailPage = () => {
                 </DoubleWrapper>
                 <DoubleWrapper>
                   <Detail>
-                    <Label>총 가격</Label> {post.totalPrice.toLocaleString()} 원
+                    <Label>총 가격</Label> {post.totalAmount.toLocaleString()}{' '}
+                    원
                   </Detail>
                   <Detail>
-                    <Label>개당 가격</Label> {post.unitPrice.toLocaleString()}{' '}
+                    <Label>개당 가격</Label> {post.unitAmount.toLocaleString()}{' '}
                     원
                   </Detail>
                 </DoubleWrapper>
@@ -574,7 +618,7 @@ const PostDetailPage = () => {
                     <Detail>
                       <Label>결제 금액</Label>{' '}
                       <PaymentAmount>
-                        {(quantity * post.unitPrice).toLocaleString()} 원
+                        {(quantity * post.unitAmount).toLocaleString()} 원
                       </PaymentAmount>
                     </Detail>
                   )}
@@ -609,13 +653,17 @@ const PostDetailPage = () => {
                       ) : post.status === POST_STATUS.APPROVED ? (
                         // 승인 완료 상태에서는 참여/취소 버튼
                         <>
-                          {isParticipant ? (
-                            <ActionButton onClick={handleCancel}>
+                          {!isParticipant ? (
+                            <ActionButton primary onClick={handleJoin}>
+                              참여
+                            </ActionButton>
+                          ) : isAuthor ? (
+                            <ActionButton onClick={handleCancelPost}>
                               취소
                             </ActionButton>
                           ) : (
-                            <ActionButton primary onClick={handleJoin}>
-                              참여
+                            <ActionButton onClick={handleCancel}>
+                              취소
                             </ActionButton>
                           )}
                         </>
@@ -629,7 +677,7 @@ const PostDetailPage = () => {
 
           {/* 내용 섹션 */}
           <TextAreaWrapper>
-            <TextArea readOnly value={post.content} />
+            <TextArea readOnly value={post.description} />
           </TextAreaWrapper>
 
           {/* 댓글 컨테이너 */}

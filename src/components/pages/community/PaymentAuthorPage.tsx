@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { requestVirtualAccount } from './api/paymentApi';
+import { VirtualAccountResponse } from './api/paymentApi';
+import VirtualAccountModal from './modal/VirtualAccountModal';
 
 const PaymentAuthorPage = () => {
   const navigate = useNavigate();
   const { state } = useLocation(); // PostDetailPage에서 전달된 데이터
   const { post, quantity } = state || {}; // 구조 분해 할당
-  const [virtualAccount, setVirtualAccount] = useState<string | null>(null); // 가상계좌 정보 저장
+  const [virtualAccount, setVirtualAccount] =
+    useState<VirtualAccountResponse | null>(null); // 가상계좌 정보 저장
+  const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({
     name: '',
     address: '',
+    detailaddress: '',
     request: '',
   });
 
@@ -18,27 +22,16 @@ const PaymentAuthorPage = () => {
     return <div>잘못된 접근입니다. 게시물 정보를 찾을 수 없습니다.</div>;
   }
 
+  const handleModalClose = () => setModalOpen(false);
+  const handleModalComplete = (account: VirtualAccountResponse) => {
+    setVirtualAccount(account);
+    setModalOpen(false);
+    alert(`가상계좌 발급 완료: ${account.virtualAccount?.accountNumber}`);
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
-  };
-
-  const handleVirtualAccountRequest = async () => {
-    try {
-      const virtualAccount = await requestVirtualAccount({
-        customerName: '홍길동', // 사용자 이름 (실제 데이터로 교체)
-        customerEmail: 'customer@example.com', // 사용자 이메일 (실제 데이터로 교체)
-        amount: quantity * post.unitPrice, // 결제 금액
-        orderId: `order-${Date.now()}`, // 고유 주문 ID
-        orderName: post.title, // 주문 이름
-      });
-
-      setVirtualAccount(virtualAccount);
-      alert(`가상계좌가 발급되었습니다: ${virtualAccount}`);
-    } catch (error) {
-      console.error('가상계좌 발급 중 오류 발생:', error);
-      alert('가상계좌 발급 중 오류가 발생했습니다. 다시 시도해주세요.');
-    }
   };
 
   const handlePayment = () => {
@@ -46,8 +39,27 @@ const PaymentAuthorPage = () => {
       alert('먼저 가상계좌를 발급받아야 합니다.');
       return;
     }
-    alert('결제 완료 처리 API 호출 (가상 구현)');
-    navigate('/community/posts/:postId/payment/complete'); // 결제 완료 후 리디렉션
+    // DepositPage로 데이터 전달
+    navigate(`/community/post/${post.id}/payment/deposit`, {
+      state: {
+        bankCode: virtualAccount.virtualAccount?.bankCode,
+        accountNumber: virtualAccount.virtualAccount?.accountNumber,
+        totalAmount: quantity * post.unitAmount,
+        onConfirm: () => {
+          alert('결제가 완료되었습니다.');
+          navigate(`/community/post/${post.id}/payment/complete`, {
+            state: {
+              paymentKey: virtualAccount.paymentKey,
+              orderId: virtualAccount.orderId,
+              totalAmount: virtualAccount.totalAmount,
+              title: post.title,
+              unitPrice: post.unitAmount,
+              quantity,
+            },
+          });
+        },
+      },
+    });
   };
 
   return (
@@ -64,7 +76,7 @@ const PaymentAuthorPage = () => {
               <ImageContainer>
                 <ImagePreviewWrapper>
                   <ImagePreview>
-                    <img src={post.images[0]} alt={'이미지'} />
+                    <img src={post.imageUrls[0]} alt={'이미지'} />
                   </ImagePreview>
                 </ImagePreviewWrapper>
               </ImageContainer>
@@ -76,7 +88,7 @@ const PaymentAuthorPage = () => {
                 </Detail>
                 <Detail>
                   <Label>개당 가격</Label>
-                  {post.unitPrice.toLocaleString()} 원
+                  {post.unitAmount.toLocaleString()} 원
                 </Detail>
                 <Detail>
                   <Label>수량</Label> <Quantity>{quantity}</Quantity>
@@ -84,7 +96,7 @@ const PaymentAuthorPage = () => {
                 <Detail>
                   <Label>결제 금액</Label>{' '}
                   <PaymentAmount>
-                    {(quantity * post.unitPrice).toLocaleString()} 원
+                    {(quantity * post.unitAmount).toLocaleString()} 원
                   </PaymentAmount>
                 </Detail>
               </DetailsContainer>
@@ -107,6 +119,12 @@ const PaymentAuthorPage = () => {
                 onChange={handleInputChange}
               />
               <Input
+                placeholder="상세 주소를 입력하세요."
+                name="detailaddress"
+                value={form.detailaddress}
+                onChange={handleInputChange}
+              />
+              <Input
                 placeholder="배송 요청사항을 입력하세요."
                 name="request"
                 value={form.request}
@@ -118,10 +136,8 @@ const PaymentAuthorPage = () => {
           <Section>
             <SectionTitle>결제 정보 확인</SectionTitle>
             <SelectButtonContainer>
-              <VirtualAccountButton onClick={handleVirtualAccountRequest}>
-                {virtualAccount
-                  ? `발급된 계좌: ${virtualAccount}`
-                  : '가상계좌 발급'}
+              <VirtualAccountButton onClick={() => setModalOpen(true)}>
+                가상계좌 발급
               </VirtualAccountButton>
             </SelectButtonContainer>
           </Section>
@@ -131,6 +147,18 @@ const PaymentAuthorPage = () => {
           </ButtonContainer>
         </FormContainer>
       </ContentWrapper>
+
+      {modalOpen && (
+        <VirtualAccountModal
+          orderId={`order-${Date.now()}`}
+          amount={quantity * post.unitPrice}
+          title={post.title}
+          customerName="홍길동"
+          customerEmail="customer@example.com"
+          onClose={handleModalClose}
+          onComplete={handleModalComplete}
+        />
+      )}
     </PaymentPageContainer>
   );
 };

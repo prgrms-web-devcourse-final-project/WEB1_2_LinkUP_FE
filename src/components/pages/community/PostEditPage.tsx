@@ -8,55 +8,53 @@ import {
   FaAngleLeft,
   FaAngleRight,
 } from 'react-icons/fa';
-import { updatePost, Post, deletePostById, defaultPost } from './api/postApi';
-// import { fetchPostById, updatePost, PostData, deletePostById } from './api/postApi';
+import {
+  fetchPostById,
+  updatePost,
+  Post,
+  deletePostById,
+  defaultPost,
+} from './api/postApi';
 import CategoryWrapper from '../../common/CategoryWrapper';
-import { mockCommunityPosts } from '../../../mocks/communityPosts';
 import { POST_CATEGORIES } from './postCategories';
 
 const PostEditPage = () => {
   const navigate = useNavigate();
-  const { postId } = useParams<{ postId: string }>();
+  const { communityPostId } = useParams<{ communityPostId: string }>();
 
   const [post, setPost] = useState<Post>(defaultPost); // 수정 대상 포스트 데이터
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [requiredQuantity, setRequiredQuantity] = useState('');
-  const [totalPrice, setTotalPrice] = useState('');
+  const [availableNumber, setAvailableNumber] = useState('');
+  const [totalAmount, setTotalAmount] = useState('');
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [deadline, setDeadline] = useState('마감 기한  ');
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [images, setImages] = useState<string[]>([]);
+  const [description, setDescription] = useState('');
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [urlInput, setUrlInput] = useState('');
   const [urlError, setUrlError] = useState(false);
 
   useEffect(() => {
-    if (!postId) {
+    if (!communityPostId) {
       alert('유효하지 않은 접근입니다.');
-      navigate('/community');
+      navigate('/mypage/post');
       return;
     }
 
     // 기존 게시글 데이터 로드
     const loadPost = async () => {
       try {
-        // 실제 API 요청 (주석 처리된 부분)
-        // const fetchPost = await fetchPostById(postId);
-
-        // Mock 데이터 사용
-        const fetchedPost = mockCommunityPosts.find(
-          (item) => item.postId === postId
-        );
+        const fetchedPost = await fetchPostById(Number(communityPostId));
         if (fetchedPost) {
           setPost(fetchedPost);
           setTitle(fetchedPost.title);
-          setContent(fetchedPost.content);
-          setImages(fetchedPost.images || []);
+          setDescription(fetchedPost.description);
+          setImageUrls(fetchedPost.imageUrls || []);
           setSelectedCategory(fetchedPost.category);
-          setRequiredQuantity(fetchedPost.requiredQuantity.toString());
-          setTotalPrice(fetchedPost.totalPrice.toString());
-          setUrlInput(fetchedPost.url);
+          setAvailableNumber(fetchedPost.availableNumber.toString());
+          setTotalAmount(fetchedPost.totalAmount.toString());
+          setUrlInput(fetchedPost.productUrl);
           setDeadline(
             calculateDeadlineFromNow(fetchedPost.createdAt, fetchedPost.closeAt)
           );
@@ -66,12 +64,12 @@ const PostEditPage = () => {
       } catch (error) {
         console.error('게시글 불러오기 실패:', error);
         alert('게시글 정보를 불러오는 데 실패했습니다.');
-        navigate('/community');
+        navigate('/mypage/post');
       }
     };
 
     loadPost();
-  }, [postId, navigate]);
+  }, [communityPostId, navigate]);
 
   // createdAt과 closeAt을 사용해 마감 기한 계산
   const calculateDeadlineFromNow = (createdAt: string, closeAt: string) => {
@@ -102,12 +100,12 @@ const PostEditPage = () => {
   const handlePostUpdate = async () => {
     if (
       !title ||
-      !requiredQuantity ||
-      !totalPrice ||
+      !availableNumber ||
+      !totalAmount ||
       deadline === '마감 기한' ||
-      images.length === 0 || // 최소 한 개의 이미지 추가 확인
+      imageUrls.length === 0 || // 최소 한 개의 이미지 추가 확인
       !urlInput ||
-      !content
+      !description
     ) {
       alert('모든 필수 정보를 입력하세요.');
       return;
@@ -123,59 +121,57 @@ const PostEditPage = () => {
       return;
     }
 
-    const parsedTotalPrice = parseInt(totalPrice.replace(/,/g, ''), 10);
-    const parsedRequiredQuantity = parseInt(requiredQuantity, 10);
+    const parsedTotalAmount = parseInt(totalAmount.replace(/,/g, ''), 10);
+    const parsedAvailableNumber = parseInt(availableNumber, 10);
 
     const updatedPost: Post = {
       ...post,
       title,
-      content,
-      images,
+      description,
+      imageUrls,
       category: selectedCategory,
-      closeAt: post.closeAt, // 기존 또는 수정된 closeAt 사용
-      requiredQuantity: parsedRequiredQuantity,
-      totalPrice: parsedTotalPrice,
-      unitPrice: Math.floor(parsedTotalPrice / parsedRequiredQuantity),
-      url: urlInput,
-      updatedAt: new Date().toISOString(), // 수정된 시점 설정
+      availableNumber: parsedAvailableNumber,
+      totalAmount: parsedTotalAmount,
+      unitAmount: Math.floor(parsedTotalAmount / parsedAvailableNumber),
+      productUrl: urlInput,
     };
 
     try {
-      await updatePost(postId!, updatedPost); // 게시글 수정 API 호출
+      await updatePost(Number(communityPostId), updatedPost); // 게시글 수정 API 호출
       alert('게시글이 성공적으로 수정되었습니다.');
-      navigate(`/community/posts/${postId}`);
+      navigate(`/mypage/post/${communityPostId}`);
     } catch (error) {
       console.error('게시글 수정 중 오류 발생:', error);
       alert('게시글 수정에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
-  const handleRequiredQuantityChange = (
+  const handleAvailableNumberChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
     const numericValue = Number(value);
 
     if (value === '' || numericValue <= 0) {
-      setRequiredQuantity(''); // 입력 중 모두 지웠거나, 음수 또는 0인 경우 초기화
+      setAvailableNumber(''); // 입력 중 모두 지웠거나, 음수 또는 0인 경우 초기화
     } else {
-      setRequiredQuantity(value); // 유효한 값 업데이트
+      setAvailableNumber(value); // 유효한 값 업데이트
     }
   };
 
-  const handleTotalPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTotalAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
     const numericValue = Number(value);
 
     if (value === '' || numericValue <= 0) {
-      setTotalPrice(''); // 입력 중 모두 지웠거나, 음수 또는 0인 경우 초기화
+      setTotalAmount(''); // 입력 중 모두 지웠거나, 음수 또는 0인 경우 초기화
     } else {
-      setTotalPrice(formatCurrency(value)); // 통화 형식으로 변환
+      setTotalAmount(formatCurrency(value)); // 통화 형식으로 변환
     }
   };
 
   const handleCancel = () => {
-    navigate(`/community/posts/${postId}`);
+    navigate(`/mypage/post/${communityPostId}`);
   };
 
   const formatCurrency = (value: string) => {
@@ -183,13 +179,13 @@ const PostEditPage = () => {
     return new Intl.NumberFormat().format(Number(numberValue)); // 통화 형식으로 변환
   };
 
-  const unitPrice =
-    totalPrice && requiredQuantity
+  const unitAmount =
+    totalAmount && availableNumber
       ? formatCurrency(
           String(
             Math.floor(
-              parseInt(totalPrice.replace(/,/g, ''), 10) /
-                parseInt(requiredQuantity, 10)
+              parseInt(totalAmount.replace(/,/g, ''), 10) /
+                parseInt(availableNumber, 10)
             )
           )
         )
@@ -200,14 +196,14 @@ const PostEditPage = () => {
       const uploadedImages = Array.from(e.target.files).map((file) =>
         URL.createObjectURL(file)
       );
-      setImages((prev) => [...prev, ...uploadedImages]);
-      setCurrentIndex(images.length); // 마지막으로 추가된 이미지로 이동
+      setImageUrls((prev) => [...prev, ...uploadedImages]);
+      setCurrentIndex(imageUrls.length); // 마지막으로 추가된 이미지로 이동
     }
   };
 
   const handleRemoveImage = () => {
     if (currentIndex >= 0) {
-      setImages((prev) => {
+      setImageUrls((prev) => {
         const updatedImages = prev.filter((_, i) => i !== currentIndex);
 
         // 다음 이미지 또는 이전 이미지로 이동
@@ -227,16 +223,16 @@ const PostEditPage = () => {
   };
 
   const handleNextImage = () => {
-    if (currentIndex < images.length - 1) {
+    if (currentIndex < imageUrls.length - 1) {
       setCurrentIndex((prev) => prev + 1);
-    } else if (currentIndex === images.length - 1) {
+    } else if (currentIndex === imageUrls.length - 1) {
       setCurrentIndex(-1); // AddImageButton 상태로 전환
     }
   };
 
   const handlePreviousImage = () => {
     if (currentIndex === -1) {
-      setCurrentIndex(images.length - 1); // 마지막 이미지로 이동
+      setCurrentIndex(imageUrls.length - 1); // 마지막 이미지로 이동
     } else {
       setCurrentIndex((prev) => Math.max(prev - 1, 0));
     }
@@ -274,9 +270,9 @@ const PostEditPage = () => {
     if (!confirmDelete) return;
 
     try {
-      await deletePostById(postId!); // 삭제 API 호출
+      await deletePostById(Number(communityPostId)); // 삭제 API 호출
       alert('게시글이 성공적으로 삭제되었습니다.');
-      navigate('/community/');
+      navigate('/mypage/post');
     } catch (error) {
       console.error('게시글 삭제 중 오류 발생:', error);
       alert('게시글 삭제에 실패했습니다. 다시 시도해주세요.');
@@ -294,7 +290,7 @@ const PostEditPage = () => {
               <ImageUploadContainer>
                 <ImagePreviewWrapper>
                   <PreviousButtonWrapper>
-                    {images.length > 0 &&
+                    {imageUrls.length > 0 &&
                       (currentIndex > 0 || currentIndex === -1) && (
                         <PreviousButton onClick={handlePreviousImage}>
                           <FaAngleLeft size={20} />
@@ -315,7 +311,10 @@ const PostEditPage = () => {
                     </AddImageButton>
                   ) : (
                     <ImagePreview>
-                      <img src={images[currentIndex]} alt="이미지 미리보기" />
+                      <img
+                        src={imageUrls[currentIndex]}
+                        alt="이미지 미리보기"
+                      />
                       <RemoveImageButton onClick={handleRemoveImage}>
                         <FaMinusCircle size={30} />
                       </RemoveImageButton>
@@ -323,7 +322,7 @@ const PostEditPage = () => {
                   )}
 
                   <NextButtonWrapper>
-                    {images.length > 0 && currentIndex !== -1 && (
+                    {imageUrls.length > 0 && currentIndex !== -1 && (
                       <NextButton onClick={handleNextImage}>
                         <FaAngleRight size={20} />
                       </NextButton>
@@ -333,9 +332,9 @@ const PostEditPage = () => {
 
                 {/* PaginationDots */}
                 <PaginationDotsWrapper>
-                  {images.length > 0 && (
+                  {imageUrls.length > 0 && (
                     <PaginationDots>
-                      {images.map((_, index) => (
+                      {imageUrls.map((_, index) => (
                         <span
                           key={index}
                           className={currentIndex === index ? 'active' : ''}
@@ -396,8 +395,8 @@ const PostEditPage = () => {
                     <SmallInput
                       type="text" // 숫자만 입력되도록 onChange에서 제어
                       placeholder="수량 입력"
-                      value={requiredQuantity}
-                      onChange={handleRequiredQuantityChange}
+                      value={availableNumber}
+                      onChange={handleAvailableNumberChange}
                     />
                   </InputWrapper>
                   <InputWrapper>
@@ -430,14 +429,14 @@ const PostEditPage = () => {
                       <SmallInput
                         type="text" // 숫자만 입력되도록 onChange에서 제어
                         placeholder="총 가격 입력"
-                        value={totalPrice}
-                        onChange={handleTotalPriceChange}
+                        value={totalAmount}
+                        onChange={handleTotalAmountChange}
                       />
                       {' 원'}
                     </InputWrapper>
                     <InputWrapper>
                       <Label>개당 가격</Label>
-                      <SmallInput disabled value={unitPrice} />
+                      <SmallInput disabled value={unitAmount} />
                       {' 원'}
                     </InputWrapper>
                   </PriceWrapper>
@@ -449,8 +448,8 @@ const PostEditPage = () => {
             <TextAreaWrapper>
               <TextArea
                 placeholder="내용을 입력해주세요."
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
                 spellCheck={false}
               />
             </TextAreaWrapper>

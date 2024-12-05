@@ -5,10 +5,10 @@ import styled from 'styled-components';
 import StarRating from '../../common/StarRating';
 
 import { submitOrder } from './api/submitApi';
-import { products } from '../../../mocks/products';
+// import { products } from '../../../mocks/products';
 import { addComment } from './api/CommentApi';
 import { addWishList } from './api/WishApi';
-// import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
+import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams();
@@ -16,8 +16,9 @@ const ProductDetail: React.FC = () => {
     return <p>상품 번호가 유실되었습니다.</p>;
   }
   const productId = Number(id);
-  // const { data: product, isLoading, isError } = useProductQuery(productId);
-  const product = products.find((p) => p.id === productId);
+  // console.log(productId);
+  const { data: product, isLoading, isError } = useProductQuery(productId);
+  // const product = products.find((p) => p.id === productId);
 
   if (!product) {
     return <p>해당 상품을 찾을 수 없습니다.</p>;
@@ -93,7 +94,7 @@ const ProductDetail: React.FC = () => {
 
   return (
     <>
-      {/* <QueryHandler isLoading={isLoading} isError={isError}> */}
+       <QueryHandler isLoading={isLoading} isError={isError}> 
       <Container>
         <ContentWrapper>
           <ImageSection>
@@ -201,7 +202,7 @@ const ProductDetail: React.FC = () => {
           </div>
         </CommentSection>
       </Container>
-      {/* </QueryHandler> */}
+       </QueryHandler> 
     </>
   );
 };

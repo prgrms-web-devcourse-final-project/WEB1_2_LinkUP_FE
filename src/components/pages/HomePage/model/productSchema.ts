@@ -1,5 +1,6 @@
 interface Review {
   review: string;
+  rating : number;
 }
 
 export interface Product {

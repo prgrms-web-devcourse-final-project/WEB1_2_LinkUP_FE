@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { postSignUpLocation } from '../../../api/loginApi';
 import KakaoMap from '../../common/KakaoMap';
 
 function SetLocationPage() {
@@ -83,8 +84,17 @@ function SetLocationPage() {
         </KakaoMapWrapper>
 
         <LoginButton
-          onClick={() => {
-            navigate('/setnickname');
+          onClick={async () => {
+            if (region) {
+              const response = await postSignUpLocation({ address: region });
+
+              if (response.message === '주소 확인 완료') {
+                localStorage.setItem('address', region);
+                navigate('/setnickname');
+              } else {
+                alert('주소를 다시 확인해주세요.');
+              }
+            }
           }}
         >
           Next

@@ -43,12 +43,15 @@ const PostManagementPage = () => {
         <ContentWrapper>
           <Title>관리자 페이지</Title>
           <Header>
-            <CategoryWrapper
-              categories={ADMIN_CATEGORIES}
-              selectedCategory={selectedCategory}
-              onCategoryChange={(id: string) => setSelectedCategory(id)}
-              title="게시글 관리" // 제목 변경
-            />
+            <Wrapper>
+              {' '}
+              <CategoryWrapper
+                categories={ADMIN_CATEGORIES}
+                selectedCategory={selectedCategory}
+                onCategoryChange={(id: string) => setSelectedCategory(id)}
+                title="게시글 관리" // 제목 변경
+              />
+            </Wrapper>
           </Header>
           <PostList
             posts={posts}
@@ -87,4 +90,10 @@ const Title = styled.h1`
   font-weight: bold;
   margin-bottom: 1.5rem;
   text-align: left;
+`;
+
+const Wrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-left: 50px;
 `;

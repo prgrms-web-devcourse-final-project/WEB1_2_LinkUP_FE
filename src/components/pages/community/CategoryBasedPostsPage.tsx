@@ -7,7 +7,7 @@ import { POST_CATEGORIES } from './postCategories';
 
 const CategoryBasedPostsPage = () => {
   const location = useLocation();
-  const initialCategory = location.state?.selectedCategory || '생활용품'; // 전달받은 상태 또는 기본값
+  const initialCategory = location.state?.selectedCategory || 'LIFESTYLE'; // 전달받은 상태 또는 기본값
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
 
   return (
@@ -15,13 +15,15 @@ const CategoryBasedPostsPage = () => {
       <CommunityPageContainer>
         <ContentWrapper>
           <Title>공구 모집 및 진행</Title>
-          <CategoryWrapper
-            categories={POST_CATEGORIES}
-            selectedCategory={selectedCategory} // 현재 선택된 카테고리를 전달
-            onCategoryChange={
-              (categoryId: string) => setSelectedCategory(categoryId) // 카테고리 변경 시 상태 업데이트
-            }
-          />
+          <Wrapper>
+            <CategoryWrapper
+              categories={POST_CATEGORIES}
+              selectedCategory={selectedCategory} // 현재 선택된 카테고리를 전달
+              onCategoryChange={
+                (categoryId: string) => setSelectedCategory(categoryId) // 카테고리 변경 시 상태 업데이트
+              }
+            />
+          </Wrapper>
           <PostList selectedCategory={selectedCategory} posts={[]} />
         </ContentWrapper>
       </CommunityPageContainer>
@@ -48,4 +50,10 @@ const Title = styled.h1`
   font-weight: bold;
   margin-bottom: 1.5rem;
   text-align: left;
+`;
+
+const Wrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-left: 50px;
 `;

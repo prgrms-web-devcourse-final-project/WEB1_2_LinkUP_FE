@@ -42,10 +42,16 @@ const SignInPage = () => {
         />
         <LoginButton
           onClick={async () => {
-            await postSignIn({
+            const response = await postSignIn({
               email: email,
               password: pw,
             });
+            if (response.status === 200) {
+              localStorage.setItem('role', response.data.roles);
+              navigate('/');
+            } else {
+              alert('틀렸습니다.');
+            }
           }}
         >
           Login

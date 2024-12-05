@@ -76,7 +76,12 @@ export const postSignUpLast = async (profile: File | null) => {
 export const postSignIn = async (body: { email: string; password: string }) => {
   const response = await axiosInstance.post(`/users/login`, body);
 
-  return response.data;
+  const token =
+    response.headers['authorization'] || response.headers['Authorization'];
+  if (token) {
+    localStorage.setItem('token', token);
+  }
+  return response;
 };
 
 export const postFindPassword = async (body: { email: string }) => {

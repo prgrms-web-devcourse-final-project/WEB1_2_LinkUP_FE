@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { useMemo, useState } from 'react';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { handlePayment } from './api/paymentApi';
 // import { products } from '../../../mocks/products';
@@ -12,7 +12,14 @@ const PaymentForm = () => {
   const data = query.get('data') || null; // null일 경우 빈 문자열 반환
   const productData = data ? JSON.parse(decodeURIComponent(data)) : null;
 
-  const productId = productData.id;
+  const { id } = useParams();
+  const productId = useMemo(() => {
+    if (!id || isNaN(Number(id))) {
+      return null;
+    }
+    return Number(id);
+  }, [id]);
+
   if (!productId) {
     return <p>잘못된 상품 ID입니다.</p>;
   }
@@ -47,7 +54,7 @@ const PaymentForm = () => {
   };
   const onPaymentSubmit = async () => {
     try {
-      const paymentResult = await handlePayment(product.id, payload);
+      const paymentResult = await handlePayment(productId, payload);
       if (paymentResult == 'success') {
         navigate('/payment-success');
       }
@@ -64,7 +71,7 @@ const PaymentForm = () => {
             <ContentBox>
               <FlexRow>
                 <ProductName>{product.name}</ProductName>
-                <Price>₩{product.discountprice.toLocaleString()}</Price>
+                <Price>{product.discountprice}원</Price>
               </FlexRow>
               <FlexRow>
                 <Quantity>{productData.amount}</Quantity>
@@ -72,10 +79,7 @@ const PaymentForm = () => {
               <TotalRow>
                 <span>합계:</span>
                 <TotalPrice>
-                  {(
-                    product.discountprice * productData.amount
-                  ).toLocaleString()}
-                  원
+                  {product.discountprice * productData.amount}원
                 </TotalPrice>
               </TotalRow>
             </ContentBox>

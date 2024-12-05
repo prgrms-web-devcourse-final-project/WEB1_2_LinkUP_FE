@@ -22,7 +22,6 @@ const PopularProduct: React.FC<PopularProductProps> = ({
   if (!product) {
     return <div>Product data is not available</div>;
   }
-  console.log(product.category);
   return (
     <>
       <QueryHandler isLoading={isLoading} isError={isError}>

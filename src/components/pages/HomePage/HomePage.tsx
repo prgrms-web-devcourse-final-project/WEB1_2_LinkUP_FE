@@ -14,7 +14,6 @@ const HomePage: React.FC = () => {
     (a, b) =>
       b.originalprice - b.discountprice - (a.originalprice - a.discountprice)
   )[0]; // 할인율 내림차순
-  console.log(popularProduct);
 
   return (
     <>

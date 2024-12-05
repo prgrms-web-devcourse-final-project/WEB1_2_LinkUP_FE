@@ -10,7 +10,6 @@ import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams();
-
   const productId = useMemo(() => {
     if (!id || isNaN(Number(id))) {
       return null;
@@ -99,6 +98,7 @@ const ProductDetail: React.FC = () => {
     (product.now / product.currentStock) * 100,
     100
   );
+  console.log(productId);
   return (
     <>
       <QueryHandler isLoading={isLoading} isError={isError}>
@@ -156,7 +156,7 @@ const ProductDetail: React.FC = () => {
                 </QuantityWrapper>
                 <ButtonWrapper>
                   <PurchaseButton
-                    to={`/products/payment/${product.id}?data=${encodeURIComponent(JSON.stringify(data))}`}
+                    to={`/products/payment/${productId}?data=${encodeURIComponent(JSON.stringify(data))}`}
                     disabled={isButtonDisabled}
                     onClick={handleSubmit}
                   >

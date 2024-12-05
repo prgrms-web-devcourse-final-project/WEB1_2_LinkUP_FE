@@ -23,8 +23,9 @@ export const handlePayment = async (
 ) => {
   try {
     const URL = `goodbuyUs/orders/${productId}/payment`;
-    const { data } = await axiosInstance.post(URL, payload);
-    return data.data.paymentStatus;
+    const response = await axiosInstance.post(URL, payload);
+    console.log(response);
+    return response.data;
   } catch {
     throw new Error('결제에 실패하였습니다.');
   }

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
+import { postSignUpLast } from '../../../api/loginApi';
 
 const SetProfilePage = () => {
   const navigate = useNavigate();
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -14,6 +16,7 @@ const SetProfilePage = () => {
         setPreviewImage(reader.result as string);
       };
       reader.readAsDataURL(file);
+      setSelectedFile(file);
     }
   };
 
@@ -56,7 +59,8 @@ const SetProfilePage = () => {
         </ImageWrapper>
 
         <NextButton
-          onClick={() => {
+          onClick={async () => {
+            await postSignUpLast(selectedFile);
             navigate('/logincomplete');
           }}
         >
@@ -64,7 +68,8 @@ const SetProfilePage = () => {
         </NextButton>
         <SkipWrapper>
           <SkipButton
-            onClick={() => {
+            onClick={async () => {
+              await postSignUpLast(null);
               navigate('/logincomplete');
             }}
           >

@@ -11,9 +11,8 @@ import { Link } from 'react-router-dom';
 const HomePage: React.FC = () => {
   const { data: products, isLoading, isError } = useProductsQuery();
   const popularProduct = products?.sort(
-    (a, b) =>
-      b.originalprice - b.discountprice - (a.originalprice - a.discountprice)
-  )[0]; // 할인율 내림차순
+    (a, b) => b.currentStock - a.currentStock
+  )[0];
 
   return (
     <>

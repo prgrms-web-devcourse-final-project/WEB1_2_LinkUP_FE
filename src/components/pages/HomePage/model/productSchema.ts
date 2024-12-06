@@ -15,6 +15,7 @@ export interface Product {
   deadline: string;
   now: number;
   currentStock: number;
+  initstock: number;
   description: string;
   reviews: Review[];
   likes: boolean;

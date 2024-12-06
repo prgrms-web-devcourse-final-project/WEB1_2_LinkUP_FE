@@ -3,11 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import StarRating from '../../common/StarRating';
 import { submitOrder } from './api/submitApi';
-import { addComment } from './api/commentApi';
+import { addComment, deleteComment, editComment } from './api/commentApi';
 import { addWishList } from './api/wishApi';
 import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
-
+import { products } from '../../../mocks/products';
 const ProductDetail: React.FC = () => {
   const { id } = useParams();
   const productId = useMemo(() => {
@@ -16,6 +16,7 @@ const ProductDetail: React.FC = () => {
     }
     return Number(id);
   }, [id]);
+  const sample = products.filter((p) => p.id === productId)[0];
 
   if (!productId) {
     return <p>잘못된 상품 ID입니다.</p>;
@@ -31,7 +32,9 @@ const ProductDetail: React.FC = () => {
   const isOutOfStock = product ? product.now >= product.currentStock : false;
   const isDeadlinePassed = remainingTime === '마감되었습니다.';
   const isButtonDisabled = isOutOfStock || isDeadlinePassed;
-
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingText, setEditingText] = useState('');
+  const [editingRating, setEditingRating] = useState(5);
   useEffect(() => {
     if (!product) return;
 
@@ -60,6 +63,11 @@ const ProductDetail: React.FC = () => {
     return () => clearInterval(timer);
   }, [product]);
 
+  const editPayload = {
+    review: editingText,
+    rating: editingRating,
+  };
+
   // 더보기 버튼 클릭 시 댓글 수를 증가시키는 함수
   const handleShowMore = () => {
     setVisibleCount((prevCount) => prevCount + 10);
@@ -80,20 +88,45 @@ const ProductDetail: React.FC = () => {
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (product) {
-      addComment(product.id, { review: newComment, rating: newCommentStar });
+      addComment(productId, { review: newComment, rating: newCommentStar });
       setNewComment('');
     }
+  };
+  const handleEditComment = (
+    commentId: number,
+    text: string,
+    rating: number
+  ) => {
+    setEditingId(commentId);
+    setEditingText(text);
+    setEditingRating(rating);
+  };
+
+  const handleUpdateComment = async (commentId: number) => {
+    editComment(commentId, editPayload);
+    setEditingId(null);
+    setEditingText('');
+    setEditingRating(5);
+  };
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditingText('');
+    setEditingRating(5);
+  };
+
+  const handleDeleteComment = (commentId: number) => {
+    deleteComment(commentId);
   };
   if (!product) {
     return <p>상품 정보를 불러올 수 없습니다.</p>;
   }
 
   //할인까지 남은 수량
-  const least = product.minamount - product.now;
+  const least = product.minamount - (product.initstock - product.currentStock);
 
   // 구매 비율 계산
   const purchasePercentage = Math.min(
-    (product.now / product.currentStock) * 100,
+    ((product.initstock - product.currentStock) / product.currentStock) * 100,
     100
   );
   return (
@@ -138,7 +171,8 @@ const ProductDetail: React.FC = () => {
                   <StockFill style={{ width: `${purchasePercentage}%` }} />
                 </StockBar>
                 <StockStatus>
-                  {product.now} / {product.currentStock} 구매됨
+                  {product.initstock - product.currentStock} /{' '}
+                  {product.initstock} 구매됨
                 </StockStatus>
               </StockWrapper>
               <ActionWrapper>
@@ -195,10 +229,69 @@ const ProductDetail: React.FC = () => {
               </CommentInputWrapper>
             </CommentForm>{' '}
             <div>
-              {product.reviews.slice(0, visibleCount).map((review, index) => (
+              {sample.reviews.slice(0, visibleCount).map((review, index) => (
                 <Comment key={index}>
-                  {review.review}
-                  <CommentStars>{'⭐'.repeat(review.rating)}</CommentStars>
+                  {editingId === index ? (
+                    <EditCommentForm>
+                      <EditInput
+                        value={editingText}
+                        onChange={(e) => setEditingText(e.target.value)}
+                      />
+                      <StarSelector
+                        value={editingRating}
+                        onChange={(e) =>
+                          setEditingRating(Number(e.target.value))
+                        }
+                      >
+                        {[1, 2, 3, 4, 5].map((num) => (
+                          <option key={num} value={num}>
+                            {'⭐'.repeat(num)}
+                          </option>
+                        ))}
+                      </StarSelector>
+                      <EditActions>
+                        <ActionButton
+                          onClick={() => handleUpdateComment(index)}
+                          color="primary"
+                        >
+                          저장
+                        </ActionButton>
+                        <ActionButton
+                          onClick={handleCancelEdit}
+                          color="secondary"
+                        >
+                          취소
+                        </ActionButton>
+                      </EditActions>
+                    </EditCommentForm>
+                  ) : (
+                    <>
+                      <CommentContent>
+                        <CommentText>{review.review}</CommentText>
+                        <CommentStars>
+                          {'⭐'.repeat(review.rating)}
+                        </CommentStars>
+                      </CommentContent>
+                      <CommentActions>
+                        <ActionButton
+                          onClick={() =>
+                            handleEditComment(
+                              index,
+                              review.review,
+                              review.rating
+                            )
+                          }
+                        >
+                          수정
+                        </ActionButton>
+                        <ActionButton
+                          onClick={() => handleDeleteComment(index)}
+                        >
+                          삭제
+                        </ActionButton>
+                      </CommentActions>
+                    </>
+                  )}
                 </Comment>
               ))}
 
@@ -516,7 +609,13 @@ const CommentSubmitButton = styled.button`
   border-radius: 4px;
   cursor: pointer;
 `;
-
+const CommentActions = styled.div`
+  margin-left: 10px;
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+`;
 const Comment = styled.div`
   margin-top: 10px;
   padding: 15px;
@@ -525,6 +624,38 @@ const Comment = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  &:hover ${CommentActions} {
+    opacity: 1;
+  }
+`;
+
+const CommentContent = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+`;
+
+const CommentText = styled.span`
+  flex: 1;
+`;
+
+const ActionButton = styled.button`
+  padding: 4px 8px;
+  font-size: 12px;
+  background: transparent;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    color: white;
+  }
 `;
 
 const CommentStars = styled.div`
@@ -551,5 +682,28 @@ const ViewMore = styled.button`
     color: white;
   }
 `;
+const EditCommentForm = styled.div`
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  align-items: center;
+`;
 
+const EditInput = styled.input`
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+
+  &:focus {
+    outline: none;
+    border-color: #2563eb;
+  }
+`;
+
+const EditActions = styled.div`
+  display: flex;
+  gap: 4px;
+`;
 export default ProductDetail;

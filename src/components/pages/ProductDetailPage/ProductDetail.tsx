@@ -148,19 +148,32 @@ const ProductDetail: React.FC = () => {
               <Title>{product.name}</Title>
 
               <PriceWrapper>
-                <OriginalPrice>{product.originalprice}원</OriginalPrice>
-                <DiscountWrapper>
-                  <DiscountedPrice>{product.discountprice}원</DiscountedPrice>
-                  <DiscountInfo>
-                    {product.minamount}개 부터 할인 적용
-                  </DiscountInfo>
-                </DiscountWrapper>
-                {least > 0 && (
-                  <RemainingCount>할인 적용까지 {least}개 남음</RemainingCount>
-                )}
+                <>
+                  {product.available ? (
+                    <>
+                      <OriginalPrice>{product.originalprice}원</OriginalPrice>
+                      <DiscountWrapper>
+                        <DiscountedPrice>
+                          {product.discountprice}원
+                        </DiscountedPrice>
+                        <DiscountInfo>
+                          {product.minamount}개 부터 할인 적용
+                        </DiscountInfo>
+                      </DiscountWrapper>
+                      {least > 0 && (
+                        <RemainingCount>
+                          할인 적용까지 {least}개 남음
+                        </RemainingCount>
+                      )}
+                    </>
+                  ) : (
+                    <UnavailablePrice>∞ (판매 종료)</UnavailablePrice>
+                  )}
+                </>
               </PriceWrapper>
-
-              <Description>{product.description}</Description>
+              {product.available && (
+                <Description>{product.description}</Description>
+              )}
               <DeadlineLabel>{remainingTime}</DeadlineLabel>
 
               <StockWrapper>
@@ -372,6 +385,11 @@ const PriceWrapper = styled.div`
   @media (min-width: 576px) and (max-width: 767px) {
     flex-direction: column;
   }
+`;
+
+const UnavailablePrice = styled.div`
+  font-size: 2.3rem;
+  color: gray;
 `;
 const DiscountWrapper = styled.div`
   display: flex;

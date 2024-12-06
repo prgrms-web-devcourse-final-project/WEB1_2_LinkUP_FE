@@ -77,8 +77,16 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
                   <StarRating rating={product.rating} />
                 </ProductStar>
                 <PriceWrapper>
-                  <OriginalPrice>{product.originalprice}원</OriginalPrice>
-                  <DiscountedPrice>{product.discountprice}원</DiscountedPrice>
+                  {product.available ? (
+                    <>
+                      <OriginalPrice>{product.originalprice}원</OriginalPrice>
+                      <DiscountedPrice>
+                        {product.discountprice}원
+                      </DiscountedPrice>
+                    </>
+                  ) : (
+                    <UnavailablePrice>∞ (판매 종료)</UnavailablePrice>
+                  )}
                 </PriceWrapper>
               </ProductWrapper>
             </StyledLink>
@@ -260,7 +268,15 @@ const DiscountedPrice = styled.div`
     bottom: 10px;
   }
 `;
-
+const UnavailablePrice = styled.div`
+  font-size: 20px;
+  color: gray;
+  @media (min-width: 576px) and (max-width: 767px) {
+    font-size: 12px;
+    position: absolute;
+    bottom: 10px;
+  }
+`;
 const LikeButton = styled.img.withConfig({
   shouldForwardProp: (prop) => prop !== 'likes',
 })<{ likes: boolean }>`

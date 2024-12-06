@@ -1,7 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import ChatRoom from '../../../common/ChatRoom'; // 채팅방 컴포넌트
-import { WebSocketService } from '../../../../utils/webSocket';
+import {
+  webSocketService,
+  WebSocketService,
+} from '../../../../utils/webSocket';
+import { FaTrashAlt } from 'react-icons/fa';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { deleteChatRoom } from '../api/chatApi';
 
 interface ChatRoomModalProps {
   chatRoomId: string;
@@ -9,6 +15,7 @@ interface ChatRoomModalProps {
   isOpen: boolean;
   onClose: () => void;
   webSocketService: WebSocketService;
+  isAdminPage: boolean; // 관리자 페이지 여부를 나타내는 프롭
 }
 
 const ChatRoomModal: React.FC<ChatRoomModalProps> = ({
@@ -16,7 +23,37 @@ const ChatRoomModal: React.FC<ChatRoomModalProps> = ({
   onClose,
   chatRoomId,
   chatRoomTitle,
+  isAdminPage = false,
 }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isChatAdminPage = isAdminPage || location.pathname === '/admin/chat';
+
+  // URL 상태 반영
+  useEffect(() => {
+    if (isOpen) {
+      navigate(`?roomId=${chatRoomId}`, { replace: true });
+    } else {
+      navigate(-1); // 원래 페이지로 돌아감
+    }
+  }, [isOpen, chatRoomId, navigate]);
+
+  const handleDelete = async () => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const roomId = urlParams.get('roomId');
+      if (roomId) {
+        await deleteChatRoom(parseInt(roomId)); // 채팅방 삭제 API 호출
+        alert('채팅방이 성공적으로 삭제되었습니다.');
+        onClose(); // 모달 닫기
+      }
+    } catch (error) {
+      console.error('채팅방 삭제 실패:', error);
+      alert('채팅방을 삭제할 수 없습니다.');
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -24,10 +61,23 @@ const ChatRoomModal: React.FC<ChatRoomModalProps> = ({
       <ModalContainer>
         <ModalHeader>
           <ModalTitle>{chatRoomTitle}</ModalTitle>
-          <ModalCloseButton onClick={onClose}>&times;</ModalCloseButton>
+          <HeaderButtons>
+            {/* 삭제 버튼: 관리자 채팅방 관리 페이지에서만 보이도록 조건부 렌더링 */}
+            {isChatAdminPage && (
+              <DeleteButton onClick={handleDelete}>
+                <FaTrashAlt />
+              </DeleteButton>
+            )}
+            <CloseButton onClick={onClose}>&times;</CloseButton>
+          </HeaderButtons>
         </ModalHeader>
         <ModalContent>
-          <ChatRoom chatRoomId={chatRoomId} />
+          <ChatRoom
+            chatRoomId={parseInt(chatRoomId, 10)}
+            chatMembers={[]}
+            webSocketService={webSocketService}
+            isAdmin={isAdminPage}
+          />
         </ModalContent>
       </ModalContainer>
     </ModalOverlay>
@@ -73,14 +123,37 @@ const ModalTitle = styled.h2`
   font-size: 18px;
   font-weight: bold;
   color: #333;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
-const ModalCloseButton = styled.button`
+const HeaderButtons = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const DeleteButton = styled.button`
+  background: none;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  color: #666;
+
+  &:hover {
+    color: #333;
+  }
+`;
+
+const CloseButton = styled.button`
   background: none;
   border: none;
   font-size: 20px;
   cursor: pointer;
   color: #666;
+
   &:hover {
     color: #333;
   }

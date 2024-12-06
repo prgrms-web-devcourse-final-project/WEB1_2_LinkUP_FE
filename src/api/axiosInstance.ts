@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, // API URL
+  baseURL: 'http://15.164.5.135:8080', // API URL
   timeout: 5000, // 요청 제한 시간 (ms)
   headers: {
     'Content-Type': 'application/json', // JSON 형식 사용

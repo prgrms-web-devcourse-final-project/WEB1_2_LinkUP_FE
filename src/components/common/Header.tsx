@@ -55,7 +55,7 @@ const Header = () => {
               </StyledLink>
             </NavItem>
             <NavItem>
-              <StyledLink to="/community" onClick={toggleMobileMenu}>
+              <StyledLink to="/community/post" onClick={toggleMobileMenu}>
                 Community
               </StyledLink>
             </NavItem>

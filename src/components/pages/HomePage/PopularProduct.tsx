@@ -1,54 +1,64 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Product } from './model/productSchema';
 import StarRating from '../../common/StarRating';
-import { Link } from 'react-router-dom';
-// import { Link } from 'react-router-dom';
+import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
+import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
+import { Product } from './model/productSchema';
 
 interface PopularProductProps {
-  product: Product;
+  popular: Product | undefined;
+  category: string | undefined;
 }
+const PopularProduct: React.FC<PopularProductProps> = ({
+  popular,
+  category,
+}) => {
+  if (!popular) {
+    return <div>No popular product available</div>;
+  }
 
-const PopularProduct: React.FC<PopularProductProps> = ({ product }) => {
+  const { data: product, isLoading, isError } = useProductQuery(popular.id);
+
+  if (!product) {
+    return <div>Product data is not available</div>;
+  }
   return (
-    <StyledLink to={`/products/${product.id}`}>
-      <BannerContainer>
-        <ImageWrapper>
-          <ProductImage src={product.url} alt={product.name} />
-        </ImageWrapper>
-        <ProductInfoSection>
-          <Star>
-            <StarRating rating={product.rating} />
-          </Star>
-          <ProductHeader>
-            <TitleArea>
-              <ProductName>{product.name}</ProductName>
-
-              <ProductCategory>{product.category}</ProductCategory>
-            </TitleArea>
-            <ProductDescription> 상품설명- 추후 추가 예정</ProductDescription>
-            {/* {product.description} */}
-          </ProductHeader>
-        </ProductInfoSection>
-      </BannerContainer>
-    </StyledLink>
+    <>
+      <QueryHandler isLoading={isLoading} isError={isError}>
+        <BannerWrapper>
+          <BannerContainer>
+            <ImageWrapper>
+              <ProductImage
+                src={product.url || DEFAULT_IMG}
+                alt={product.name}
+                onError={(e) => {
+                  e.currentTarget.src = DEFAULT_IMG;
+                }}
+              />
+            </ImageWrapper>
+            <ProductInfoSection>
+              <Star>
+                <StarRating rating={product.rating} />
+              </Star>
+              <ProductHeader>
+                <TitleArea>
+                  <ProductName>{product.name}</ProductName>
+                  <ProductCategory>{category}</ProductCategory>
+                </TitleArea>
+                <ProductDescription>{product.description}</ProductDescription>
+              </ProductHeader>
+            </ProductInfoSection>
+          </BannerContainer>
+        </BannerWrapper>
+      </QueryHandler>
+    </>
   );
 };
 
-const StyledLink = styled(Link)`
+const BannerWrapper = styled.div`
   width: 80%;
   margin: 0 auto;
   display: block;
-  text-decoration: none;
-  color: inherit;
-
-  &:link,
-  &:visited,
-  &:hover,
-  &:active {
-    color: inherit;
-    text-decoration: none;
-  }
 `;
 
 const BannerContainer = styled.div`

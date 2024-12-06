@@ -36,7 +36,9 @@ const Container = styled.div`
   gap: 8px;
 `;
 
-const Button = styled.button<{ active: boolean }>`
+const Button = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'active',
+})<{ active: boolean }>`
   padding: 8px 16px;
   font-size: 1rem;
   font-weight: 500;

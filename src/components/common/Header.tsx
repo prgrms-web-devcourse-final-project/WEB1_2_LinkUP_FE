@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import cart from '../../assets/icons/icon.png';
+// import cart from '../../assets/icons/icon.png';
 import logo from '../../assets/icons/goodbuyus-logo.svg';
 import menu from '../../assets/icons/menu.svg';
 const Header = () => {
@@ -9,25 +9,18 @@ const Header = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isUser, setIsUser] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isAdminDropdownOpen, setIsAdminDropdownOpen] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('jwt');
-    setIsLoggedIn(!!token);
+    const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('role');
 
-    // 관리자 여부 확인 (예: localStorage에서 'role'의 ADMIN 여부 확인)
-    const adminStatus = localStorage.getItem('role') === 'ROLE_ADMIN';
-    const userStatus = localStorage.getItem('role') === 'ROLE_USER';
-    setIsAdmin(adminStatus);
-    setIsUser(userStatus);
+    setIsLoggedIn(!!token);
+    setIsAdmin(userRole === 'ROLE_ADMIN');
+    setIsUser(userRole === 'ROLE_USER');
   }, []);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const toggleAdminDropdown = () => {
-    setIsAdminDropdownOpen((prev) => !prev);
   };
 
   const handleCommunityClick = (
@@ -77,40 +70,26 @@ const Header = () => {
                 Community
               </StyledLink>
             </NavItem>
-            {isAdmin ? (
-              <NavItem>
-                <StyledLink
-                  to="#"
-                  onMouseEnter={toggleAdminDropdown}
-                  onMouseLeave={toggleAdminDropdown}
-                >
-                  Admin Page
-                </StyledLink>
-                {isAdminDropdownOpen && (
-                  <AdminMenu
-                    onMouseEnter={toggleAdminDropdown}
-                    onMouseLeave={toggleAdminDropdown}
-                  >
-                    <AdminDropdown>
-                      <DropdownItem>
-                        <StyledLink to="/admin/post">게시물 관리</StyledLink>
-                      </DropdownItem>
-                      <DropdownItem>
-                        <StyledLink to="/admin/chatlist">
-                          채팅방 관리
-                        </StyledLink>
-                      </DropdownItem>
-                    </AdminDropdown>
-                  </AdminMenu>
-                )}
-              </NavItem>
-            ) : (
-              <NavItem>
-                <StyledLink to="/mypage/setting" onClick={toggleMobileMenu}>
-                  My Page
-                </StyledLink>
-              </NavItem>
-            )}
+            <NavItem>
+              <StyledLink
+                to={isAdmin ? '/adminpage' : '/mypage/setting'}
+                onClick={toggleMobileMenu}
+              >
+                {isAdmin ? 'Admin Page' : 'My Page'}
+              </StyledLink>
+              {isAdmin && (
+                <SubMenu>
+                  <SubMenuItem>
+                    <StyledLink to="/admin/post">Post Management</StyledLink>
+                  </SubMenuItem>
+                  <SubMenuItem>
+                    <StyledLink to="/admin/chatlist">
+                      Chat Management
+                    </StyledLink>
+                  </SubMenuItem>
+                </SubMenu>
+              )}
+            </NavItem>
             {!isLoggedIn ? (
               <Login>
                 <Link to="/signin" onClick={toggleMobileMenu}>
@@ -119,18 +98,22 @@ const Header = () => {
               </Login>
             ) : (
               <>
-                <LogOut>
-                  <StyledLink to="/signout" onClick={toggleMobileMenu}>
-                    LogOut
-                  </StyledLink>
+                <LogOut
+                  onClick={() => {
+                    localStorage.removeItem('role');
+                    localStorage.removeItem('token');
+                    setIsLoggedIn(false);
+                  }}
+                >
+                  <a>LogOut</a>
                 </LogOut>
-                <LogOut>
+                {/* <LogOut>
                   <CartIcon>
                     <StyledLink to="/cart" onClick={toggleMobileMenu}>
                       <img src={cart} alt="장바구니 아이콘" />
                     </StyledLink>
                   </CartIcon>
-                </LogOut>
+                </LogOut> */}
               </>
             )}{' '}
           </NavList>
@@ -229,9 +212,50 @@ const NavList = styled.ul`
   }
 `;
 
+const SubMenu = styled.ul`
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  padding: 5px 0;
+  margin: 0;
+  z-index: 1000;
+
+  @media (min-width: 576px) and (max-width: 767px) {
+    position: static;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    background: transparent;
+  }
+`;
+
+const SubMenuItem = styled.li`
+  padding: 8px 12px;
+
+  a {
+    text-decoration: none;
+    color: black;
+    display: block;
+  }
+
+  &:hover {
+    background: #f4f4f4;
+  }
+
+  @media (min-width: 576px) and (max-width: 767px) {
+    padding: 10px;
+    text-align: center;
+  }
+`;
 const NavItem = styled.li`
   margin: 0;
-
+  position: relative;
   a {
     display: block;
     padding-bottom: 15px;
@@ -240,7 +264,9 @@ const NavItem = styled.li`
     font-weight: bold;
     border-radius: 5px;
   }
-
+  &:hover > ${SubMenu} {
+    display: block;
+  }
   &:hover {
     background-color: #f4f4f4;
     border-radius: 8px;
@@ -249,7 +275,12 @@ const NavItem = styled.li`
   @media (min-width: 576px) and (max-width: 767px) {
     width: 100%;
     text-align: center;
-
+    &:hover > ${SubMenu} {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
     a {
       padding: 10px;
       width: 100%;
@@ -293,13 +324,16 @@ const LogOut = styled.li`
   height: 30px;
   border-radius: 5px;
   overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  padding: 0px 10px;
 
   a {
     color: white;
     text-decoration: none;
     display: block;
     text-align: center;
-    margin-top: -1px;
+    margin-top: 1px;
     font-weight: bold;
   }
 
@@ -336,55 +370,16 @@ const StyledLink = styled(Link)`
   }
 `;
 
-const CartIcon = styled.div`
-  img {
-    width: 20px;
-    height: 20px;
-  }
+// const CartIcon = styled.div`
+//   img {
+//     width: 20px;
+//     height: 20px;
+//   }
 
-  @media (min-width: 576px) and (max-width: 767px) {
-    img {
-      width: 25px;
-      height: 25px;
-    }
-  }
-`;
-
-const AdminMenu = styled.li`
-  position: relative;
-  margin-left: 12.5px;
-  a {
-    font-weight: bold;
-    padding: 5px 5px;
-    border-radius: 5px;
-    text-decoration: none;
-    color: black;
-  }
-
-  &:hover {
-    background-color: #f4f4f4;
-  }
-`;
-
-const AdminDropdown = styled.ul`
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background-color: white;
-  list-style: none;
-  margin: 0;
-  padding: 10px 0;
-  border-radius: 5px;
-  transform: translateY(-10%); /* 추가로 위치 조정 */
-  z-index: 10; /* 다른 요소 위로 표시 */
-`;
-
-const DropdownItem = styled.li`
-  font-size: 0.9rem;
-
-  a {
-    text-decoration: none;
-    color: black;
-    display: block;
-  }
-`;
+//   @media (min-width: 576px) and (max-width: 767px) {
+//     img {
+//       width: 25px;
+//       height: 25px;
+//     }
+//   }
+// `;

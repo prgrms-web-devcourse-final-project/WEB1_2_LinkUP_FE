@@ -20,7 +20,7 @@ const Sidemenu = () => {
       <Line />
       <Menu>
         <MenuItem
-          isActive={isActive('/mypage/setting')}
+          $isActive={isActive('/mypage/setting')}
           onClick={() => navigate('/mypage/setting')}
         >
           <img
@@ -32,7 +32,7 @@ const Sidemenu = () => {
           설정
         </MenuItem>
         <MenuItem
-          isActive={isActive('/mypage/orderlist')}
+          $isActive={isActive('/mypage/orderlist')}
           onClick={() => navigate('/mypage/orderlist')}
         >
           <img
@@ -46,7 +46,7 @@ const Sidemenu = () => {
           주문 내역
         </MenuItem>
         <MenuItem
-          isActive={isActive('/mypage/wishlist')}
+          $isActive={isActive('/mypage/wishlist')}
           onClick={() => navigate('/mypage/wishlist')}
         >
           <img
@@ -60,7 +60,7 @@ const Sidemenu = () => {
           찜한 상품
         </MenuItem>
         <MenuItem
-          isActive={isActive('/mypage/location')}
+          $isActive={isActive('/mypage/location')}
           onClick={() => navigate('/mypage/location')}
         >
           <img
@@ -74,7 +74,7 @@ const Sidemenu = () => {
           동네인증
         </MenuItem>
         <MenuItem
-          isActive={isActive('/mypage/refund')}
+          $isActive={isActive('/mypage/refund')}
           onClick={() => navigate('/mypage/refund')}
         >
           <img
@@ -86,7 +86,7 @@ const Sidemenu = () => {
           환불계좌 관리
         </MenuItem>
         <MenuItem
-          isActive={isActive('/mypage/notification')}
+          $isActive={isActive('/mypage/notification')}
           onClick={() => navigate('/mypage/notification')}
         >
           <img
@@ -100,7 +100,7 @@ const Sidemenu = () => {
           알림내역
         </MenuItem>
         <MenuItem
-          isActive={isActive('/mypage/myposts')}
+          $isActive={isActive('/mypage/myposts')}
           onClick={() => navigate('/mypage/myposts')}
         >
           <img
@@ -112,7 +112,7 @@ const Sidemenu = () => {
           나의 게시글
         </MenuItem>
         <MenuItem
-          isActive={isActive('/mypage/chatlist')}
+          $isActive={isActive('/mypage/chatlist')}
           onClick={() => navigate('/mypage/chatlist')}
         >
           <img
@@ -179,22 +179,24 @@ const Menu = styled.div`
   padding: 10px 20px;
 `;
 
-const MenuItem = styled.div<{ isActive?: boolean }>`
+const MenuItem = styled.div<{ $isActive?: boolean }>`
   display: flex;
   align-items: center;
   font-size: 14px;
   font-weight: 500;
-  color: ${({ isActive }) => (isActive ? '#fff' : '#333')};
+  color: ${({ $isActive: isActive }) => (isActive ? '#fff' : '#333')};
   cursor: pointer;
   height: 30px;
   gap: 10px;
-  background-color: ${({ isActive }) => (isActive ? '#000' : 'transparent')};
+  background-color: ${({ $isActive: isActive }) =>
+    isActive ? '#000' : 'transparent'};
   border-radius: 5px;
   padding: 5px 10px;
 
   &:hover {
-    background-color: ${({ isActive }) => (isActive ? '#000' : '#f1f1f1')};
-    color: ${({ isActive }) => (isActive ? '#fff' : '#000')};
+    background-color: ${({ $isActive: isActive }) =>
+      isActive ? '#000' : '#f1f1f1'};
+    color: ${({ $isActive: isActive }) => (isActive ? '#fff' : '#000')};
   }
 `;
 

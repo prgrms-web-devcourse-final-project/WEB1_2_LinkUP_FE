@@ -1,47 +1,48 @@
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
+// import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
+import { products } from '../../../mocks/products';
 
-const PaymentSuccessPage = () => {
+const PaymentFailPage = () => {
   const { id } = useParams();
   if (!id) {
     return <p>상품 번호가 유실되었습니다.</p>;
   }
   const productId = Number(id);
-  const { data: product, isLoading, isError } = useProductQuery(productId);
-
+  // const { data: product, isLoading, isError } = useProductQuery(productId);
+  const product = products.filter((p) => p.id === productId)[0];
+  console.log(product);
   if (!product) {
     return <p>해당 상품을 찾을 수 없습니다.</p>;
   }
+
   return (
     <>
-      <QueryHandler isLoading={isLoading} isError={isError}>
-        <Container>
-          <SuccessSection>
-            <Title>결제 완료</Title>
-            <Subtitle>주문해주셔서 감사합니다!</Subtitle>
+      {/* <QueryHandler isLoading={isLoading} isError={isError}> */}
+      <Container>
+        <FailureSection>
+          <Title>결제 실패</Title>
+          <Subtitle>죄송합니다. 결제에 실패하였습니다.</Subtitle>
 
-            <OrderSummary>
-              <SummaryRow>
-                <Label>상품명</Label>
-                <Value>{product?.name}</Value>
-              </SummaryRow>
-              <SummaryRow>
-                <Label>결제 금액</Label>
-                <Value>{product?.discountprice.toLocaleString()}</Value>
-              </SummaryRow>
-            </OrderSummary>
-          </SuccessSection>
+          <OrderSummary>
+            <SummaryRow>
+              <Label>상품명</Label>
+              <Value>{product?.name}</Value>
+            </SummaryRow>
+            <SummaryRow>
+              <Label>결제 금액</Label>
+              <Value>{product?.discountprice} 원</Value>
+            </SummaryRow>
+          </OrderSummary>
+        </FailureSection>
 
-          <ButtonGroup>
-            <OrderDetailButton to={`/orders/${product?.id}`}>
-              주문 내역 보기
-            </OrderDetailButton>
-            <BackButton to="/">메인으로 돌아가기</BackButton>
-          </ButtonGroup>
-        </Container>
-      </QueryHandler>
+        <ButtonGroup>
+          <RetryButton to={`/products/${productId}`}>다시 시도하기</RetryButton>
+          <BackButton to="/">메인으로 돌아가기</BackButton>
+        </ButtonGroup>
+      </Container>
+      {/* </QueryHandler> */}
     </>
   );
 };
@@ -57,7 +58,7 @@ const Container = styled.div`
   align-items: center;
 `;
 
-const SuccessSection = styled.div`
+const FailureSection = styled.div`
   width: 100%;
   background-color: white;
   border-radius: 12px;
@@ -127,7 +128,7 @@ const BaseButton = styled(Link)`
   transition: all 0.2s;
 `;
 
-const OrderDetailButton = styled(BaseButton)`
+const RetryButton = styled(BaseButton)`
   background-color: #2563eb;
   border: none;
   color: white;
@@ -147,4 +148,4 @@ const BackButton = styled(BaseButton)`
   }
 `;
 
-export default PaymentSuccessPage;
+export default PaymentFailPage;

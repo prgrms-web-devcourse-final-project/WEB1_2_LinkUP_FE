@@ -6,6 +6,7 @@ import StarRating from '../../common/StarRating';
 import Heart from '../../../assets/icons/heart.png';
 import FilledHeart from '../../../assets/icons/filled-heart.png';
 import { Product } from '../HomePage/model/productSchema';
+import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
 
 type ProductComponentProps = {
   input: string;
@@ -25,8 +26,8 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
   const startIndex = (currentPage - 1) * PRODUCT_PER_PAGE;
   const filteredProducts =
     selectedText === '마감 상품'
-      ? products.filter((product) => new Date(product.deadline) < new Date())
-      : products.filter((product) => new Date(product.deadline) > new Date());
+      ? products.filter((p) => p.available === false)
+      : products.filter((p) => p.available === true);
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCT_PER_PAGE);
 
@@ -38,7 +39,6 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
     startIndex,
     startIndex + PRODUCT_PER_PAGE
   );
-
   return (
     <Recommend>
       <RecommendTitle>
@@ -63,7 +63,13 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
         {currentProducts.map((product) => (
           <Card key={product.id} selected={selectedText === '판매 상품'}>
             <StyledLink to={`/products/${product.id}`}>
-              <ProductImg src={product.url} alt={product.name} />
+              <ProductImg
+                src={product.url || DEFAULT_IMG}
+                alt={product.name}
+                onError={(e) => {
+                  e.currentTarget.src = DEFAULT_IMG;
+                }}
+              />
               <ProductWrapper>
                 <ProductName>{product.name}</ProductName>
                 <ProductStar>
@@ -71,12 +77,16 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
                   <StarRating rating={product.rating} />
                 </ProductStar>
                 <PriceWrapper>
-                  <OriginalPrice>
-                    ${product.originalPrice.toFixed(2)}
-                  </OriginalPrice>
-                  <DiscountedPrice>
-                    ${product.discountPrice.toFixed(2)}
-                  </DiscountedPrice>
+                  {product.available ? (
+                    <>
+                      <OriginalPrice>{product.originalprice}원</OriginalPrice>
+                      <DiscountedPrice>
+                        {product.discountprice}원
+                      </DiscountedPrice>
+                    </>
+                  ) : (
+                    <UnavailablePrice>∞ (판매 종료)</UnavailablePrice>
+                  )}
                 </PriceWrapper>
               </ProductWrapper>
             </StyledLink>
@@ -146,7 +156,7 @@ const Card = styled.div.withConfig({
   padding: 15px;
   margin: 10px;
   width: 200px;
-  background-color: ${({ selected }) => (selected ? 'white' : '#f0f0f0')};
+  background-color: ${({ selected }) => (selected ? 'white' : '#474545')};
   border-radius: 8px;
   box-shadow: ${({ selected }) =>
     selected ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none'};
@@ -160,7 +170,7 @@ const Card = styled.div.withConfig({
     top: 10px;
     left: 50%;
     transform: translateX(-50%);
-    color: #fff;
+    color: #474545;
     font-size: 14px;
     font-weight: bold;
     padding: 5px 10px;
@@ -258,7 +268,15 @@ const DiscountedPrice = styled.div`
     bottom: 10px;
   }
 `;
-
+const UnavailablePrice = styled.div`
+  font-size: 20px;
+  color: gray;
+  @media (min-width: 576px) and (max-width: 767px) {
+    font-size: 12px;
+    position: absolute;
+    bottom: 10px;
+  }
+`;
 const LikeButton = styled.img.withConfig({
   shouldForwardProp: (prop) => prop !== 'likes',
 })<{ likes: boolean }>`
@@ -284,7 +302,9 @@ const LikeButton = styled.img.withConfig({
   }
 `;
 const PagenationWrapper = styled.div`
-  margin-top: 20px;
-  margin-left: 46%;
+  margin-top: 100px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
 `;
 export default ProductComponent;

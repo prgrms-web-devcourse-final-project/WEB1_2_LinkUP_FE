@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { orderHistoryData } from '../mockData';
+import { getOrderList, OrderType } from '../../../../api/mypageApi';
 
 const OrderHistory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [orderList, setOrderList] = useState<OrderType[]>([]);
 
   const handleCancelClick = () => {
     setIsModalOpen(true);
@@ -18,19 +19,47 @@ const OrderHistory = () => {
     setIsModalOpen(false);
   };
 
+  const getStatusLabel = (status: string): string => {
+    switch (status) {
+      case 'PENDING':
+        return '결제 대기 중';
+      case 'AUTH_COMPLETED':
+        return '결제 요청 인증 성공';
+      case 'DONE':
+        return '결제 완료';
+      case 'FAILED':
+        return '결제 실패';
+      case 'CANCELD':
+        return '결제 취소';
+      case 'PARTIAL_CANCELED':
+        return '부분 취소';
+      default:
+        return '알 수 없는 상태';
+    }
+  };
+
+  useEffect(() => {
+    const fetchOrderList = async () => {
+      const response = await getOrderList();
+
+      setOrderList(response);
+    };
+    fetchOrderList();
+  }, []);
+
   return (
     <Container>
       <OrderList>
-        {orderHistoryData.map((order) => (
-          <OrderItem key={order.id}>
+        {orderList.map((order, index) => (
+          <OrderItem key={index}>
             <OrderWrapper>
               <ImageContainer>
                 <ImagePlaceholder />
               </ImageContainer>
               <OrderDetails>
-                <ProductName>{order.name}</ProductName>
+                <ProductName>{order.productName}</ProductName>
                 <ProductInfo>Quantity: {order.quantity}</ProductInfo>
-                <StatusBadge status={order.status}>{order.status}</StatusBadge>
+                <StatusBadge>{getStatusLabel(order.paymentStatus)}</StatusBadge>
               </OrderDetails>
             </OrderWrapper>
             <Price>{order.price}</Price>
@@ -39,7 +68,7 @@ const OrderHistory = () => {
               <CancelButton onClick={handleCancelClick}>
                 주문 취소/환불
               </CancelButton>
-              {order.status === '배송 완료' && (
+              {order.paymentStatus === 'DONE' && (
                 <ReviewLink>
                   <ReviewIcon src="/images/qricon.png" alt="review icon" />
                   <span>리뷰 작성하기</span>
@@ -118,18 +147,11 @@ const ProductInfo = styled.div`
   margin-top: 4px;
 `;
 
-const StatusBadge = styled.div<{ status: string }>`
+const StatusBadge = styled.div`
   margin-top: 10px;
   font-size: 12px;
   font-weight: bold;
-  color: ${(props) =>
-    props.status === '배송 완료'
-      ? '#28a745'
-      : props.status === '배송 준비 중'
-        ? '#ffc107'
-        : props.status === '주문 취소'
-          ? '#dc3545'
-          : '#007bff'};
+  color: #000;
 `;
 
 const Price = styled.div`

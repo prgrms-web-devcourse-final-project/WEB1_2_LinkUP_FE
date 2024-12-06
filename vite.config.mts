@@ -12,10 +12,15 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       proxy: {
+        '/goodbuyUs': {
+          target: env.VITE_API_URL,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/goodbuyUs/, '/goodbuyUs'),
+        },
         '/api': {
-          target: 'http://15.164.5.135:8080', // 백엔드 주소
-          changeOrigin: true, // CORS 우회
-          rewrite: (path) => path.replace(/^\/api/, '/api'), // 이 부분은 경로를 그대로 두어야 함
+          target: env.VITE_API_URL,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, '/api'),
         },
       },
     },

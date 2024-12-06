@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import StarRating from '../../common/StarRating';
-
+import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
 import { Product } from './model/productSchema';
 import {
   Card,
@@ -24,15 +24,18 @@ import {
 
 interface CategoryProductsProps {
   categories: string[];
-  products: Product[];
+  products: Product[] | undefined;
 }
 
 const CategoryProduct: React.FC<CategoryProductsProps> = ({
   categories,
   products,
 }) => {
+  if (!products) {
+    return <div>No products available</div>;
+  }
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>('생활용품');
+  const [selectedCategory, setSelectedCategory] = useState<string>('LIFESTYLE');
 
   const handleToggle = () => setIsExpanded(!isExpanded);
   const handleCategoryClick = (category: string) => {
@@ -79,7 +82,13 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
         {displayedProducts.map((product) => (
           <Card key={product.id}>
             <StyledLink to={`/products/${product.id}`}>
-              <ProductImg src={product.url} alt={product.name} />
+              <ProductImg
+                src={product.url || DEFAULT_IMG}
+                alt={product.name}
+                onError={(e) => {
+                  e.currentTarget.src = DEFAULT_IMG;
+                }}
+              />
               <ProductWrapper>
                 <ProductName>{product.name}</ProductName>
                 <ProductStar>
@@ -87,12 +96,8 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
                   <StarRating rating={product.rating} />
                 </ProductStar>
                 <PriceWrapper>
-                  <OriginalPrice>
-                    ${product.originalPrice.toFixed(2)}
-                  </OriginalPrice>
-                  <DiscountedPrice>
-                    ${product.discountPrice.toFixed(2)}
-                  </DiscountedPrice>
+                  <OriginalPrice>{product.originalprice}원</OriginalPrice>
+                  <DiscountedPrice>{product.discountprice}원</DiscountedPrice>
                 </PriceWrapper>
               </ProductWrapper>
             </StyledLink>

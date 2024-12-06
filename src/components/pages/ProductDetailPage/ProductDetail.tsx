@@ -62,9 +62,7 @@ const ProductDetail: React.FC = () => {
 
   const handleSubmit = async () => {
     const res = await submitOrder(productId, quantity);
-    navigate(
-      `/products/payment/${productId}?data=${encodeURIComponent(JSON.stringify(res))}`
-    );
+    navigate(`/products/payment/${productId}`, { state: res });
   };
 
   if (!product) {

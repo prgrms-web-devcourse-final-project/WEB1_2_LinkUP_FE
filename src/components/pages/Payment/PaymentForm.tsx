@@ -7,9 +7,7 @@ import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 const PaymentForm = () => {
   // URL 쿼리 스트링을 통한 데이터 수신
   const location = useLocation();
-  const query = new URLSearchParams(location.search);
-  const data = query.get('data') || null; // null일 경우 빈 문자열 반환
-  const productData = data ? JSON.parse(decodeURIComponent(data)) : null;
+  const productData = location.state;
 
   const { id } = useParams();
   const productId = useMemo(() => {

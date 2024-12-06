@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Sidemenu from './SideMenu';
 import GS from './GS';
 import styled from 'styled-components';
 import OrderHistory from './OrderListComponents/OrderHistory';
 import RefundHistory from './OrderListComponents/RefundHistory';
 import GroupPurchaseHistory from './OrderListComponents/GroupPurchaseHistory';
-import { getOrderList } from '../../../api/mypageApi';
 
 function OrderListPage() {
   const [activeTab, setActiveTab] = useState('order');
@@ -22,14 +21,6 @@ function OrderListPage() {
         return null;
     }
   };
-
-  useEffect(() => {
-    const fetchOrderList = async () => {
-      const response = await getOrderList();
-      console.log(response);
-    };
-    fetchOrderList();
-  }, []);
 
   return (
     <GS.Wrapper>

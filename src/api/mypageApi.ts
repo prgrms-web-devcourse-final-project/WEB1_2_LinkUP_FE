@@ -1,5 +1,15 @@
 import axiosInstance from './axiosInstance';
 
+export type OrderType = {
+  delivery: null | string;
+  orderDate: string;
+  paymentStatus: string;
+  payment_key: null | string;
+  price: number;
+  productName: string;
+  quantity: number;
+};
+
 export const postPasswordVerify = async (body: { currentPassword: string }) => {
   const response = await axiosInstance.post(`/mypage/verfiy`, body);
 

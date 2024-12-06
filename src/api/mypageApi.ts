@@ -17,3 +17,9 @@ export const postLocationChange = async (body: { newAddress: string }) => {
 
   return response.data;
 };
+
+export const getOrderList = async () => {
+  const response = await axiosInstance.get(`/mypage/orders`);
+
+  return response.data;
+};

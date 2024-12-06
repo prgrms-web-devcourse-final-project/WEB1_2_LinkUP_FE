@@ -28,19 +28,19 @@ function OrderListPage() {
       <GS.Content>
         <TabsContainer>
           <Tab
-            isActive={activeTab === 'order'}
+            $isActive={activeTab === 'order'}
             onClick={() => setActiveTab('order')}
           >
             주문내역
           </Tab>
           <Tab
-            isActive={activeTab === 'refund'}
+            $isActive={activeTab === 'refund'}
             onClick={() => setActiveTab('refund')}
           >
             환불내역
           </Tab>
           <Tab
-            isActive={activeTab === 'group'}
+            $isActive={activeTab === 'group'}
             onClick={() => setActiveTab('group')}
           >
             공동구매 참여내역
@@ -55,12 +55,12 @@ const TabsContainer = styled.div`
   display: flex;
 `;
 
-const Tab = styled.div<{ isActive: boolean }>`
+const Tab = styled.div<{ $isActive: boolean }>`
   padding: 10px 20px;
   cursor: pointer;
   font-size: 16px;
-  font-weight: ${(props) => (props.isActive ? 'bold' : '500')};
-  color: ${(props) => (props.isActive ? '#000' : '#555')};
+  font-weight: ${(props) => (props.$isActive ? 'bold' : '500')};
+  color: ${(props) => (props.$isActive ? '#000' : '#555')};
   position: relative;
 
   &:after {
@@ -69,7 +69,7 @@ const Tab = styled.div<{ isActive: boolean }>`
     bottom: -1px;
     left: 0;
     right: 0;
-    height: ${(props) => (props.isActive ? '2px' : '0')};
+    height: ${(props) => (props.$isActive ? '2px' : '0')};
     background-color: #000;
     transition: height 0.3s ease;
   }

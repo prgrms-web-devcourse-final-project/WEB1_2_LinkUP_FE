@@ -33,6 +33,30 @@ const PaymentForm = () => {
   const [needed, setNeeded] = useState('');
   const [payment, setPayment] = useState('');
 
+  const validateForm = () => {
+    if (!userName.trim()) {
+      alert('수령인을 입력해주세요.');
+      return false;
+    }
+    if (!basicAddress.trim()) {
+      alert('기본 주소를 입력해주세요.');
+      return false;
+    }
+    if (!detailAddress.trim()) {
+      alert('상세 주소를 입력해주세요.');
+      return false;
+    }
+    if (!needed.trim()) {
+      alert('배송 시 요청사항을 입력해주세요.');
+      return false;
+    }
+    if (!payment) {
+      alert('결제 방법을 선택해주세요.');
+      return false;
+    }
+    return true;
+  };
+
   const payload = {
     productName: product.name,
     url: product.url,
@@ -52,6 +76,9 @@ const PaymentForm = () => {
     setPayment(e.target.value);
   };
   const onPaymentSubmit = async () => {
+    if (!validateForm()) {
+      return;
+    }
     try {
       const paymentResult = await handlePayment(productId, payload);
 

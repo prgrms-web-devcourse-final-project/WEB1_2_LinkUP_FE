@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
+import { postSignUpNickname } from '../../../api/loginApi';
 
 const SetNicknamePage = () => {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ const SetNicknamePage = () => {
 
   const validateNickname = (value: string) => {
     setIsValidLength(value.length >= 2 && value.length <= 15);
-    setIsValidFormat(/^[가-힣a-zA-Z0-9]+$/.test(value));
+    setIsValidFormat(/^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+$/.test(value));
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,9 +51,17 @@ const SetNicknamePage = () => {
           띄어쓰기 및 특수문자 사용 불가
         </NicknameCondition>
         <NextButton
-          onClick={() => {
+          onClick={async () => {
             if (isValidLength && isValidFormat) {
-              navigate('/setprofile');
+              const response = await postSignUpNickname({ nickname: nickname });
+
+              if (response.message === '닉네임 중복 확인 완료') {
+                localStorage.setItem('nickname', nickname);
+
+                navigate('/setprofile');
+              } else {
+                alert('닉네임이 중복입니다.');
+              }
             } else {
               alert('닉네임 조건을 만족시켜 주세요.');
             }

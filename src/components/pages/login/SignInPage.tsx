@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
-import { postSignIn } from '../../../api/loginApi';
+import { postSignIn, postSignInSNS } from '../../../api/loginApi';
 
 const SignInPage = () => {
   const navigate = useNavigate();
@@ -42,15 +42,25 @@ const SignInPage = () => {
         />
         <LoginButton
           onClick={async () => {
-            await postSignIn({
+            const response = await postSignIn({
               email: email,
               password: pw,
             });
+            if (response.status === 200) {
+              localStorage.setItem('role', response.data.roles);
+              navigate('/');
+            } else {
+              alert('틀렸습니다.');
+            }
           }}
         >
           Login
         </LoginButton>
-        <SNSButton>
+        <SNSButton
+          onClick={async () => {
+            await postSignInSNS();
+          }}
+        >
           <img
             src="/images/googlelogo.png"
             alt="Google Logo"

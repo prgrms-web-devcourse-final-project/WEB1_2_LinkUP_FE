@@ -13,8 +13,9 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         '/goodbuyUs': {
-          target: 'http://15.164.5.135:8080',
+          target: env.VITE_API_URL,
           changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/goodbuyUs/, '/goodbuyUs'),
         },
       },
     },

@@ -73,7 +73,7 @@ const ProductDetail: React.FC = () => {
   };
   const handleSubmit = () => {
     if (product) {
-      submitOrder(productId, quantity).then((res) => {
+      submitOrder(productId, { amount: quantity }).then((res) => {
         setData(res);
       });
     }

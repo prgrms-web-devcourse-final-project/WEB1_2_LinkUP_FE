@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import StarRating from '../../common/StarRating';
 import { submitOrder } from './api/submitApi';
@@ -27,9 +27,7 @@ const ProductDetail: React.FC = () => {
   const [newCommentStar, setNewCommentStar] = useState(5);
   const [remainingTime, setRemainingTime] = useState('');
   const [visibleCount, setVisibleCount] = useState(10);
-  const [data, setData] = useState({});
-
-  // 렌더링 조건 계산
+  const navigate = useNavigate();
   const isOutOfStock = product ? product.now >= product.currentStock : false;
   const isDeadlinePassed = remainingTime === '마감되었습니다.';
   const isButtonDisabled = isOutOfStock || isDeadlinePassed;
@@ -71,12 +69,11 @@ const ProductDetail: React.FC = () => {
     const value = parseInt(e.target.value);
     if (value > 0) setQuantity(value);
   };
-  const handleSubmit = () => {
-    if (product) {
-      submitOrder(productId, { amount: quantity }).then((res) => {
-        setData(res);
-      });
-    }
+  const handleSubmit = async () => {
+    const res = await submitOrder(productId, quantity);
+    navigate(
+      `/products/payment/${productId}?data=${encodeURIComponent(JSON.stringify(res))}`
+    );
   };
 
   //댓글 작성
@@ -90,6 +87,7 @@ const ProductDetail: React.FC = () => {
   if (!product) {
     return <p>상품 정보를 불러올 수 없습니다.</p>;
   }
+
   //할인까지 남은 수량
   const least = product.minamount - product.now;
 
@@ -98,7 +96,6 @@ const ProductDetail: React.FC = () => {
     (product.now / product.currentStock) * 100,
     100
   );
-  console.log(productId);
   return (
     <>
       <QueryHandler isLoading={isLoading} isError={isError}>
@@ -156,7 +153,6 @@ const ProductDetail: React.FC = () => {
                 </QuantityWrapper>
                 <ButtonWrapper>
                   <PurchaseButton
-                    to={`/products/payment/${productId}?data=${encodeURIComponent(JSON.stringify(data))}`}
                     disabled={isButtonDisabled}
                     onClick={handleSubmit}
                   >
@@ -439,7 +435,7 @@ const ButtonWrapper = styled.div`
   gap: 10px;
 `;
 
-const PurchaseButton = styled(Link)<{ disabled?: boolean }>`
+const PurchaseButton = styled.button<{ disabled?: boolean }>`
   flex: 2;
   padding: 15px;
   background-color: ${({ disabled }) => (disabled ? '#d1d5db' : '#2563eb')};

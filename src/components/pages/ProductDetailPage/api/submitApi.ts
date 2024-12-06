@@ -15,8 +15,8 @@ export const submitOrder = async (
 ): Promise<SubmitResponse> => {
   try {
     const URL = `/goodbuyUs/orders?postId=${postId}`;
-    const response = await axiosInstance.get(URL, {amount});
-    console.log(response);
+    const response = await axiosInstance.post(URL, { amount });
+    console.log(response.data);
     return response.data;
   } catch {
     throw new Error('주문에 실패하였습니다.');

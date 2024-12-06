@@ -1,9 +1,9 @@
 import axiosInstance from '../../../../api/axiosInstance';
 export interface PaymentForm {
-  productName: string;
   url: string;
-  price: number;
+  productName: string;
   quantity: number;
+  price: number;
   payMethod: string;
   deliveryRequestDTO: UserForm;
 }
@@ -22,11 +22,11 @@ export const handlePayment = async (
   payload: PaymentForm
 ) => {
   try {
-    const URL = `goodbuyUs/orders/${productId}/payment`;
+    const URL = `/api/v1/main-payments?postId=${productId}`;
     const response = await axiosInstance.post(URL, payload);
-    console.log(response);
-    return response.data;
-  } catch {
+    return response.data.checkoutPageUrl;
+  } catch (error) {
+    console.error(error);
     throw new Error('결제에 실패하였습니다.');
   }
 };

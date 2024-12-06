@@ -35,6 +35,7 @@ import PaymentParticipantPage from '../components/pages/community/PaymentPartici
 import PaymentCompletePage from '../components/pages/community/PaymentCompletePage';
 import PostManagementPage from '../components/pages/admin/PostManagementPage';
 import PostApprovalPage from '../components/pages/admin/PostApprovalPage';
+import PaymentFailPage from '../components/pages/Payment/PaymentFailPage';
 
 const router = createBrowserRouter(
   [
@@ -67,6 +68,10 @@ const router = createBrowserRouter(
         {
           path: '/products/payment-success/:id',
           element: <PaymentSuccessPage />,
+        },
+        {
+          path: '/products/payment-fail/:id',
+          element: <PaymentFailPage />,
         },
         {
           path: '/community',

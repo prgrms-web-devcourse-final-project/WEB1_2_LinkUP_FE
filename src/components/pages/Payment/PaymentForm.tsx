@@ -1,8 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { handlePayment } from './api/paymentApi';
-// import { products } from '../../../mocks/products';
 import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 
 const PaymentForm = () => {
@@ -28,12 +27,12 @@ const PaymentForm = () => {
     return <p>해당 상품을 찾을 수 없습니다.</p>;
   }
 
-  const navigate = useNavigate();
   const [userName, setName] = useState('');
   const [basicAddress, setBasicAddress] = useState('');
   const [detailAddress, setDetailAddress] = useState('');
   const [needed, setNeeded] = useState('');
   const [payment, setPayment] = useState('');
+
   const payload = {
     productName: product.name,
     url: product.url,
@@ -55,9 +54,8 @@ const PaymentForm = () => {
   const onPaymentSubmit = async () => {
     try {
       const paymentResult = await handlePayment(productId, payload);
-      if (paymentResult == 'success') {
-        navigate('/payment-success');
-      }
+
+      window.location.href = paymentResult;
     } catch (e) {
       alert(`결제에 실패하였습니다 ${e}`);
     }
@@ -144,7 +142,7 @@ const PaymentForm = () => {
                   <RadioInput
                     type="radio"
                     name="payment-method"
-                    value="card"
+                    value="카드"
                     onChange={handleRadio}
                   />
                   <RadioText>카드 결제</RadioText>

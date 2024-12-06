@@ -41,7 +41,7 @@ const ProductDetail: React.FC = () => {
       const deadline = new Date(product.deadline);
       const diff = deadline.getTime() - now.getTime();
 
-      if (diff <= 0) {
+      if (diff <= 0 || product.available == false) {
         setRemainingTime('마감되었습니다.');
         return;
       }

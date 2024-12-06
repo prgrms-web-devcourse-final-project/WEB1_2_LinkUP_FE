@@ -7,7 +7,6 @@ import { addComment, deleteComment, editComment } from './api/commentApi';
 import { addWishList } from './api/wishApi';
 import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
-import { products } from '../../../mocks/products';
 const ProductDetail: React.FC = () => {
   const { id } = useParams();
   const productId = useMemo(() => {
@@ -16,7 +15,6 @@ const ProductDetail: React.FC = () => {
     }
     return Number(id);
   }, [id]);
-  const sample = products.filter((p) => p.id === productId)[0];
 
   if (!productId) {
     return <p>잘못된 상품 ID입니다.</p>;
@@ -229,7 +227,7 @@ const ProductDetail: React.FC = () => {
               </CommentInputWrapper>
             </CommentForm>{' '}
             <div>
-              {sample.reviews.slice(0, visibleCount).map((review, index) => (
+              {product.reviews.slice(0, visibleCount).map((review, index) => (
                 <Comment key={index}>
                   {editingId === index ? (
                     <EditCommentForm>

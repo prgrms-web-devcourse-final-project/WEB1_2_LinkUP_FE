@@ -65,27 +65,21 @@ const Header = () => {
               >
                 {isAdmin ? 'Admin Page' : 'My Page'}
               </StyledLink>
+              {isAdmin && (
+                <SubMenu>
+                  <SubMenuItem>
+                    <StyledLink to="/adminpage/post-management">
+                      Post Management
+                    </StyledLink>
+                  </SubMenuItem>
+                  <SubMenuItem>
+                    <StyledLink to="/adminpage/chat-management">
+                      Chat Management
+                    </StyledLink>
+                  </SubMenuItem>
+                </SubMenu>
+              )}
             </NavItem>
-            {isAdmin && (
-              <>
-                <NavItem>
-                  <StyledLink
-                    to="/adminpage/post-management"
-                    onClick={toggleMobileMenu}
-                  >
-                    Post Management
-                  </StyledLink>
-                </NavItem>
-                <NavItem>
-                  <StyledLink
-                    to="/adminpage/chat-management"
-                    onClick={toggleMobileMenu}
-                  >
-                    Chat Management
-                  </StyledLink>
-                </NavItem>
-              </>
-            )}
             {!isLoggedIn ? (
               <Login>
                 <Link to="/signin" onClick={toggleMobileMenu}>
@@ -204,9 +198,50 @@ const NavList = styled.ul`
   }
 `;
 
+const SubMenu = styled.ul`
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  padding: 5px 0;
+  margin: 0;
+  z-index: 1000;
+
+  @media (min-width: 576px) and (max-width: 767px) {
+    position: static;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    background: transparent;
+  }
+`;
+
+const SubMenuItem = styled.li`
+  padding: 8px 12px;
+
+  a {
+    text-decoration: none;
+    color: black;
+    display: block;
+  }
+
+  &:hover {
+    background: #f4f4f4;
+  }
+
+  @media (min-width: 576px) and (max-width: 767px) {
+    padding: 10px;
+    text-align: center;
+  }
+`;
 const NavItem = styled.li`
   margin: 0;
-
+  position: relative;
   a {
     display: block;
     padding-bottom: 15px;
@@ -215,7 +250,9 @@ const NavItem = styled.li`
     font-weight: bold;
     border-radius: 5px;
   }
-
+  &:hover > ${SubMenu} {
+    display: block;
+  }
   &:hover {
     background-color: #f4f4f4;
     border-radius: 8px;
@@ -224,7 +261,12 @@ const NavItem = styled.li`
   @media (min-width: 576px) and (max-width: 767px) {
     width: 100%;
     text-align: center;
-
+    &:hover > ${SubMenu} {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
     a {
       padding: 10px;
       width: 100%;
@@ -274,7 +316,7 @@ const LogOut = styled.li`
     text-decoration: none;
     display: block;
     text-align: center;
-    margin-top: -1px;
+    margin-top: 1px;
     font-weight: bold;
   }
 

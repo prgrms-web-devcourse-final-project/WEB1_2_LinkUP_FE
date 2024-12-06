@@ -46,7 +46,7 @@ const HomePage: React.FC = () => {
 const StyledLink = styled(Link)`
   text-decoration: none;
   color: inherit;
-
+  width: 100%;
   &:link,
   &:visited,
   &:hover,

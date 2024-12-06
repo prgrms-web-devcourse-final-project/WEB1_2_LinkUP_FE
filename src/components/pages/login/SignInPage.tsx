@@ -62,9 +62,9 @@ const SignInPage = () => {
           }}
         >
           <img
-            src="/images/googlelogo.png"
-            alt="Google Logo"
-            style={{ width: '50px', height: '17px' }}
+            src="/images/naverlogo.png"
+            alt="Naver Logo"
+            style={{ width: '50px', height: '15px' }}
           />
           계정으로 로그인
         </SNSButton>

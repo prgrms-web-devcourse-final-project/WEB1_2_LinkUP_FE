@@ -6,15 +6,38 @@ import logo from '../../assets/icons/goodbuyus-logo.svg';
 import menu from '../../assets/icons/menu.svg';
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isUser, setIsUser] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAdminDropdownOpen, setIsAdminDropdownOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('jwt');
     setIsLoggedIn(!!token);
+
+    // 관리자 여부 확인 (예: localStorage에서 'role'의 ADMIN 여부 확인)
+    const adminStatus = localStorage.getItem('role') === 'ROLE_ADMIN';
+    const userStatus = localStorage.getItem('role') === 'ROLE_USER';
+    setIsAdmin(adminStatus);
+    setIsUser(userStatus);
   }, []);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const toggleAdminDropdown = () => {
+    setIsAdminDropdownOpen((prev) => !prev);
+  };
+
+  const handleCommunityClick = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+  ) => {
+    if (!isUser && !isAdmin) {
+      e.preventDefault();
+      alert('로그인 후 이용할 수 있는 페이지입니다.');
+      setIsMobileMenuOpen(!isMobileMenuOpen);
+    }
   };
 
   return (
@@ -50,15 +73,44 @@ const Header = () => {
               </StyledLink>
             </NavItem>
             <NavItem>
-              <StyledLink to="/community/post" onClick={toggleMobileMenu}>
+              <StyledLink to="/community/post" onClick={handleCommunityClick}>
                 Community
               </StyledLink>
             </NavItem>
-            <NavItem>
-              <StyledLink to="/mypage/setting" onClick={toggleMobileMenu}>
-                My Page
-              </StyledLink>
-            </NavItem>
+            {isAdmin ? (
+              <NavItem>
+                <StyledLink
+                  to="#"
+                  onMouseEnter={toggleAdminDropdown}
+                  onMouseLeave={toggleAdminDropdown}
+                >
+                  Admin Page
+                </StyledLink>
+                {isAdminDropdownOpen && (
+                  <AdminMenu
+                    onMouseEnter={toggleAdminDropdown}
+                    onMouseLeave={toggleAdminDropdown}
+                  >
+                    <AdminDropdown>
+                      <DropdownItem>
+                        <StyledLink to="/admin/post">게시물 관리</StyledLink>
+                      </DropdownItem>
+                      <DropdownItem>
+                        <StyledLink to="/admin/chatlist">
+                          채팅방 관리
+                        </StyledLink>
+                      </DropdownItem>
+                    </AdminDropdown>
+                  </AdminMenu>
+                )}
+              </NavItem>
+            ) : (
+              <NavItem>
+                <StyledLink to="/mypage/setting" onClick={toggleMobileMenu}>
+                  My Page
+                </StyledLink>
+              </NavItem>
+            )}
             {!isLoggedIn ? (
               <Login>
                 <Link to="/signin" onClick={toggleMobileMenu}>
@@ -295,5 +347,44 @@ const CartIcon = styled.div`
       width: 25px;
       height: 25px;
     }
+  }
+`;
+
+const AdminMenu = styled.li`
+  position: relative;
+  margin-left: 12.5px;
+  a {
+    font-weight: bold;
+    padding: 5px 5px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: black;
+  }
+
+  &:hover {
+    background-color: #f4f4f4;
+  }
+`;
+
+const AdminDropdown = styled.ul`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  list-style: none;
+  margin: 0;
+  padding: 10px 0;
+  border-radius: 5px;
+  transform: translateY(-10%); /* 추가로 위치 조정 */
+  z-index: 10; /* 다른 요소 위로 표시 */
+`;
+
+const DropdownItem = styled.li`
+  font-size: 0.9rem;
+
+  a {
+    text-decoration: none;
+    color: black;
+    display: block;
   }
 `;

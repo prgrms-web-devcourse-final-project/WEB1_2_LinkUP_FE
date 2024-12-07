@@ -1,55 +1,46 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { FaRegComment } from 'react-icons/fa';
-import {
-  fetchChatRoomDetails,
-  fetchChatMessages,
-} from '../pages/community/api/chatApi';
+import { fetchChatMessages } from '../pages/community/api/chatApi';
 import { webSocketService } from '../../utils/webSocket';
 
 interface Message {
   senderId: string;
   content: string;
   timestamp: string | null;
-  chatRoomId?: string;
-  type?: 'date';
-}
-
-interface Participant {
-  userId: string;
-  nickname: string;
+  type?: string;
 }
 
 interface ChatRoomProps {
-  chatRoomId: string;
+  chatRoomId: number;
+  chatMembers: string[];
+  webSocketService: typeof webSocketService;
+  isAdmin?: boolean; // 관리자 여부
 }
 
-const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId }) => {
+const ChatRoom: React.FC<ChatRoomProps> = ({
+  chatRoomId,
+  chatMembers,
+  webSocketService,
+  isAdmin = false,
+}) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [participants, setParticipants] = useState<Participant[]>([]);
   const [input, setInput] = useState('');
-  const currentUserId = 'user-00001'; // Mock 로그인 사용자 ID
   const chatBoxRef = useRef<HTMLDivElement>(null);
-  const [authorId, setAuthorId] = useState<string>('');
+  const currentUserId = 'user-00001'; // Mock 로그인 사용자 ID
 
   useEffect(() => {
-    // 채팅방 정보 및 초기 메시지 가져오기
-    const fetchRoomDetails = async () => {
+    // 채팅방 초기 메시지 및 채팅 메시지 가져오기
+    const fetchMessages = async () => {
       try {
-        const { participants, authorNickname } =
-          await fetchChatRoomDetails(chatRoomId);
-        setParticipants(participants);
-
-        const author = participants.find((p) => p.nickname === authorNickname);
-        if (author) setAuthorId(author.userId);
-
-        const participantNicknames = participants.map((p) => p.nickname);
+        const fetchedMessages = await fetchChatMessages(chatRoomId);
 
         // 입장 메시지 추가
         const joinMessage: Message = {
           senderId: 'system',
-          content: `'${[...participantNicknames].join(', ')}'님께서
-채팅방에 입장하셨습니다.`,
+          content: `${chatMembers
+            .map((member) => getNicknameDisplay(member))
+            .join(', ')}님이 입장하셨습니다.`,
           timestamp: null, // timestamp 표시하지 않음
         };
 
@@ -85,48 +76,46 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId }) => {
           timestamp: null,
         };
 
-        const fetchedMessages = await fetchChatMessages(chatRoomId);
         setMessages([joinMessage, groupChatNotice, ...fetchedMessages]);
       } catch (error) {
-        console.error('Failed to fetch chat room details or messages:', error);
+        console.error('Failed to fetch messages:', error);
       }
     };
 
-    fetchRoomDetails();
-  }, [chatRoomId]);
+    fetchMessages();
+  }, [chatRoomId, chatMembers]);
 
   const getNicknameDisplay = (senderId: string): string => {
     if (senderId === 'system') return '';
-    const participant = participants.find((p) => p.userId === senderId);
-    if (!participant) return senderId;
-
-    if (senderId === authorId) {
-      return senderId === currentUserId
-        ? '나(방장)'
-        : `${participant.nickname}(방장)`;
-    }
-    return senderId === currentUserId ? '나' : participant.nickname;
+    return senderId === currentUserId ? '나' : senderId;
   };
 
   useEffect(() => {
     // WebSocket 연결
     const handleIncomingMessage = (data: Message) => {
-      if (data.chatRoomId === chatRoomId) {
-        setMessages((prev) => [...prev, data]);
-      }
+      setMessages((prev) => [...prev, data]);
     };
 
     webSocketService.connect(
-      handleIncomingMessage,
-      () => console.log('WebSocket connected'),
+      () => {
+        webSocketService.subscribe(
+          `/sub/message/${chatRoomId}`,
+          (messageOutput) => {
+            const data = JSON.parse(messageOutput.body);
+            handleIncomingMessage(data);
+          }
+        );
+        console.log('WebSocket connected to room');
+      },
       () => console.log('WebSocket disconnected'),
-      (error) => console.error('WebSocket error:', error)
+      () => console.error('WebSocket connection error')
     );
 
     return () => {
+      webSocketService.unsubscribe(`/sub/message/${chatRoomId}`);
       webSocketService.close();
     };
-  }, [chatRoomId]);
+  }, [chatRoomId, webSocketService]);
 
   useEffect(() => {
     // 채팅 박스 스크롤 관리
@@ -139,16 +128,15 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId }) => {
     if (!input.trim()) return;
 
     const message: Message = {
-      senderId: currentUserId,
-      content: input.trim(),
-      chatRoomId,
+      senderId: isAdmin ? 'system' : currentUserId,
+      content: isAdmin ? `[관리자 메시지] ${input.trim()}` : input.trim(),
       timestamp: new Date().toISOString(),
     };
 
-    // WebSocket으로 메시지 전송
-    webSocketService.send(`/pub/message/${chatRoomId}`, message);
-
-    // 메시지 상태 업데이트
+    webSocketService.send(
+      `/pub/message/${chatRoomId}`,
+      JSON.stringify(message)
+    );
     setMessages((prev) => [...prev, message]);
     setInput('');
   };
@@ -214,10 +202,11 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId }) => {
               <MessageContent
                 isCurrentUser={msg.senderId === currentUserId}
                 isGroupNotice={isGroupNotice}
+                isSystemMessage={msg.senderId === 'system'}
               >
                 {msg.content}
               </MessageContent>
-              {msg.timestamp && (
+              {msg.timestamp && msg.senderId !== 'system' && (
                 <Timestamp>
                   {new Date(msg.timestamp).toLocaleTimeString()}
                 </Timestamp>
@@ -292,10 +281,15 @@ const SenderName = styled.div`
 const MessageContent = styled.div<{
   isCurrentUser: boolean;
   isGroupNotice?: boolean;
+  isSystemMessage?: boolean;
 }>`
   max-width: 70%;
-  background-color: ${({ isCurrentUser, isGroupNotice }) =>
-    isGroupNotice ? '#cecece' : isCurrentUser ? '#d9f9d9' : '#e9e9e9'};
+  background-color: ${({ isCurrentUser, isGroupNotice, isSystemMessage }) =>
+    isGroupNotice || isSystemMessage
+      ? '#cecece'
+      : isCurrentUser
+        ? '#d9f9d9'
+        : '#e9e9e9'};
   color: #333;
   padding: 10px;
   border-radius: 12px;

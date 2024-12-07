@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { mockCommunityPosts } from '../../mocks/communityPosts';
-// import { getPosts, Post } from '../pages/community/api/postApi'
+import { getPosts, Post } from '../pages/community/api/postApi';
 import WriteButton from './WriteButton';
 import SearchBar from './SearchBar';
 import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
-import { Post } from '../pages/community/api/postApi';
 
 interface PostListProps {
   posts: Post[];
@@ -20,36 +18,33 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
   hideWriteButton,
 }) => {
   const navigate = useNavigate();
-
-  // const [posts, setPosts] = useState<Post[]>([]); // 실제 게시글 데이터
-
+  const [posts, setPosts] = useState<Post[]>([]); // 실제 게시글 데이터
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState(''); // 입력된 검색어
   const [searchQuery, setSearchQuery] = useState(''); // 실제 검색 실행 시의 검색어
+  const [loading, setLoading] = useState(false); // 로딩 상태
 
-  // const [loading, setLoading] = useState(false); // 로딩 상태
+  // 게시글 데이터 로드
+  const loadPosts = async () => {
+    try {
+      setLoading(true);
+      const data = await getPosts(selectedCategory, searchQuery); // API 호출
+      setPosts(data);
+    } catch (error) {
+      console.error('게시물 조회 중 오류 발생:', error);
+      alert('게시물 조회 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // // 게시글 데이터 로드
-  // const loadPosts = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const data = await getPosts(selectedCategory, searchQuery); // API 호출
-  //     setPosts(data);
-  //   } catch (error) {
-  //     console.error('게시물 조회 중 오류 발생:', error);
-  //     alert('게시물 조회 중 오류가 발생했습니다. 다시 시도해주세요.');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  // 카테고리나 검색어 변경 시 데이터 로드
+  useEffect(() => {
+    loadPosts();
+  }, [selectedCategory, searchQuery]);
 
-  // // 카테고리나 검색어 변경 시 데이터 로드
-  // useEffect(() => {
-  //   loadPosts();
-  // }, [selectedCategory, searchQuery]);
-
-  // 선택된 카테고리에 따른 게시글 필터링
-  const categoryFilteredPosts = mockCommunityPosts
+  // 선택된 카테고리에 따른 게시글 필터링 (status 조건 추가)
+  const categoryFilteredPosts = posts
     .filter((post) => {
       if (selectedCategory === 'NOT_APPROVED') {
         return post.status === 'NOT_APPROVED' || post.status === 'REJECTED';
@@ -65,20 +60,10 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     ); // 최신순 정렬
 
-  // 검색 실행 시 필터링된 게시글
-  const filteredPosts = categoryFilteredPosts
-    .filter((post) =>
-      post.title.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    ); // 최신순 정렬
-
   // 페이지네이션 계산
-  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
+  const totalPages = Math.ceil(categoryFilteredPosts.length / POSTS_PER_PAGE);
   const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
-  const currentPosts = filteredPosts.slice(
+  const currentPosts = categoryFilteredPosts.slice(
     startIndex,
     startIndex + POSTS_PER_PAGE
   );
@@ -98,15 +83,17 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
 
   // 글 작성 버튼 클릭 핸들러
   const handleWriteButtonClick = () => {
-    navigate('/community/create', { state: { selectedCategory } }); // 카테고리 정보 전달
+    navigate('/community/post/create', { state: { selectedCategory } }); // 카테고리 정보 전달
   };
 
   // 포스트 클릭 핸들러
-  const handlePostClick = (postId: string) => {
+  const handlePostClick = (communityPostId: number) => {
     if (selectedCategory === 'NOT_APPROVED') {
-      navigate(`/admin/approval/${postId}`, { state: { postId } }); // 승인 대기 페이지로 이동
+      navigate(`/admin/post/approval/${communityPostId}`, {
+        state: { communityPostId },
+      }); // 승인 대기 페이지로 이동
     } else {
-      navigate(`/community/posts/${postId}`); // 일반 포스트 상세 페이지로 이동
+      navigate(`/community/post/${communityPostId}`); // 일반 포스트 상세 페이지로 이동
     }
   };
 
@@ -121,31 +108,27 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
         />
       </ActionsContainer>
 
-      {/* {loading ? (
+      {loading ? (
         <NoPostMessage>게시물을 불러오는 중입니다...</NoPostMessage>
-      ) : posts.length === 0 ? (
-        <NoPostMessage>게시물이 없습니다.</NoPostMessage>
-      ) : currentPosts.length === 0 ? ( */}
-
-      {categoryFilteredPosts.length === 0 ? (
+      ) : categoryFilteredPosts.length === 0 ? (
         <NoPostMessage>
           선택된 카테고리에 해당하는 게시글이 없습니다.
         </NoPostMessage>
-      ) : filteredPosts.length === 0 ? (
+      ) : currentPosts.length === 0 ? (
         <NoPostMessage>
           &apos;{searchQuery}&apos;의 검색 결과가 존재하지 않습니다.
         </NoPostMessage>
       ) : (
         currentPosts.map((post) => (
           <PostItem
-            key={post.postId}
-            onClick={() => handlePostClick(post.postId)} // 포스트 클릭 시 상세 조회로 이동
+            key={post.communityPostId}
+            onClick={() => handlePostClick(post.communityPostId)}
           >
-            <PostImage src={post.images[0]} alt={post.title} />
+            <PostImage src={post.imageUrls[0]} alt={post.title} />
             <PostContent>
               <PostTitle>{post.title}</PostTitle>
               <PostDetails>
-                <PostAuthor>{post.authorNickname}</PostAuthor>
+                <PostAuthor>{post.nickname}</PostAuthor>
                 <PostDate>
                   <PostCreatedAt>
                     {new Date(post.createdAt).toLocaleString('ko-KR', {
@@ -170,10 +153,10 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
                   </PostCloseAt>
                 </PostDate>
                 <PostJoinStatus>
-                  참여 현황: {post.currentQuantity} / {post.requiredQuantity}
+                  참여 현황: {post.currentQuantity} / {post.availableNumber}
                 </PostJoinStatus>
               </PostDetails>
-              <PostDescription>{post.content}</PostDescription>
+              <PostDescription>{post.description}</PostDescription>
             </PostContent>
           </PostItem>
         ))

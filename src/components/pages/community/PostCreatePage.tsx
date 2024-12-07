@@ -11,23 +11,22 @@ import {
 } from 'react-icons/fa';
 import { createPost, CreatePostInput } from './api/postApi';
 import CategoryWrapper from '../../common/CategoryWrapper';
-import ScrollToTopButton from '../../common/ScrollToTopButton';
 import { POST_CATEGORIES } from './postCategories';
 
 const PostCreatePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const defaultCategory = location.state?.selectedCategory || '생활용품'; // 이전 페이지에서 전달된 카테고리
+  const defaultCategory = location.state?.selectedCategory || 'LIFESTYLE'; // 이전 페이지에서 전달된 카테고리
 
   const [selectedCategory, setSelectedCategory] = useState(defaultCategory);
-  const [requiredQuantity, setRequiredQuantity] = useState('');
-  const [totalPrice, setTotalPrice] = useState('');
+  const [availableNumber, setAvailableNumber] = useState('');
+  const [totalAmount, setTotalAmount] = useState('');
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [deadline, setDeadline] = useState('마감 기한  ');
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [images, setImages] = useState<string[]>([]);
+  const [description, setDescription] = useState('');
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(-1); // -1: AddImageButton 상태
   const [urlInput, setUrlInput] = useState('');
   const [urlError, setUrlError] = useState(false);
@@ -38,7 +37,7 @@ const PostCreatePage = () => {
       // 생성 성공 시 목록 업데이트
       queryClient.invalidateQueries({ queryKey: ['postList'] });
       alert('포스트가 작성되었습니다. 관리자의 승인을 대기 중입니다.');
-      navigate('/community');
+      navigate('/community/post');
     },
     onError: (error) => {
       console.error('포스트 생성 중 오류 발생:', error);
@@ -58,12 +57,12 @@ const PostCreatePage = () => {
   const handlePostSubmit = async () => {
     if (
       !title ||
-      !requiredQuantity ||
-      !totalPrice ||
+      !availableNumber ||
+      !totalAmount ||
       deadline === '마감 기한' ||
-      images.length === 0 || // 최소 한 개의 이미지 추가 확인
+      imageUrls.length === 0 || // 최소 한 개의 이미지 추가 확인
       !urlInput ||
-      !content
+      !description
     ) {
       alert('모든 필수 정보를 입력하세요.');
       return;
@@ -73,8 +72,8 @@ const PostCreatePage = () => {
       return;
     }
 
-    const parsedTotalPrice = parseInt(totalPrice.replace(/,/g, ''), 10);
-    const parsedRequiredQuantity = parseInt(requiredQuantity, 10);
+    const parsedTotalAmount = parseInt(totalAmount.replace(/,/g, ''), 10);
+    const parsedAvailableNumber = parseInt(availableNumber, 10);
 
     // 마감 기한 계산 (Long 타입으로 전송할 기간 설정)
     const period =
@@ -89,13 +88,14 @@ const PostCreatePage = () => {
 
     const postData: CreatePostInput = {
       title: title.trim(),
-      content: content.trim(),
-      images,
+      description: description.trim(),
+      imageUrls,
       category: selectedCategory,
-      requiredQuantity: parsedRequiredQuantity,
-      totalPrice: parsedTotalPrice,
-      unitPrice: Math.floor(parsedTotalPrice / parsedRequiredQuantity),
-      url: urlInput.trim(),
+      currentQuantity: 0,
+      availableNumber: parsedAvailableNumber,
+      totalAmount: parsedTotalAmount,
+      unitAmount: Math.floor(parsedTotalAmount / parsedAvailableNumber),
+      productUrl: urlInput.trim(),
       period, // 마감 기한 (Long 타입)
       status: 'NOT_APPROVED',
     };
@@ -103,32 +103,32 @@ const PostCreatePage = () => {
     createPostMutation.mutate(postData); // React Query Mutation 호출
   };
 
-  const handleRequiredQuantityChange = (
+  const handleAvailableNumberChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
     const numericValue = Number(value);
 
     if (value === '' || numericValue <= 0) {
-      setRequiredQuantity(''); // 입력 중 모두 지웠거나, 음수 또는 0인 경우 초기화
+      setAvailableNumber(''); // 입력 중 모두 지웠거나, 음수 또는 0인 경우 초기화
     } else {
-      setRequiredQuantity(value); // 유효한 값 업데이트
+      setAvailableNumber(value); // 유효한 값 업데이트
     }
   };
 
-  const handleTotalPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTotalAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
     const numericValue = Number(value);
 
     if (value === '' || numericValue <= 0) {
-      setTotalPrice(''); // 입력 중 모두 지웠거나, 음수 또는 0인 경우 초기화
+      setTotalAmount(''); // 입력 중 모두 지웠거나, 음수 또는 0인 경우 초기화
     } else {
-      setTotalPrice(formatCurrency(value)); // 통화 형식으로 변환
+      setTotalAmount(formatCurrency(value)); // 통화 형식으로 변환
     }
   };
 
   const handleCancel = () => {
-    navigate('/community', { state: { selectedCategory } }); // // CommunityPage 경로와 state 전달
+    navigate('/community/post', { state: { selectedCategory } }); // // CommunityPage 경로와 state 전달
   };
 
   const formatCurrency = (value: string) => {
@@ -136,13 +136,13 @@ const PostCreatePage = () => {
     return new Intl.NumberFormat().format(Number(numberValue)); // 통화 형식으로 변환
   };
 
-  const unitPrice =
-    totalPrice && requiredQuantity
+  const unitAmount =
+    totalAmount && availableNumber
       ? formatCurrency(
           String(
             Math.floor(
-              parseInt(totalPrice.replace(/,/g, ''), 10) /
-                parseInt(requiredQuantity, 10)
+              parseInt(totalAmount.replace(/,/g, ''), 10) /
+                parseInt(availableNumber, 10)
             )
           )
         )
@@ -153,14 +153,14 @@ const PostCreatePage = () => {
       const uploadedImages = Array.from(e.target.files).map((file) =>
         URL.createObjectURL(file)
       );
-      setImages((prev) => [...prev, ...uploadedImages]);
-      setCurrentIndex(images.length); // 마지막으로 추가된 이미지로 이동
+      setImageUrls((prev) => [...prev, ...uploadedImages]);
+      setCurrentIndex(imageUrls.length); // 마지막으로 추가된 이미지로 이동
     }
   };
 
   const handleRemoveImage = () => {
     if (currentIndex >= 0) {
-      setImages((prev) => {
+      setImageUrls((prev) => {
         const updatedImages = prev.filter((_, i) => i !== currentIndex);
 
         // 다음 이미지 또는 이전 이미지로 이동
@@ -180,16 +180,16 @@ const PostCreatePage = () => {
   };
 
   const handleNextImage = () => {
-    if (currentIndex < images.length - 1) {
+    if (currentIndex < imageUrls.length - 1) {
       setCurrentIndex((prev) => prev + 1);
-    } else if (currentIndex === images.length - 1) {
+    } else if (currentIndex === imageUrls.length - 1) {
       setCurrentIndex(-1); // AddImageButton 상태로 전환
     }
   };
 
   const handlePreviousImage = () => {
     if (currentIndex === -1) {
-      setCurrentIndex(images.length - 1); // 마지막 이미지로 이동
+      setCurrentIndex(imageUrls.length - 1); // 마지막 이미지로 이동
     } else {
       setCurrentIndex((prev) => Math.max(prev - 1, 0));
     }
@@ -199,7 +199,7 @@ const PostCreatePage = () => {
     setCurrentIndex(index);
   };
 
-  const isValidUrl = (url: string) => {
+  const isValidUrl = (productUrl: string) => {
     const pattern = new RegExp(
       '^(https?:\\/\\/)?' +
         '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|(\\d{1,3}\\.){3}\\d{1,3})' +
@@ -208,7 +208,7 @@ const PostCreatePage = () => {
         '(\\#[-a-z\\d_]*)?$',
       'i'
     );
-    return !!pattern.test(url);
+    return !!pattern.test(productUrl);
   };
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -227,7 +227,7 @@ const PostCreatePage = () => {
               <ImageUploadContainer>
                 <ImagePreviewWrapper>
                   <PreviousButtonWrapper>
-                    {images.length > 0 &&
+                    {imageUrls.length > 0 &&
                       (currentIndex > 0 || currentIndex === -1) && (
                         <PreviousButton onClick={handlePreviousImage}>
                           <FaAngleLeft size={20} />
@@ -248,7 +248,10 @@ const PostCreatePage = () => {
                     </AddImageButton>
                   ) : (
                     <ImagePreview>
-                      <img src={images[currentIndex]} alt="이미지 미리보기" />
+                      <img
+                        src={imageUrls[currentIndex]}
+                        alt="이미지 미리보기"
+                      />
                       <RemoveImageButton onClick={handleRemoveImage}>
                         <FaMinusCircle size={30} />
                       </RemoveImageButton>
@@ -256,7 +259,7 @@ const PostCreatePage = () => {
                   )}
 
                   <NextButtonWrapper>
-                    {images.length > 0 && currentIndex !== -1 && (
+                    {imageUrls.length > 0 && currentIndex !== -1 && (
                       <NextButton onClick={handleNextImage}>
                         <FaAngleRight size={20} />
                       </NextButton>
@@ -266,9 +269,9 @@ const PostCreatePage = () => {
 
                 {/* PaginationDots */}
                 <PaginationDotsWrapper>
-                  {images.length > 0 && (
+                  {imageUrls.length > 0 && (
                     <PaginationDots>
-                      {images.map((_, index) => (
+                      {imageUrls.map((_, index) => (
                         <span
                           key={index}
                           className={currentIndex === index ? 'active' : ''}
@@ -311,8 +314,8 @@ const PostCreatePage = () => {
                     />
                   </InputWrapper>
                   <CategoryInputWrapper>
-                    <CategoryLabel>카테고리 선택</CategoryLabel>
                     <CategoryWrapperStyled
+                      title="카테고리 선택"
                       categories={POST_CATEGORIES}
                       selectedCategory={selectedCategory} // 현재 선택된 카테고리를 전달
                       onCategoryChange={
@@ -329,8 +332,8 @@ const PostCreatePage = () => {
                     <SmallInput
                       type="text" // 숫자만 입력되도록 onChange에서 제어
                       placeholder="수량 입력"
-                      value={requiredQuantity}
-                      onChange={handleRequiredQuantityChange}
+                      value={availableNumber}
+                      onChange={handleAvailableNumberChange}
                     />
                   </InputWrapper>
                   <InputWrapper>
@@ -363,14 +366,14 @@ const PostCreatePage = () => {
                       <SmallInput
                         type="text" // 숫자만 입력되도록 onChange에서 제어
                         placeholder="총 가격 입력"
-                        value={totalPrice}
-                        onChange={handleTotalPriceChange}
+                        value={totalAmount}
+                        onChange={handleTotalAmountChange}
                       />
                       {' 원'}
                     </InputWrapper>
                     <InputWrapper>
                       <Label>개당 가격</Label>
-                      <SmallInput disabled value={unitPrice} />
+                      <SmallInput disabled value={unitAmount} />
                       {' 원'}
                     </InputWrapper>
                   </PriceWrapper>
@@ -382,8 +385,8 @@ const PostCreatePage = () => {
             <TextAreaWrapper>
               <TextArea
                 placeholder="내용을 입력해주세요."
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
                 spellCheck={false}
               />
             </TextAreaWrapper>
@@ -396,7 +399,6 @@ const PostCreatePage = () => {
           </FormContainer>
         </ContentWrapper>
       </PostCreatePageContainer>
-      <ScrollToTopButton />
     </div>
   );
 };
@@ -602,20 +604,20 @@ const DetailsAndInfoContainer = styled.div`
   display: flex;
   flex-direction: column; /* 세로 정렬 */
   align-items: flex-start; /* 왼쪽 정렬 */
-  justify-content: space-between; /* 위아래 요소 간격 균등 */
   width: 490px;
   height: 495px; /* ImageUploadContainer와 동일한 고정 높이 */
   flex-grow: 1; /* 가로 공간을 균등 분배 */
   border: 1px solid #ccc;
   border-radius: 10px;
   padding: 20px;
+  gap: 20px;
   box-sizing: border-box;
 `;
 
 const DetailsContainer = styled.div`
   display: flex;
   flex-direction: column; /* 세로 정렬 */
-  gap: 50px; /* 컴포넌트 간 간격 */
+  gap: 20px; /* 컴포넌트 간 간격 */
   width: 100%;
 `;
 
@@ -644,17 +646,12 @@ const TextInput = styled.input`
 
 const CategoryInputWrapper = styled.div`
   display: flex;
-  flex-direction: column; /* 라벨과 카테고리를 세로로 배치 */
-`;
-
-const CategoryLabel = styled.label`
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-bottom: 10px; /* 라벨과 카테고리 사이 간격 */
+  justify-content: flex-start;
 `;
 
 const CategoryWrapperStyled = styled(CategoryWrapper)`
   display: flex;
+  margin-left: 50px;
   flex-wrap: wrap;
   gap: 8px;
   padding: 10px 0;

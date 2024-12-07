@@ -1,47 +1,118 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-// import { useNavigate, useLocation } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-// import { fetchChatRoomDetails } from './api/chatApi';
-import { mockFetchChatRoomDetails } from '../../../mocks/chatData';
-import ChatRoomModal from './modal/ChatRoomModal'; // 채팅방 모달 컴포넌트 가져오기
+import { useNavigate, useLocation } from 'react-router-dom';
+import { fetchPaymentStatus } from './api/paymentApi';
+import { fetchPostById } from './api/postApi';
+import { createChatRoom } from './api/chatApi';
+import ChatRoomModal from './modal/ChatRoomModal';
 import { webSocketService } from '../../../utils/webSocket';
 
-const PaymentCompletePage = () => {
-  const navigate = useNavigate();
-  //   const { state } = useLocation(); // 결제 페이지에서 전달된 상태
-  //   const { post } = state || {}; // Post 데이터 구조 분해 할당
+interface Post {
+  title: string;
+  unitAmount: number;
+}
 
-  const [isChatOpen, setIsChatOpen] = useState(false); // 채팅방 모달 상태
-  //   const [chatRoomId, setChatRoomId] = useState<string | null>(null); // 채팅방 ID 상태 추가
-  const [chatRoomId, setChatRoomId] = useState<string>('room-1'); // Mock 데이터의 첫 번째 채팅방 ID
-  const [chatRoomTitle, setChatRoomTitle] = useState<string>(''); // 채팅방 제목 상태 추가
+const PaymentCompletePage: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state;
+
+  if (!state || !state.communityPostId || !state.quantity) {
+    return <div>잘못된 접근입니다.</div>;
+  }
+
+  const { communityPostId, quantity } = state;
+
+  const [paymentData, setPaymentData] = useState<{
+    paymentKey: string;
+    orderId: string;
+    totalAmount: number;
+  } | null>(null);
+
+  const [post, setPost] = useState<Post | null>(null);
+  const [status, setStatus] = useState<'WAITING_FOR_DEPOSIT' | 'DONE'>(
+    'WAITING_FOR_DEPOSIT'
+  );
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatRoom, setChatRoom] = useState<{
+    id: number;
+    roomName: string;
+  } | null>(null);
+
+  useEffect(() => {
+    // 결제 상태 가져오기
+    const fetchPayment = async () => {
+      try {
+        const data = await fetchPaymentStatus(communityPostId);
+        setPaymentData(data);
+        if (data.status === 'DONE') {
+          setStatus('DONE');
+        }
+      } catch (error) {
+        console.error('결제 상태 조회 오류:', error);
+        alert('결제 상태를 확인할 수 없습니다.');
+      }
+    };
+
+    // 게시물 정보 가져오기
+    const fetchPost = async () => {
+      try {
+        const postData = await fetchPostById(Number(communityPostId));
+        setPost({
+          title: postData.title,
+          unitAmount: postData.unitAmount,
+        });
+      } catch (error) {
+        console.error('게시물 정보 조회 오류:', error);
+        alert('게시물 정보를 가져올 수 없습니다.');
+      }
+    };
+
+    fetchPayment();
+    fetchPost();
+  }, [communityPostId]);
+
+  const handleChatRoomCreation = async () => {
+    try {
+      const chatRoom = await createChatRoom(parseInt(communityPostId));
+      setChatRoom(chatRoom);
+    } catch (error) {
+      console.error('채팅방 생성 오류:', error);
+      alert('채팅방을 생성할 수 없습니다.');
+    }
+  };
 
   const openChat = async () => {
-    try {
-      //   if (!post) {
-      //     throw new Error('게시물 정보를 찾을 수 없습니다.');
-      //   }
-
-      // 채팅방 세부 정보 조회 API 호출
-      //   const { chatRoomId, chatRoomTitle } = await fetchChatRoomDetails(
-      //     post.postId
-      //   );
-      const { chatRoomTitle } = await mockFetchChatRoomDetails(chatRoomId);
-      setChatRoomId(chatRoomId);
-      setChatRoomTitle(chatRoomTitle);
-      setIsChatOpen(true);
-    } catch (error) {
-      console.error('채팅방 열기 오류:', error);
-      alert('채팅방을 열 수 없습니다.');
+    if (!chatRoom) {
+      await handleChatRoomCreation();
     }
+    setIsChatOpen(true);
   };
 
   const closeChat = () => setIsChatOpen(false);
 
+  if (!paymentData || !post) {
+    return <div>로딩 중...</div>;
+  }
+
   return (
     <PaymentCompleteContainer>
-      <Message>결제가 정상적으로 완료되었습니다.</Message>
+      {status === 'WAITING_FOR_DEPOSIT' ? (
+        <>
+          <Message>결제 상태를 확인 중입니다...</Message>
+        </>
+      ) : (
+        <>
+          <Message>결제가 정상적으로 완료되었습니다.</Message>
+          <OrderInformation>
+            <p>주문 ID: {paymentData.orderId}</p>
+            <p>상품명: {post.title}</p>
+            <p>개당 가격: {post.unitAmount.toLocaleString()} 원</p>
+            <p>수량: {quantity}</p>
+            <p>결제 금액: {paymentData.totalAmount.toLocaleString()} 원</p>
+          </OrderInformation>
+        </>
+      )}
       <ButtonContainer>
         <ActionButton onClick={openChat}>채팅방 열기</ActionButton>
         <ActionButton onClick={() => navigate('/mypage/orderlist')}>
@@ -50,13 +121,14 @@ const PaymentCompletePage = () => {
       </ButtonContainer>
 
       {/* 채팅방 모달 */}
-      {chatRoomId && (
+      {chatRoom && (
         <ChatRoomModal
           isOpen={isChatOpen}
           onClose={closeChat}
-          chatRoomId={chatRoomId}
-          chatRoomTitle={chatRoomTitle} // 채팅방 제목 전달
+          chatRoomId={chatRoom.id.toString()}
+          chatRoomTitle={chatRoom.roomName} // 채팅방 제목 전달
           webSocketService={webSocketService} // WebSocket 서비스 전달
+          isAdminPage={false}
         />
       )}
     </PaymentCompleteContainer>
@@ -65,7 +137,6 @@ const PaymentCompletePage = () => {
 
 export default PaymentCompletePage;
 
-// 스타일 컴포넌트
 const PaymentCompleteContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -80,6 +151,14 @@ const Message = styled.h1`
   font-size: 2rem;
   font-weight: bold;
   color: #333;
+  margin-bottom: 20px;
+`;
+
+const OrderInformation = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 20px;
 `;
 

@@ -54,13 +54,12 @@ const Wrapper = styled.div`
   flex-wrap: wrap;
   gap: 5px 10px;
   width: 100%;
-  margin-left: 50px;
   justify-content: flex-start;
   align-items: center;
 `;
 
 const HeaderTitle = styled.h2`
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: bold;
   margin: 0 50px 0 0;
   white-space: nowrap; /* 텍스트 줄바꿈 방지 */

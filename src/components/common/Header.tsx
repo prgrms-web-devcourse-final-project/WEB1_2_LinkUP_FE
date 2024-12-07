@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import cart from '../../assets/icons/icon.png';
+// import cart from '../../assets/icons/icon.png';
 import logo from '../../assets/icons/goodbuyus-logo.svg';
 import menu from '../../assets/icons/menu.svg';
 const Header = () => {
@@ -12,6 +12,7 @@ const Header = () => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userRole = localStorage.getItem('role');
+
 
     setIsLoggedIn(!!token);
     setIsAdmin(userRole === 'ROLE_ADMIN');
@@ -54,7 +55,7 @@ const Header = () => {
               </StyledLink>
             </NavItem>
             <NavItem>
-              <StyledLink to="/community" onClick={toggleMobileMenu}>
+              <StyledLink to="/community/post" onClick={toggleMobileMenu}>
                 Community
               </StyledLink>
             </NavItem>
@@ -88,18 +89,22 @@ const Header = () => {
               </Login>
             ) : (
               <>
-                <LogOut>
-                  <StyledLink to="/signout" onClick={toggleMobileMenu}>
-                    LogOut
-                  </StyledLink>
+                <LogOut
+                  onClick={() => {
+                    localStorage.removeItem('role');
+                    localStorage.removeItem('token');
+                    setIsLoggedIn(false);
+                  }}
+                >
+                  <a>LogOut</a>
                 </LogOut>
-                <LogOut>
+                {/* <LogOut>
                   <CartIcon>
                     <StyledLink to="/cart" onClick={toggleMobileMenu}>
                       <img src={cart} alt="장바구니 아이콘" />
                     </StyledLink>
                   </CartIcon>
-                </LogOut>
+                </LogOut> */}
               </>
             )}{' '}
           </NavList>
@@ -310,6 +315,9 @@ const LogOut = styled.li`
   height: 30px;
   border-radius: 5px;
   overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  padding: 0px 10px;
 
   a {
     color: white;
@@ -353,16 +361,16 @@ const StyledLink = styled(Link)`
   }
 `;
 
-const CartIcon = styled.div`
-  img {
-    width: 20px;
-    height: 20px;
-  }
+// const CartIcon = styled.div`
+//   img {
+//     width: 20px;
+//     height: 20px;
+//   }
 
-  @media (min-width: 576px) and (max-width: 767px) {
-    img {
-      width: 25px;
-      height: 25px;
-    }
-  }
-`;
+//   @media (min-width: 576px) and (max-width: 767px) {
+//     img {
+//       width: 25px;
+//       height: 25px;
+//     }
+//   }
+// `;

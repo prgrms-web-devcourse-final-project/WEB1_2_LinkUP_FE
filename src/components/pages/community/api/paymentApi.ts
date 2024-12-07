@@ -10,37 +10,28 @@ import axiosInstance from '../../../../api/axiosInstance'; // 기존 Axios 인�
  * @param bank 선택 은행
  * @returns 발급된 가상계좌 정보
  */
-export const requestVirtualAccount = async ({
-  customerName,
-  customerEmail,
-  amount,
-  orderId,
-  orderName,
-  bank = '국민은행', // 기본 은행 설정
-}: {
-  customerName: string;
-  customerEmail: string;
-  amount: number;
+export interface VirtualAccountResponse {
+  paymentKey: string;
   orderId: string;
-  orderName: string;
-  bank?: string;
-}): Promise<string> => {
-  try {
-    const response = await axiosInstance.post(
-      '/api/toss-payments/virtual-account',
-      {
-        customerName,
-        customerEmail,
-        amount,
-        orderId,
-        orderName,
-        bank,
-      }
-    );
+  status: string;
+  totalAmount: string;
+  checkoutPageUrl: string;
+  virtualAccount: {
+    accountNumber: string;
+    bankCode: string;
+    customerName: string;
+  } | null;
+}
 
-    return response.data.virtualAccount; // 발급된 가상계좌 반환
+// 결제 상태 확인 API
+export const fetchPaymentStatus = async (paymentKey: string) => {
+  try {
+    const response = await axiosInstance.get(
+      `/api/v1/virtual/update-payment/${paymentKey}`
+    );
+    return response.data;
   } catch (error) {
-    console.error('가상계좌 발급 실패:', error);
-    throw new Error('가상계좌 발급에 실패했습니다.');
+    console.error('결제 상태 확인 실패:', error);
+    throw new Error('결제 상태 확인에 실패했습니다.');
   }
 };

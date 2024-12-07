@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
-import { postSignIn, postSignInSNS } from '../../../api/loginApi';
+import { postSignIn } from '../../../api/loginApi';
 
 const SignInPage = () => {
   const navigate = useNavigate();
@@ -56,17 +56,24 @@ const SignInPage = () => {
         >
           Login
         </LoginButton>
-        <SNSButton
-          onClick={async () => {
-            await postSignInSNS();
-          }}
-        >
-          <img
-            src="/images/googlelogo.png"
-            alt="Google Logo"
-            style={{ width: '50px', height: '17px' }}
-          />
-          계정으로 로그인
+        <SNSButton>
+          <a
+            href="http://15.164.5.135:8080/users/sociallogin"
+            style={{
+              textDecoration: 'none',
+              color: 'inherit',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <img
+              src="/images/naverlogo.png"
+              alt="Naver Logo"
+              style={{ width: '50px', height: '15px' }}
+            />
+            계정으로 로그인
+          </a>
         </SNSButton>
         <AuthButtonWrapper>
           <AuthButton

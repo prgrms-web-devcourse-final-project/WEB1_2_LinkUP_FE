@@ -32,13 +32,13 @@ const PostApprovalPage = () => {
   }, [postId, navigate]);
 
   const handleNextImage = () => {
-    if (post) setCurrentIndex((prev) => (prev + 1) % post.images.length);
+    if (post) setCurrentIndex((prev) => (prev + 1) % post.imageUrls.length);
   };
 
   const handlePreviousImage = () => {
     if (post)
       setCurrentIndex(
-        (prev) => (prev - 1 + post.images.length) % post.images.length
+        (prev) => (prev - 1 + post.imageUrls.length) % post.imageUrls.length
       );
   };
 
@@ -51,7 +51,7 @@ const PostApprovalPage = () => {
     try {
       await updatePostStatus(postId, 'APPROVED'); // 포스트 상태를 APPROVED로 변경
       alert('게시물이 승인되었습니다.');
-      navigate('/admin/posts'); // 승인 후 관리자 페이지로 리다이렉트
+      navigate('/admin/post'); // 승인 후 관리자 페이지로 리다이렉트
     } catch (error) {
       console.error('Failed to approve post:', error);
       alert('승인 처리 중 오류가 발생했습니다.');
@@ -63,7 +63,7 @@ const PostApprovalPage = () => {
     try {
       await updatePostStatus(postId, 'REJECTED'); // 포스트 상태를 REJECTED로 변경하고 제목 수정
       alert('게시물이 거절 처리되었습니다.');
-      navigate('/admin/posts'); // 거절 후 관리자 페이지로 리다이렉트
+      navigate('/admin/post'); // 거절 후 관리자 페이지로 리다이렉트
     } catch (error) {
       console.error('Failed to reject post:', error);
       alert('거절 처리 중 오류가 발생했습니다.');
@@ -92,7 +92,7 @@ const PostApprovalPage = () => {
             <ImageContainer>
               <ImagePreviewWrapper>
                 <PreviousButtonWrapper>
-                  {post.images.length > 1 && currentIndex > 0 && (
+                  {post.imageUrls.length > 1 && currentIndex > 0 && (
                     <PreviousButton onClick={handlePreviousImage}>
                       <FaAngleLeft size={20} />
                     </PreviousButton>
@@ -101,14 +101,14 @@ const PostApprovalPage = () => {
 
                 <ImagePreview>
                   <img
-                    src={post.images[currentIndex]}
+                    src={post.imageUrls[currentIndex]}
                     alt={`이미지 ${currentIndex + 1}`}
                   />
                 </ImagePreview>
 
                 <NextButtonWrapper>
-                  {post.images.length > 1 &&
-                    currentIndex < post.images.length - 1 && (
+                  {post.imageUrls.length > 1 &&
+                    currentIndex < post.imageUrls.length - 1 && (
                       <NextButton onClick={handleNextImage}>
                         <FaAngleRight size={20} />
                       </NextButton>
@@ -118,9 +118,9 @@ const PostApprovalPage = () => {
 
               {/* PaginationDots는 이미지 아래에 위치 */}
               <PaginationDotsWrapper>
-                {post.images.length > 1 && (
+                {post.imageUrls.length > 1 && (
                   <PaginationDots>
-                    {post.images.map((_, index) => (
+                    {post.imageUrls.map((_, index) => (
                       <span
                         key={index}
                         className={currentIndex === index ? 'active' : ''}
@@ -134,7 +134,7 @@ const PostApprovalPage = () => {
               <UrlContainer>
                 <UrlWrapper>
                   <Label htmlFor="urlInput">URL 주소</Label>
-                  <Url>{post.url}</Url>
+                  <Url>{post.productUrl}</Url>
                 </UrlWrapper>
               </UrlContainer>
             </ImageContainer>
@@ -149,7 +149,7 @@ const PostApprovalPage = () => {
                 <DoubleWrapper>
                   <AuthorDetail>
                     <Label>작성자</Label>
-                    <AuthorNickname>{post.authorNickname}</AuthorNickname>
+                    <AuthorNickname>{post.nickname}</AuthorNickname>
                   </AuthorDetail>
                   <CreatedAtDetail>
                     <Label>작성일</Label>{' '}
@@ -163,7 +163,7 @@ const PostApprovalPage = () => {
                   <Detail>
                     <Label>참여 현황</Label> {post.currentQuantity}
                     {' / '}
-                    {post.requiredQuantity}
+                    {post.availableNumber}
                   </Detail>
                 </DoubleWrapper>
 
@@ -174,10 +174,11 @@ const PostApprovalPage = () => {
                 </DoubleWrapper>
                 <DoubleWrapper>
                   <Detail>
-                    <Label>총 가격</Label> {post.totalPrice.toLocaleString()} 원
+                    <Label>총 가격</Label> {post.totalAmount.toLocaleString()}{' '}
+                    원
                   </Detail>
                   <Detail>
-                    <Label>개당 가격</Label> {post.unitPrice.toLocaleString()}{' '}
+                    <Label>개당 가격</Label> {post.unitAmount.toLocaleString()}{' '}
                     원
                   </Detail>
                 </DoubleWrapper>
@@ -187,7 +188,7 @@ const PostApprovalPage = () => {
 
           {/* 내용 섹션 */}
           <TextAreaWrapper>
-            <TextArea readOnly value={post.content} />
+            <TextArea readOnly value={post.description} />
           </TextAreaWrapper>
 
           <ActionButtons>

@@ -9,6 +9,9 @@ const PaymentSuccessPage = () => {
     return <p>상품 번호가 유실되었습니다.</p>;
   }
   const productId = Number(id);
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const amount = urlParams.get('amount');
   const { data: product, isLoading, isError } = useProductQuery(productId);
 
   if (!product) {
@@ -29,7 +32,7 @@ const PaymentSuccessPage = () => {
               </SummaryRow>
               <SummaryRow>
                 <Label>결제 금액</Label>
-                <Value>{product?.discountprice}원</Value>
+                <Value>{amount}원</Value>
               </SummaryRow>
             </OrderSummary>
           </SuccessSection>

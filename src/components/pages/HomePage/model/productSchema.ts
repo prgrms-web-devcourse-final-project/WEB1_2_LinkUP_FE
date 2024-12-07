@@ -1,5 +1,5 @@
 interface Review {
-  review: string;
+  content: string;
   rating: number;
 }
 

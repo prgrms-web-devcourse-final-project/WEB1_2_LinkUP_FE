@@ -7,7 +7,7 @@ import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 const PaymentForm = () => {
   // URL 쿼리 스트링을 통한 데이터 수신
   const location = useLocation();
-  const productData = location.state;
+  const productData = location.state || {};
 
   const { id } = useParams();
   const productId = useMemo(() => {
@@ -79,7 +79,6 @@ const PaymentForm = () => {
     }
     try {
       const paymentResult = await handlePayment(productId, payload);
-
       window.location.href = paymentResult;
     } catch (e) {
       alert(`결제에 실패하였습니다 ${e}`);

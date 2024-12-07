@@ -3,11 +3,15 @@ import styled from 'styled-components';
 import { addComment, deleteComment, editComment } from './api/commentApi';
 
 interface CommentProps {
-  reviews: Array<{ review: string; rating: number }>;
+  initReviews: Array<{ content: string; rating: number }>;
   productId: number;
 }
 
-const CommentComponent: React.FC<CommentProps> = ({ reviews, productId }) => {
+const CommentComponent: React.FC<CommentProps> = ({
+  initReviews,
+  productId,
+}) => {
+  const [reviews, setReviews] = useState(initReviews);
   const [newComment, setNewComment] = useState('');
   const [newCommentStar, setNewCommentStar] = useState(5);
   const [visibleCount, setVisibleCount] = useState(10);
@@ -19,10 +23,26 @@ const CommentComponent: React.FC<CommentProps> = ({ reviews, productId }) => {
     setVisibleCount((prevCount) => prevCount + 10);
   };
 
-  const handleCommentSubmit = (e: React.FormEvent) => {
+  const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    addComment(productId, { review: newComment, rating: newCommentStar });
-    setNewComment('');
+    try {
+      await addComment(productId, {
+        content: newComment,
+        rate: newCommentStar,
+      });
+
+      setReviews((prevReviews) => [
+        ...prevReviews,
+        {
+          content: newComment,
+          rating: newCommentStar,
+        },
+      ]);
+      setNewComment('');
+      setNewCommentStar(5);
+    } catch {
+      alert('현재 댓글을 작성할 수 없는 상태입니다.');
+    }
   };
 
   const handleEditComment = (
@@ -36,13 +56,27 @@ const CommentComponent: React.FC<CommentProps> = ({ reviews, productId }) => {
   };
 
   const handleUpdateComment = async (commentId: number) => {
-    await editComment(commentId, {
-      review: editingText,
-      rating: editingRating,
-    });
-    setEditingId(null);
-    setEditingText('');
-    setEditingRating(5);
+    try {
+      const reviewId = commentId + 1;
+      await editComment(reviewId, {
+        content: editingText,
+        rate: editingRating,
+      });
+
+      setReviews((prevReviews) =>
+        prevReviews.map((review, index) =>
+          index === commentId
+            ? { content: editingText, rating: editingRating }
+            : review
+        )
+      );
+
+      setEditingId(null);
+      setEditingText('');
+      setEditingRating(5);
+    } catch {
+      alert('현재 댓글을 수정할 수 없는 상태입니다.');
+    }
   };
 
   const handleCancelEdit = () => {
@@ -51,8 +85,17 @@ const CommentComponent: React.FC<CommentProps> = ({ reviews, productId }) => {
     setEditingRating(5);
   };
 
-  const handleDeleteComment = (commentId: number) => {
-    deleteComment(commentId);
+  const handleDeleteComment = async (commentId: number) => {
+    try {
+      const reviewId = commentId + 1;
+      await deleteComment(reviewId);
+
+      setReviews((prevReviews) =>
+        prevReviews.filter((_, index) => index !== commentId - 1)
+      );
+    } catch {
+      alert('현재 댓글을 삭제할 수 없는 상태입니다.');
+    }
   };
 
   return (
@@ -111,18 +154,18 @@ const CommentComponent: React.FC<CommentProps> = ({ reviews, productId }) => {
             ) : (
               <>
                 <CommentContent>
-                  <CommentText>{review.review}</CommentText>
+                  <CommentText>{review.content}</CommentText>
                   <CommentStars>{'⭐'.repeat(review.rating)}</CommentStars>
                 </CommentContent>
                 <CommentActions>
                   <ActionButton
                     onClick={() =>
-                      handleEditComment(index, review.review, review.rating)
+                      handleEditComment(index, review.content, review.rating)
                     }
                   >
                     수정
                   </ActionButton>
-                  <ActionButton onClick={() => handleDeleteComment(index)}>
+                  <ActionButton onClick={() => handleDeleteComment(index + 1)}>
                     삭제
                   </ActionButton>
                 </CommentActions>

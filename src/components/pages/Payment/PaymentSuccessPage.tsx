@@ -29,7 +29,7 @@ const PaymentSuccessPage = () => {
               </SummaryRow>
               <SummaryRow>
                 <Label>결제 금액</Label>
-                <Value>{product?.discountprice.toLocaleString()}</Value>
+                <Value>{product?.discountprice}원</Value>
               </SummaryRow>
             </OrderSummary>
           </SuccessSection>

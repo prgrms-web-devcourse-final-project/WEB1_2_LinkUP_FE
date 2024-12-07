@@ -152,7 +152,10 @@ const ProductDetail: React.FC = () => {
               </ActionWrapper>
             </InfoSection>
           </ContentWrapper>
-          <CommentComponent productId={productId} reviews={product.reviews} />
+          <CommentComponent
+            productId={productId}
+            initReviews={product.reviews}
+          />
         </Container>
       </QueryHandler>
     </>

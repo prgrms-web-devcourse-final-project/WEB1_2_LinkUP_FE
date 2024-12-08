@@ -50,7 +50,13 @@ const FindPasswordPage = () => {
           <LoginButton
             onClick={async () => {
               setShowModal(true);
-              await postFindPassword({ email: email });
+              const response = await postFindPassword({ email: email });
+              if (
+                response.message ===
+                '비밀번호 재설정 링크가 이메일로 전송되었습니다.'
+              ) {
+                navigate('/resetpassword');
+              }
             }}
           >
             확인

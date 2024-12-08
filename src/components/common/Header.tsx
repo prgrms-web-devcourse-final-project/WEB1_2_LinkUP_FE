@@ -1,21 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import cart from '../../assets/icons/icon.png';
 import logo from '../../assets/icons/goodbuyus-logo.svg';
 import menu from '../../assets/icons/menu.svg';
+import { useAuth } from '../../api/AuthContext';
+
 const Header = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isLoggedIn, isAdmin, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userRole = localStorage.getItem('role');
-
-    setIsLoggedIn(!!token);
-    setIsAdmin(userRole === 'ROLE_ADMIN');
-  }, []);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -90,13 +83,7 @@ const Header = () => {
               </Login>
             ) : (
               <>
-                <LogOut
-                  onClick={() => {
-                    localStorage.removeItem('role');
-                    localStorage.removeItem('token');
-                    setIsLoggedIn(false);
-                  }}
-                >
+                <LogOut onClick={logout}>
                   <a>LogOut</a>
                 </LogOut>
                 <LogOut>

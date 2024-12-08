@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 import { postSignIn } from '../../../api/loginApi';
+import { useAuth } from '../../../api/AuthContext';
 
 const SignInPage = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string>('');
   const [pw, setPw] = useState<string>('');
-
+  const { login } = useAuth();
   return (
     <Wrapper>
       <LeftContent>
@@ -47,7 +48,7 @@ const SignInPage = () => {
               password: pw,
             });
             if (response.status === 200) {
-              localStorage.setItem('role', response.data.roles);
+              login();
               navigate('/');
             } else {
               alert('틀렸습니다.');

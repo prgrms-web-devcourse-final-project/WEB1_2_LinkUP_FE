@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { getOrderList, OrderType } from '../../../../api/mypageApi';
 
 const OrderHistory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [orderList, setOrderList] = useState<OrderType[]>([]);
+  const navigate = useNavigate();
 
   const handleCancelClick = () => {
     setIsModalOpen(true);
@@ -62,9 +64,15 @@ const OrderHistory = () => {
                 <StatusBadge>{getStatusLabel(order.paymentStatus)}</StatusBadge>
               </OrderDetails>
             </OrderWrapper>
-            <Price>{order.price}</Price>
+            <Price>{order.price}원</Price>
             <Actions>
-              <ActionButton>상품 페이지 이동</ActionButton>
+              <ActionButton
+                onClick={() => {
+                  navigate(`/products/${order.postId}`);
+                }}
+              >
+                상품 페이지 이동
+              </ActionButton>
               <CancelButton onClick={handleCancelClick}>
                 주문 취소/환불
               </CancelButton>

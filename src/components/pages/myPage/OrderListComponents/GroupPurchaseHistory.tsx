@@ -1,41 +1,68 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { getCommunity } from '../../../../api/mypageApi';
-import { groupPurchaseHistoryData } from '../mockData';
+import { getCommunity, GroupPurchaseType } from '../../../../api/mypageApi';
 
 const GroupPurchaseHistory = () => {
+  const [groupPurchaseList, setGroupPurchaseList] = useState<
+    GroupPurchaseType[]
+  >([]);
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchPost = async () => {
       try {
         const response = await getCommunity();
-        console.log(response);
+
+        setGroupPurchaseList(response);
       } catch (error) {
         console.error('failed', error);
       }
     };
     fetchPost();
   }, []);
+
+  const getStatusLabel = (status: string): string => {
+    return STATUS_MAP[status] || '알 수 없는 상태';
+  };
+
   return (
     <Container>
       <OrderList>
-        {groupPurchaseHistoryData.map((groupPurchase) => (
-          <GroupPurchaseItem key={groupPurchase.id}>
+        {groupPurchaseList.map((groupPurchase, idx) => (
+          <GroupPurchaseItem key={idx}>
             <GroupPurchaseWrapper>
               <ImageContainer>
-                <ImagePlaceholder />
+                {groupPurchase.imageUrls[0] !== '' ? (
+                  <img
+                    src={groupPurchase.imageUrls[0]}
+                    width={60}
+                    height={60}
+                  />
+                ) : (
+                  <ImagePlaceholder />
+                )}
               </ImageContainer>
               <GroupPurchaseDetails>
-                <ProductName>{groupPurchase.name}</ProductName>
-                <ProductInfo>Quantity: {groupPurchase.quantity}</ProductInfo>
-                <StatusBadge status={groupPurchase.status}>
-                  {groupPurchase.status}
+                <ProductName>{groupPurchase.title}</ProductName>
+                <ProductInfo>
+                  Quantity: {groupPurchase.availableNumber}
+                </ProductInfo>
+                <StatusBadge>
+                  {getStatusLabel(groupPurchase.status)}
                 </StatusBadge>
               </GroupPurchaseDetails>
             </GroupPurchaseWrapper>
-            <Price>{groupPurchase.price}</Price>
+            <Price>{groupPurchase.unitAmount}원</Price>
             <Actions>
-              <ActionButton>상품 페이지 이동</ActionButton>
-              {groupPurchase.status === '공구 완료' && (
+              <ActionButton
+                onClick={() => {
+                  navigate(`/community/post/${groupPurchase.communityPostId}`);
+                }}
+              >
+                상품 페이지 이동
+              </ActionButton>
+              {groupPurchase.status === 'APPROVED' && (
                 <>
                   <QRCodeButton>QR 코드 확인</QRCodeButton>
                   <ReviewLink>
@@ -44,7 +71,7 @@ const GroupPurchaseHistory = () => {
                   </ReviewLink>
                 </>
               )}
-              {groupPurchase.status === '공구 모집중' && (
+              {groupPurchase.status === 'NOT_APPROVED' && (
                 <>
                   <CancelButton>주문 취소하기</CancelButton>
                 </>
@@ -55,6 +82,15 @@ const GroupPurchaseHistory = () => {
       </OrderList>
     </Container>
   );
+};
+
+const STATUS_MAP: { [key: string]: string } = {
+  NOT_APPROVED: '승인대기',
+  APPROVED: '승인완료',
+  PAYMENT_STANDBY: '결제 대기',
+  PAYMENT_COMPLETED: '결제 완료',
+  REJECTED: '승인 거절',
+  DELETED: '글 삭제',
 };
 
 const GroupPurchaseWrapper = styled.div`
@@ -110,11 +146,11 @@ const ProductInfo = styled.div`
   margin-top: 4px;
 `;
 
-const StatusBadge = styled.div<{ status: string }>`
+const StatusBadge = styled.div`
   margin-top: 10px;
   font-size: 12px;
   font-weight: bold;
-  color: ${(props) => (props.status === '공구 모집중' ? '#28a745' : '#007bff')};
+  color: #000;
 `;
 
 const Price = styled.div`

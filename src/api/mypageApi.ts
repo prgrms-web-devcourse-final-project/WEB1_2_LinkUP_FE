@@ -1,5 +1,24 @@
 import axiosInstance from './axiosInstance';
 
+export type GroupPurchaseType = {
+  communityPostId: number;
+  title: string;
+  totalAmount: number;
+  description: string;
+  productUrl: string;
+  category: string;
+  availableNumber: number;
+  createdAt: string;
+  period: number;
+  closeAt: null;
+  unitAmount: number;
+  imageUrls: string[];
+  status: string;
+  userId: number;
+  nickname: string;
+  paymentDeadline: null;
+};
+
 export type OrderType = {
   productName: string;
   price: number;

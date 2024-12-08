@@ -10,6 +10,7 @@ import {
 const OrderHistory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [orderList, setOrderList] = useState<OrderType[]>([]);
+  const [pk, setPk] = useState<string>('');
   const navigate = useNavigate();
 
   const handleCancelClick = () => {
@@ -17,7 +18,7 @@ const OrderHistory = () => {
   };
 
   const handleConfirm = async () => {
-    await postProductCancel({ paymentKey: '', cancelReason: '' });
+    await postProductCancel({ paymentKey: pk, cancelReason: 'test' });
     setIsModalOpen(false);
   };
 
@@ -77,7 +78,14 @@ const OrderHistory = () => {
               >
                 상품 페이지 이동
               </ActionButton>
-              <CancelButton onClick={handleCancelClick}>
+              <CancelButton
+                onClick={() => {
+                  handleCancelClick();
+                  if (order.payment_key) {
+                    setPk(order.payment_key);
+                  }
+                }}
+              >
                 주문 취소/환불
               </CancelButton>
               {order.paymentStatus === 'DONE' && (

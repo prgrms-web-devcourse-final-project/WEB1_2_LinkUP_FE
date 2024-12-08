@@ -2,16 +2,20 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 import { postResetPassword } from '../../../api/loginApi';
+import { useLocation } from 'react-router-dom';
 
 const ResetPasswordPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const queryParams = new URLSearchParams(location.search);
+  const token = queryParams.get('token');
 
   const handleConfirm = async () => {
-    if (password === confirmPassword && password.length >= 8) {
-      await postResetPassword({ newPassword: password }, '1');
+    if (password === confirmPassword && password.length >= 8 && token) {
+      await postResetPassword({ newPassword: password }, token);
       setShowModal(true);
     } else {
       alert('비밀번호가 일치하지 않거나 유효하지 않습니다.');

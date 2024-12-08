@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidemenu from './SideMenu';
 import GS from './GS';
 import styled from 'styled-components';
+import { deleteMyPost, getMyPost } from '../../../api/mypageApi';
 
 function MyPostsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,6 +14,19 @@ function MyPostsPage() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const response = await getMyPost();
+        console.log(response);
+      } catch (error) {
+        console.error('failed', error);
+      }
+    };
+    fetchPost();
+  }, []);
+
   return (
     <GS.Wrapper>
       <Sidemenu />
@@ -48,7 +62,14 @@ function MyPostsPage() {
             <ModalContent>
               삭제하시겠습니까?
               <ModalButtons>
-                <RegisterButton>예</RegisterButton>
+                <RegisterButton
+                  onClick={async () => {
+                    setIsModalOpen(false);
+                    await deleteMyPost('1');
+                  }}
+                >
+                  예
+                </RegisterButton>
                 <CancelButton onClick={handleCloseModal}>아니요</CancelButton>
               </ModalButtons>
             </ModalContent>

@@ -43,3 +43,15 @@ export const getUser = async () => {
 
   return response.data;
 };
+
+export const getMyPost = async () => {
+  const response = await axiosInstance.get(`/api/mypage/community`);
+
+  return response.data;
+};
+
+export const deleteMyPost = async (id: string) => {
+  const response = await axiosInstance.delete(`/api/mypage/post/${id}`);
+
+  return response.data;
+};

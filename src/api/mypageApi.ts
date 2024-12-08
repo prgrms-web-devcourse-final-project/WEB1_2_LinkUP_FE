@@ -11,25 +11,25 @@ export type OrderType = {
 };
 
 export const postPasswordVerify = async (body: { currentPassword: string }) => {
-  const response = await axiosInstance.post(`/mypage/verfiy`, body);
+  const response = await axiosInstance.post(`/api/mypage/verify`, body);
 
   return response.data;
 };
 
 export const postPasswordChange = async (body: { newPassword: string }) => {
-  const response = await axiosInstance.post(`/mypage/change`, body);
+  const response = await axiosInstance.post(`/api/mypage/change`, body);
 
   return response.data;
 };
 
 export const postLocationChange = async (body: { newAddress: string }) => {
-  const response = await axiosInstance.post(`/mypage/changeneighbor`, body);
+  const response = await axiosInstance.post(`/api/mypage/changeneighbor`, body);
 
   return response.data;
 };
 
 export const getOrderList = async () => {
-  const response = await axiosInstance.get(`/mypage/orders`);
+  const response = await axiosInstance.get(`/api/mypage/orders`);
 
   return response.data;
 };

@@ -65,7 +65,8 @@ const SettingPage = () => {
     const fetchUser = async () => {
       try {
         const response = await getUser();
-        console.log(response);
+
+        setProfileImage(response.profile);
       } catch (error) {
         console.error('failed', error);
       }

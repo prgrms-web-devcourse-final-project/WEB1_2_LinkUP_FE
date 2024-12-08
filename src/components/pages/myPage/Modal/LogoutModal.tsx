@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
-import { useAuth } from '../../../../api/AuthContext';
+import { useAuth } from '../../../../context/AuthContext';
 
 const LogoutModal = ({ onClose }: { onClose: () => void }) => {
   const navigate = useNavigate();

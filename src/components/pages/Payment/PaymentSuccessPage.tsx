@@ -11,7 +11,9 @@ const PaymentSuccessPage = () => {
   const productId = Number(id);
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
+  const orderId = urlParams.get('orderId');
   const amount = urlParams.get('amount');
+
   const { data: product, isLoading, isError } = useProductQuery(productId);
 
   if (!product) {
@@ -33,6 +35,10 @@ const PaymentSuccessPage = () => {
               <SummaryRow>
                 <Label>결제 금액</Label>
                 <Value>{amount}원</Value>
+              </SummaryRow>
+              <SummaryRow>
+                <Label>주문 번호</Label>
+                <Value>{orderId}</Value>
               </SummaryRow>
             </OrderSummary>
           </SuccessSection>

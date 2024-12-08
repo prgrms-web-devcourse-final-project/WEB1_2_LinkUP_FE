@@ -4,13 +4,16 @@ import RecommendProduct from './RecommendProduct';
 import PopularProduct from './PopularProduct';
 import CategoryProduct from './CategoryProduct';
 import ScrollToTopButton from '../../common/ScrollToTopButton';
-import { categories } from '../../../mocks/products';
+
 import { QueryHandler, useProductsQuery } from '../../../hooks/useGetProduct';
 import { Link } from 'react-router-dom';
+import { categories } from './model/categories';
 
 const HomePage: React.FC = () => {
   const { data: products, isLoading, isError } = useProductsQuery();
-  const availableProduct = products?.filter((p) => p.available === true);
+  const availableProduct = products?.filter(
+    (p) => p.available === true && new Date(p.deadline) > new Date()
+  );
   const popularProduct = availableProduct?.sort(
     (a, b) => b.currentStock - a.currentStock
   )[0];

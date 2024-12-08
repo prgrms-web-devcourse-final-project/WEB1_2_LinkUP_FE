@@ -39,6 +39,7 @@ import PaymentFailPage from '../components/pages/Payment/PaymentFailPage';
 import ChatRoomManagementPage from '../components/pages/admin/ChatRoomManagementPage';
 import ScrollToTopButton from '../components/common/ScrollToTopButton';
 import DepositPage from '../components/pages/community/DepositPage';
+import ProtectedRoutes from './ProtectedRoutes';
 
 const router = createBrowserRouter(
   [
@@ -59,11 +60,19 @@ const router = createBrowserRouter(
         },
         {
           path: '/products',
-          element: <ProductPage />,
+          element: (
+            <ProtectedRoutes>
+              <ProductPage />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: '/products/:id',
-          element: <ProductDetail />,
+          element: (
+            <ProtectedRoutes>
+              <ProductDetail />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: '/products/payment/:id',
@@ -79,7 +88,11 @@ const router = createBrowserRouter(
         },
         {
           path: '/community/post',
-          element: <CategoryBasedPostsPage />,
+          element: (
+            <ProtectedRoutes>
+              <CategoryBasedPostsPage />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: '/community/post/create',
@@ -111,7 +124,11 @@ const router = createBrowserRouter(
         },
         {
           path: '/admin/post',
-          element: <PostManagementPage />,
+          element: (
+            <ProtectedRoutes>
+              <PostManagementPage />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: '/admin/post/approve/:communityPostId',
@@ -119,7 +136,12 @@ const router = createBrowserRouter(
         },
         {
           path: '/admin/chatlist',
-          element: <ChatRoomManagementPage />,
+          element: (
+            <ProtectedRoutes>
+              {' '}
+              <ChatRoomManagementPage />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: '/mypage',

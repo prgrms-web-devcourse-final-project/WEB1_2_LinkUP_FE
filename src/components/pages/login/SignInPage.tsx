@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 import { postSignIn } from '../../../api/loginApi';
-import { useAuth } from '../../../api/AuthContext';
+import { useAuth } from '../../../context/AuthContext';
 
 const SignInPage = () => {
   const navigate = useNavigate();

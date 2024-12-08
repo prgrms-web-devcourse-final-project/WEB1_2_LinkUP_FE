@@ -1,17 +1,3 @@
-export const categories = [
-  'FOOD',
-  'LIFESTYLE',
-  'FASHION',
-  'ELECTRONICS',
-  'FURNITURE',
-  'KIDS',
-  'SPORTS',
-  'PETS',
-  'BEAUTY',
-  'SEASONAL',
-  'HOBBIES',
-  'AUTOMOTIVE',
-];
 export const popularProduct = {
   id: 16,
   name: '키친타올 세트',

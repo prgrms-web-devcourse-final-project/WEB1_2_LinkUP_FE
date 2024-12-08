@@ -26,8 +26,12 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
   const startIndex = (currentPage - 1) * PRODUCT_PER_PAGE;
   const filteredProducts =
     selectedText === '마감 상품'
-      ? products.filter((p) => p.available === false)
-      : products.filter((p) => p.available === true);
+      ? products.filter(
+          (p) => p.available === false && new Date(p.deadline) < new Date()
+        )
+      : products.filter(
+          (p) => p.available === true && new Date(p.deadline) > new Date()
+        );
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCT_PER_PAGE);
 

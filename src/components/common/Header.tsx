@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import cart from '../../assets/icons/icon.png';
 import logo from '../../assets/icons/goodbuyus-logo.svg';
 import menu from '../../assets/icons/menu.svg';
-import { useAuth } from '../../api/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 const Header = () => {
   const { isLoggedIn, isAdmin, logout } = useAuth();

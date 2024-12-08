@@ -7,6 +7,7 @@ import { addWishList } from './api/wishApi';
 import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
 import CommentComponent from './CommentComponent';
+import { useQuantity } from '../../../context/QuantityContext';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams();
@@ -20,13 +21,12 @@ const ProductDetail: React.FC = () => {
   }
 
   const { data: product, isLoading, isError } = useProductQuery(productId || 0);
-  const [quantity, setQuantity] = useState(1);
+  const { quantity, setQuantity } = useQuantity();
   const [remainingTime, setRemainingTime] = useState('');
   const navigate = useNavigate();
   const isOutOfStock = product ? product.now >= product.currentStock : false;
   const isDeadlinePassed = remainingTime === '마감되었습니다.';
   const isButtonDisabled = isOutOfStock || isDeadlinePassed;
-
   useEffect(() => {
     if (!product) return;
 
@@ -61,8 +61,8 @@ const ProductDetail: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    const res = await submitOrder(productId, quantity);
-    navigate(`/products/payment/${productId}`, { state: res });
+    await submitOrder(productId, quantity);
+    navigate(`/products/payment/${productId}`);
   };
 
   if (!product) {

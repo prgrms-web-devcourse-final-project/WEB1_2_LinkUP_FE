@@ -33,3 +33,9 @@ export const getOrderList = async () => {
 
   return response.data;
 };
+
+export const getUser = async () => {
+  const response = await axiosInstance.get(`/api/mypage`);
+
+  return response.data;
+};

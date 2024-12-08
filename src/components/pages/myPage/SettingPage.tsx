@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { styled } from 'styled-components';
 import GS from './GS';
 import Sidemenu from './SideMenu';
@@ -7,6 +7,7 @@ import PasswordModal from './Modal/PasswordModal';
 import LogoutModal from './Modal/LogoutModal';
 import WithdrawModal from './Modal/WithdrawModal';
 import { useDaumPostcodePopup } from 'react-daum-postcode';
+import { getUser } from '../../../api/mypageApi';
 
 const SettingPage = () => {
   const { addressList } = SettingPageData;
@@ -59,6 +60,18 @@ const SettingPage = () => {
       reader.readAsDataURL(file);
     }
   };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await getUser();
+        console.log(response);
+      } catch (error) {
+        console.error('failed', error);
+      }
+    };
+    fetchUser();
+  }, []);
 
   return (
     <GS.Wrapper>

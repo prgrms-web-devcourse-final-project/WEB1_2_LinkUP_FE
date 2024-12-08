@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { getOrderList, OrderType } from '../../../../api/mypageApi';
+import {
+  getOrderList,
+  OrderType,
+  postProductCancel,
+} from '../../../../api/mypageApi';
 
 const OrderHistory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -12,8 +16,8 @@ const OrderHistory = () => {
     setIsModalOpen(true);
   };
 
-  const handleConfirm = () => {
-    // 주문 취소/환불 로직 추가 예정
+  const handleConfirm = async () => {
+    await postProductCancel({ paymentKey: '', cancelReason: '' });
     setIsModalOpen(false);
   };
 

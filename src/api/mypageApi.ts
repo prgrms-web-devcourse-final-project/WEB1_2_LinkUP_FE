@@ -63,3 +63,15 @@ export const deleteMyPost = async (id: string) => {
 
   return response.data;
 };
+
+export const postProductCancel = async (body: {
+  paymentKey: string;
+  cancelReason: string;
+}) => {
+  const response = await axiosInstance.post(
+    `/api/v1/main-payments/cancel`,
+    body
+  );
+
+  return response.data;
+};

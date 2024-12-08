@@ -1,8 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
+import { getCommunity } from '../../../../api/mypageApi';
 import { groupPurchaseHistoryData } from '../mockData';
 
 const GroupPurchaseHistory = () => {
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const response = await getCommunity();
+        console.log(response);
+      } catch (error) {
+        console.error('failed', error);
+      }
+    };
+    fetchPost();
+  }, []);
   return (
     <Container>
       <OrderList>

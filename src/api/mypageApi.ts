@@ -44,8 +44,14 @@ export const getUser = async () => {
   return response.data;
 };
 
-export const getMyPost = async () => {
+export const getCommunity = async () => {
   const response = await axiosInstance.get(`/api/mypage/community`);
+
+  return response.data;
+};
+
+export const getMyPostList = async () => {
+  const response = await axiosInstance.get(`/api/mypage/post`);
 
   return response.data;
 };

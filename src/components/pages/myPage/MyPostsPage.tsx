@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Sidemenu from './SideMenu';
 import GS from './GS';
 import styled from 'styled-components';
-import { deleteMyPost, getMyPost } from '../../../api/mypageApi';
+import { deleteMyPost, getMyPostList } from '../../../api/mypageApi';
 
 function MyPostsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,7 +18,7 @@ function MyPostsPage() {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await getMyPost();
+        const response = await getMyPostList();
         console.log(response);
       } catch (error) {
         console.error('failed', error);

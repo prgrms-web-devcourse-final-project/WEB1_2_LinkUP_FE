@@ -59,6 +59,12 @@ export const getOrderList = async () => {
   }
 };
 
+export const getRefundList = async () => {
+  const response = await axiosInstance.get(`/api/mypage/refund_orders`);
+
+  return response.data;
+};
+
 export const getUser = async () => {
   const response = await axiosInstance.get(`/api/mypage`);
 

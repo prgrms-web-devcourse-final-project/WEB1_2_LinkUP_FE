@@ -1,13 +1,15 @@
 import axiosInstance from './axiosInstance';
 
 export type OrderType = {
-  delivery: null | string;
+  productName: string;
+  price: number;
   orderDate: string;
   paymentStatus: string;
   payment_key: null | string;
-  price: number;
-  productName: string;
   quantity: number;
+  delivery: null | string;
+  postId: number;
+  url: string;
 };
 
 export const postPasswordVerify = async (body: { currentPassword: string }) => {

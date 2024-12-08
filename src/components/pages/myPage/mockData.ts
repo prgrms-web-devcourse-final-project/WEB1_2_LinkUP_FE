@@ -88,7 +88,7 @@ export const wishHistoryData = [
     name: 'Women Textured Handheld Bag',
     quantity: 1,
     price: '$80.00',
-    thumb: '',
+    thumb: '/images/bell.png',
   },
   {
     id: 2,

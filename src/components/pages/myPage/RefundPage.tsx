@@ -6,12 +6,34 @@ import styled from 'styled-components';
 function RefundPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [accountData, setAccountData] = useState({
+    bank: '신한은행',
+    owner: '굿바이어',
+    accountNumber: '111-111-111111',
+  });
+
+  const [modalData, setModalData] = useState(accountData);
+
   const handleEditClick = () => {
+    setModalData(accountData);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleRegister = () => {
+    setAccountData(modalData);
+    setIsModalOpen(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setModalData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   return (
@@ -37,9 +59,9 @@ function RefundPage() {
             </thead>
             <tbody>
               <tr>
-                <Td>00은행</Td>
-                <Td>굿바이어</Td>
-                <Td>012********</Td>
+                <Td>{accountData.bank}</Td>
+                <Td>{accountData.owner}</Td>
+                <Td>{accountData.accountNumber}</Td>
                 <Td>
                   <ButtonWrapper>
                     <EditButton onClick={handleEditClick}>수정</EditButton>
@@ -65,19 +87,34 @@ function RefundPage() {
                 <tbody>
                   <tr>
                     <Td>
-                      <Input type="text" defaultValue="00은행" />
+                      <Input
+                        type="text"
+                        name="bank"
+                        value={modalData.bank}
+                        onChange={handleInputChange}
+                      />
                     </Td>
                     <Td>
-                      <Input type="text" defaultValue="굿바이어" />
+                      <Input
+                        type="text"
+                        name="owner"
+                        value={modalData.owner}
+                        onChange={handleInputChange}
+                      />
                     </Td>
                     <Td>
-                      <Input type="text" defaultValue="012********" />
+                      <Input
+                        type="text"
+                        name="accountNumber"
+                        value={modalData.accountNumber}
+                        onChange={handleInputChange}
+                      />
                     </Td>
                   </tr>
                 </tbody>
               </ModalTable>
               <ModalButtons>
-                <RegisterButton>등록</RegisterButton>
+                <RegisterButton onClick={handleRegister}>등록</RegisterButton>
                 <CancelButton onClick={handleCloseModal}>취소</CancelButton>
               </ModalButtons>
             </ModalContent>
@@ -87,8 +124,6 @@ function RefundPage() {
     </GS.Wrapper>
   );
 }
-
-// Styled Components
 const Desc = styled.div`
   color: #88868c;
   margin-bottom: 20px;

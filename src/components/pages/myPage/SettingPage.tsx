@@ -10,7 +10,7 @@ import { useDaumPostcodePopup } from 'react-daum-postcode';
 import { getUser } from '../../../api/mypageApi';
 
 const SettingPage = () => {
-  const { addressList } = SettingPageData;
+  const [addressList, setAddressList] = useState(SettingPageData.addressList);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
@@ -59,6 +59,10 @@ const SettingPage = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleDeleteAddress = (id: number) => {
+    setAddressList((prevList) => prevList.filter((item) => item.id !== id));
   };
 
   useEffect(() => {
@@ -183,7 +187,7 @@ const SettingPage = () => {
             </AddAddressButton>
           )}
           <AddressList>
-            {addressList.map((item) => (
+            {addressList?.map((item) => (
               <AddressItem key={item.id}>
                 <AddressInfo>
                   <Name>{item.name}</Name>
@@ -191,8 +195,9 @@ const SettingPage = () => {
                   <Phone>{item.phone}</Phone>
                 </AddressInfo>
                 <Actions>
-                  <EditButton>Edit</EditButton>
-                  <DeleteButton>Delete</DeleteButton>
+                  <DeleteButton onClick={() => handleDeleteAddress(item.id)}>
+                    Delete
+                  </DeleteButton>
                 </Actions>
               </AddressItem>
             ))}
@@ -371,21 +376,6 @@ const ButtonGroup = styled.div`
   margin-top: 10px;
   width: 350px;
 `;
-
-const EditButton = styled.div`
-  display: inline-flex;
-  justify-content: center;
-  background-color: #f1f1f1;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 5px 10px;
-  cursor: pointer;
-
-  &:hover {
-    background-color: #ddd;
-  }
-`;
-
 const DeleteButton = styled.div`
   display: inline-flex;
   justify-content: center;

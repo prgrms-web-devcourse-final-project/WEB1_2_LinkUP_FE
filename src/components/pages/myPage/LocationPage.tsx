@@ -3,7 +3,7 @@ import Sidemenu from './SideMenu';
 import GS from './GS';
 import KakaoMap from '../../common/KakaoMap';
 import styled from 'styled-components';
-import { postLocationChange } from '../../../api/mypageApi';
+import { putLocationChange } from '../../../api/mypageApi';
 
 function LocationPage() {
   const [location, setLocation] = useState<{
@@ -68,7 +68,7 @@ function LocationPage() {
           <VerfiyButton
             onClick={async () => {
               if (region) {
-                await postLocationChange({ newAddress: region });
+                await putLocationChange({ newAddress: region });
               }
             }}
           >

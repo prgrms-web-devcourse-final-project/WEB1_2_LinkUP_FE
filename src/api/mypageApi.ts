@@ -22,8 +22,8 @@ export const postPasswordChange = async (body: { newPassword: string }) => {
   return response.data;
 };
 
-export const postLocationChange = async (body: { newAddress: string }) => {
-  const response = await axiosInstance.post(`/api/mypage/changeneighbor`, body);
+export const putLocationChange = async (body: { newAddress: string }) => {
+  const response = await axiosInstance.put(`/api/mypage/changeneighbor`, body);
 
   return response.data;
 };
@@ -31,7 +31,11 @@ export const postLocationChange = async (body: { newAddress: string }) => {
 export const getOrderList = async () => {
   const response = await axiosInstance.get(`/api/mypage/orders`);
 
-  return response.data;
+  if (response.status !== 204) {
+    return response.data;
+  } else {
+    return [];
+  }
 };
 
 export const getUser = async () => {

@@ -1,10 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import { FaAngleLeft, FaAngleRight } from 'react-icons/fa';
+import { getImageSrc } from '../../../../hooks/GetImageSrc';
 
 interface PostImageSectionProps {
   selectedPost: {
-    imageUrls: File[];
+    imageUrls: (File | string)[];
     productUrl: string;
   } | null;
   currentIndex: number;
@@ -47,7 +48,7 @@ const PostImageSection: React.FC<PostImageSectionProps> = ({
 
         <ImagePreview>
           <img
-            src={URL.createObjectURL(selectedPost.imageUrls[currentIndex])}
+            src={getImageSrc(selectedPost.imageUrls[currentIndex])}
             alt={`이미지 ${currentIndex + 1}`}
           />
         </ImagePreview>

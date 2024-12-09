@@ -5,6 +5,7 @@ import SearchBar from './SearchBar';
 import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
 import { SSEEvent, Post } from '../../types/postTypes';
+import { getImageSrc } from '../../hooks/GetImageSrc';
 
 interface PostListProps {
   selectedCategory: string;
@@ -116,7 +117,7 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
             onClick={() => handlePostClick(post.communityPostId)}
           >
             <PostImage
-              src={URL.createObjectURL(post.imageUrls[0])}
+              src={getImageSrc(post.imageUrls[0])}
               alt={`post.title`}
             />
             <PostContent>

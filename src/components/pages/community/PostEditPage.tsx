@@ -15,6 +15,7 @@ import { fetchPostById, updatePost, deletePostById } from './api/postApi';
 import CategoryWrapper from '../../common/CategoryWrapper';
 import { POST_CATEGORIES } from './postCategories';
 import { Post, PostDetailResponse } from '../../../types/postTypes';
+import { getImageSrc } from '../../../hooks/GetImageSrc';
 
 const PostEditPage = () => {
   const { communityPostId } = useParams<{ communityPostId: string }>();
@@ -291,13 +292,7 @@ const PostEditPage = () => {
                   ) : (
                     <ImagePreview>
                       <img
-                        src={
-                          typeof imageUrls[currentIndex] === 'string'
-                            ? (imageUrls[currentIndex] as string)
-                            : URL.createObjectURL(
-                                imageUrls[currentIndex] as File
-                              )
-                        }
+                        src={getImageSrc(imageUrls[currentIndex])}
                         alt="이미지 미리보기"
                       />
                       <RemoveImageButton onClick={handleRemoveImage}>

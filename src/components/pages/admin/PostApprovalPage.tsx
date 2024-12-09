@@ -5,6 +5,7 @@ import { fetchPostById } from '../community/api/postApi';
 import { approvePost, rejectPost } from './api/adminApi';
 import { FaBackspace, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import { Post } from '../../../types/postTypes';
+import { getImageSrc } from '../../../hooks/GetImageSrc';
 
 const PostApprovalPage = () => {
   const location = useLocation();
@@ -109,7 +110,7 @@ const PostApprovalPage = () => {
 
                 <ImagePreview>
                   <img
-                    src={URL.createObjectURL(post.imageUrls[currentIndex])}
+                    src={getImageSrc(post.imageUrls[currentIndex])}
                     alt={`이미지 ${currentIndex + 1}`}
                   />
                 </ImagePreview>

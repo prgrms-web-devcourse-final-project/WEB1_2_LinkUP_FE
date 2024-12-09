@@ -13,7 +13,7 @@ import { createPost } from './api/postApi';
 import CategoryWrapper from '../../common/CategoryWrapper';
 import { POST_CATEGORIES } from './postCategories';
 import { CreatePostData } from '../../../types/postTypes';
-import PostImageSection from './PostDetailPage/PostImageSection';
+import { getImageSrc } from '../../../hooks/GetImageSrc';
 
 const PostCreatePage = () => {
   const navigate = useNavigate();
@@ -219,11 +219,6 @@ const PostCreatePage = () => {
           <FormContainer>
             <ImageAndDetailsContainer>
               {/* 이미지 업로드 섹션 */}
-              <PostImageSection
-                selectedPost={{ imageUrls: imageUrls, productUrl: urlInput }}
-                currentIndex={currentIndex}
-                setCurrentIndex={setCurrentIndex}
-              />
               <ImageUploadContainer>
                 <ImagePreviewWrapper>
                   <PreviousButtonWrapper>
@@ -249,13 +244,7 @@ const PostCreatePage = () => {
                   ) : (
                     <ImagePreview>
                       <img
-                        src={
-                          typeof imageUrls[currentIndex] === 'string'
-                            ? (imageUrls[currentIndex] as string)
-                            : URL.createObjectURL(
-                                imageUrls[currentIndex] as File
-                              )
-                        }
+                        src={getImageSrc(imageUrls[currentIndex])}
                         alt="이미지 미리보기"
                       />
                       <RemoveImageButton onClick={handleRemoveImage}>

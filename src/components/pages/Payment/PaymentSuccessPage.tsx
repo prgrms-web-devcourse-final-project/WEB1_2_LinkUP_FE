@@ -11,8 +11,8 @@ const PaymentSuccessPage = () => {
   const productId = Number(id);
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
-  const orderId = urlParams.get('orderId');
-  const amount = urlParams.get('amount');
+
+  const amount = urlParams.get('totalAmount');
 
   const { data: product, isLoading, isError } = useProductQuery(productId);
 
@@ -36,15 +36,11 @@ const PaymentSuccessPage = () => {
                 <Label>결제 금액</Label>
                 <Value>{amount}원</Value>
               </SummaryRow>
-              <SummaryRow>
-                <Label>주문 번호</Label>
-                <Value>{orderId}</Value>
-              </SummaryRow>
             </OrderSummary>
           </SuccessSection>
 
           <ButtonGroup>
-            <OrderDetailButton to={`/orders/${product?.id}`}>
+            <OrderDetailButton to={`/mypage/orderlist`}>
               주문 내역 보기
             </OrderDetailButton>
             <BackButton to="/">메인으로 돌아가기</BackButton>

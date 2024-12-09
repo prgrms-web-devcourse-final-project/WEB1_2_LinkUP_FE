@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  selectedPostAtom,
   realTimeDataAtom,
   selectedPostIdAtom,
   joinQuantityAtom,
@@ -15,19 +14,30 @@ import {
   joinPost,
   cancelJoinPost,
   deletePostById,
+  handleSSEUpdate,
 } from '../community/api/postApi';
 import { FaBackspace } from 'react-icons/fa';
-import { POST_STATUS, PostDetailResponse } from '../../../types/postTypes';
+import {
+  Post,
+  POST_STATUS,
+  PostDetailResponse,
+  SSEEvent,
+} from '../../../types/postTypes';
 import PostImageSection from './PostDetailPage/PostImageSection';
 import PostDetailsSection from './PostDetailPage/PostDetailsSection';
 import PostCommentsSection from './PostDetailPage/PostCommentsSection';
+import SSEHandler from '../../../utils/SSEHandler';
+import ParticipantList from './ParticipantList';
+import { useAuth } from '../../../context/AuthContext';
 
 const PostDetailPage: React.FC = () => {
   const { communityPostId } = useParams<{ communityPostId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { isAdmin } = useAuth();
 
-  const [selectedPost] = useAtom(selectedPostAtom);
+  const [post, setPost] = useState<Post | null>(null);
+  const [data, setData] = useState<PostDetailResponse | null>(null);
   const [realTimeData, setRealTimeData] = useAtom(realTimeDataAtom);
   const [, setSelectedPostId] = useAtom(selectedPostIdAtom);
   const [currentUser] = useAtom(currentUserAtom);
@@ -46,32 +56,41 @@ const PostDetailPage: React.FC = () => {
     if (communityPostIdNumber) {
       setSelectedPostId(communityPostIdNumber);
     } else {
-      alert('잘못된 게시물 ID입니다.');
       navigate('/community/post');
     }
   }, [communityPostIdNumber, setSelectedPostId, navigate]);
 
-  // 게시물 데이터 가져오기
-  const { data, isError } = useQuery<PostDetailResponse>({
-    queryKey,
-    queryFn: async (): Promise<PostDetailResponse> =>
-      fetchPostById(communityPostIdNumber),
-  });
+  useEffect(() => {
+    const fetchPostDetails = async () => {
+      try {
+        const data = await fetchPostById(Number(communityPostId!));
+        setData(data);
+        setPost(data.communityPost);
+      } catch (error) {
+        console.error('Failed to fetch post details:', error);
+        navigate('*');
+      }
+    };
+
+    if (communityPostId) fetchPostDetails();
+  }, [communityPostId, navigate]);
 
   useEffect(() => {
-    if (data) {
+    if (data!) {
       const quantityToSet =
-        data.participationStatus === 'JOIN' ||
-        data.participationStatus === 'PAYMENT_STANDBY'
+        data!.participationStatus === 'JOIN' ||
+        data!.participationStatus === 'PAYMENT_STANDBY'
           ? (joinQuantity ?? 1)
           : 1;
       setQuantity(quantityToSet);
     }
-  }, [data, joinQuantity]);
+  }, [data!, joinQuantity]);
 
-  const isParticipant = selectedPost.data?.participationStatus === 'JOIN';
-  const isNotParticipant = !selectedPost.data?.participationStatus;
-  const isAuthor = selectedPost.data?.communityPost.userId === currentUser?.id;
+  const isParticipant =
+    realTimeData?.participationStatus === 'JOIN' ||
+    realTimeData?.participationStatus === 'PAYMENT_STANDBY';
+  const isNotParticipant = !realTimeData?.participationStatus;
+  const isAuthor = post?.userId === currentUser?.id;
 
   // SSE 연결 활성화
   useEffect(() => {
@@ -95,23 +114,15 @@ const PostDetailPage: React.FC = () => {
     }
   }, [communityPostIdNumber, queryClient, setRealTimeData]);
 
-  // 오류 처리
-  useEffect(() => {
-    if (isError) {
-      alert('게시물을 불러오는 데 실패했습니다.');
-      navigate('/community/post');
-    }
-  }, [isError, navigate]);
-
   // 마감 시간 계산
   useEffect(() => {
-    if (selectedPost.data?.communityPost.closeAt) {
+    if (post?.closeAt) {
       const calculateRemainingTime = () => {
+        const createdTime = new Date(post.closeAt || '').getTime();
+        const targetTime = createdTime + 9 * 24 * 60 * 60 * 1000;
         const now = Date.now();
-        const targetTime = new Date(
-          selectedPost.data?.communityPost.closeAt || ''
-        ).getTime();
         const diff = targetTime - now;
+
         if (diff <= 0) return '마감되었습니다.';
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor(
@@ -128,20 +139,17 @@ const PostDetailPage: React.FC = () => {
 
       return () => clearInterval(timer);
     }
-  }, [selectedPost]);
+  }, [post?.createdAt, post?.period]);
 
   // 결제 마감 시간 계산
   useEffect(() => {
-    if (
-      selectedPost.data?.communityPost.status === POST_STATUS.PAYMENT_STANDBY &&
-      selectedPost.data.communityPost.paymentDeadline
-    ) {
-      const countdownTarget =
-        new Date(selectedPost.data.communityPost.paymentDeadline).getTime() +
-        12 * 60 * 60 * 1000;
-
+    if (post?.status === POST_STATUS.PAYMENT_STANDBY && post?.paymentDeadline) {
       const calculatePaymentTime = () => {
-        const now = new Date().getTime();
+        const paymentDeadlineTime = new Date(
+          post.paymentDeadline || ''
+        ).getTime();
+        const countdownTarget = paymentDeadlineTime + 12 * 60 * 60 * 1000;
+        const now = Date.now();
         const diff = countdownTarget - now;
 
         if (diff <= 0) return '결제 마감되었습니다.';
@@ -158,7 +166,7 @@ const PostDetailPage: React.FC = () => {
 
       return () => clearInterval(timer);
     }
-  }, [selectedPost]);
+  }, [post?.status, post?.paymentDeadline]);
 
   // 게시물 삭제 핸들러
   const deletePostMutation = useMutation({
@@ -175,6 +183,7 @@ const PostDetailPage: React.FC = () => {
 
   const handleDelete = () => {
     if (window.confirm('정말 이 게시물을 삭제하시겠습니까?')) {
+      handleSSEUpdate(communityPostIdNumber);
       deletePostMutation.mutate(communityPostIdNumber);
     }
   };
@@ -189,8 +198,13 @@ const PostDetailPage: React.FC = () => {
     Error, // 에러 타입
     { communityPostId: number; quantity: number }
   >({
-    mutationFn: ({ communityPostId, quantity }) =>
-      joinPost(communityPostId, quantity),
+    mutationFn: ({
+      communityPostId,
+      quantity,
+    }: {
+      communityPostId: number;
+      quantity: number;
+    }) => joinPost(communityPostId, quantity),
     onSuccess: () => {
       alert('공구 참여가 완료되었습니다.');
       queryClient.invalidateQueries({ queryKey }); // 정확한 queryKey 사용
@@ -207,19 +221,62 @@ const PostDetailPage: React.FC = () => {
       alert('수량을 입력해주세요.');
       return;
     }
+    handleSSEUpdate(communityPostIdNumber);
+    joinMutation(
+      { communityPostId: communityPostIdNumber, quantity },
+      {
+        onSuccess: () => {
+          setRealTimeData((prev) => {
+            const updatedParticipants = prev?.participants
+              ? [
+                  ...prev.participants.filter(
+                    (p) => p.userId !== currentUser?.id
+                  ),
+                  {
+                    userId: currentUser?.id || 0, // userId가 undefined일 수 있으므로 기본값 추가
+                    nickname: currentUser?.nickname || '',
+                    isCancelled: false,
+                    isPaymentCompleted: false,
+                    quantity,
+                  },
+                ]
+              : [
+                  {
+                    userId: currentUser?.id || 0,
+                    nickname: currentUser?.nickname || '',
+                    isCancelled: false,
+                    isPaymentCompleted: false,
+                    quantity,
+                  },
+                ];
 
-    joinMutation({ communityPostId: communityPostIdNumber, quantity });
+            return {
+              ...prev,
+              participants: updatedParticipants,
+              participationCount: updatedParticipants.length,
+              postStatus: prev?.postStatus || POST_STATUS.APPROVED,
+              paymentCount: prev?.paymentCount || 0,
+              participationStatus: 'JOIN',
+            } as SSEEvent;
+          });
+
+          alert('공구 참여가 완료되었습니다.');
+          queryClient.invalidateQueries({ queryKey });
+        },
+        onError: (error: Error) => {
+          console.error('공구 참여 실패:', error.message);
+          alert('공구 참여에 실패했습니다.');
+        },
+      }
+    );
   };
 
   // 초기 수량 설정 (참여 상태 확인)
   useEffect(() => {
-    if (
-      selectedPost.data?.participationStatus === 'JOIN' &&
-      joinQuantity !== null
-    ) {
+    if (data?.participationStatus === 'JOIN' && joinQuantity !== null) {
       setQuantity(joinQuantity);
     }
-  }, [selectedPost.data?.participationStatus, joinQuantity]);
+  }, [data?.participationStatus, joinQuantity]);
 
   // 참여 취소 핸들러
   const cancelMutation = useMutation({
@@ -234,7 +291,31 @@ const PostDetailPage: React.FC = () => {
   });
 
   const handleCancel = () => {
-    cancelMutation.mutate();
+    handleSSEUpdate(communityPostIdNumber);
+    cancelMutation.mutate(undefined, {
+      onSuccess: () => {
+        setRealTimeData((prev) => {
+          const updatedParticipants = prev?.participants?.map((p) =>
+            p.userId === currentUser?.id ? { ...p, isCancelled: true } : p
+          );
+
+          return {
+            ...prev,
+            participants: updatedParticipants,
+            participationCount: updatedParticipants?.filter(
+              (p) => !p.isCancelled
+            ).length,
+            postStatus: prev?.postStatus || POST_STATUS.APPROVED,
+            paymentCount: prev?.paymentCount || 0,
+          } as SSEEvent;
+        });
+
+        alert('참여가 취소되었습니다.');
+      },
+      onError: () => {
+        alert('참여 취소에 실패했습니다.');
+      },
+    });
   };
 
   const handleReport = () => {
@@ -244,39 +325,52 @@ const PostDetailPage: React.FC = () => {
   // 수량 변경
   const handleQuantityChange = (change: number) => {
     const newQuantity = quantity + change;
-    if (
-      newQuantity > 0 &&
-      newQuantity <= selectedPost.data!.communityPost.availableNumber
-    ) {
+    const maxAvailable = post?.availableNumber || 0;
+
+    if (newQuantity > 0 && newQuantity <= maxAvailable) {
       setQuantity(newQuantity);
+    } else {
+      alert('유효한 수량을 입력하세요.');
     }
   };
 
   // 결제하기 페이지로 이동
   const handlePayment = () => {
-    if (
-      selectedPost.data?.participationStatus !== POST_STATUS.PAYMENT_STANDBY
-    ) {
+    handleSSEUpdate(communityPostIdNumber);
+    if (data?.participationStatus !== POST_STATUS.PAYMENT_STANDBY) {
       alert('현재 결제할 수 없는 상태입니다.');
       return;
     }
 
     const paymentState = {
       post: {
-        title: selectedPost.data.communityPost.title,
-        unitAmount: selectedPost.data.communityPost.unitAmount,
-        imageUrls: selectedPost.data.communityPost.imageUrls,
+        title: post?.title,
+        unitAmount: post?.unitAmount,
+        imageUrls: post?.imageUrls,
       },
       quantity,
     };
 
+    setRealTimeData((prev) => {
+      const updatedParticipants = prev?.participants?.map((p) =>
+        p.userId === currentUser?.id ? { ...p, isPaymentCompleted: true } : p
+      );
+
+      return {
+        ...prev,
+        participants: updatedParticipants,
+        paymentCount: updatedParticipants?.filter((p) => p.isPaymentCompleted)
+          .length,
+        postStatus: prev?.postStatus || POST_STATUS.PAYMENT_COMPLETED,
+        participationCount: updatedParticipants?.length || 0,
+      } as SSEEvent;
+    });
+
     if (isAuthor) {
-      // 작성자인 경우 PaymentAuthorPage로 이동
       navigate(`/community/post/${communityPostId}/payment/author`, {
         state: paymentState,
       });
     } else {
-      // 참여자인 경우 PaymentParticipantPage로 이동
       navigate(`/community/post/${communityPostId}/payment/participant`, {
         state: paymentState,
       });
@@ -285,14 +379,46 @@ const PostDetailPage: React.FC = () => {
 
   // 환불 요청 페이지로 이동
   const handleRefund = () => {
-    if (selectedPost.data?.participationStatus === 'PAYMENT_COMPLETE') {
-      navigate(`/community/post/${communityPostId}/refund`);
+    handleSSEUpdate(communityPostIdNumber);
+    if (data?.participationStatus === 'PAYMENT_COMPLETE') {
+      const refundState = {
+        post: { title: post?.title, unitAmount: post?.unitAmount },
+        quantity,
+      };
+
+      setRealTimeData((prev) => {
+        const updatedParticipants = prev?.participants?.map((p) =>
+          p.userId === currentUser?.id ? { ...p, isPaymentCompleted: false } : p
+        );
+
+        return {
+          ...prev,
+          participants: updatedParticipants,
+          paymentCount: updatedParticipants?.filter((p) => p.isPaymentCompleted)
+            .length,
+          postStatus: prev?.postStatus || POST_STATUS.APPROVED,
+          participationCount: updatedParticipants?.length || 0,
+        } as SSEEvent;
+      });
+
+      if (isAuthor) {
+        navigate(`/community/post/${communityPostId}/refund/author`, {
+          state: refundState,
+        });
+      } else {
+        navigate(`/community/post/${communityPostId}/refund/participant`, {
+          state: refundState,
+        });
+      }
     } else {
       alert('환불 요청이 불가능한 상태입니다.');
     }
   };
 
-  if (!selectedPost.data?.communityPost) return <div>게시물이 없습니다.</div>;
+  if (!post) return <div>게시물이 없습니다.</div>;
+  if (!data || !post) {
+    return <div>로딩 중입니다...</div>;
+  }
 
   return (
     <PostDetailContainer>
@@ -320,15 +446,15 @@ const PostDetailPage: React.FC = () => {
             {/* 이미지 섹션 */}
             <PostImageSection
               selectedPost={{
-                imageUrls: selectedPost.data.communityPost.imageUrls,
-                productUrl: selectedPost.data.communityPost.productUrl,
+                imageUrls: post?.imageUrls || [],
+                productUrl: post?.productUrl || '',
               }}
               currentIndex={currentIndex}
               setCurrentIndex={setCurrentIndex}
             />
 
             <PostDetailsSection
-              selectedPost={selectedPost.data.communityPost}
+              selectedPost={post}
               realTimeData={realTimeData}
               quantity={quantity}
               isParticipant={isParticipant}
@@ -345,23 +471,26 @@ const PostDetailPage: React.FC = () => {
 
           {/* 내용 섹션 */}
           <TextAreaWrapper>
-            <TextArea
-              readOnly
-              value={selectedPost.data.communityPost.description}
-            />
+            <TextArea readOnly value={post?.description || ''} />
           </TextAreaWrapper>
 
           {/* 댓글 컨테이너 */}
           <PostCommentsSection
             communityPostId={communityPostIdNumber}
-            comments={selectedPost.data.communityPost.comments.map(
-              (comment) => ({
+            comments={
+              post?.comments?.map((comment) => ({
                 ...comment,
                 commentId: Number(comment.commentId),
-              })
-            )}
+              })) || []
+            }
           />
         </FormContainer>
+        {isAdmin && realTimeData?.participants && (
+          <>
+            <SSEHandler communityPostId={communityPostIdNumber} />
+            <ParticipantList />
+          </>
+        )}
       </ContentWrapper>
     </PostDetailContainer>
   );

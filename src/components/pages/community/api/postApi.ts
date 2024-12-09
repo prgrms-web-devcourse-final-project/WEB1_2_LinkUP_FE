@@ -209,43 +209,45 @@ export const cancelJoinPost = async (
 
 // SSE: 실시간 정보 구독 (참여 현황, 포스트 상태, 결제 현황) 데이터 수신 및 상태 갱신
 export const handleSSEUpdate = (
-  communityPostId: number,
-  updateState: (state: {
+  postId: number,
+  updateState?: (state: {
     postStatus?: POST_STATUS;
     participationCount?: number;
     paymentCount?: number;
   }) => void
-): EventSource => {
-  const eventSource = new EventSource(
-    `/api/community/post/${communityPostId}/participants`
-  );
+): void => {
+  const url = `/api/community/post/${postId}/participants`;
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('GET', url, true);
+  xhr.send();
+
+  // SSE 연결
+  const eventSource = new EventSource(url);
+
+  // SSE 메시지 수신
   eventSource.onmessage = (event) => {
-    const data: SSEEvent = JSON.parse(event.data);
-    updateState({
-      postStatus: data.postStatus,
-      participationCount: data.participationCount,
-      paymentCount: data.paymentCount,
-    });
+    try {
+      const data: SSEEvent = JSON.parse(event.data);
+
+      // 상태 갱신 함수가 있을 경우 호출
+      if (updateState) {
+        updateState({
+          postStatus: data.postStatus,
+          participationCount: data.participationCount,
+          paymentCount: data.paymentCount,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to parse SSE data:', error);
+    }
   };
 
+  // SSE 연결 오류 처리
   eventSource.onerror = (error) => {
     console.error('SSE connection error:', error);
     eventSource.close();
   };
-
-  return eventSource;
-};
-
-// SSE 통합 상태 갱신
-export const updatePostStatusWithSSE = (
-  communityPostId: number,
-  updateState: (state: {
-    postStatus?: POST_STATUS;
-    participationCount?: number;
-    paymentCount?: number;
-  }) => void
-): EventSource => {
-  return handleSSEUpdate(communityPostId, updateState);
 };
 
 // 댓글 작성

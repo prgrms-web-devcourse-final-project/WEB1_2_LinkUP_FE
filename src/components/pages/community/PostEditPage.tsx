@@ -16,7 +16,6 @@ import CategoryWrapper from '../../common/CategoryWrapper';
 import { POST_CATEGORIES } from './postCategories';
 import { Post, PostDetailResponse } from '../../../types/postTypes';
 import { getImageSrc } from '../../../utils/GetImageSrc';
-
 const PostEditPage = () => {
   const { communityPostId } = useParams<{ communityPostId: string }>();
   const navigate = useNavigate();

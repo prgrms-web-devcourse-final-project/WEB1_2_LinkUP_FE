@@ -17,7 +17,7 @@ const Header = () => {
   const handleCommunityClick = (
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
   ) => {
-    if (!isLoggedIn || !isAdmin) {
+    if (!isLoggedIn && !isAdmin) {
       e.preventDefault();
       alert('로그인 후 이용할 수 있는 페이지입니다.');
       setIsMobileMenuOpen(!isMobileMenuOpen);

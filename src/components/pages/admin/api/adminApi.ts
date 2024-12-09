@@ -38,9 +38,9 @@ export const approvePost = async (
       throw new Error('Failed to approve post');
     }
     return response.data;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    console.error(`Error approving post with ID ${communityPostId}:`, error);
-    throw error;
+    throw new Error(`Error approving post with ID ${communityPostId}`);
   }
 };
 
@@ -63,8 +63,8 @@ export const rejectPost = async (
       throw new Error('Failed to reject post');
     }
     return response.data;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    console.error(`Error rejecting post with ID ${communityPostId}:`, error);
-    throw error;
+    throw new Error(`Error rejecting post with ID ${communityPostId}`);
   }
 };

@@ -85,17 +85,31 @@ export const groupPurchaseHistoryData = [
 export const wishHistoryData = [
   {
     id: 1,
-    name: 'Women Textured Handheld Bag',
+    name: '트렌치코트',
     quantity: 1,
-    price: '$80.00',
-    thumb: '/images/bell.png',
+    price: '148500원',
+    thumb: '/images/trenchcoat.jpeg',
   },
   {
     id: 2,
-    name: 'Tailored Cotton Casual Shirt',
+    name: '싱싱한 사과',
     quantity: 1,
-    price: '$40.00',
-    thumb: '',
+    price: '3500원',
+    thumb: '/images/apple.png',
+  },
+  {
+    id: 3,
+    name: '무선청소기',
+    quantity: 1,
+    price: '118500원',
+    thumb: '/images/vacuum.png',
+  },
+  {
+    id: 4,
+    name: '목욕 수건',
+    quantity: 1,
+    price: '3500원',
+    thumb: '/images/towel.jpeg',
   },
 ];
 

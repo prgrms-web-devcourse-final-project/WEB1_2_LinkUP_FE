@@ -45,7 +45,7 @@ function WishListPage() {
                   </ImageContainer>
                   <WishDetails>
                     <ProductName>{wish.name}</ProductName>
-                    <ProductInfo>Quantity: {wish.quantity}</ProductInfo>
+                    <ProductInfo>수량: {wish.quantity}</ProductInfo>
                   </WishDetails>
                 </WishWrapper>
                 <Price>{wish.price}</Price>

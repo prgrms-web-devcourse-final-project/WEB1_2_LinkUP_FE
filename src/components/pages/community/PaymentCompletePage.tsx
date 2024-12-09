@@ -59,8 +59,8 @@ const PaymentCompletePage: React.FC = () => {
       try {
         const postData = await fetchPostById(Number(communityPostId));
         setPost({
-          title: postData.title,
-          unitAmount: postData.unitAmount,
+          title: postData.communityPost.title,
+          unitAmount: postData.communityPost.unitAmount,
         });
       } catch (error) {
         console.error('게시물 정보 조회 오류:', error);

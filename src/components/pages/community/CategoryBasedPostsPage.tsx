@@ -1,14 +1,40 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useLocation } from 'react-router-dom';
+import { useAtom } from 'jotai';
+import {
+  postsAtom,
+  selectedPostIdAtom,
+  realTimeDataAtom,
+} from '../../../store/postStore';
 import CategoryWrapper from '../../common/CategoryWrapper';
 import PostList from '../../common/PostList';
 import { POST_CATEGORIES } from './postCategories';
+import { Post, SSEEvent } from '../../../types/postTypes';
 
 const CategoryBasedPostsPage = () => {
-  const location = useLocation();
-  const initialCategory = location.state?.selectedCategory || 'LIFESTYLE'; // 전달받은 상태 또는 기본값
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [postsAtomState] = useAtom(postsAtom); // 전체 포스트 상태
+  const posts = postsAtomState?.data || []; // Query 결과에서 data 추출
+  const [realTimeData] = useAtom(realTimeDataAtom); // 실시간 데이터 상태
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    POST_CATEGORIES[0].id // 초기 카테고리 설정
+  );
+  const [, setSelectedPostId] = useAtom(selectedPostIdAtom); // 선택된 포스트 ID 설정 함수
+
+  // `realTimeData`를 안전하게 변환
+  const formattedRealTimeData: Record<number, SSEEvent> =
+    typeof realTimeData === 'object' && realTimeData !== null
+      ? (realTimeData as unknown as Record<number, SSEEvent>)
+      : {};
+
+  // 카테고리 변경 핸들러
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+  };
+
+  // 포스트 선택 핸들러
+  const handlePostSelect = (postId: number) => {
+    setSelectedPostId(postId);
+  };
 
   return (
     <div>
@@ -18,13 +44,16 @@ const CategoryBasedPostsPage = () => {
           <Wrapper>
             <CategoryWrapper
               categories={POST_CATEGORIES}
-              selectedCategory={selectedCategory} // 현재 선택된 카테고리를 전달
-              onCategoryChange={
-                (categoryId: string) => setSelectedCategory(categoryId) // 카테고리 변경 시 상태 업데이트
-              }
+              selectedCategory={selectedCategory}
+              onCategoryChange={handleCategoryChange}
             />
           </Wrapper>
-          <PostList selectedCategory={selectedCategory} posts={[]} />
+          <PostList
+            selectedCategory={selectedCategory}
+            posts={posts as Post[]} // 데이터 형식을 명시적으로 지정
+            realTimeData={formattedRealTimeData} // 변환된 realTimeData 전달
+            onPostSelect={handlePostSelect}
+          />
         </ContentWrapper>
       </CommunityPageContainer>
     </div>

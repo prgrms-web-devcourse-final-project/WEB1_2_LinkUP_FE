@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Post,
-  updatePostStatus,
-  fetchPostById,
-} from '../community/api/postApi';
+import { fetchPostById } from '../community/api/postApi';
+import { approvePost, rejectPost } from './api/adminApi';
 import { FaBackspace, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
+import { Post } from '../../../types/postTypes';
+import { getImageSrc } from '../../../utils/GetImageSrc';
+import { formatDateWithOffset } from '../../../utils/formatDate';
 
 const PostApprovalPage = () => {
   const location = useLocation();
@@ -18,12 +18,12 @@ const PostApprovalPage = () => {
   useEffect(() => {
     const fetchPost = async () => {
       if (!postId) {
-        navigate('/admin/posts'); // postId가 없을 경우 관리자 페이지로 리다이렉트
+        navigate('/admin/post'); // postId가 없을 경우 관리자 페이지로 리다이렉트
         return;
       }
       try {
         const postDetails = await fetchPostById(postId); // 포스트 세부 정보 가져오기
-        setPost(postDetails);
+        setPost(postDetails.communityPost);
       } catch (error) {
         console.error('Failed to fetch post details:', error);
       }
@@ -49,7 +49,12 @@ const PostApprovalPage = () => {
   const handleApprove = async () => {
     if (!post) return;
     try {
-      await updatePostStatus(postId, 'APPROVED'); // 포스트 상태를 APPROVED로 변경
+      // 제목에서 '(수정요망)' 제거
+      const updatedTitle = post.title.startsWith('(수정요망)')
+        ? post.title.replace(/^\(수정요망\)\s*/, '')
+        : post.title;
+
+      await approvePost(postId, updatedTitle); // 포스트 상태를 APPROVED로 변경
       alert('게시물이 승인되었습니다.');
       navigate('/admin/post'); // 승인 후 관리자 페이지로 리다이렉트
     } catch (error) {
@@ -61,7 +66,12 @@ const PostApprovalPage = () => {
   const handleReject = async () => {
     if (!post) return;
     try {
-      await updatePostStatus(postId, 'REJECTED'); // 포스트 상태를 REJECTED로 변경하고 제목 수정
+      // 제목에 '(수정요망)' 추가
+      const updatedTitle = post.title.startsWith('(수정요망)')
+        ? post.title // 이미 '(수정요망)'이 있으면 그대로 유지
+        : `(수정요망) ${post.title}`;
+
+      await rejectPost(postId, updatedTitle); // 포스트 상태를 REJECTED로 변경
       alert('게시물이 거절 처리되었습니다.');
       navigate('/admin/post'); // 거절 후 관리자 페이지로 리다이렉트
     } catch (error) {
@@ -101,7 +111,7 @@ const PostApprovalPage = () => {
 
                 <ImagePreview>
                   <img
-                    src={post.imageUrls[currentIndex]}
+                    src={getImageSrc(post.imageUrls[currentIndex])}
                     alt={`이미지 ${currentIndex + 1}`}
                   />
                 </ImagePreview>
@@ -153,7 +163,7 @@ const PostApprovalPage = () => {
                   </AuthorDetail>
                   <CreatedAtDetail>
                     <Label>작성일</Label>{' '}
-                    {new Date(post.createdAt).toLocaleString()}
+                    {formatDateWithOffset(post.createdAt).toLocaleString()}
                   </CreatedAtDetail>
                 </DoubleWrapper>
                 <DoubleWrapper>
@@ -161,8 +171,7 @@ const PostApprovalPage = () => {
                     <Label>카테고리</Label> {post.category}
                   </Detail>
                   <Detail>
-                    <Label>참여 현황</Label> {post.currentQuantity}
-                    {' / '}
+                    <Label>참여 필요 수량</Label>
                     {post.availableNumber}
                   </Detail>
                 </DoubleWrapper>

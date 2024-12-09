@@ -54,7 +54,7 @@ const Header = () => {
             <NavItem>
               {isLoggedIn && (
                 <StyledLink
-                  to={isAdmin ? '#' : '/mypage'}
+                  to={isAdmin ? '#' : '/mypage/setting'}
                   onClick={(e) => {
                     if (isAdmin) {
                       e.preventDefault(); // Admin일 경우 링크 동작 차단

@@ -78,8 +78,10 @@ export const postSignIn = async (body: { email: string; password: string }) => {
 
   const token =
     response.headers['authorization'] || response.headers['Authorization'];
+  const role = response.data.roles;
   if (token) {
     localStorage.setItem('token', token);
+    localStorage.setItem('role', role);
   }
   return response;
 };

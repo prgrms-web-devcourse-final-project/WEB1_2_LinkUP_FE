@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ChatRoomModal from '../community/modal/ChatRoomModal'; // 기존 채팅 모달 컴포넌트
 import Pagination from '../../common/Pagination'; // 기존 페이지네이션 컴포넌트
-import { fetchChatRooms } from '../community/api/chatApi';
+import { fetchAllChatRooms } from '../community/api/chatApi';
 import { FaBackspace } from 'react-icons/fa';
 import { webSocketService } from '../../../utils/webSocket';
 
@@ -32,7 +32,7 @@ const ChatRoomManagementPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const rooms = await fetchChatRooms();
+        const rooms = await fetchAllChatRooms();
         setChatRooms(rooms);
       } catch (error) {
         console.error('Failed to fetch chat rooms:', error);

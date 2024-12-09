@@ -1,101 +1,132 @@
 import axiosInstance from '../../../../api/axiosInstance';
 import { webSocketService } from '../../../../utils/webSocket';
 
-/**
- * 채팅방 생성
- * @param postId 게시물 ID
- * @returns 생성된 채팅방 정보
- */
-export const createChatRoom = async (
-  postId: number
-): Promise<{
-  id: number;
-  roomName: string;
-  createdAt: string | null;
-  capacity: number;
-}> => {
-  try {
-    const response = await axiosInstance.post('/chat', { postId });
-    return response.data;
-  } catch (error) {
-    console.error('채팅방 생성 오류:', error);
-    throw new Error('채팅방을 생성할 수 없습니다.');
+// 채팅방 생성
+export const createChatRoom = async (postId: number) => {
+  const response = await axiosInstance.post('/api/chat', { postId });
+  if (response.status !== 200) {
+    throw new Error('Failed to create chat room');
   }
+
+  const { id, roomName } = response.data;
+  console.log(`Chat room created: ${roomName} (ID: ${id})`);
+
+  // 채팅방 구독 시작
+  webSocketService.subscribe(
+    `/sub/message/${id}`,
+    (message) => {
+      console.log(`Message in room ${id}:`, message);
+    },
+    true
+  );
+
+  return response.data;
 };
 
-/**
- * 관리자 페이지 내 채팅방 목록 가져오기
- * @returns 채팅방 목록 배열
- */
-export const fetchChatRooms = async (): Promise<
-  {
-    postId: number;
-    capacity: number;
-    roomName: string;
-    chatMembers: string[];
-  }[]
-> => {
-  try {
-    // 실제 API 사용 시
-    const response = await axiosInstance.get('/admin/chatlist');
-    return response.data;
-  } catch (error) {
-    console.error('채팅방 목록 조회 오류:', error);
-    throw new Error('채팅방 목록을 불러올 수 없습니다.');
+// 채팅방 삭제
+export const deleteChatRoom = async (chatRoomId: number) => {
+  const response = await axiosInstance.delete(`/api/chat/${chatRoomId}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+    },
+  });
+
+  if (response.status !== 200) {
+    throw new Error('Failed to delete chat room');
   }
+
+  console.log(`Chat room ${chatRoomId} deleted`);
+
+  // 채팅방 구독 취소
+  webSocketService.unsubscribe(`/sub/message/${chatRoomId}`);
+  return response.data;
 };
 
-/**
- * 채팅 메시지 가져오기
- * @param id 채팅방 ID
- * @returns 채팅 메시지 리스트
- */
-export const fetchChatMessages = async (id: number) => {
-  try {
-    // 실제 API 사용
-    const response = await axiosInstance.get(`/chat/${id}/messages`);
-    return response.data;
-  } catch (error) {
-    console.error('채팅 메시지 조회 오류:', error);
-    throw new Error('채팅 메시지를 조회할 수 없습니다.');
+// 내 채팅방 목록 조회
+export const fetchMyChatRooms = async () => {
+  const response = await axiosInstance.get('/api/mypage/chatlist', {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+    },
+  });
+
+  if (response.status !== 200) {
+    throw new Error('Failed to fetch my chat rooms');
   }
+
+  console.log('Fetched my chat rooms:', response.data);
+  return response.data;
 };
 
-/**
- * 채팅 메시지 전송
- * @param id 채팅방 ID
- * @param senderId 메시지 송신자 ID
- * @param content 메시지 내용
- */
-export const sendMessage = async (
-  chatRoomId: string,
-  senderId: string,
-  content: string
-): Promise<void> => {
+// 전체 채팅방 목록 조회 (관리자)
+export const fetchAllChatRooms = async () => {
+  const response = await axiosInstance.get('/api/admin/chatlist', {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+    },
+  });
+
+  if (response.status !== 200) {
+    throw new Error('Failed to fetch all chat rooms');
+  }
+
+  console.log('Fetched all chat rooms:', response.data);
+  return response.data;
+};
+
+// 채팅 메시지 발행
+export const sendMessage = (
+  chatRoomId: number,
+  userName: string,
+  message: string
+) => {
+  const payload = {
+    roomId: chatRoomId,
+    userName,
+    message,
+    time: new Date().toISOString(),
+  };
+
+  webSocketService.send(`/pub/message/${chatRoomId}`, payload);
+  console.log(`Message sent to room ${chatRoomId}:`, payload);
+};
+
+// 채팅 메시지 구독
+export const subscribeToChatMessages = (
+  chatRoomId: number,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  callback: (message: any) => void
+) => {
+  webSocketService.subscribe(`/sub/message/${chatRoomId}`, callback, true);
+  console.log(`Subscribed to messages for room ${chatRoomId}`);
+};
+
+// 채팅 메시지 구독 취소
+export const unsubscribeFromChatMessages = (chatRoomId: number) => {
+  webSocketService.unsubscribe(`/sub/message/${chatRoomId}`);
+  console.log(`Unsubscribed from messages for room ${chatRoomId}`);
+};
+
+// 채팅 내용 조회
+export const fetchChatMessages = async (chatRoomId: number) => {
   try {
-    // 실제 WebSocket 발행 메시지 전송
-    const message = { senderId, content };
-    webSocketService.send(
-      `/pub/message/${chatRoomId}`,
-      JSON.stringify(message)
+    const response = await axiosInstance.get(`/api/chat/${chatRoomId}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+      },
+    });
+
+    if (response.status !== 200) {
+      throw new Error('Failed to fetch chat messages');
+    }
+
+    console.log(`Fetched messages for chat room ${chatRoomId}:`, response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Error fetching messages for chat room ${chatRoomId}:`,
+      error
     );
-  } catch (error) {
-    console.error('채팅 메시지 전송 오류:', error);
-    throw new Error('채팅 메시지를 전송할 수 없습니다.');
-  }
-};
-
-/**
- * 채팅방 삭제
- * @param id 삭제할 채팅방 ID
- */
-export const deleteChatRoom = async (id: number): Promise<void> => {
-  try {
-    // 실제 API 사용
-    const response = await axiosInstance.delete(`/chat/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error('채팅방 삭제 오류:', error);
-    throw new Error('채팅방을 삭제할 수 없습니다.');
+    throw error;
   }
 };

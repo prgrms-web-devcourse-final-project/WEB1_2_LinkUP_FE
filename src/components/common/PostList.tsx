@@ -1,49 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { getPosts, Post } from '../pages/community/api/postApi';
 import WriteButton from './WriteButton';
 import SearchBar from './SearchBar';
 import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
+import { SSEEvent, Post } from '../../types/postTypes';
 
 interface PostListProps {
-  posts: Post[];
   selectedCategory: string;
+  posts: Post[];
+  onPostSelect?: (postId: number) => void; // onPostSelect 추가
+  realTimeData: Record<number, SSEEvent>; // 실시간 데이터 매핑 추가
 }
 
 const POSTS_PER_PAGE = 6; // 한 페이지에 표시할 게시글 수
 
 const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
   selectedCategory,
+  posts,
+  realTimeData,
+  onPostSelect,
   hideWriteButton,
 }) => {
   const navigate = useNavigate();
-  const [posts, setPosts] = useState<Post[]>([]); // 실제 게시글 데이터
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState(''); // 입력된 검색어
   const [searchQuery, setSearchQuery] = useState(''); // 실제 검색 실행 시의 검색어
-  const [loading, setLoading] = useState(false); // 로딩 상태
 
-  // 게시글 데이터 로드
-  const loadPosts = async () => {
-    try {
-      setLoading(true);
-      const data = await getPosts(selectedCategory, searchQuery); // API 호출
-      setPosts(data);
-    } catch (error) {
-      console.error('게시물 조회 중 오류 발생:', error);
-      alert('게시물 조회 중 오류가 발생했습니다. 다시 시도해주세요.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 카테고리나 검색어 변경 시 데이터 로드
-  useEffect(() => {
-    loadPosts();
-  }, [selectedCategory, searchQuery]);
-
-  // 선택된 카테고리에 따른 게시글 필터링 (status 조건 추가)
+  // 선택된 카테고리에 따른 게시글 필터링
   const categoryFilteredPosts = posts
     .filter((post) => {
       if (selectedCategory === 'NOT_APPROVED') {
@@ -88,6 +72,10 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
 
   // 포스트 클릭 핸들러
   const handlePostClick = (communityPostId: number) => {
+    if (onPostSelect) {
+      onPostSelect(communityPostId); // 부모 컴포넌트에 선택 이벤트 전달
+    }
+
     if (selectedCategory === 'NOT_APPROVED') {
       navigate(`/admin/post/approval/${communityPostId}`, {
         state: { communityPostId },
@@ -95,6 +83,11 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
     } else {
       navigate(`/community/post/${communityPostId}`); // 일반 포스트 상세 페이지로 이동
     }
+  };
+
+  // 특정 포스트의 현재 참여 수 계산
+  const getParticipationCount = (postId: number): number => {
+    return realTimeData[postId]?.participationCount || 0;
   };
 
   return (
@@ -108,9 +101,7 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
         />
       </ActionsContainer>
 
-      {loading ? (
-        <NoPostMessage>게시물을 불러오는 중입니다...</NoPostMessage>
-      ) : categoryFilteredPosts.length === 0 ? (
+      {categoryFilteredPosts.length === 0 ? (
         <NoPostMessage>
           선택된 카테고리에 해당하는 게시글이 없습니다.
         </NoPostMessage>
@@ -124,7 +115,10 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
             key={post.communityPostId}
             onClick={() => handlePostClick(post.communityPostId)}
           >
-            <PostImage src={post.imageUrls[0]} alt={post.title} />
+            <PostImage
+              src={URL.createObjectURL(post.imageUrls[0])}
+              alt={`post.title`}
+            />
             <PostContent>
               <PostTitle>{post.title}</PostTitle>
               <PostDetails>
@@ -153,7 +147,8 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
                   </PostCloseAt>
                 </PostDate>
                 <PostJoinStatus>
-                  참여 현황: {post.currentQuantity} / {post.availableNumber}
+                  참여 현황: {getParticipationCount(post.communityPostId)} /{' '}
+                  {post.availableNumber}
                 </PostJoinStatus>
               </PostDetails>
               <PostDescription>{post.description}</PostDescription>

@@ -4,31 +4,31 @@ import { useLocation } from 'react-router-dom';
 import { ADMIN_CATEGORIES } from './adminCategories';
 import CategoryWrapper from '../../../components/common/CategoryWrapper';
 import PostList from '../../../components/common/PostList';
-import { Post } from '../community/api/postApi';
-import { fetchAdminPosts } from './api/adminApi';
+import { fetchPendingPosts } from './api/adminApi';
+import { useAtom } from 'jotai';
+import { realTimeDataAtom, selectedPostIdAtom } from '../../../store/postStore';
+import { Post, POST_STATUS, SSEEvent } from '../../../types/postTypes';
 
 const PostManagementPage = () => {
   const location = useLocation();
   const initialCategory = location.state?.selectedCategory || 'NOT_APPROVED';
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [selectedCategory, setSelectedCategory] =
+    useState<POST_STATUS>(initialCategory);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [, setSelectedPostId] = useAtom(selectedPostIdAtom); // 선택된 포스트 ID 설정 함수
+  const [realTimeData] = useAtom(realTimeDataAtom); // 실시간 데이터 상태
+
+  // `realTimeData`를 안전하게 변환
+  const formattedRealTimeData: Record<number, SSEEvent> =
+    typeof realTimeData === 'object' && realTimeData !== null
+      ? (realTimeData as unknown as Record<number, SSEEvent>)
+      : {};
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetchAdminPosts(selectedCategory);
-
-        // '작성글 게시 승인 대기 목록' 카테고리에서는 'NOT_APPROVED' 또는 'REJECTED' 상태의 포스트만 표시
-        if (selectedCategory === 'NOT_APPROVED') {
-          setPosts(
-            response.filter(
-              (post) =>
-                post.status === 'NOT_APPROVED' || post.status === 'REJECTED'
-            )
-          );
-        } else {
-          setPosts(response); // 다른 카테고리는 전체 포스트 표시
-        }
+        const response = await fetchPendingPosts();
+        setPosts(response);
       } catch (error) {
         console.error('Failed to fetch posts:', error);
       }
@@ -37,6 +37,11 @@ const PostManagementPage = () => {
     fetchPosts();
   }, [selectedCategory]);
 
+  // 포스트 선택 핸들러
+  const handlePostSelect = (postId: number) => {
+    setSelectedPostId(postId);
+  };
+
   return (
     <div>
       <PageContainer>
@@ -44,19 +49,22 @@ const PostManagementPage = () => {
           <Title>관리자 페이지</Title>
           <Header>
             <Wrapper>
-              {' '}
               <CategoryWrapper
                 categories={ADMIN_CATEGORIES}
                 selectedCategory={selectedCategory}
-                onCategoryChange={(id: string) => setSelectedCategory(id)}
-                title="게시글 관리" // 제목 변경
+                onCategoryChange={(id: string) =>
+                  setSelectedCategory(id as POST_STATUS)
+                }
+                title="게시글 관리"
               />
             </Wrapper>
           </Header>
           <PostList
-            posts={posts}
             selectedCategory={selectedCategory}
+            posts={posts}
             hideWriteButton
+            realTimeData={formattedRealTimeData} // 변환된 realTimeData 전달
+            onPostSelect={handlePostSelect}
           />
         </ContentWrapper>
       </PageContainer>

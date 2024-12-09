@@ -72,7 +72,7 @@ const Header = () => {
             </NavItem>
             <NavItem>
               <StyledLink
-                to={isAdmin ? '/adminpage' : '/mypage/setting'}
+                to={isAdmin ? '#' : '/mypage/setting'}
                 onClick={toggleMobileMenu}
               >
                 {isAdmin ? 'Admin Page' : 'My Page'}

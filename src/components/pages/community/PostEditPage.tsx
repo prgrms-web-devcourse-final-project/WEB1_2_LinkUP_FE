@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useAtom } from 'jotai';
+import { useQuery } from '@tanstack/react-query';
+import { selectedPostAtom, selectedPostIdAtom } from '../../../store/postStore';
 import styled from 'styled-components';
-import { useNavigate, useParams } from 'react-router-dom';
 import {
   FaCaretDown,
   FaPlusCircle,
@@ -8,93 +11,78 @@ import {
   FaAngleLeft,
   FaAngleRight,
 } from 'react-icons/fa';
-import {
-  fetchPostById,
-  updatePost,
-  Post,
-  deletePostById,
-  defaultPost,
-} from './api/postApi';
+import { fetchPostById, updatePost, deletePostById } from './api/postApi';
 import CategoryWrapper from '../../common/CategoryWrapper';
 import { POST_CATEGORIES } from './postCategories';
+import { Post, PostDetailResponse } from '../../../types/postTypes';
 
 const PostEditPage = () => {
-  const navigate = useNavigate();
   const { communityPostId } = useParams<{ communityPostId: string }>();
+  const navigate = useNavigate();
 
-  const [post, setPost] = useState<Post>(defaultPost); // 수정 대상 포스트 데이터
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [availableNumber, setAvailableNumber] = useState('');
-  const [totalAmount, setTotalAmount] = useState('');
+  const [selectedPost] = useAtom(selectedPostAtom);
+  const [, setSelectedPostId] = useAtom(selectedPostIdAtom);
+  const [post, setPost] = useState<Post | undefined>({} as Post);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [availableNumber, setAvailableNumber] = useState<number | undefined>();
+  const [totalAmount, setTotalAmount] = useState<number | undefined>();
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [deadline, setDeadline] = useState('마감 기한  ');
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [title, setTitle] = useState<string | undefined>('');
+  const [description, setDescription] = useState<string | undefined>('');
+  const [imageUrls, setImageUrls] = useState<Array<File>>([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
-  const [urlInput, setUrlInput] = useState('');
+  const [urlInput, setUrlInput] = useState<string | undefined>('');
   const [urlError, setUrlError] = useState(false);
+  const [period, setPeriod] = useState<number | undefined>();
+
+  const communityPostIdNumber = Number(communityPostId);
+  const queryKey = ['post', communityPostIdNumber];
+
+  if (!communityPostIdNumber) {
+    alert('유효하지 않은 게시물 ID입니다.');
+    return;
+  }
+
+  // 게시물 ID 설정 및 초기화
+  useEffect(() => {
+    if (communityPostIdNumber) {
+      setSelectedPostId(communityPostIdNumber);
+    } else {
+      alert('잘못된 게시물 ID입니다.');
+      navigate('/community/post');
+    }
+  }, [communityPostIdNumber, setSelectedPostId, navigate]);
+
+  // 게시물 데이터 가져오기
+  const { data, isError } = useQuery<PostDetailResponse>({
+    queryKey,
+    queryFn: async (): Promise<PostDetailResponse> =>
+      fetchPostById(communityPostIdNumber),
+  });
 
   useEffect(() => {
-    if (!communityPostId) {
-      alert('유효하지 않은 접근입니다.');
-      navigate('/mypage/post');
-      return;
+    if (data) {
+      setPost(selectedPost.data?.communityPost);
+      setTitle(selectedPost.data?.communityPost.title);
+      setDescription(selectedPost.data?.communityPost.description);
+      setImageUrls(selectedPost.data?.communityPost.imageUrls || []);
+      setSelectedCategory(
+        selectedPost.data?.communityPost.category || '생활용품'
+      );
+      setAvailableNumber(selectedPost.data?.communityPost.availableNumber);
+      setTotalAmount(selectedPost.data?.communityPost.totalAmount);
+      setUrlInput(selectedPost.data?.communityPost.productUrl);
+      setPeriod(selectedPost.data?.communityPost.period);
     }
-
-    // 기존 게시글 데이터 로드
-    const loadPost = async () => {
-      try {
-        const fetchedPost = await fetchPostById(Number(communityPostId));
-        if (fetchedPost) {
-          setPost(fetchedPost);
-          setTitle(fetchedPost.title);
-          setDescription(fetchedPost.description);
-          setImageUrls(fetchedPost.imageUrls || []);
-          setSelectedCategory(fetchedPost.category);
-          setAvailableNumber(fetchedPost.availableNumber.toString());
-          setTotalAmount(fetchedPost.totalAmount.toString());
-          setUrlInput(fetchedPost.productUrl);
-          setDeadline(
-            calculateDeadlineFromNow(fetchedPost.createdAt, fetchedPost.closeAt)
-          );
-        } else {
-          throw new Error('게시물이 존재하지 않습니다.');
-        }
-      } catch (error) {
-        console.error('게시글 불러오기 실패:', error);
-        alert('게시글 정보를 불러오는 데 실패했습니다.');
-        navigate('/mypage/post');
-      }
-    };
-
-    loadPost();
-  }, [communityPostId, navigate]);
-
-  // createdAt과 closeAt을 사용해 마감 기한 계산
-  const calculateDeadlineFromNow = (createdAt: string, closeAt: string) => {
-    const createdDate = new Date(createdAt);
-    const closeDate = new Date(closeAt);
-    const diffDays = Math.ceil(
-      (closeDate.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    return `${diffDays}일`; // ex: "5일"
-  };
+  }, [data]);
 
   const handleDropdownToggle = () => {
     setDropdownVisible(!dropdownVisible);
   };
 
-  const handleDeadlineSelect = (day: string) => {
-    setDeadline(day);
-    if (post) {
-      const createdDate = new Date(post.createdAt);
-      const daysToAdd = parseInt(day.replace(/[^0-9]/g, ''), 10); // ex: "5일" -> 5
-      const newCloseDate = new Date(createdDate);
-      newCloseDate.setDate(createdDate.getDate() + daysToAdd);
-      setPost({ ...post, closeAt: newCloseDate.toISOString() }); // closeAt 수정
-    }
-    setDropdownVisible(false);
+  const handlePeriodSelect = (period: number) => {
+    setPeriod(period); // DropdownItem에서 선택된 값을 바로 설정
+    setDropdownVisible(false); // Dropdown 메뉴 닫기
   };
 
   const handlePostUpdate = async () => {
@@ -102,7 +90,7 @@ const PostEditPage = () => {
       !title ||
       !availableNumber ||
       !totalAmount ||
-      deadline === '마감 기한' ||
+      !period ||
       imageUrls.length === 0 || // 최소 한 개의 이미지 추가 확인
       !urlInput ||
       !description
@@ -115,24 +103,23 @@ const PostEditPage = () => {
       return;
     }
 
-    // post가 null인 경우 처리
-    if (!post) {
-      alert('게시글 정보를 로드하는 데 실패했습니다.');
-      return;
-    }
+    // 오류 처리
+    useEffect(() => {
+      if (isError) {
+        alert('게시물을 불러오는 데 실패했습니다.');
+        navigate('/community/post');
+      }
+    }, [isError, navigate]);
 
-    const parsedTotalAmount = parseInt(totalAmount.replace(/,/g, ''), 10);
-    const parsedAvailableNumber = parseInt(availableNumber, 10);
-
-    const updatedPost: Post = {
+    const updatedPost: Partial<Post> = {
       ...post,
       title,
       description,
       imageUrls,
-      category: selectedCategory,
-      availableNumber: parsedAvailableNumber,
-      totalAmount: parsedTotalAmount,
-      unitAmount: Math.floor(parsedTotalAmount / parsedAvailableNumber),
+      category: selectedCategory || '생활용품',
+      availableNumber: availableNumber,
+      totalAmount: totalAmount,
+      unitAmount: Math.floor(totalAmount / availableNumber),
       productUrl: urlInput,
     };
 
@@ -153,9 +140,9 @@ const PostEditPage = () => {
     const numericValue = Number(value);
 
     if (value === '' || numericValue <= 0) {
-      setAvailableNumber(''); // 입력 중 모두 지웠거나, 음수 또는 0인 경우 초기화
+      setAvailableNumber(undefined); // 입력 중 모두 지웠거나, 음수 또는 0인 경우 초기화
     } else {
-      setAvailableNumber(value); // 유효한 값 업데이트
+      setAvailableNumber(numericValue); // 유효한 값 업데이트
     }
   };
 
@@ -164,9 +151,9 @@ const PostEditPage = () => {
     const numericValue = Number(value);
 
     if (value === '' || numericValue <= 0) {
-      setTotalAmount(''); // 입력 중 모두 지웠거나, 음수 또는 0인 경우 초기화
+      setTotalAmount(undefined); // 입력 중 모두 지웠거나, 음수 또는 0인 경우 초기화
     } else {
-      setTotalAmount(formatCurrency(value)); // 통화 형식으로 변환
+      setTotalAmount(numericValue); // 통화 형식으로 변환
     }
   };
 
@@ -181,23 +168,15 @@ const PostEditPage = () => {
 
   const unitAmount =
     totalAmount && availableNumber
-      ? formatCurrency(
-          String(
-            Math.floor(
-              parseInt(totalAmount.replace(/,/g, ''), 10) /
-                parseInt(availableNumber, 10)
-            )
-          )
-        )
+      ? formatCurrency(String(Math.floor(totalAmount / availableNumber)))
       : '자동 계산';
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const uploadedImages = Array.from(e.target.files).map((file) =>
-        URL.createObjectURL(file)
+      const uploadedFiles = Array.from(e.target.files).filter(
+        (file) => file instanceof File
       );
-      setImageUrls((prev) => [...prev, ...uploadedImages]);
-      setCurrentIndex(imageUrls.length); // 마지막으로 추가된 이미지로 이동
+      setImageUrls((prev) => [...prev, ...uploadedFiles]);
     }
   };
 
@@ -312,7 +291,13 @@ const PostEditPage = () => {
                   ) : (
                     <ImagePreview>
                       <img
-                        src={imageUrls[currentIndex]}
+                        src={
+                          typeof imageUrls[currentIndex] === 'string'
+                            ? (imageUrls[currentIndex] as string)
+                            : URL.createObjectURL(
+                                imageUrls[currentIndex] as File
+                              )
+                        }
                         alt="이미지 미리보기"
                       />
                       <RemoveImageButton onClick={handleRemoveImage}>
@@ -403,7 +388,7 @@ const PostEditPage = () => {
                     <Label>모집 마감 기한 설정</Label>
                     <DropdownWrapper>
                       <DropdownButton onClick={handleDropdownToggle}>
-                        {deadline}
+                        {period}
                         <FaCaretDown />
                       </DropdownButton>
                       {dropdownVisible && (
@@ -411,10 +396,8 @@ const PostEditPage = () => {
                           {Array.from({ length: 7 }, (_, index) => (
                             <DropdownItem
                               key={index}
-                              onClick={() =>
-                                handleDeadlineSelect(`${index + 1}일  `)
-                              }
-                              isSelected={deadline === `${index + 1}일  `}
+                              onClick={() => handlePeriodSelect(index + 1)}
+                              isSelected={period === index + 1}
                             >
                               {index + 1}일
                             </DropdownItem>
@@ -429,14 +412,14 @@ const PostEditPage = () => {
                       <SmallInput
                         type="text" // 숫자만 입력되도록 onChange에서 제어
                         placeholder="총 가격 입력"
-                        value={totalAmount}
+                        value={formatCurrency(`totalAmount`)}
                         onChange={handleTotalAmountChange}
                       />
                       {' 원'}
                     </InputWrapper>
                     <InputWrapper>
                       <Label>개당 가격</Label>
-                      <SmallInput disabled value={unitAmount} />
+                      <SmallInput disabled value={formatCurrency(unitAmount)} />
                       {' 원'}
                     </InputWrapper>
                   </PriceWrapper>

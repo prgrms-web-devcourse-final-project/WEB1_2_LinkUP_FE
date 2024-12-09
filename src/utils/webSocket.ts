@@ -129,5 +129,5 @@ export class WebSocketService {
 }
 
 export const webSocketService = new WebSocketService(
-  'ws://your-api-endpoint.com/websocket'
+  'ws://http://15.164.5.135:8080/websocket'
 );

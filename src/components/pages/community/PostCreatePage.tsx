@@ -3,21 +3,24 @@ import styled from 'styled-components';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  FaCaretDown,
-  FaPlusCircle,
-  FaMinusCircle,
   FaAngleLeft,
   FaAngleRight,
+  FaCaretDown,
+  FaMinusCircle,
+  FaPlusCircle,
 } from 'react-icons/fa';
-import { createPost, CreatePostInput } from './api/postApi';
+import { createPost } from './api/postApi';
 import CategoryWrapper from '../../common/CategoryWrapper';
 import { POST_CATEGORIES } from './postCategories';
+import { CreatePostData } from '../../../types/postTypes';
+import PostImageSection from './PostDetailPage/PostImageSection';
 
 const PostCreatePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const defaultCategory = location.state?.selectedCategory || 'LIFESTYLE'; // 이전 페이지에서 전달된 카테고리
+  const defaultCategory =
+    location.state?.selectedCategory || POST_CATEGORIES[0].id; // 이전 페이지에서 전달된 카테고리
 
   const [selectedCategory, setSelectedCategory] = useState(defaultCategory);
   const [availableNumber, setAvailableNumber] = useState('');
@@ -26,13 +29,13 @@ const PostCreatePage = () => {
   const [deadline, setDeadline] = useState('마감 기한  ');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [imageUrls, setImageUrls] = useState<Array<File>>([]);
   const [currentIndex, setCurrentIndex] = useState(-1); // -1: AddImageButton 상태
   const [urlInput, setUrlInput] = useState('');
   const [urlError, setUrlError] = useState(false);
 
   const createPostMutation = useMutation({
-    mutationFn: (postData: CreatePostInput) => createPost(postData),
+    mutationFn: (postData: CreatePostData) => createPost(postData),
     onSuccess: () => {
       // 생성 성공 시 목록 업데이트
       queryClient.invalidateQueries({ queryKey: ['postList'] });
@@ -74,33 +77,26 @@ const PostCreatePage = () => {
 
     const parsedTotalAmount = parseInt(totalAmount.replace(/,/g, ''), 10);
     const parsedAvailableNumber = parseInt(availableNumber, 10);
-
-    // 마감 기한 계산 (Long 타입으로 전송할 기간 설정)
-    const period =
-      deadline !== '마감 기한'
-        ? parseInt(deadline.replace(/[^0-9]/g, ''), 10)
-        : 0;
+    const period = parseInt(deadline.replace(/[^0-9]/g, ''), 10);
 
     if (period <= 0) {
       alert('마감 기한을 올바르게 설정하세요.');
       return;
     }
 
-    const postData: CreatePostInput = {
+    const postData: CreatePostData = {
       title: title.trim(),
       description: description.trim(),
-      imageUrls,
+      imageUrls: imageUrls,
       category: selectedCategory,
-      currentQuantity: 0,
       availableNumber: parsedAvailableNumber,
       totalAmount: parsedTotalAmount,
       unitAmount: Math.floor(parsedTotalAmount / parsedAvailableNumber),
       productUrl: urlInput.trim(),
-      period, // 마감 기한 (Long 타입)
-      status: 'NOT_APPROVED',
+      period,
     };
 
-    createPostMutation.mutate(postData); // React Query Mutation 호출
+    createPostMutation.mutate(postData);
   };
 
   const handleAvailableNumberChange = (
@@ -150,11 +146,10 @@ const PostCreatePage = () => {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const uploadedImages = Array.from(e.target.files).map((file) =>
-        URL.createObjectURL(file)
+      const uploadedFiles = Array.from(e.target.files).filter(
+        (file) => file instanceof File
       );
-      setImageUrls((prev) => [...prev, ...uploadedImages]);
-      setCurrentIndex(imageUrls.length); // 마지막으로 추가된 이미지로 이동
+      setImageUrls((prev) => [...prev, ...uploadedFiles]);
     }
   };
 
@@ -224,6 +219,11 @@ const PostCreatePage = () => {
           <FormContainer>
             <ImageAndDetailsContainer>
               {/* 이미지 업로드 섹션 */}
+              <PostImageSection
+                selectedPost={{ imageUrls: imageUrls, productUrl: urlInput }}
+                currentIndex={currentIndex}
+                setCurrentIndex={setCurrentIndex}
+              />
               <ImageUploadContainer>
                 <ImagePreviewWrapper>
                   <PreviousButtonWrapper>
@@ -249,7 +249,13 @@ const PostCreatePage = () => {
                   ) : (
                     <ImagePreview>
                       <img
-                        src={imageUrls[currentIndex]}
+                        src={
+                          typeof imageUrls[currentIndex] === 'string'
+                            ? (imageUrls[currentIndex] as string)
+                            : URL.createObjectURL(
+                                imageUrls[currentIndex] as File
+                              )
+                        }
                         alt="이미지 미리보기"
                       />
                       <RemoveImageButton onClick={handleRemoveImage}>
@@ -291,7 +297,7 @@ const PostCreatePage = () => {
                       placeholder="상품 관련 URL 주소를 입력해주세요."
                       value={urlInput}
                       onChange={handleUrlChange}
-                      isError={urlError}
+                      $isError={urlError}
                       spellCheck={false}
                     />
                   </UrlInputWrapper>
@@ -351,7 +357,7 @@ const PostCreatePage = () => {
                               onClick={() =>
                                 handleDeadlineSelect(`${index + 1}일  `)
                               }
-                              isSelected={deadline === `${index + 1}일  `}
+                              $isSelected={deadline === `${index + 1}일  `}
                             >
                               {index + 1}일
                             </DropdownItem>
@@ -584,12 +590,12 @@ const UrlInputWrapper = styled.div`
   border: none;
 `;
 
-const URLInput = styled.input<{ isError: boolean }>`
+const URLInput = styled.input<{ $isError: boolean }>`
   width: 285px;
   flex: 1;
   padding: 10px;
   background-color: #ececec;
-  border: 1px solid ${({ isError }) => (isError ? 'red' : '#ccc')};
+  border: 1px solid ${({ $isError }) => ($isError ? 'red' : '#ccc')};
   border-radius: 5px;
 `;
 
@@ -719,12 +725,12 @@ const DropdownMenu = styled.div`
   box-sizing: border-box;
 `;
 
-const DropdownItem = styled.div<{ isSelected: boolean }>`
+const DropdownItem = styled.div<{ $isSelected: boolean }>`
   padding: 10px;
   text-align: center;
   cursor: pointer;
-  background: ${({ isSelected }) => (isSelected ? '#f0f0f0' : '#fff')};
-  font-weight: ${({ isSelected }) => (isSelected ? 'bold' : 'normal')};
+  background: ${({ $isSelected }) => ($isSelected ? '#f0f0f0' : '#fff')};
+  font-weight: ${({ $isSelected }) => ($isSelected ? 'bold' : 'normal')};
 
   &:hover {
     background: #eaeaea;

@@ -18,7 +18,7 @@ const FindPasswordPage = () => {
             style={{
               width: '100%',
               height: '100%',
-              objectFit: 'contain',
+              objectFit: 'cover',
             }}
           />
         </LeftContent>

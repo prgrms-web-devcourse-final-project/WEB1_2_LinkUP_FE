@@ -36,7 +36,7 @@ const OrderHistory = () => {
         return '결제 완료';
       case 'FAILED':
         return '결제 실패';
-      case 'CANCELD':
+      case 'CANCELED':
         return '결제 취소';
       case 'PARTIAL_CANCELED':
         return '부분 취소';

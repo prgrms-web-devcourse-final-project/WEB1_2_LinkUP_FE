@@ -1,17 +1,24 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { getOrderList, OrderType } from '../../../../api/mypageApi';
+import {
+  getOrderList,
+  OrderType,
+  postProductCancel,
+} from '../../../../api/mypageApi';
 
 const OrderHistory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [orderList, setOrderList] = useState<OrderType[]>([]);
+  const [pk, setPk] = useState<string>('');
+  const navigate = useNavigate();
 
   const handleCancelClick = () => {
     setIsModalOpen(true);
   };
 
-  const handleConfirm = () => {
-    // 주문 취소/환불 로직 추가 예정
+  const handleConfirm = async () => {
+    await postProductCancel({ paymentKey: pk, cancelReason: 'test' });
     setIsModalOpen(false);
   };
 
@@ -62,10 +69,23 @@ const OrderHistory = () => {
                 <StatusBadge>{getStatusLabel(order.paymentStatus)}</StatusBadge>
               </OrderDetails>
             </OrderWrapper>
-            <Price>{order.price}</Price>
+            <Price>{order.price}원</Price>
             <Actions>
-              <ActionButton>상품 페이지 이동</ActionButton>
-              <CancelButton onClick={handleCancelClick}>
+              <ActionButton
+                onClick={() => {
+                  navigate(`/products/${order.postId}`);
+                }}
+              >
+                상품 페이지 이동
+              </ActionButton>
+              <CancelButton
+                onClick={() => {
+                  handleCancelClick();
+                  if (order.payment_key) {
+                    setPk(order.payment_key);
+                  }
+                }}
+              >
                 주문 취소/환불
               </CancelButton>
               {order.paymentStatus === 'DONE' && (

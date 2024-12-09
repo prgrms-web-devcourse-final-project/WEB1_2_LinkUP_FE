@@ -1,8 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
+import { getRefundList } from '../../../../api/mypageApi';
 import { refundHistoryData } from '../mockData';
 
 const RefundHistory = () => {
+  useEffect(() => {
+    const fetchOrderList = async () => {
+      const response = await getRefundList();
+
+      console.log(response);
+    };
+    fetchOrderList();
+  }, []);
   return (
     <Container>
       <RefundList>

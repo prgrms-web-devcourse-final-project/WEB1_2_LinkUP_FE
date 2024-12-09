@@ -95,10 +95,32 @@ function SignUpPage() {
         >
           Signup
         </LoginButton>
+        <AuthButtonWrapper>
+          <AuthButton
+            onClick={() => {
+              navigate('/signin');
+            }}
+          >
+            로그인하기
+          </AuthButton>
+        </AuthButtonWrapper>
       </RightContent>
     </Wrapper>
   );
 }
+
+const AuthButton = styled.div`
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+`;
+
+const AuthButtonWrapper = styled.div`
+  margin-top: 35px;
+  width: calc(100% - 20px);
+  display: inline-flex;
+  justify-content: center;
+`;
 
 const LoginButton = styled.div`
   background-color: #000;

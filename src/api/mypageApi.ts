@@ -1,5 +1,14 @@
 import axiosInstance from './axiosInstance';
 
+export type RefundType = {
+  productName: string;
+  quantity: number;
+  price: number;
+  url: string;
+  paymentStatus: string;
+  postId: number;
+};
+
 export type MyPostType = {
   availableNumber: number;
   category: string;

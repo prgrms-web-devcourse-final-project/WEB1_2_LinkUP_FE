@@ -1,37 +1,46 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { getRefundList } from '../../../../api/mypageApi';
-import { refundHistoryData } from '../mockData';
+import { getRefundList, RefundType } from '../../../../api/mypageApi';
 
 const RefundHistory = () => {
+  const [refundList, setRefundList] = useState<RefundType[]>([]);
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchOrderList = async () => {
       const response = await getRefundList();
 
-      console.log(response);
+      setRefundList(response);
     };
     fetchOrderList();
   }, []);
   return (
     <Container>
       <RefundList>
-        {refundHistoryData.map((refund) => (
-          <RefundItem key={refund.id}>
+        {refundList.map((refund, idx) => (
+          <RefundItem key={idx}>
             <RefundWrapper>
               <ImageContainer>
                 <ImagePlaceholder />
               </ImageContainer>
               <RefundDetails>
-                <ProductName>{refund.name}</ProductName>
+                <ProductName>{refund.productName}</ProductName>
                 <ProductInfo>Quantity: {refund.quantity}</ProductInfo>
-                <StatusBadge status={refund.status}>
-                  {refund.status}
+                <StatusBadge status={refund.paymentStatus}>
+                  {refund.paymentStatus === 'CANCELED' ? '취소' : '대기 중'}
                 </StatusBadge>
               </RefundDetails>
             </RefundWrapper>
-            <Price>{refund.price}</Price>
+            <Price>{refund.price}원</Price>
             <Actions>
-              <ActionButton>상품 페이지 이동</ActionButton>
+              <ActionButton
+                onClick={() => {
+                  navigate(`/products/${refund.postId}`);
+                }}
+              >
+                상품 페이지 이동
+              </ActionButton>
             </Actions>
           </RefundItem>
         ))}

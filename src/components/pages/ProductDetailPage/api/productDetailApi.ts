@@ -5,7 +5,6 @@ export const getProductbyId = async (productId: number): Promise<Product> => {
   try {
     const URL = `/goodbuyUs/product?postid=${productId}`;
     const response = await axiosInstance.post(URL);
-    console.log(response.data);
     return response.data;
   } catch {
     throw new Error('상품 정보를 가져오는 데 실패했습니다.');

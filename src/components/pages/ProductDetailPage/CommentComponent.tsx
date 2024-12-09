@@ -80,8 +80,9 @@ const CommentComponent: React.FC<CommentProps> = ({
       setEditingId(null);
       setEditingText('');
       setEditingRating(5);
-    } catch {
+    } catch (e) {
       alert('현재 댓글을 수정할 수 없는 상태입니다.');
+      console.log(e);
     }
   };
 

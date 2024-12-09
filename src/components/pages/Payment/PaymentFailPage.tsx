@@ -11,7 +11,7 @@ const PaymentFailPage = () => {
   const productId = Number(id);
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
-  const amount = urlParams.get('price');
+  const price = urlParams.get('price');
   const { data: product, isLoading, isError } = useProductQuery(productId);
 
   if (!product) {
@@ -33,7 +33,7 @@ const PaymentFailPage = () => {
               </SummaryRow>
               <SummaryRow>
                 <Label>결제 금액</Label>
-                <Value>{amount} 원</Value>
+                <Value>{price} 원</Value>
               </SummaryRow>
             </OrderSummary>
           </FailureSection>

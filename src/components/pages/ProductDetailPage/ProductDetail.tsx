@@ -24,7 +24,7 @@ const ProductDetail: React.FC = () => {
   const { quantity, setQuantity } = useQuantity();
   const [remainingTime, setRemainingTime] = useState('');
   const navigate = useNavigate();
-  const isOutOfStock = product ? product.now >= product.currentStock : false;
+  const isOutOfStock = product ? product.currentStock <= 0 : false;
   const isDeadlinePassed = remainingTime === '마감되었습니다.';
   const isButtonDisabled = isOutOfStock || isDeadlinePassed;
   useEffect(() => {

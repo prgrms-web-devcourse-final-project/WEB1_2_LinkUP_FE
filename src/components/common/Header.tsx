@@ -54,7 +54,7 @@ const Header = () => {
             <NavItem>
               {isLoggedIn && (
                 <StyledLink
-                  to={isAdmin ? '/adminpage' : '/mypage/setting'}
+                  to={isAdmin ? '/admin/post' : '/mypage'}
                   onClick={toggleMobileMenu}
                 >
                   {isAdmin ? 'Admin Page' : 'My Page'}
@@ -63,12 +63,10 @@ const Header = () => {
               {isAdmin && (
                 <SubMenu>
                   <SubMenuItem>
-                    <StyledLink to="/adminpage/post-management">
-                      Post Management
-                    </StyledLink>
+                    <StyledLink to="/admin/post">Post Management</StyledLink>
                   </SubMenuItem>
                   <SubMenuItem>
-                    <StyledLink to="/adminpage/chat-management">
+                    <StyledLink to="/admin/chatlist">
                       Chat Management
                     </StyledLink>
                   </SubMenuItem>

@@ -27,7 +27,7 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
   const filteredProducts =
     selectedText === '마감 상품'
       ? products.filter(
-          (p) => p.available === false && new Date(p.deadline) < new Date()
+          (p) => p.available === false || new Date(p.deadline) < new Date()
         )
       : products.filter(
           (p) => p.available === true && new Date(p.deadline) > new Date()

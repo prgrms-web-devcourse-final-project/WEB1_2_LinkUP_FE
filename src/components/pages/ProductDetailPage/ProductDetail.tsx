@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import StarRating from '../../common/StarRating';
 import { submitOrder } from './api/submitApi';
-import { addWishList } from './api/wishApi';
+// import { addWishList } from './api/wishApi';
 import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
 import CommentComponent from './CommentComponent';
@@ -145,7 +145,9 @@ const ProductDetail: React.FC = () => {
                   >
                     구매하기
                   </PurchaseButton>
-                  <WishButton onClick={() => addWishList(product.id)}>
+                  <WishButton
+                  //  onClick={() => addWishList(product.id)}
+                  >
                     찜하기
                   </WishButton>
                 </ButtonWrapper>

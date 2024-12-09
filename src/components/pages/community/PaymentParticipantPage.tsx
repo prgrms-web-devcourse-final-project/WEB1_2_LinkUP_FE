@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { VirtualAccountResponse } from './api/paymentApi';
 import VirtualAccountModal from './modal/VirtualAccountModal';
+import { getImageSrc } from '../../../utils/GetImageSrc';
 
 const PaymentParticipantPage = () => {
   const navigate = useNavigate();
@@ -65,7 +66,7 @@ const PaymentParticipantPage = () => {
               <ImageContainer>
                 <ImagePreviewWrapper>
                   <ImagePreview>
-                    <img src={post.imageUrls[0]} alt={'이미지'} />
+                    <img src={getImageSrc(post.imageUrls[0])} alt={'이미지'} />
                   </ImagePreview>
                 </ImagePreviewWrapper>
               </ImageContainer>

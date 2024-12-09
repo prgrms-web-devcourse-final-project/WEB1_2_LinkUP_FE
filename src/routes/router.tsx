@@ -131,7 +131,7 @@ const router = createBrowserRouter(
           ),
         },
         {
-          path: '/admin/post/approve/:communityPostId',
+          path: '/admin/post/approval/:communityPostId',
           element: <PostApprovalPage />,
         },
         {

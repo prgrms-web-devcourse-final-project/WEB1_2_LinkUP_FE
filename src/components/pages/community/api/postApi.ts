@@ -1,139 +1,89 @@
 import axiosInstance from '../../../../api/axiosInstance';
-// import { mockCommunityPosts } from '../../../../mocks/communityPosts';
-
-export interface Comment {
-  userId: string;
-  userNickname: string;
-  commentId: string;
-  createdAt: string;
-  content: string;
-}
-
-export interface Participant {
-  userId: string;
-  quantity: number;
-  isCancelled: boolean;
-  isPaymentCompleted: boolean;
-  isRequiredRefund: boolean;
-}
-
-// PostStatus 타입
-export type PostStatus =
-  | 'NOT_APPROVED' // 승인 대기
-  | 'APPROVED' // 승인 완료
-  | 'REJECTED' // 승인 거절
-  | 'PAYMENT_STANDBY' // 결제 대기
-  | 'PAYMENT_COMPLETED' // 결제 완료
-  | 'DELECTED'; // 삭제(참여 이후)
-
-// POST_STATUS 상수 추가
-export const POST_STATUS: { [key in PostStatus]: PostStatus } = {
-  NOT_APPROVED: 'NOT_APPROVED',
-  APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED',
-  PAYMENT_STANDBY: 'PAYMENT_STANDBY',
-  PAYMENT_COMPLETED: 'PAYMENT_COMPLETED',
-  DELECTED: 'DELECTED',
-};
-
-export interface Post {
-  communityPostId: number;
-  title: string;
-  description: string;
-  imageUrls: string[];
-  productUrl: string;
-  userId: string;
-  nickname: string;
-  currentQuantity: number; // 현재 참여 수량(추가 확인 필요)
-  availableNumber: number;
-  createdAt: string;
-  closeAt: string;
-  period: number;
-  totalAmount: number;
-  unitAmount: number;
-  category: string;
-  participants: Participant[]; // 참여자 목록(추가 확인 필요)
-  comments: Comment[]; // 댓글(추가 확인 필요)
-  status: PostStatus;
-  stateUpdatedAt?: string; // 상태 변경 시점(추가 확인 필요)
-  cancelledUsers?: string[]; // 이탈한 사용자 ID 목록(추가 확인 필요)
-}
-
-// Post 생성 시 필요한 타입 정의
-export type CreatePostInput = Omit<
+import {
   Post,
-  | 'communityPostId'
-  | 'createdAt'
-  | 'closeAt'
-  | 'userId'
-  | 'nickname'
-  | 'participants'
-  | 'comments'
-  | 'cancelledUsers'
-> & {
-  period?: number;
-};
-
-// 기본 Post 구조
-export const defaultPost: Post = {
-  communityPostId: 0,
-  title: '',
-  description: '',
-  imageUrls: [],
-  productUrl: '',
-  userId: '',
-  nickname: '',
-  currentQuantity: 0, // 현재 참여 수량 초기화(추가 확인 필요)
-  availableNumber: 0,
-  createdAt: '',
-  closeAt: '',
-  period: 0,
-  totalAmount: 0,
-  unitAmount: 0,
-  category: '',
-  participants: [], // 참여자 목록 초기화(추가 확인 필요)
-  comments: [], // 댓글 초기화(추가 확인 필요)
-  status: 'NOT_APPROVED', // 기본 상태 설정
-  cancelledUsers: [], // 이탈한 사용자 ID 목록 초기화(추가 확인 필요)
-};
+  CreatePostData,
+  PostDetailResponse,
+  POST_STATUS,
+  SSEEvent,
+} from '../../../../types/postTypes';
 
 // 포스트 목록 가져오기 (카테고리와 검색어 기반)
-export const getPosts = async (
+export const fetchPosts = async (
   category?: string,
   searchQuery?: string
 ): Promise<Post[]> => {
-  const response = await axiosInstance.get('/post', {
-    params: { category, search: searchQuery },
+  const response = await axiosInstance.get('/api/community/post');
+  if (response.status !== 200) throw new Error('Failed to fetch posts');
+  return response.data.filter((post: Post) => {
+    const categoryMatch = !category || post.category === category;
+    const searchMatch =
+      !searchQuery ||
+      post.title.includes(searchQuery) ||
+      post.description.includes(searchQuery);
+    return categoryMatch && searchMatch;
   });
-  return response.data.filter((post: Post) => post.status !== 'DELECTED');
+};
 
-  // Mock 데이터 기반:
-  // return mockCommunityPosts.filter((post) => {
-  //   const categoryMatch = !category || post.category === category;
-  //   const searchMatch =
-  //     !searchQuery ||
-  //     post.title.includes(searchQuery) ||
-  //     post.content.includes(searchQuery);
-  //   return categoryMatch && searchMatch;
-  // });
+// 포스트 상세 조회
+export const fetchPostById = async (
+  communityPostId: number
+): Promise<PostDetailResponse> => {
+  const response = await axiosInstance.get(
+    `/api/community/post/${communityPostId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+      },
+    }
+  );
+  if (response.status !== 200) throw new Error('Failed to fetch post details');
+  return response.data;
 };
 
 // 포스트 생성
 export const createPost = async (
-  postData: CreatePostInput
-): Promise<{ communityPostId: number }> => {
-  // 실제 API 사용
-  const response = await axiosInstance.post('/post', postData);
+  postData: CreatePostData
+): Promise<{ message: string }> => {
+  const formData = new FormData();
+  const jsonContent = JSON.stringify({
+    title: postData.title,
+    category: postData.category,
+    availableNumber: postData.availableNumber,
+    period: postData.period,
+    totalAmount: postData.totalAmount,
+    unitAmount: postData.unitAmount,
+    productUrl: postData.productUrl,
+    description: postData.description,
+  });
+  const blobContent = new Blob([jsonContent], { type: 'application/json' });
+  formData.append('content', blobContent);
+
+  // 이미지 파일 추가
+  postData.imageUrls.forEach((file) => {
+    if (file instanceof File) {
+      formData.append('images', file); // Content-Type은 자동 설정됨
+    } else {
+      console.warn('Invalid image file detected:', file);
+    }
+  });
+
+  const response = await axiosInstance.post('/api/community/post', formData, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+    },
+  });
+  if (response.status !== 200) throw new Error('Failed to create post');
   return response.data;
 };
 
 // 포스트 상태 업데이트
 export const updatePostStatus = async (
   communityPostId: number,
-  newStatus: PostStatus,
-  period?: number
+  newStatus: POST_STATUS
 ): Promise<Post> => {
-  const response = await axiosInstance.get(`/post/${communityPostId}`);
+  const response = await axiosInstance.get(
+    `/api/community/post/${communityPostId}`
+  );
   const communityPost: Post = response.data;
 
   // 상태별 처리 로직
@@ -148,21 +98,23 @@ export const updatePostStatus = async (
           ? communityPost.title.replace(/^\(수정요망\)/, '').trim()
           : communityPost.title;
 
-        // createdAt 및 closeAt 갱신
-        const approvedAt = new Date().toISOString();
-        const calculatedCloseAt = new Date(
-          new Date(approvedAt).getTime() + (period || 0) * 24 * 60 * 60 * 1000
-        ).toISOString();
-
+        // 'APPROVED' 상태로 업데이트 요청
         const updatedResponse = await axiosInstance.patch(
-          `/post/${communityPostId}/status`,
+          `/api/admin/post/approve/${communityPostId}`,
           {
-            status: newStatus,
-            title: cleanedTitle,
-            createdAt: approvedAt,
-            closeAt: calculatedCloseAt,
+            title: cleanedTitle, // 'APPROVED' 시 '(수정요망)' 제거된 제목
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('jwt')}`, // 관리자 인증 필요
+            },
           }
         );
+
+        if (updatedResponse.status !== 200) {
+          throw new Error('Failed to approve the post');
+        }
+
         return updatedResponse.data;
       } else {
         throw new Error('현재 상태에서 APPROVED로 변경할 수 없습니다.');
@@ -180,74 +132,27 @@ export const updatePostStatus = async (
           ? communityPost.title
           : `(수정요망)${communityPost.title}`;
 
+        // 'REJECTED' 상태로 업데이트 요청
         const updatedResponse = await axiosInstance.patch(
-          `/post/${communityPostId}/status`,
+          `/api/admin/post/reject/${communityPostId}`,
           {
-            status: newStatus,
             title: updatedTitle,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('jwt')}`, // 관리자 인증 필요
+            },
           }
         );
+
+        if (updatedResponse.status !== 200) {
+          throw new Error('Failed to reject the post');
+        }
+
         return updatedResponse.data;
       } else {
-        throw new Error('REJECTED 상태로 변경할 수 없습니다.');
+        throw new Error('현재 상태에서 REJECTED로 변경할 수 없습니다.');
       }
-    }
-
-    case 'PAYMENT_STANDBY': {
-      // 실제 API 사용
-      if (
-        communityPost.status === 'APPROVED' &&
-        communityPost.currentQuantity === communityPost.availableNumber
-      ) {
-        const standbyAt = new Date().toISOString();
-
-        const updatedResponse = await axiosInstance.patch(
-          `/post/${communityPostId}/status`,
-          {
-            status: newStatus,
-            stateUpdatedAt: standbyAt,
-          }
-        );
-        return updatedResponse.data;
-      } else {
-        throw new Error('PAYMENT_STANDBY 상태로 변경할 수 없습니다.');
-      }
-    }
-
-    case 'PAYMENT_COMPLETED': {
-      // 참여자 관련 부분이라 수정 필요
-      const allPaid = communityPost.participants.every(
-        (participant) =>
-          participant.isPaymentCompleted && !participant.isCancelled
-      );
-
-      if (allPaid) {
-        const updatedResponse = await axiosInstance.patch(
-          `/post/${communityPostId}/status`,
-          {
-            status: newStatus,
-          }
-        );
-        return updatedResponse.data;
-      } else {
-        throw new Error('PAYMENT_COMPLETED 상태로 변경할 수 없습니다.');
-      }
-    }
-
-    case 'DELECTED': {
-      if (
-        communityPost.status === 'APPROVED' ||
-        communityPost.status === 'PAYMENT_STANDBY'
-      ) {
-        const updatedResponse = await axiosInstance.patch(
-          `/post/${communityPostId}/status`,
-          {
-            status: newStatus,
-          }
-        );
-        return updatedResponse.data;
-      }
-      throw new Error('DELETED 상태로 변경할 수 없습니다.');
     }
 
     default: {
@@ -256,225 +161,130 @@ export const updatePostStatus = async (
   }
 };
 
-// 포스트 조회
-export const fetchPostById = async (communityPostId: number): Promise<Post> => {
-  // 실제 API 사용
-  const response = await axiosInstance.get(`/post/${communityPostId}`);
-  return response.data;
-
-  // Mock 데이터 기반:
-  // const post = mockCommunityPosts.find(
-  //   (item) => item.communityPostId === communityPostId
-  // );
-  // if (!post) {
-  //   throw new Error('해당 게시물이 존재하지 않습니다.');
-  // }
-  // return post;
-};
-
 // 포스트 수정
 export const updatePost = async (
   communityPostId: number,
   updatedPost: Partial<Post>
-): Promise<Post> => {
-  // 실제 API 사용
+): Promise<Partial<Post>> => {
   const response = await axiosInstance.patch(
-    `/mypage/post/${communityPostId}`,
+    `/api/mypage/post/${communityPostId}`,
     updatedPost
   );
   return response.data;
-
-  // Mock 데이터 기반:
-  // const postIndex = mockCommunityPosts.findIndex(
-  //   (item) => item.communityPostId === communityPostId
-  // );
-  // if (postIndex === -1) {
-  //   throw new Error('해당 게시물이 존재하지 않습니다.');
-  // }
-  // const existingPost = mockCommunityPosts[postIndex];
-  // const updatedData = {
-  //   ...existingPost,
-  //   ...updatedPost,
-  //   updatedAt: new Date().toISOString(),
-  // };
-  // mockCommunityPosts[postIndex] = updatedData;
-  // return updatedData;
 };
 
 // 포스트 삭제
 export const deletePostById = async (
   communityPostId: number
 ): Promise<void> => {
-  // 실제 API 사용
-  await axiosInstance.delete(`/post/${communityPostId}`);
-
-  // Mock 데이터 기반:
-  // const postIndex = mockCommunityPosts.findIndex(
-  //   (item) => item.communityPostId === communityPostId
-  // );
-  // if (postIndex === -1) {
-  //   throw new Error('해당 게시물이 존재하지 않습니다.');
-  // }
-  // mockCommunityPosts.splice(postIndex, 1);
+  await axiosInstance.delete(`/api/community/post/${communityPostId}`);
 };
 
 // 공구 진행 포스트 참여
 export const joinPost = async (
   communityPostId: number,
-  userId: string,
   quantity: number
-): Promise<void> => {
-  // 실제 API 사용
-  await axiosInstance.post(`/community/post/${communityPostId}/join`, {
-    userId,
-    quantity,
-  });
-
-  // Mock 데이터 기반:
-  // const post = mockCommunityPosts.find(
-  //   (item) => item.communityPostId === communityPostId
-  // );
-  // if (!post) {
-  //   throw new Error('해당 게시물이 존재하지 않습니다.');
-  // }
-  // post.currentQuantity += quantity;
-  // post.participants.push({
-  //   userId,
-  //   quantity,
-  //   isCancelled: false,
-  //   isPaymentCompleted: false,
-  //   isRequiredRefund: false,
-  // });
+): Promise<{ message: string }> => {
+  const response = await axiosInstance.post(
+    `/api/community/post/${communityPostId}/join`,
+    {
+      number: quantity,
+    }
+  );
+  if (response.status !== 200) throw new Error('Failed to join post');
+  return response.data;
 };
 
 // 공구 진행 포스트 참여 취소
 export const cancelJoinPost = async (
-  communityPostId: number,
-  userId: string
-): Promise<void> => {
-  // 실제 API 사용
-  await axiosInstance.post(`community/post/${communityPostId}/cancel`, {
-    userId,
-  });
-
-  // Mock 데이터 기반:
-  // const post = mockCommunityPosts.find(
-  //   (item) => item.communityPostId === communityPostId
-  // );
-  // if (!post) {
-  //   throw new Error('해당 게시물이 존재하지 않습니다.');
-  // }
-  // const participant = post.participants.find((p) => p.userId === userId);
-  // if (participant) {
-  //   participant.isCancelled = true;
-  //   post.cancelledUsers.push(userId); // 취소한 사용자 ID 추가
-  // }
+  communityPostId: number
+): Promise<{ message: string }> => {
+  const response = await axiosInstance.put(
+    `/api/community/post/${communityPostId}/cancel`
+  );
+  if (response.status !== 200)
+    throw new Error('Failed to cancel participation');
+  return response.data;
 };
 
-// 결제 처리 & 환불 처리는 가상 계좌 관련 로직과 API 명세를 기준으로 전부 수정해야 함
+// SSE: 실시간 정보 구독 (참여 현황, 포스트 상태, 결제 현황) 데이터 수신 및 상태 갱신
+export const handleSSEUpdate = (
+  communityPostId: number,
+  updateState: (state: {
+    postStatus?: POST_STATUS;
+    participationCount?: number;
+    paymentCount?: number;
+  }) => void
+): EventSource => {
+  const eventSource = new EventSource(
+    `/api/community/post/${communityPostId}/participants`
+  );
+  eventSource.onmessage = (event) => {
+    const data: SSEEvent = JSON.parse(event.data);
+    updateState({
+      postStatus: data.postStatus,
+      participationCount: data.participationCount,
+      paymentCount: data.paymentCount,
+    });
+  };
 
-// // 결제 처리
-// export const completePayment = async (communityPostId: number, userId: string) => {
-//   // 실제 API 사용
-//   // await axiosInstance.post(`/posts/${postId}/payment`, { userId });
+  eventSource.onerror = (error) => {
+    console.error('SSE connection error:', error);
+    eventSource.close();
+  };
 
-//   const postIndex = mockCommunityPosts.findIndex(
-//     (item) => item.postId === postId
-//   );
-//   if (postIndex === -1) {
-//     throw new Error('해당 게시물이 존재하지 않습니다.');
-//   }
+  return eventSource;
+};
 
-//   const post = mockCommunityPosts[postIndex];
-//   const participant = post.participants.find((p) => p.userId === userId);
-
-//   if (!participant) {
-//     throw new Error('해당 사용자가 참여자 목록에 없습니다.');
-//   }
-
-//   // 결제 완료 처리
-//   participant.isCancelled = false;
-//   participant.isPaymentCompleted = true;
-
-//   // 상태 갱신 필요
-//   const allPaid = post.participants.every((p) => !p.isCancelled);
-//   if (allPaid) {
-//     post.status = 'PAYMENT_COMPLETED';
-//   }
-// };
+// SSE 통합 상태 갱신
+export const updatePostStatusWithSSE = (
+  communityPostId: number,
+  updateState: (state: {
+    postStatus?: POST_STATUS;
+    participationCount?: number;
+    paymentCount?: number;
+  }) => void
+): EventSource => {
+  return handleSSEUpdate(communityPostId, updateState);
+};
 
 // 댓글 작성
 export const addComment = async (
   communityPostId: number,
-  userId: string,
+  userId: number,
   userNickname: string,
   content: string
 ): Promise<void> => {
   // 실제 API 사용
-  await axiosInstance.post(`/post/${communityPostId}/comments`, {
+  await axiosInstance.post(`/api/community/post/${communityPostId}/comments`, {
     userId,
     userNickname,
     content,
   });
-
-  // Mock 데이터 기반:
-  // const post = mockCommunityPosts.find(
-  //   (item) => item.communityPostId === communityPostId
-  // );
-  // if (!post) {
-  //   throw new Error('해당 게시물이 존재하지 않습니다.');
-  // }
-  // post.comments.push({
-  //   userId,
-  //   userNickname,
-  //   commentId: `comment-${new Date().getTime()}`,
-  //   createdAt: new Date().toISOString(),
-  //   content,
-  // });
 };
 
 // 댓글 삭제
 export const deleteComment = async (
   communityPostId: number,
-  commentId: string
+  commentId: number
 ): Promise<void> => {
   // 실제 API 사용
-  await axiosInstance.delete(`/post/${communityPostId}/comments/${commentId}`);
-
-  // Mock 데이터 기반:
-  // const post = mockCommunityPosts.find(
-  //   (item) => item.communityPostId === communityPostId
-  // );
-  // if (!post) {
-  //   throw new Error('해당 게시물이 존재하지 않습니다.');
-  // }
-  // post.comments = post.comments.filter(
-  //   (comment) => comment.commentId !== commentId
-  // );
+  await axiosInstance.delete(
+    `/api/community/post/${communityPostId}/comments/${commentId}`
+  );
 };
 
 // 댓글 수정
 export const updateComment = async (
   communityPostId: number,
-  commentId: string,
+  commentId: number,
   content: string
 ): Promise<void> => {
   // 실제 API 사용
-  await axiosInstance.put(`/post/${communityPostId}/comments/${commentId}`, {
-    content,
-  });
-
-  // Mock 데이터 기반:
-  // const post = mockCommunityPosts.find(
-  //   (item) => item.communityPostId === communityPostId
-  // );
-  // if (!post) {
-  //   throw new Error('해당 게시물이 존재하지 않습니다.');
-  // }
-  // const comment = post.comments.find(
-  //   (comment) => comment.commentId === commentId
-  // );
-  // if (comment) {
-  //   comment.content = content;
-  // }
+  await axiosInstance.put(
+    `/api/community/post/${communityPostId}/comments/${commentId}`,
+    {
+      content,
+    }
+  );
 };

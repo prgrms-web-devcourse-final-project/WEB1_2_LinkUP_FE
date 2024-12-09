@@ -14,6 +14,16 @@ const Header = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const handleCommunityClick = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+  ) => {
+    if (!isLoggedIn || !isAdmin) {
+      e.preventDefault();
+      alert('로그인 후 이용할 수 있는 페이지입니다.');
+      setIsMobileMenuOpen(!isMobileMenuOpen);
+    }
+  };
+
   return (
     <HeaderContainer>
       <HeaderContent>
@@ -47,14 +57,14 @@ const Header = () => {
               </StyledLink>
             </NavItem>
             <NavItem>
-              <StyledLink to="/community/post" onClick={toggleMobileMenu}>
+              <StyledLink to="/community/post" onClick={handleCommunityClick}>
                 Community
               </StyledLink>
             </NavItem>
             <NavItem>
               {isLoggedIn && (
                 <StyledLink
-                  to={isAdmin ? '/adminpage' : '/mypage/setting'}
+                  to={isAdmin ? '#' : '/mypage/setting'}
                   onClick={toggleMobileMenu}
                 >
                   {isAdmin ? 'Admin Page' : 'My Page'}
@@ -63,12 +73,10 @@ const Header = () => {
               {isAdmin && (
                 <SubMenu>
                   <SubMenuItem>
-                    <StyledLink to="/adminpage/post-management">
-                      Post Management
-                    </StyledLink>
+                    <StyledLink to="/admin/post">Post Management</StyledLink>
                   </SubMenuItem>
                   <SubMenuItem>
-                    <StyledLink to="/adminpage/chat-management">
+                    <StyledLink to="/admin/chatlist">
                       Chat Management
                     </StyledLink>
                   </SubMenuItem>

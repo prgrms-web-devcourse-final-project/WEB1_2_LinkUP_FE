@@ -39,7 +39,7 @@ const CategoryWrapper: React.FC<CategoryWrapperProps> = ({
       {categories.map((category) => (
         <CategoryItem
           key={category.id}
-          active={category.id === currentCategory}
+          $active={category.id === currentCategory}
           onClick={() => handleCategoryClick(category.id)}
         >
           {category.name}
@@ -65,15 +65,15 @@ const HeaderTitle = styled.h2`
   white-space: nowrap; /* 텍스트 줄바꿈 방지 */
 `;
 
-const CategoryItem = styled.div<{ active: boolean }>`
+const CategoryItem = styled.div<{ $active: boolean }>`
   padding: 1rem 1rem;
-  font-weight: ${({ active }) => (active ? 'bold' : 'normal')};
+  font-weight: ${({ $active }) => ($active ? 'bold' : 'normal')};
   cursor: pointer;
   position: relative;
 
   &::after {
     content: '';
-    display: ${({ active }) => (active ? 'block' : 'none')};
+    display: ${({ $active }) => ($active ? 'block' : 'none')};
     height: 2px;
     background-color: black;
     width: 100%;

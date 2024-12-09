@@ -279,7 +279,7 @@ const Login = styled.li`
     text-decoration: none;
     display: block;
     text-align: center;
-    margin-top: 4px;
+    margin-top: 5px;
     font-weight: bold;
   }
 
@@ -308,11 +308,11 @@ const LogOut = styled.li`
   padding: 0px 10px;
 
   a {
+    font-size: 15px;
     color: white;
     text-decoration: none;
     display: block;
     text-align: center;
-    margin-top: 1px;
     font-weight: bold;
   }
 
@@ -351,8 +351,9 @@ const StyledLink = styled(Link)`
 
 const CartIcon = styled.div`
   img {
-    width: 20px;
-    height: 23px;
+    margin-top: -4px;
+    width: 22px;
+    height: 22px;
   }
 
   @media (min-width: 576px) and (max-width: 767px) {

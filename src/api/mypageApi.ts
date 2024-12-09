@@ -1,5 +1,14 @@
 import axiosInstance from './axiosInstance';
 
+export type RefundType = {
+  productName: string;
+  quantity: number;
+  price: number;
+  url: string;
+  paymentStatus: string;
+  postId: number;
+};
+
 export type MyPostType = {
   availableNumber: number;
   category: string;
@@ -132,6 +141,14 @@ export const putEditProfile = async (file: File) => {
         'Content-Type': 'multipart/form-data',
       },
     }
+  );
+
+  return response.data;
+};
+
+export const putChangeNickname = async (nickname: string) => {
+  const response = await axiosInstance.put(
+    `/api/mypage/change_nickname?nickName=${nickname}`
   );
 
   return response.data;

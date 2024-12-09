@@ -36,7 +36,7 @@ const OrderHistory = () => {
         return '결제 완료';
       case 'FAILED':
         return '결제 실패';
-      case 'CANCELD':
+      case 'CANCELED':
         return '결제 취소';
       case 'PARTIAL_CANCELED':
         return '부분 취소';
@@ -78,18 +78,24 @@ const OrderHistory = () => {
               >
                 상품 페이지 이동
               </ActionButton>
-              <CancelButton
-                onClick={() => {
-                  handleCancelClick();
-                  if (order.payment_key) {
-                    setPk(order.payment_key);
-                  }
-                }}
-              >
-                주문 취소/환불
-              </CancelButton>
               {order.paymentStatus === 'DONE' && (
-                <ReviewLink>
+                <CancelButton
+                  onClick={() => {
+                    handleCancelClick();
+                    if (order.payment_key) {
+                      setPk(order.payment_key);
+                    }
+                  }}
+                >
+                  주문 취소/환불
+                </CancelButton>
+              )}
+              {order.paymentStatus === 'DONE' && (
+                <ReviewLink
+                  onClick={() => {
+                    navigate(`/products/${order.postId}`);
+                  }}
+                >
                   <ReviewIcon src="/images/qricon.png" alt="review icon" />
                   <span>리뷰 작성하기</span>
                 </ReviewLink>

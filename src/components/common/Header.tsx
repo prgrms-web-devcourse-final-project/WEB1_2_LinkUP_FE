@@ -55,7 +55,7 @@ const Header = () => {
               {isLoggedIn && (
                 <StyledLink
                   to={isAdmin ? '#' : '/mypage/setting'}
-                  onClick={(e) => {
+                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     if (isAdmin) {
                       e.preventDefault(); // Admin일 경우 링크 동작 차단
                     } else {
@@ -92,7 +92,10 @@ const Header = () => {
                 </LogOut>
                 <LogOut>
                   <CartIcon>
-                    <StyledLink to="/cart" onClick={toggleMobileMenu}>
+                    <StyledLink
+                      to="/mypage/wishlist"
+                      onClick={toggleMobileMenu}
+                    >
                       <img src={cart} alt="장바구니 아이콘" />
                     </StyledLink>
                   </CartIcon>

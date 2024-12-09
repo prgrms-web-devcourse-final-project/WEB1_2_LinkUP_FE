@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -20,7 +21,7 @@ function SignUpPage() {
           style={{
             width: '100%',
             height: '100%',
-            objectFit: 'contain',
+            objectFit: 'cover',
           }}
         />
       </LeftContent>
@@ -71,24 +72,35 @@ function SignUpPage() {
             if (pw !== cpw) {
               alert('비밀번호가 일치하지 않습니다.');
             } else {
-              const response = await postSignUp({
-                email: email,
-                password: pw,
-                password_confirm: cpw,
-                name: name,
-                phone: phone,
-              });
+              try {
+                const response = await postSignUp({
+                  email: email,
+                  password: pw,
+                  password_confirm: cpw,
+                  name: name,
+                  phone: phone,
+                });
 
-              if (response.message === '이메일, 전화번호 중복 확인 완료') {
-                localStorage.setItem('email', email);
-                localStorage.setItem('password', pw);
-                localStorage.setItem('password_confirm', cpw);
-                localStorage.setItem('name', name);
-                localStorage.setItem('phone', phone);
+                if (response.message === '이메일, 전화번호 중복 확인 완료') {
+                  localStorage.setItem('email', email);
+                  localStorage.setItem('password', pw);
+                  localStorage.setItem('password_confirm', cpw);
+                  localStorage.setItem('name', name);
+                  localStorage.setItem('phone', phone);
 
-                navigate('/termsandservice');
-              } else {
-                alert('이메일 또는 전화번호가 중복 되었습니다.');
+                  navigate('/termsandservice');
+                } else {
+                  alert('이메일 또는 전화번호가 중복 되었습니다.');
+                }
+              } catch (err) {
+                if (
+                  axios.isAxiosError(err) &&
+                  err.response &&
+                  err.response.data &&
+                  err.response.data.error
+                ) {
+                  alert(err.response.data.error);
+                }
               }
             }
           }}

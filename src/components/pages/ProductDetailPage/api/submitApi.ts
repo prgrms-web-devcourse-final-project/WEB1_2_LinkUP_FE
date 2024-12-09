@@ -14,7 +14,7 @@ export const submitOrder = async (
   amount: number
 ): Promise<SubmitResponse> => {
   try {
-    const URL = `/goodbuyUs/orders?postId=${productId}`;
+    const URL = `/api/v1/orders?postId=${productId}`;
     const response = await axiosInstance.post(URL, { amount });
     return response.data;
   } catch {

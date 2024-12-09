@@ -2,32 +2,23 @@ import React, { useState } from 'react';
 import Sidemenu from './SideMenu';
 import GS from './GS';
 import { styled } from 'styled-components';
-import { wishHistoryData } from './mockData';
-
-interface WishState {
-  [key: number]: boolean;
-}
+import { wishHistoryData as initialWishHistoryData } from './mockData';
 
 interface Wish {
   id: number;
   name: string;
   quantity: number;
   price: string;
+  thumb: string;
 }
 
 function WishListPage() {
-  const [wishStates, setWishStates] = useState<WishState>(() =>
-    wishHistoryData.reduce((acc: WishState, wish: Wish) => {
-      acc[wish.id] = true;
-      return acc;
-    }, {})
+  const [wishHistoryData, setWishHistoryData] = useState<Wish[]>(
+    initialWishHistoryData
   );
 
-  const toggleWish = (id: number): void => {
-    setWishStates((prev: WishState) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+  const removeWish = (id: number): void => {
+    setWishHistoryData((prev) => prev.filter((wish) => wish.id !== id));
   };
 
   return (
@@ -41,22 +32,27 @@ function WishListPage() {
               <WishItem key={wish.id}>
                 <WishWrapper>
                   <ImageContainer>
-                    <ImagePlaceholder />
+                    {wish.thumb !== '' ? (
+                      <img
+                        src={wish.thumb}
+                        alt={wish.name}
+                        width={60}
+                        height={60}
+                      />
+                    ) : (
+                      <ImagePlaceholder />
+                    )}
                   </ImageContainer>
                   <WishDetails>
                     <ProductName>{wish.name}</ProductName>
-                    <ProductInfo>Quantity: {wish.quantity}</ProductInfo>
+                    <ProductInfo>수량: {wish.quantity}</ProductInfo>
                   </WishDetails>
                 </WishWrapper>
                 <Price>{wish.price}</Price>
                 <Actions>
                   <HeartIcon
-                    src={
-                      wishStates[wish.id]
-                        ? '/images/wish_on.png'
-                        : '/images/wish.png'
-                    }
-                    onClick={() => toggleWish(wish.id)}
+                    src="/images/wish_on.png"
+                    onClick={() => removeWish(wish.id)}
                     alt="찜하기"
                   />
                 </Actions>

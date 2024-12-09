@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
 import { Product } from '../HomePage/model/productSchema';
 import { QueryHandler, useProductsQuery } from '../../../hooks/useGetProduct';
+import ScrollToTopButton from '../../common/ScrollToTopButton';
 
 const ProductPage = () => {
   const { data: products, isLoading, isError } = useProductsQuery();

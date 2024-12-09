@@ -1,8 +1,7 @@
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-// import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
-import { products } from '../../../mocks/products';
+import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 
 const PaymentFailPage = () => {
   const { id } = useParams();
@@ -10,39 +9,43 @@ const PaymentFailPage = () => {
     return <p>상품 번호가 유실되었습니다.</p>;
   }
   const productId = Number(id);
-  // const { data: product, isLoading, isError } = useProductQuery(productId);
-  const product = products.filter((p) => p.id === productId)[0];
-  console.log(product);
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const amount = urlParams.get('amount');
+  const { data: product, isLoading, isError } = useProductQuery(productId);
+
   if (!product) {
     return <p>해당 상품을 찾을 수 없습니다.</p>;
   }
 
   return (
     <>
-      {/* <QueryHandler isLoading={isLoading} isError={isError}> */}
-      <Container>
-        <FailureSection>
-          <Title>결제 실패</Title>
-          <Subtitle>죄송합니다. 결제에 실패하였습니다.</Subtitle>
+      <QueryHandler isLoading={isLoading} isError={isError}>
+        <Container>
+          <FailureSection>
+            <Title>결제 실패</Title>
+            <Subtitle>죄송합니다. 결제에 실패하였습니다.</Subtitle>
 
-          <OrderSummary>
-            <SummaryRow>
-              <Label>상품명</Label>
-              <Value>{product?.name}</Value>
-            </SummaryRow>
-            <SummaryRow>
-              <Label>결제 금액</Label>
-              <Value>{product?.discountprice} 원</Value>
-            </SummaryRow>
-          </OrderSummary>
-        </FailureSection>
+            <OrderSummary>
+              <SummaryRow>
+                <Label>상품명</Label>
+                <Value>{product?.name}</Value>
+              </SummaryRow>
+              <SummaryRow>
+                <Label>결제 금액</Label>
+                <Value>{amount} 원</Value>
+              </SummaryRow>
+            </OrderSummary>
+          </FailureSection>
 
-        <ButtonGroup>
-          <RetryButton to={`/products/${productId}`}>다시 시도하기</RetryButton>
-          <BackButton to="/">메인으로 돌아가기</BackButton>
-        </ButtonGroup>
-      </Container>
-      {/* </QueryHandler> */}
+          <ButtonGroup>
+            <RetryButton to={`/products/${productId}`}>
+              다시 시도하기
+            </RetryButton>
+            <BackButton to="/">메인으로 돌아가기</BackButton>
+          </ButtonGroup>
+        </Container>
+      </QueryHandler>
     </>
   );
 };

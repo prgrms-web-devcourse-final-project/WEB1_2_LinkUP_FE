@@ -1,10 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidemenu from './SideMenu';
 import GS from './GS';
 import styled from 'styled-components';
+import {
+  deleteMyPost,
+  getMyPostList,
+  MyPostType,
+} from '../../../api/mypageApi';
+import { useNavigate } from 'react-router-dom';
 
 function MyPostsPage() {
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [myPostList, setMyPostList] = useState<MyPostType[]>([]);
+  const [deleteId, setDeleteId] = useState<string>('');
 
   const handleDeleteClick = () => {
     setIsModalOpen(true);
@@ -13,6 +22,32 @@ function MyPostsPage() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
+
+  const formatDate = (isoString: string): string => {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  };
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const response = await getMyPostList();
+        console.log(response);
+        setMyPostList(response);
+      } catch (error) {
+        console.error('failed', error);
+      }
+    };
+    fetchPost();
+  }, []);
+
   return (
     <GS.Wrapper>
       <Sidemenu />
@@ -28,18 +63,31 @@ function MyPostsPage() {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <Td>titititititititi</Td>
-                <Td>2024-11-18</Td>
-                <Td>
-                  <ButtonWrapper>
-                    <EditButton>수정</EditButton>
-                    <DeleteButton onClick={handleDeleteClick}>
-                      삭제
-                    </DeleteButton>
-                  </ButtonWrapper>
-                </Td>
-              </tr>
+              {myPostList.map((myPost, index) => (
+                <tr key={index}>
+                  <Td>{myPost.title}</Td>
+                  <Td>{formatDate(myPost.createdAt)}</Td>
+                  <Td>
+                    <ButtonWrapper>
+                      <EditButton
+                        onClick={() => {
+                          navigate(`/community/post/${myPost.communityPostId}`);
+                        }}
+                      >
+                        수정
+                      </EditButton>
+                      <DeleteButton
+                        onClick={() => {
+                          handleDeleteClick();
+                          setDeleteId(myPost.communityPostId + '');
+                        }}
+                      >
+                        삭제
+                      </DeleteButton>
+                    </ButtonWrapper>
+                  </Td>
+                </tr>
+              ))}
             </tbody>
           </Table>
         </TableWrapper>
@@ -48,7 +96,14 @@ function MyPostsPage() {
             <ModalContent>
               삭제하시겠습니까?
               <ModalButtons>
-                <RegisterButton>예</RegisterButton>
+                <RegisterButton
+                  onClick={async () => {
+                    setIsModalOpen(false);
+                    await deleteMyPost(deleteId);
+                  }}
+                >
+                  예
+                </RegisterButton>
                 <CancelButton onClick={handleCloseModal}>아니요</CancelButton>
               </ModalButtons>
             </ModalContent>

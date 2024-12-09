@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { styled } from 'styled-components';
 import GS from './GS';
 import Sidemenu from './SideMenu';
@@ -7,9 +7,10 @@ import PasswordModal from './Modal/PasswordModal';
 import LogoutModal from './Modal/LogoutModal';
 import WithdrawModal from './Modal/WithdrawModal';
 import { useDaumPostcodePopup } from 'react-daum-postcode';
+import { getUser, putEditProfile } from '../../../api/mypageApi';
 
 const SettingPage = () => {
-  const { addressList } = SettingPageData;
+  const [addressList, setAddressList] = useState(SettingPageData.addressList);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
@@ -60,6 +61,23 @@ const SettingPage = () => {
     }
   };
 
+  const handleDeleteAddress = (id: number) => {
+    setAddressList((prevList) => prevList.filter((item) => item.id !== id));
+  };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await getUser();
+
+        setProfileImage(response.profile);
+      } catch (error) {
+        console.error('failed', error);
+      }
+    };
+    fetchUser();
+  }, []);
+
   return (
     <GS.Wrapper>
       <Sidemenu />
@@ -70,9 +88,31 @@ const SettingPage = () => {
             alt="Profile"
             width={80}
             height={80}
+            onClick={() => document.getElementById('fileInput')?.click()}
+            style={{ cursor: 'pointer' }}
           />
           <EditProfileButton
-            onClick={() => document.getElementById('fileInput')?.click()}
+            onClick={async () => {
+              if (!profileImage) {
+                alert('이미지를 먼저 업로드해주세요.');
+                return;
+              }
+
+              try {
+                const blob = await fetch(profileImage).then((res) =>
+                  res.blob()
+                );
+                const file = new File([blob], 'profile.jpg', {
+                  type: blob.type,
+                });
+
+                await putEditProfile(file);
+                alert('프로필이 성공적으로 업데이트되었습니다.');
+              } catch (error) {
+                alert('프로필 업데이트 중 오류가 발생했습니다.');
+                console.error('API 오류:', error);
+              }
+            }}
           >
             Edit Profile
           </EditProfileButton>
@@ -84,6 +124,7 @@ const SettingPage = () => {
             onChange={handleImageUpload}
           />
         </ProfileWrapper>
+
         <NicknameWrapper>
           <Title>닉네임 변경</Title>
           <NicknameInput placeholder="최소 2자 이상 ~ 15자 이내, 띄어쓰기 및 특수문자 사용 불가" />
@@ -169,7 +210,7 @@ const SettingPage = () => {
             </AddAddressButton>
           )}
           <AddressList>
-            {addressList.map((item) => (
+            {addressList?.map((item) => (
               <AddressItem key={item.id}>
                 <AddressInfo>
                   <Name>{item.name}</Name>
@@ -177,8 +218,9 @@ const SettingPage = () => {
                   <Phone>{item.phone}</Phone>
                 </AddressInfo>
                 <Actions>
-                  <EditButton>Edit</EditButton>
-                  <DeleteButton>Delete</DeleteButton>
+                  <DeleteButton onClick={() => handleDeleteAddress(item.id)}>
+                    Delete
+                  </DeleteButton>
                 </Actions>
               </AddressItem>
             ))}
@@ -357,21 +399,6 @@ const ButtonGroup = styled.div`
   margin-top: 10px;
   width: 350px;
 `;
-
-const EditButton = styled.div`
-  display: inline-flex;
-  justify-content: center;
-  background-color: #f1f1f1;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 5px 10px;
-  cursor: pointer;
-
-  &:hover {
-    background-color: #ddd;
-  }
-`;
-
 const DeleteButton = styled.div`
   display: inline-flex;
   justify-content: center;

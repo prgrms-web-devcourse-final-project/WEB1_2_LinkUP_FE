@@ -1,20 +1,40 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+import { getUser } from '../../../api/mypageApi';
 
 const Sidemenu = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [newName, setNewName] = useState('');
 
   const isActive = (path: string) => location.pathname === path;
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await getUser();
+
+        setProfileImage(response.profile);
+        setNewName(response.name);
+      } catch (error) {
+        console.error('failed', error);
+      }
+    };
+    fetchUser();
+  }, []);
 
   return (
     <Wrapper>
       <ProfileSection>
-        <ProfileImage src="/images/origin.png" alt="Profile" />
+        <ProfileImage
+          src={profileImage || '/images/origin.png'}
+          alt="Profile"
+        />
         <ProfileText>
           <Hello>Hello 👋</Hello>
-          <Username>Robert Fox</Username>
+          <Username>{newName}</Username>
         </ProfileText>
       </ProfileSection>
       <Line />

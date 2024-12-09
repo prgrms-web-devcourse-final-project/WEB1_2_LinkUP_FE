@@ -224,7 +224,7 @@ const SettingPage = () => {
             </NewAddressForm>
           ) : (
             <AddAddressButton onClick={() => setIsAddingNewAddress(true)}>
-              Add New Address
+              주소 추가하기
             </AddAddressButton>
           )}
           <AddressList>

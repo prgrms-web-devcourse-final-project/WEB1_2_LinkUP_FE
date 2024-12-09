@@ -14,16 +14,6 @@ const Header = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleCommunityClick = (
-    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
-  ) => {
-    if (!isLoggedIn && !isAdmin) {
-      e.preventDefault();
-      alert('로그인 후 이용할 수 있는 페이지입니다.');
-      setIsMobileMenuOpen(!isMobileMenuOpen);
-    }
-  };
-
   return (
     <HeaderContainer>
       <HeaderContent>
@@ -57,7 +47,7 @@ const Header = () => {
               </StyledLink>
             </NavItem>
             <NavItem>
-              <StyledLink to="/community/post" onClick={handleCommunityClick}>
+              <StyledLink to="/community/post" onClick={toggleMobileMenu}>
                 Community
               </StyledLink>
             </NavItem>
@@ -65,7 +55,13 @@ const Header = () => {
               {isLoggedIn && (
                 <StyledLink
                   to={isAdmin ? '#' : '/mypage/setting'}
-                  onClick={toggleMobileMenu}
+                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                    if (isAdmin) {
+                      e.preventDefault(); // Admin일 경우 링크 동작 차단
+                    } else {
+                      toggleMobileMenu();
+                    }
+                  }}
                 >
                   {isAdmin ? 'Admin Page' : 'My Page'}
                 </StyledLink>
@@ -96,7 +92,10 @@ const Header = () => {
                 </LogOut>
                 <LogOut>
                   <CartIcon>
-                    <StyledLink to="/cart" onClick={toggleMobileMenu}>
+                    <StyledLink
+                      to="/mypage/wishlist"
+                      onClick={toggleMobileMenu}
+                    >
                       <img src={cart} alt="장바구니 아이콘" />
                     </StyledLink>
                   </CartIcon>

@@ -29,8 +29,10 @@ function SetLocationPage() {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (result: any, status: any) => {
                 if (status === window.kakao.maps.services.Status.OK) {
-                  const primaryRegion = result[0]?.region_3depth_name || '';
-                  setRegion(primaryRegion);
+                  const fullRegion = `${result[0]?.region_1depth_name || ''} ${
+                    result[0]?.region_2depth_name || ''
+                  } ${result[0]?.region_3depth_name || ''}`;
+                  setRegion(fullRegion);
                   setCalled(true);
                 } else {
                   console.error('주소를 가져오지 못했습니다.');

@@ -1,14 +1,25 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 import { postSignIn } from '../../../api/loginApi';
 import { useAuth } from '../../../context/AuthContext';
 
 const SignInPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState<string>('');
   const [pw, setPw] = useState<string>('');
   const { login } = useAuth();
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const accessToken = searchParams.get('accessToken');
+    if (accessToken) {
+      localStorage.setItem('token', accessToken);
+      navigate('/');
+    }
+  }, [location, navigate]);
+
   return (
     <Wrapper>
       <LeftContent>

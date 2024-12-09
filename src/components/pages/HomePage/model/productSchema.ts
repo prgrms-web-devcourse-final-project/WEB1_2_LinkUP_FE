@@ -1,6 +1,7 @@
 interface Review {
-  review: string;
+  content: string;
   rating: number;
+  using: boolean;
 }
 
 export interface Product {

@@ -1,14 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { handlePayment } from './api/paymentApi';
 import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
+import { useQuantity } from '../../../context/QuantityContext';
 
 const PaymentForm = () => {
-  // URL 쿼리 스트링을 통한 데이터 수신
-  const location = useLocation();
-  const productData = location.state;
-
+  const { quantity } = useQuantity();
   const { id } = useParams();
   const productId = useMemo(() => {
     if (!id || isNaN(Number(id))) {
@@ -58,8 +56,8 @@ const PaymentForm = () => {
   const payload = {
     productName: product.name,
     url: product.url,
-    price: product.discountprice * productData.amount,
-    quantity: productData.amount,
+    price: product.discountprice * quantity,
+    quantity: quantity,
     payMethod: payment,
     deliveryRequestDTO: {
       name: userName,
@@ -79,12 +77,12 @@ const PaymentForm = () => {
     }
     try {
       const paymentResult = await handlePayment(productId, payload);
-
       window.location.href = paymentResult;
     } catch (e) {
       alert(`결제에 실패하였습니다 ${e}`);
     }
   };
+
   return (
     <>
       <QueryHandler isLoading={isLoading} isError={isError}>
@@ -97,13 +95,11 @@ const PaymentForm = () => {
                 <Price>{product.discountprice}원</Price>
               </FlexRow>
               <FlexRow>
-                <Quantity>{productData.amount}</Quantity>
+                <Quantity>수량 : {quantity}</Quantity>
               </FlexRow>
               <TotalRow>
                 <span>합계:</span>
-                <TotalPrice>
-                  {product.discountprice * productData.amount}원
-                </TotalPrice>
+                <TotalPrice>{product.discountprice * quantity}원</TotalPrice>
               </TotalRow>
             </ContentBox>
           </Section>

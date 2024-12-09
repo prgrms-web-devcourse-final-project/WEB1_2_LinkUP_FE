@@ -1,9 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
+import { useAuth } from '../../../../context/AuthContext';
 
 const LogoutModal = ({ onClose }: { onClose: () => void }) => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   return (
     <ModalOverlay onClick={onClose}>
       <Modal
@@ -15,6 +17,7 @@ const LogoutModal = ({ onClose }: { onClose: () => void }) => {
           <Title>로그아웃 하시겠습니까?</Title>
           <Button
             onClick={() => {
+              logout();
               navigate('/');
             }}
           >

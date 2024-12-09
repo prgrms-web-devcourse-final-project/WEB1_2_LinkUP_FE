@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import StarRating from '../../common/StarRating';
 import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
@@ -42,24 +42,19 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
     setSelectedCategory(category);
     setIsExpanded(false);
   };
-
-  const filtered = products.filter((product: Product) =>
-    product.category.toLowerCase().includes(selectedCategory.toLowerCase())
+  const filtered = useMemo(
+    () =>
+      products?.filter((product) =>
+        product.category.toLowerCase().includes(selectedCategory.toLowerCase())
+      ) || [],
+    [selectedCategory, products]
   );
 
-  const getRandomProducts = (products: Product[]): Product[] => {
-    const shuffled = [...products].sort(() => 0.5 - Math.random()); // Shuffle the array
+  const displayedProducts = useMemo(() => {
+    const shuffled = [...filtered].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, 8);
-  };
+  }, [filtered]);
 
-  const displayedProducts = useMemo(
-    () => getRandomProducts(filtered),
-    [filtered]
-  );
-
-  useEffect(() => {
-    //fetch상품
-  }, [selectedCategory]);
   return (
     <Recommend>
       <CategoryWrapper>

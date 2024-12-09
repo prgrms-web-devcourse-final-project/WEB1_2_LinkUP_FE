@@ -1,22 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-// import cart from '../../assets/icons/icon.png';
+import cart from '../../assets/icons/icon.png';
 import logo from '../../assets/icons/goodbuyus-logo.svg';
 import menu from '../../assets/icons/menu.svg';
+import { useAuth } from '../../context/AuthContext';
+
 const Header = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isLoggedIn, isAdmin, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userRole = localStorage.getItem('role');
-
-
-    setIsLoggedIn(!!token);
-    setIsAdmin(userRole === 'ROLE_ADMIN');
-  }, []);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -60,12 +52,14 @@ const Header = () => {
               </StyledLink>
             </NavItem>
             <NavItem>
-              <StyledLink
-                to={isAdmin ? '/adminpage' : '/mypage/setting'}
-                onClick={toggleMobileMenu}
-              >
-                {isAdmin ? 'Admin Page' : 'My Page'}
-              </StyledLink>
+              {isLoggedIn && (
+                <StyledLink
+                  to={isAdmin ? '/adminpage' : '/mypage/setting'}
+                  onClick={toggleMobileMenu}
+                >
+                  {isAdmin ? 'Admin Page' : 'My Page'}
+                </StyledLink>
+              )}
               {isAdmin && (
                 <SubMenu>
                   <SubMenuItem>
@@ -89,22 +83,16 @@ const Header = () => {
               </Login>
             ) : (
               <>
-                <LogOut
-                  onClick={() => {
-                    localStorage.removeItem('role');
-                    localStorage.removeItem('token');
-                    setIsLoggedIn(false);
-                  }}
-                >
+                <LogOut onClick={logout}>
                   <a>LogOut</a>
                 </LogOut>
-                {/* <LogOut>
+                <LogOut>
                   <CartIcon>
                     <StyledLink to="/cart" onClick={toggleMobileMenu}>
                       <img src={cart} alt="장바구니 아이콘" />
                     </StyledLink>
                   </CartIcon>
-                </LogOut> */}
+                </LogOut>
               </>
             )}{' '}
           </NavList>
@@ -291,7 +279,7 @@ const Login = styled.li`
     text-decoration: none;
     display: block;
     text-align: center;
-    margin-top: 4px;
+    margin-top: 5px;
     font-weight: bold;
   }
 
@@ -320,11 +308,11 @@ const LogOut = styled.li`
   padding: 0px 10px;
 
   a {
+    font-size: 15px;
     color: white;
     text-decoration: none;
     display: block;
     text-align: center;
-    margin-top: 1px;
     font-weight: bold;
   }
 
@@ -361,16 +349,17 @@ const StyledLink = styled(Link)`
   }
 `;
 
-// const CartIcon = styled.div`
-//   img {
-//     width: 20px;
-//     height: 20px;
-//   }
+const CartIcon = styled.div`
+  img {
+    margin-top: -4px;
+    width: 22px;
+    height: 22px;
+  }
 
-//   @media (min-width: 576px) and (max-width: 767px) {
-//     img {
-//       width: 25px;
-//       height: 25px;
-//     }
-//   }
-// `;
+  @media (min-width: 576px) and (max-width: 767px) {
+    img {
+      width: 25px;
+      height: 25px;
+    }
+  }
+`;

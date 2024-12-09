@@ -25,8 +25,7 @@ export const handlePayment = async (
     const URL = `/api/v1/main-payments?postId=${productId}`;
     const response = await axiosInstance.post(URL, payload);
     return response.data.checkoutPageUrl;
-  } catch (error) {
-    console.error(error);
+  } catch {
     throw new Error('결제에 실패하였습니다.');
   }
 };

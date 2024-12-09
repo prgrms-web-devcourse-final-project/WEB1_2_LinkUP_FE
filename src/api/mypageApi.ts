@@ -123,7 +123,7 @@ export const postProductCancel = async (body: {
 export const putEditProfile = async (file: File) => {
   const formData = new FormData();
 
-  formData.append('file', file);
+  formData.append('profile', file);
   const response = await axiosInstance.put(
     `/api/mypage/editprofile`,
     formData,

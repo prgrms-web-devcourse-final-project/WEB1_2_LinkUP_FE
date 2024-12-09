@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -53,14 +54,27 @@ const SetNicknamePage = () => {
         <NextButton
           onClick={async () => {
             if (isValidLength && isValidFormat) {
-              const response = await postSignUpNickname({ nickname: nickname });
+              try {
+                const response = await postSignUpNickname({
+                  nickname: nickname,
+                });
 
-              if (response.message === '닉네임 중복 확인 완료') {
-                localStorage.setItem('nickname', nickname);
+                if (response.message === '닉네임 중복 확인 완료') {
+                  localStorage.setItem('nickname', nickname);
 
-                navigate('/setprofile');
-              } else {
-                alert('닉네임이 중복입니다.');
+                  navigate('/setprofile');
+                } else {
+                  alert('닉네임이 중복입니다.');
+                }
+              } catch (err) {
+                if (
+                  axios.isAxiosError(err) &&
+                  err.response &&
+                  err.response.data &&
+                  err.response.data.error
+                ) {
+                  alert(err.response.data.error);
+                }
               }
             } else {
               alert('닉네임 조건을 만족시켜 주세요.');

@@ -136,3 +136,11 @@ export const putEditProfile = async (file: File) => {
 
   return response.data;
 };
+
+export const putChangeNickname = async (nickname: string) => {
+  const response = await axiosInstance.put(
+    `/api/mypage/change_nickname?nickName=${nickname}`
+  );
+
+  return response.data;
+};

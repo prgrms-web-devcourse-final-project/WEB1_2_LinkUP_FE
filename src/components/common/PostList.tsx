@@ -5,7 +5,8 @@ import SearchBar from './SearchBar';
 import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
 import { SSEEvent, Post } from '../../types/postTypes';
-import { getImageSrc } from '../../hooks/GetImageSrc';
+import { getImageSrc } from '../../utils/GetImageSrc';
+import { formatDateWithOffset } from '../../utils/formatDate';
 
 interface PostListProps {
   selectedCategory: string;
@@ -126,26 +127,16 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
                 <PostAuthor>{post.nickname}</PostAuthor>
                 <PostDate>
                   <PostCreatedAt>
-                    {new Date(post.createdAt).toLocaleString('ko-KR', {
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: false,
-                    })}
+                    {formatDateWithOffset(post.createdAt)}
                   </PostCreatedAt>
-                  {'~'}
-                  <PostCloseAt>
-                    {new Date(post.closeAt).toLocaleString('ko-KR', {
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: false,
-                    })}
-                  </PostCloseAt>
+                  {selectedCategory !== 'NOT_APPROVED' && (
+                    <>
+                      {'~'}
+                      <PostCloseAt>
+                        {formatDateWithOffset(post.closeAt)}
+                      </PostCloseAt>
+                    </>
+                  )}
                 </PostDate>
                 <PostJoinStatus>
                   참여 현황: {getParticipationCount(post.communityPostId)} /{' '}

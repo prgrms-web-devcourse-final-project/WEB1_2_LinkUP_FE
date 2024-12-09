@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { VirtualAccountResponse } from './api/paymentApi';
 import VirtualAccountModal from './modal/VirtualAccountModal';
-import { getImageSrc } from '../../../hooks/GetImageSrc';
+import { getImageSrc } from '../../../utils/GetImageSrc';
 
 const PaymentParticipantPage = () => {
   const navigate = useNavigate();

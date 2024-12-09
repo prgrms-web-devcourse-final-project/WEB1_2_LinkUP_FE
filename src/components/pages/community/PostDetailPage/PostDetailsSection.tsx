@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { FaPlusCircle, FaMinusCircle } from 'react-icons/fa';
 import { POST_STATUS } from '../../../../types/postTypes';
+import { formatDateWithOffset } from '../../../../utils/formatDate';
 
 interface PostDetailsSectionProps {
   selectedPost: {
@@ -59,7 +60,7 @@ const PostDetailsSection: React.FC<PostDetailsSectionProps> = ({
           </AuthorDetail>
           <CreatedAtDetail>
             <Label>작성일</Label>
-            {new Date(selectedPost.createdAt).toLocaleString()}
+            {formatDateWithOffset(selectedPost.createdAt).toLocaleString()}
           </CreatedAtDetail>
         </DoubleWrapper>
         <DoubleWrapper>
@@ -74,12 +75,14 @@ const PostDetailsSection: React.FC<PostDetailsSectionProps> = ({
         </DoubleWrapper>
         <DoubleWrapper>
           <Detail>
-            <Label>모집 마감</Label> {remainingTime}
+            <Label>모집 마감</Label> {formatDateWithOffset(remainingTime)}
           </Detail>
           {selectedPost.status === 'PAYMENT_STANDBY' && (
             <Detail>
               <Label>결제 마감</Label>
-              <DetailText>{paymentRemainingTime}</DetailText>
+              <DetailText>
+                {formatDateWithOffset(paymentRemainingTime)}
+              </DetailText>
             </Detail>
           )}
         </DoubleWrapper>

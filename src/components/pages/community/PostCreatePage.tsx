@@ -13,7 +13,7 @@ import { createPost } from './api/postApi';
 import CategoryWrapper from '../../common/CategoryWrapper';
 import { POST_CATEGORIES } from './postCategories';
 import { CreatePostData } from '../../../types/postTypes';
-import { getImageSrc } from '../../../hooks/GetImageSrc';
+import { getImageSrc } from '../../../utils/GetImageSrc';
 
 const PostCreatePage = () => {
   const navigate = useNavigate();

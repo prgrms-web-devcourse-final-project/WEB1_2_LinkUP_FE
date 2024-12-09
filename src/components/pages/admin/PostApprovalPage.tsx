@@ -5,7 +5,8 @@ import { fetchPostById } from '../community/api/postApi';
 import { approvePost, rejectPost } from './api/adminApi';
 import { FaBackspace, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import { Post } from '../../../types/postTypes';
-import { getImageSrc } from '../../../hooks/GetImageSrc';
+import { getImageSrc } from '../../../utils/GetImageSrc';
+import { formatDateWithOffset } from '../../../utils/formatDate';
 
 const PostApprovalPage = () => {
   const location = useLocation();
@@ -17,7 +18,7 @@ const PostApprovalPage = () => {
   useEffect(() => {
     const fetchPost = async () => {
       if (!postId) {
-        navigate('/admin/posts'); // postId가 없을 경우 관리자 페이지로 리다이렉트
+        navigate('/admin/post'); // postId가 없을 경우 관리자 페이지로 리다이렉트
         return;
       }
       try {
@@ -55,7 +56,7 @@ const PostApprovalPage = () => {
 
       await approvePost(postId, updatedTitle); // 포스트 상태를 APPROVED로 변경
       alert('게시물이 승인되었습니다.');
-      navigate('/admin/posts'); // 승인 후 관리자 페이지로 리다이렉트
+      navigate('/admin/post'); // 승인 후 관리자 페이지로 리다이렉트
     } catch (error) {
       console.error('Failed to approve post:', error);
       alert('승인 처리 중 오류가 발생했습니다.');
@@ -72,7 +73,7 @@ const PostApprovalPage = () => {
 
       await rejectPost(postId, updatedTitle); // 포스트 상태를 REJECTED로 변경
       alert('게시물이 거절 처리되었습니다.');
-      navigate('/admin/posts'); // 거절 후 관리자 페이지로 리다이렉트
+      navigate('/admin/post'); // 거절 후 관리자 페이지로 리다이렉트
     } catch (error) {
       console.error('Failed to reject post:', error);
       alert('거절 처리 중 오류가 발생했습니다.');
@@ -162,7 +163,7 @@ const PostApprovalPage = () => {
                   </AuthorDetail>
                   <CreatedAtDetail>
                     <Label>작성일</Label>{' '}
-                    {new Date(post.createdAt).toLocaleString()}
+                    {formatDateWithOffset(post.createdAt).toLocaleString()}
                   </CreatedAtDetail>
                 </DoubleWrapper>
                 <DoubleWrapper>

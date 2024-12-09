@@ -8,6 +8,7 @@ import {
 } from '../../community/api/postApi';
 import { useAtom } from 'jotai';
 import { currentUserAtom } from '../../../../store/userStore';
+import { formatDateWithOffset } from '../../../../utils/formatDate';
 
 interface PostCommentsSectionProps {
   communityPostId: number;
@@ -113,7 +114,7 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
             <CommentHeader>
               <CommentAuthor>{comment.userNickname}</CommentAuthor>
               <CommentDate>
-                {new Date(comment.createdAt).toLocaleString()}
+                {formatDateWithOffset(comment.createdAt).toLocaleString()}
               </CommentDate>
             </CommentHeader>
             {editCommentId === comment.commentId ? (

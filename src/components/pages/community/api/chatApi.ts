@@ -1,3 +1,4 @@
+import { formatDateWithOffset } from './../../../../utils/formatDate';
 import axiosInstance from '../../../../api/axiosInstance';
 import { webSocketService } from '../../../../utils/webSocket';
 
@@ -84,7 +85,7 @@ export const sendMessage = (
     roomId: chatRoomId,
     userName,
     message,
-    time: new Date().toISOString(),
+    time: formatDateWithOffset(new Date().toISOString()),
   };
 
   webSocketService.send(`/pub/message/${chatRoomId}`, payload);

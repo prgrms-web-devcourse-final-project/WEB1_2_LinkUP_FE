@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { FaAngleLeft, FaAngleRight } from 'react-icons/fa';
-import { getImageSrc } from '../../../../hooks/GetImageSrc';
+import { getImageSrc } from '../../../../utils/GetImageSrc';
 
 interface PostImageSectionProps {
   selectedPost: {

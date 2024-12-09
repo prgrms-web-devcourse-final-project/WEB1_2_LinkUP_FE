@@ -48,7 +48,6 @@ const SignInPage = () => {
               password: pw,
             });
             if (response.status === 200) {
-              localStorage.setItem('role', response.data.roles);
               login();
               navigate('/');
             } else {

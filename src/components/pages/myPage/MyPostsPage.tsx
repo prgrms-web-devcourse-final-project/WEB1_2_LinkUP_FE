@@ -39,7 +39,7 @@ function MyPostsPage() {
     const fetchPost = async () => {
       try {
         const response = await getMyPostList();
-        console.log(response);
+
         setMyPostList(response);
       } catch (error) {
         console.error('failed', error);

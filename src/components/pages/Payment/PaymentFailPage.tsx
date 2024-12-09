@@ -11,7 +11,7 @@ const PaymentFailPage = () => {
   const productId = Number(id);
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
-  const amount = urlParams.get('amount');
+  const amount = urlParams.get('totalAmount');
   const { data: product, isLoading, isError } = useProductQuery(productId);
 
   if (!product) {

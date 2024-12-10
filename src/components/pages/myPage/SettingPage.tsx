@@ -89,7 +89,7 @@ const SettingPage = () => {
       <GS.Content>
         <ProfileWrapper>
           <img
-            src={profileImage || '/images/origin.png'}
+            src={'/images/profile.png'}
             alt="Profile"
             width={80}
             height={80}

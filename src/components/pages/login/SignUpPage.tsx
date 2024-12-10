@@ -11,6 +11,44 @@ function SignUpPage() {
   const [email, setEmail] = useState<string>('');
   const [pw, setPw] = useState<string>('');
   const [cpw, setCpw] = useState<string>('');
+  const [pwError, setPwError] = useState<string>('');
+  const [cpwError, setCpwError] = useState<string>('');
+
+  const validatePassword = (password: string): boolean => {
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
+    return passwordRegex.test(password);
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPw = e.target.value;
+    setPw(newPw);
+    if (newPw && !validatePassword(newPw)) {
+      setPwError(
+        '비밀번호는 영문 대/소문자, 숫자, 특수문자를 포함한 8-16자여야 합니다.'
+      );
+    } else {
+      setPwError('');
+    }
+
+    if (cpw && newPw !== cpw) {
+      setCpwError('비밀번호가 일치하지 않습니다.');
+    } else {
+      setCpwError('');
+    }
+  };
+
+  const handleConfirmPasswordChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newCpw = e.target.value;
+    setCpw(newCpw);
+    if (newCpw && pw !== newCpw) {
+      setCpwError('비밀번호가 일치하지 않습니다.');
+    } else {
+      setCpwError('');
+    }
+  };
 
   return (
     <Wrapper>
@@ -53,54 +91,59 @@ function SignUpPage() {
         />
         <Subtitle>Password</Subtitle>
         <StyledInput
-          placeholder="비밀번호 입력 (8 ~ 16자리)"
+          type="password"
+          placeholder="비밀번호 입력 (영문 대/소문자, 숫자, 특수문자 포함 8-16자)"
           value={pw}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setPw(e.target.value);
-          }}
+          onChange={handlePasswordChange}
         />
+        {pwError && <ErrorMessage>{pwError}</ErrorMessage>}
+
         <Subtitle>Confirm Password</Subtitle>
         <StyledInput
+          type="password"
           placeholder="비밀번호 확인"
           value={cpw}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setCpw(e.target.value);
-          }}
+          onChange={handleConfirmPasswordChange}
         />
+        {cpwError && <ErrorMessage>{cpwError}</ErrorMessage>}
         <LoginButton
           onClick={async () => {
+            if (!validatePassword(pw)) {
+              alert('올바른 비밀번호 형식이 아닙니다.');
+              return;
+            }
             if (pw !== cpw) {
               alert('비밀번호가 일치하지 않습니다.');
-            } else {
-              try {
-                const response = await postSignUp({
-                  email: email,
-                  password: pw,
-                  password_confirm: cpw,
-                  name: name,
-                  phone: phone,
-                });
+              return;
+            }
+            try {
+              const response = await postSignUp({
+                email: email,
+                password: pw,
+                password_confirm: cpw,
+                name: name,
+                phone: phone,
+              });
 
-                if (response.message === '이메일, 전화번호 중복 확인 완료') {
-                  localStorage.setItem('email', email);
-                  localStorage.setItem('password', pw);
-                  localStorage.setItem('password_confirm', cpw);
-                  localStorage.setItem('name', name);
-                  localStorage.setItem('phone', phone);
+              if (response.message === '이메일, 전화번호 중복 확인 완료') {
+                localStorage.setItem('email', email);
+                localStorage.setItem('password', pw);
+                localStorage.setItem('password_confirm', cpw);
+                localStorage.setItem('name', name);
+                localStorage.setItem('phone', phone);
 
-                  navigate('/termsandservice');
-                } else {
-                  alert('이메일 또는 전화번호가 중복 되었습니다.');
-                }
-              } catch (err) {
-                if (
-                  axios.isAxiosError(err) &&
-                  err.response &&
-                  err.response.data &&
-                  err.response.data.error
-                ) {
-                  alert(err.response.data.error);
-                }
+                navigate('/termsandservice');
+              } else {
+                alert('이메일 또는 전화번호가 중복 되었습니다.');
+              }
+            } catch (err) {
+              if (
+                axios.isAxiosError(err) &&
+                err.response &&
+                err.response.data &&
+                err.response.data.error
+              ) {
+                alert(err.response.data.error);
               }
             }
           }}
@@ -120,6 +163,12 @@ function SignUpPage() {
     </Wrapper>
   );
 }
+
+const ErrorMessage = styled.div`
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+`;
 
 const AuthButton = styled.div`
   font-size: 13px;

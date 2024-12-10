@@ -66,7 +66,9 @@ const FindPasswordPage = () => {
       {showModal && (
         <ModalOverlay>
           <ModalContent>
-            <ModalText>이메일을 확인해주세요</ModalText>
+            <ModalText>
+              비밀번호 재설정 링크가 이메일로 전송되었습니다.
+            </ModalText>
             <ModalButton onClick={() => setShowModal(false)}>확인</ModalButton>
           </ModalContent>
         </ModalOverlay>

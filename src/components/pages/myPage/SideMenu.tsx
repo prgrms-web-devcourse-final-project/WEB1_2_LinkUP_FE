@@ -6,7 +6,6 @@ import { getUser } from '../../../api/mypageApi';
 const Sidemenu = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [profileImage, setProfileImage] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
 
   const isActive = (path: string) => location.pathname === path;
@@ -16,7 +15,6 @@ const Sidemenu = () => {
       try {
         const response = await getUser();
 
-        setProfileImage(response.profile);
         setNewName(response.name);
       } catch (error) {
         console.error('failed', error);
@@ -28,10 +26,7 @@ const Sidemenu = () => {
   return (
     <Wrapper>
       <ProfileSection>
-        <ProfileImage
-          src={profileImage || '/images/origin.png'}
-          alt="Profile"
-        />
+        <ProfileImage src={'/images/profile.png'} alt="Profile" />
         <ProfileText>
           <Hello>Hello 👋</Hello>
           <Username>{newName}</Username>

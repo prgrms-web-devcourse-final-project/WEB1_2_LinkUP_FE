@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { styled } from 'styled-components';
+import axios from 'axios';
 import {
   postPasswordChange,
   postPasswordVerify,
@@ -10,28 +11,83 @@ const PasswordModal = ({ onClose }: { onClose: () => void }) => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [pwError, setPwError] = useState<string>('');
+  const [cpwError, setCpwError] = useState<string>('');
+
+  const validatePassword = (password: string): boolean => {
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
+    return passwordRegex.test(password);
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPw = e.target.value;
+    setNewPassword(newPw);
+    if (newPw && !validatePassword(newPw)) {
+      setPwError(
+        '비밀번호는 영문 대/소문자, 숫자, 특수문자를 포함한 8-16자여야 합니다.'
+      );
+    } else {
+      setPwError('');
+    }
+
+    if (confirmPassword && newPw !== confirmPassword) {
+      setCpwError('비밀번호가 일치하지 않습니다.');
+    } else {
+      setCpwError('');
+    }
+  };
+
+  const handleConfirmPasswordChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newCpw = e.target.value;
+    setConfirmPassword(newCpw);
+    if (newCpw && newPassword !== newCpw) {
+      setCpwError('비밀번호가 일치하지 않습니다.');
+    } else {
+      setCpwError('');
+    }
+  };
 
   const handleNextStep = async () => {
     if (step === 1) {
-      await postPasswordVerify({ currentPassword: currentPassword });
-      setStep(2);
+      try {
+        await postPasswordVerify({ currentPassword: currentPassword });
+        setStep(2);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          alert('현재 비밀번호가 일치하지 않습니다.');
+        } else {
+          alert('오류가 발생했습니다.');
+        }
+      }
     } else if (step === 2) {
-      if (newPassword === confirmPassword) {
-        await postPasswordChange({ newPassword: newPassword });
-        onClose();
-      } else {
+      if (!validatePassword(newPassword)) {
+        alert('올바른 비밀번호 형식이 아닙니다.');
+        return;
+      }
+      if (newPassword !== confirmPassword) {
         alert('비밀번호가 일치하지 않습니다.');
+        return;
+      }
+      try {
+        await postPasswordChange({ newPassword: newPassword });
+        alert('비밀번호가 성공적으로 변경되었습니다.');
+        onClose();
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          alert('비밀번호 변경에 실패했습니다.');
+        } else {
+          alert('오류가 발생했습니다.');
+        }
       }
     }
   };
 
   return (
     <ModalOverlay onClick={onClose}>
-      <Modal
-        onClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) =>
-          e.stopPropagation()
-        }
-      >
+      <Modal onClick={(e) => e.stopPropagation()}>
         <ModalContent>
           {step === 1 && (
             <>
@@ -41,9 +97,7 @@ const PasswordModal = ({ onClose }: { onClose: () => void }) => {
                   type="password"
                   placeholder="현재 비밀번호를 입력하세요"
                   value={currentPassword}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setCurrentPassword(e.target.value)
-                  }
+                  onChange={(e) => setCurrentPassword(e.target.value)}
                 />
                 <Button onClick={handleNextStep}>확인</Button>
               </InputWrapper>
@@ -55,25 +109,24 @@ const PasswordModal = ({ onClose }: { onClose: () => void }) => {
               <InputWrapper>
                 <Input
                   type="password"
-                  placeholder="새 비밀번호를 입력하세요"
+                  placeholder="영문 대/소문자, 숫자, 특수문자 포함 8-16자"
                   value={newPassword}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setNewPassword(e.target.value)
-                  }
+                  onChange={handlePasswordChange}
                 />
               </InputWrapper>
+              {pwError && <ErrorMessage>{pwError}</ErrorMessage>}
+
               <Title>비밀번호 확인</Title>
               <InputWrapper>
                 <Input
                   type="password"
                   placeholder="비밀번호를 다시 입력하세요"
                   value={confirmPassword}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setConfirmPassword(e.target.value)
-                  }
+                  onChange={handleConfirmPasswordChange}
                 />
                 <Button onClick={handleNextStep}>변경</Button>
               </InputWrapper>
+              {cpwError && <ErrorMessage>{cpwError}</ErrorMessage>}
             </>
           )}
         </ModalContent>
@@ -81,6 +134,12 @@ const PasswordModal = ({ onClose }: { onClose: () => void }) => {
     </ModalOverlay>
   );
 };
+
+const ErrorMessage = styled.div`
+  color: red;
+  font-size: 12px;
+  margin: -15px 0 10px 0;
+`;
 
 const ModalOverlay = styled.div`
   position: fixed;

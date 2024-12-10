@@ -10,15 +10,61 @@ const ResetPasswordPage = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [pwError, setPwError] = useState<string>('');
+  const [cpwError, setCpwError] = useState<string>('');
   const queryParams = new URLSearchParams(location.search);
   const token = queryParams.get('token');
 
+  const validatePassword = (password: string): boolean => {
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
+    return passwordRegex.test(password);
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPw = e.target.value;
+    setPassword(newPw);
+    if (newPw && !validatePassword(newPw)) {
+      setPwError(
+        '비밀번호는 영문 대/소문자, 숫자, 특수문자를 포함한 8-16자여야 합니다.'
+      );
+    } else {
+      setPwError('');
+    }
+
+    if (confirmPassword && newPw !== confirmPassword) {
+      setCpwError('비밀번호가 일치하지 않습니다.');
+    } else {
+      setCpwError('');
+    }
+  };
+
+  const handleConfirmPasswordChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newCpw = e.target.value;
+    setConfirmPassword(newCpw);
+    if (newCpw && password !== newCpw) {
+      setCpwError('비밀번호가 일치하지 않습니다.');
+    } else {
+      setCpwError('');
+    }
+  };
+
   const handleConfirm = async () => {
-    if (password === confirmPassword && password.length >= 8 && token) {
+    if (!validatePassword(password)) {
+      alert('올바른 비밀번호 형식이 아닙니다.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      alert('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+    if (token) {
       await postResetPassword({ newPassword: password }, token);
       setShowModal(true);
     } else {
-      alert('비밀번호가 일치하지 않거나 유효하지 않습니다.');
+      alert('유효하지 않은 토큰입니다.');
     }
   };
 
@@ -40,21 +86,21 @@ const ResetPasswordPage = () => {
         <Subtitle>password</Subtitle>
         <StyledInput
           type="password"
-          placeholder="비밀번호 입력 (8 ~ 16자리)"
+          placeholder="비밀번호 입력 (영문 대/소문자, 숫자, 특수문자 포함 8-16자)"
           value={password}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setPassword(e.target.value)
-          }
+          onChange={handlePasswordChange}
         />
+        {pwError && <ErrorMessage>{pwError}</ErrorMessage>}
+
         <Subtitle>confirm password</Subtitle>
         <StyledInput
           type="password"
           placeholder="비밀번호 확인"
           value={confirmPassword}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setConfirmPassword(e.target.value)
-          }
+          onChange={handleConfirmPasswordChange}
         />
+        {cpwError && <ErrorMessage>{cpwError}</ErrorMessage>}
+
         <LoginButton onClick={handleConfirm}>Confirm</LoginButton>
       </RightContent>
       {showModal && (
@@ -74,6 +120,12 @@ const ResetPasswordPage = () => {
     </Wrapper>
   );
 };
+
+const ErrorMessage = styled.div`
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+`;
 
 const NaviButton = styled.div`
   background-color: #000;

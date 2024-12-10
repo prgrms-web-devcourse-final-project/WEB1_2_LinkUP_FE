@@ -9,7 +9,14 @@ const SignInPage = () => {
   const location = useLocation();
   const [email, setEmail] = useState<string>('');
   const [pw, setPw] = useState<string>('');
+  const [pwError, setPwError] = useState<string>('');
   const { login } = useAuth();
+
+  const validatePassword = (password: string): boolean => {
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
+    return passwordRegex.test(password);
+  };
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -45,15 +52,28 @@ const SignInPage = () => {
         />
         <Subtitle>password</Subtitle>
         <StyledInput
-          placeholder="비밀번호 입력 (8 ~ 16자리)"
+          placeholder="비밀번호 입력 (영문 대/소문자, 숫자, 특수문자 포함 8-16자)"
           value={pw}
           type={'password'}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setPw(e.target.value);
+            const newPw = e.target.value;
+            setPw(newPw);
+            if (newPw && !validatePassword(newPw)) {
+              setPwError(
+                '비밀번호는 영문 대/소문자, 숫자, 특수문자를 포함한 8-16자여야 합니다.'
+              );
+            } else {
+              setPwError('');
+            }
           }}
         />
+        {pwError && <ErrorMessage>{pwError}</ErrorMessage>}
         <LoginButton
           onClick={async () => {
+            if (!validatePassword(pw)) {
+              alert('올바른 비밀번호 형식이 아닙니다.');
+              return;
+            }
             const response = await postSignIn({
               email: email,
               password: pw,
@@ -108,6 +128,11 @@ const SignInPage = () => {
   );
 };
 
+const ErrorMessage = styled.div`
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+`;
 const AuthButton = styled.div`
   font-size: 13px;
   font-weight: 400;

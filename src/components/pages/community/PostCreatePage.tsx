@@ -42,8 +42,7 @@ const PostCreatePage = () => {
       alert('포스트가 작성되었습니다. 관리자의 승인을 대기 중입니다.');
       navigate('/community/post');
     },
-    onError: (error) => {
-      console.error('포스트 생성 중 오류 발생:', error);
+    onError: () => {
       alert('포스트 생성에 실패했습니다.');
     },
   });

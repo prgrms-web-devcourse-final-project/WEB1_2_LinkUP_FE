@@ -31,12 +31,8 @@ const ChatRoomManagementPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const rooms = await fetchAllChatRooms();
-        setChatRooms(rooms);
-      } catch (error) {
-        console.error('Failed to fetch chat rooms:', error);
-      }
+      const rooms = await fetchAllChatRooms();
+      setChatRooms(rooms);
     };
 
     fetchData();

@@ -7,7 +7,11 @@ import PasswordModal from './Modal/PasswordModal';
 import LogoutModal from './Modal/LogoutModal';
 import WithdrawModal from './Modal/WithdrawModal';
 import { useDaumPostcodePopup } from 'react-daum-postcode';
-import { getUser, putEditProfile } from '../../../api/mypageApi';
+import {
+  getUser,
+  putChangeNickname,
+  putEditProfile,
+} from '../../../api/mypageApi';
 
 const SettingPage = () => {
   const [addressList, setAddressList] = useState(SettingPageData.addressList);
@@ -21,6 +25,7 @@ const SettingPage = () => {
   const [phoneLast, setPhoneLast] = useState('');
   const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [nickname, setNickname] = useState<string>('');
 
   const postcodeScriptUrl =
     'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
@@ -84,7 +89,7 @@ const SettingPage = () => {
       <GS.Content>
         <ProfileWrapper>
           <img
-            src={profileImage || '/images/origin.png'}
+            src={'/images/profile.png'}
             alt="Profile"
             width={80}
             height={80}
@@ -127,8 +132,21 @@ const SettingPage = () => {
 
         <NicknameWrapper>
           <Title>닉네임 변경</Title>
-          <NicknameInput placeholder="최소 2자 이상 ~ 15자 이내, 띄어쓰기 및 특수문자 사용 불가" />
-          <NicknameButton>변경하기</NicknameButton>
+          <NicknameInput
+            value={nickname}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setNickname(e.target.value);
+            }}
+            placeholder="최소 2자 이상 ~ 15자 이내, 띄어쓰기 및 특수문자 사용 불가"
+          />
+          <NicknameButton
+            onClick={async () => {
+              await putChangeNickname(nickname);
+              setNickname('');
+            }}
+          >
+            변경하기
+          </NicknameButton>
         </NicknameWrapper>
         <AddressWrapper>
           <Title>배송지 주소 변경</Title>
@@ -206,7 +224,7 @@ const SettingPage = () => {
             </NewAddressForm>
           ) : (
             <AddAddressButton onClick={() => setIsAddingNewAddress(true)}>
-              Add New Address
+              주소 추가하기
             </AddAddressButton>
           )}
           <AddressList>

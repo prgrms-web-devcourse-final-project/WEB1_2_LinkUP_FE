@@ -53,8 +53,8 @@ export const fetchPaymentStatus = async (paymentKey: string) => {
       `/api/v1/virtual/update-payment/${paymentKey}`
     );
     return response.data;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    console.error('결제 상태 확인 실패:', error);
     throw new Error('결제 상태 확인에 실패했습니다.');
   }
 };
@@ -68,21 +68,16 @@ export const requestPayment = async (
     deliveryRequest: string;
   }
 ) => {
-  try {
-    const response = await axiosInstance.post(
-      `/api/v1/virtual/${communityPostId}`,
-      paymentInfo,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error('결제 요청 중 오류:', error);
-    throw error;
-  }
+  const response = await axiosInstance.post(
+    `/api/v1/virtual/${communityPostId}`,
+    paymentInfo,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+      },
+    }
+  );
+  return response.data;
 };
 
 // 결제 승인 요청
@@ -93,21 +88,16 @@ export const confirmPayment = async (
     orderId: string;
   }
 ) => {
-  try {
-    const response = await axiosInstance.post(
-      `/api/v1/virtual/confirm-payment/${paymentKey}`,
-      paymentData,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error('결제 승인 요청 중 오류:', error);
-    throw error;
-  }
+  const response = await axiosInstance.post(
+    `/api/v1/virtual/confirm-payment/${paymentKey}`,
+    paymentData,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+      },
+    }
+  );
+  return response.data;
 };
 
 // 환불 요청
@@ -123,19 +113,14 @@ export const requestRefund = async (
     };
   }
 ) => {
-  try {
-    const response = await axiosInstance.post(
-      `/api/v1/virtual/cancel-payment/${communityPostId}`,
-      refundData,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error('환불 요청 중 오류:', error);
-    throw error;
-  }
+  const response = await axiosInstance.post(
+    `/api/v1/virtual/cancel-payment/${communityPostId}`,
+    refundData,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+      },
+    }
+  );
+  return response.data;
 };

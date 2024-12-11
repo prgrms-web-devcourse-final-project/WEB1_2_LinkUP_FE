@@ -49,54 +49,28 @@ const PostDetailsSection: React.FC<PostDetailsSectionProps> = ({
   return (
     <DetailsAndInfoContainer>
       <DetailsContainer>
-        <Detail>
-          <Label>제목</Label>
-          <DetailText>{selectedPost.title}</DetailText>
-        </Detail>
-        <DoubleWrapper>
+        <LeftContainer>
+          <Detail>
+            <Label>제목</Label>
+            <DetailText>{selectedPost.title}</DetailText>
+          </Detail>
           <AuthorDetail>
             <Label>작성자</Label>
             <AuthorNickname>{selectedPost.nickname}</AuthorNickname>
           </AuthorDetail>
-          <CreatedAtDetail>
-            <Label>작성일</Label>
-            {formatDateWithOffset(selectedPost.createdAt).toLocaleString()}
-          </CreatedAtDetail>
-        </DoubleWrapper>
-        <DoubleWrapper>
-          <Detail>
-            <Label>카테고리</Label> {selectedPost.category}
-          </Detail>
           <Detail>
             <Label>참여 현황</Label> {realTimeData?.participationCount || 0}
             {' / '}
             {selectedPost.availableNumber}
           </Detail>
-        </DoubleWrapper>
-        <DoubleWrapper>
-          <Detail>
-            <Label>모집 마감</Label> {formatDateWithOffset(remainingTime)}
-          </Detail>
-          {selectedPost.status === 'PAYMENT_STANDBY' && (
-            <Detail>
-              <Label>결제 마감</Label>
-              <DetailText>
-                {formatDateWithOffset(paymentRemainingTime)}
-              </DetailText>
-            </Detail>
-          )}
-        </DoubleWrapper>
-        <DoubleWrapper>
-          <Detail>
-            <Label>총 가격</Label> {selectedPost.totalAmount.toLocaleString()}{' '}
-            원
-          </Detail>
           <Detail>
             <Label>개당 가격</Label> {selectedPost.unitAmount.toLocaleString()}{' '}
             원
           </Detail>
-        </DoubleWrapper>
-        <DoubleWrapper>
+          <Detail>
+            <Label>총 가격</Label> {selectedPost.totalAmount.toLocaleString()}{' '}
+            원
+          </Detail>
           <Detail>
             <Label>수량</Label>
             <Quantity>
@@ -110,6 +84,26 @@ const PostDetailsSection: React.FC<PostDetailsSectionProps> = ({
               {isParticipant && <span>{quantity}</span>}
             </Quantity>
           </Detail>
+        </LeftContainer>
+        <RightContainer>
+          <CreatedAtDetail>
+            <Label>작성일</Label>
+            <Date>
+              {formatDateWithOffset(selectedPost.createdAt).toLocaleString()}
+            </Date>
+          </CreatedAtDetail>
+          <Detail>
+            <Label>카테고리</Label> {selectedPost.category}
+          </Detail>
+          <Detail>
+            <Label>모집 마감</Label> {remainingTime}
+          </Detail>
+          {selectedPost.status === 'PAYMENT_STANDBY' && (
+            <Detail>
+              <Label>결제 마감</Label>
+              <DetailText>{paymentRemainingTime}</DetailText>
+            </Detail>
+          )}
           {isParticipant && (
             <Detail>
               <Label>결제 금액</Label>
@@ -118,7 +112,9 @@ const PostDetailsSection: React.FC<PostDetailsSectionProps> = ({
               </PaymentAmount>
             </Detail>
           )}
-        </DoubleWrapper>
+        </RightContainer>
+      </DetailsContainer>
+      <ButtonContainer>
         <ActionButtons>
           {selectedPost.status === POST_STATUS.PAYMENT_COMPLETED ? (
             <ActionButton primary onClick={handleRefund}>
@@ -147,7 +143,7 @@ const PostDetailsSection: React.FC<PostDetailsSectionProps> = ({
             </>
           ) : null}
         </ActionButtons>
-      </DetailsContainer>
+      </ButtonContainer>
     </DetailsAndInfoContainer>
   );
 };
@@ -171,7 +167,6 @@ const DetailsAndInfoContainer = styled.div`
 
 const DetailsContainer = styled.div`
   display: flex;
-  flex-direction: column;
   gap: 20px;
   width: 100%;
 `;
@@ -179,6 +174,7 @@ const DetailsContainer = styled.div`
 const Detail = styled.div`
   display: flex;
   flex-direction: column;
+  margin-right: 50px;
   font-size: 1rem;
 `;
 
@@ -192,12 +188,6 @@ const DetailText = styled.span`
   color: #333;
 `;
 
-const DoubleWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-`;
-
 const AuthorDetail = styled.div`
   display: flex;
   flex-direction: column;
@@ -207,8 +197,14 @@ const AuthorNickname = styled.div`
   font-size: 1rem;
 `;
 
-const CreatedAtDetail = styled.div`
+const Date = styled.div`
   font-size: 1rem;
+`;
+
+const CreatedAtDetail = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-right: 50px;
 `;
 
 const Quantity = styled.div`
@@ -237,4 +233,24 @@ const ActionButton = styled.button<{ primary?: boolean }>`
   border: 1px solid #000;
   border-radius: 5px;
   cursor: pointer;
+`;
+
+const LeftContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+`;
+
+const RightContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
 `;

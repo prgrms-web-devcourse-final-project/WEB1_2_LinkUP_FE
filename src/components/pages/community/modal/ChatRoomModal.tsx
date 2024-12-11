@@ -48,8 +48,8 @@ const ChatRoomModal: React.FC<ChatRoomModalProps> = ({
         alert('채팅방이 성공적으로 삭제되었습니다.');
         onClose(); // 모달 닫기
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.error('채팅방 삭제 실패:', error);
       alert('채팅방을 삭제할 수 없습니다.');
     }
   };

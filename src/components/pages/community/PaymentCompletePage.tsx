@@ -48,8 +48,8 @@ const PaymentCompletePage: React.FC = () => {
         if (data.status === 'DONE') {
           setStatus('DONE');
         }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        console.error('결제 상태 조회 오류:', error);
         alert('결제 상태를 확인할 수 없습니다.');
       }
     };
@@ -62,8 +62,8 @@ const PaymentCompletePage: React.FC = () => {
           title: postData.communityPost.title,
           unitAmount: postData.communityPost.unitAmount,
         });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        console.error('게시물 정보 조회 오류:', error);
         alert('게시물 정보를 가져올 수 없습니다.');
       }
     };
@@ -76,8 +76,8 @@ const PaymentCompletePage: React.FC = () => {
     try {
       const chatRoom = await createChatRoom(parseInt(communityPostId));
       setChatRoom(chatRoom);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.error('채팅방 생성 오류:', error);
       alert('채팅방을 생성할 수 없습니다.');
     }
   };

@@ -32,22 +32,21 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   useEffect(() => {
     // 채팅방 초기 메시지 및 채팅 메시지 가져오기
     const fetchMessages = async () => {
-      try {
-        const fetchedMessages = await fetchChatMessages(chatRoomId);
+      const fetchedMessages = await fetchChatMessages(chatRoomId);
 
-        // 입장 메시지 추가
-        const joinMessage: Message = {
-          senderId: 'system',
-          content: `${chatMembers
-            .map((member) => getNicknameDisplay(member))
-            .join(', ')}님이 입장하셨습니다.`,
-          timestamp: null, // timestamp 표시하지 않음
-        };
+      // 입장 메시지 추가
+      const joinMessage: Message = {
+        senderId: 'system',
+        content: `${chatMembers
+          .map((member) => getNicknameDisplay(member))
+          .join(', ')}님이 입장하셨습니다.`,
+        timestamp: null, // timestamp 표시하지 않음
+      };
 
-        // 그룹 채팅 안내 메시지 추가
-        const groupChatNotice: Message = {
-          senderId: 'system',
-          content: `
+      // 그룹 채팅 안내 메시지 추가
+      const groupChatNotice: Message = {
+        senderId: 'system',
+        content: `
 안내사항: 환불 및 이탈 관련 정책
   1. 환불 및 수령 시간/위치 조율
     - 공구 진행 중(최종 승인 이후)인 채팅방에서
@@ -73,13 +72,10 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
 
 공구 진행에 차질이 없도록 적극적인 협조
 부탁드립니다. 😊`,
-          timestamp: null,
-        };
+        timestamp: null,
+      };
 
-        setMessages([joinMessage, groupChatNotice, ...fetchedMessages]);
-      } catch (error) {
-        console.error('Failed to fetch messages:', error);
-      }
+      setMessages([joinMessage, groupChatNotice, ...fetchedMessages]);
     };
 
     fetchMessages();
@@ -96,20 +92,15 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
       setMessages((prev) => [...prev, data]);
     };
 
-    webSocketService.connect(
-      () => {
-        webSocketService.subscribe(
-          `/sub/message/${chatRoomId}`,
-          (messageOutput) => {
-            const data = JSON.parse(messageOutput.body);
-            handleIncomingMessage(data);
-          }
-        );
-        console.log('WebSocket connected to room');
-      },
-      () => console.log('WebSocket disconnected'),
-      () => console.error('WebSocket connection error')
-    );
+    webSocketService.connect(() => {
+      webSocketService.subscribe(
+        `/sub/message/${chatRoomId}`,
+        (messageOutput) => {
+          const data = JSON.parse(messageOutput.body);
+          handleIncomingMessage(data);
+        }
+      );
+    });
 
     return () => {
       webSocketService.unsubscribe(`/sub/message/${chatRoomId}`);

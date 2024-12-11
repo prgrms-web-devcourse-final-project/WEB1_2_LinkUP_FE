@@ -2,7 +2,6 @@ export const getImageSrc = (
   image: File | string | null | undefined
 ): string => {
   if (!image) {
-    console.error('No image provided');
     return '';
   }
 
@@ -14,14 +13,8 @@ export const getImageSrc = (
     const baseUrl = process.env.VITE_API_URL || 'http://15.164.5.135:8080';
     return `${baseUrl}/${image}`;
   } else if (image instanceof File) {
-    try {
-      return URL.createObjectURL(image);
-    } catch (error) {
-      console.error('Failed to create object URL for file:', error);
-      return '';
-    }
+    return URL.createObjectURL(image);
   } else {
-    console.error('Invalid image format:', image);
     return '';
   }
 };

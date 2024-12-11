@@ -50,8 +50,8 @@ const VirtualAccountModal: React.FC<VirtualAccountModalProps> = ({
         }
       );
       onComplete(response.data);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.error('가상 계좌 발급 실패:', error);
       alert('가상 계좌 발급에 실패했습니다.');
     } finally {
       setLoading(false);

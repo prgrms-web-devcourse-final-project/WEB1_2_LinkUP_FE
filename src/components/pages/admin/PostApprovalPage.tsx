@@ -22,12 +22,8 @@ const PostApprovalPage = () => {
         navigate('/admin/post'); // postId가 없을 경우 관리자 페이지로 리다이렉트
         return;
       }
-      try {
-        const postDetails = await fetchPostById(postId); // 포스트 세부 정보 가져오기
-        setPost(postDetails.communityPost);
-      } catch (error) {
-        console.error('Failed to fetch post details:', error);
-      }
+      const postDetails = await fetchPostById(postId); // 포스트 세부 정보 가져오기
+      setPost(postDetails.communityPost);
     };
     fetchPost();
   }, [postId, navigate]);
@@ -58,8 +54,8 @@ const PostApprovalPage = () => {
       await approvePost(postId, updatedTitle); // 포스트 상태를 APPROVED로 변경
       alert('게시물이 승인되었습니다.');
       navigate('/admin/post'); // 승인 후 관리자 페이지로 리다이렉트
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.error('Failed to approve post:', error);
       alert('승인 처리 중 오류가 발생했습니다.');
     }
   };
@@ -75,8 +71,8 @@ const PostApprovalPage = () => {
       await rejectPost(postId, updatedTitle); // 포스트 상태를 REJECTED로 변경
       alert('게시물이 거절 처리되었습니다.');
       navigate('/admin/post'); // 거절 후 관리자 페이지로 리다이렉트
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.error('Failed to reject post:', error);
       alert('거절 처리 중 오류가 발생했습니다.');
     }
   };

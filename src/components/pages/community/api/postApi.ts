@@ -62,8 +62,6 @@ export const createPost = async (
   postData.imageUrls.forEach((file) => {
     if (file instanceof File) {
       formData.append('images', file); // Content-Type은 자동 설정됨
-    } else {
-      console.warn('Invalid image file detected:', file);
     }
   });
 
@@ -227,25 +225,20 @@ export const handleSSEUpdate = (
 
   // SSE 메시지 수신
   eventSource.onmessage = (event) => {
-    try {
-      const data: SSEEvent = JSON.parse(event.data);
+    const data: SSEEvent = JSON.parse(event.data);
 
-      // 상태 갱신 함수가 있을 경우 호출
-      if (updateState) {
-        updateState({
-          postStatus: data.postStatus,
-          participationCount: data.participationCount,
-          paymentCount: data.paymentCount,
-        });
-      }
-    } catch (error) {
-      console.error('Failed to parse SSE data:', error);
+    // 상태 갱신 함수가 있을 경우 호출
+    if (updateState) {
+      updateState({
+        postStatus: data.postStatus,
+        participationCount: data.participationCount,
+        paymentCount: data.paymentCount,
+      });
     }
   };
 
   // SSE 연결 오류 처리
-  eventSource.onerror = (error) => {
-    console.error('SSE connection error:', error);
+  eventSource.onerror = () => {
     eventSource.close();
   };
 };

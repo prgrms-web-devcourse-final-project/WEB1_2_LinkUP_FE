@@ -34,7 +34,6 @@ const SSEHandler: React.FC<{ communityPostId: number }> = ({
     };
 
     eventSource.onerror = () => {
-      console.error('SSE 연결 오류');
       eventSource.close();
     };
 

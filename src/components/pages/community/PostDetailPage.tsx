@@ -66,8 +66,8 @@ const PostDetailPage: React.FC = () => {
         const data = await fetchPostById(Number(communityPostId!));
         setData(data);
         setPost(data.communityPost);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        console.error('Failed to fetch post details:', error);
         navigate('*');
       }
     };
@@ -106,7 +106,6 @@ const PostDetailPage: React.FC = () => {
       };
 
       eventSource.onerror = () => {
-        console.error('SSE 연결 오류 발생');
         eventSource.close();
       };
 
@@ -209,8 +208,7 @@ const PostDetailPage: React.FC = () => {
       alert('공구 참여가 완료되었습니다.');
       queryClient.invalidateQueries({ queryKey }); // 정확한 queryKey 사용
     },
-    onError: (error: Error) => {
-      console.error('공구 참여 실패:', error.message); // 오류 메시지 출력
+    onError: () => {
       alert('공구 참여에 실패했습니다.');
     },
   });
@@ -263,8 +261,7 @@ const PostDetailPage: React.FC = () => {
           alert('공구 참여가 완료되었습니다.');
           queryClient.invalidateQueries({ queryKey });
         },
-        onError: (error: Error) => {
-          console.error('공구 참여 실패:', error.message);
+        onError: () => {
           alert('공구 참여에 실패했습니다.');
         },
       }

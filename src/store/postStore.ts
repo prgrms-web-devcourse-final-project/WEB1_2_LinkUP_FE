@@ -13,8 +13,7 @@ export const postsAtom = atomWithQuery(() => ({
     return response.data;
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onError: (error: any) => {
-    console.error('Error fetching posts:', error);
+  onError: () => {
     alert('포스트를 불러오는 데 실패했습니다.');
   },
 }));
@@ -35,8 +34,7 @@ export const selectedPostAtom = atomWithQuery<PostDetailResponse | null>(
       return await fetchPostById(communityPostId);
     },
     enabled: Boolean(get(selectedPostIdAtom)), // 유효성 검사
-    onError: (error: unknown) => {
-      console.error('Error fetching selected post:', error);
+    onError: () => {
       alert('선택된 포스트를 불러오는 데 실패했습니다.');
     },
   })
@@ -59,8 +57,7 @@ export const subscribeToSSE = (
     setRealTimeData(data); // 상태를 업데이트
   };
 
-  eventSource.onerror = (error) => {
-    console.error('SSE connection error:', error);
+  eventSource.onerror = () => {
     eventSource.close();
   };
 
@@ -81,7 +78,6 @@ export const sseSubscriptionAtom = atom((get) => {
     // 컴포넌트가 해제되면 이벤트 소스 닫기
     return () => {
       eventSource.close();
-      console.log('SSE connection closed');
     };
   };
 });

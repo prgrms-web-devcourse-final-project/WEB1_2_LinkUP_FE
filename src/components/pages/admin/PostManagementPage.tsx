@@ -26,12 +26,8 @@ const PostManagementPage = () => {
 
   useEffect(() => {
     const fetchPosts = async () => {
-      try {
-        const response = await fetchPendingPosts();
-        setPosts(response);
-      } catch (error) {
-        console.error('Failed to fetch posts:', error);
-      }
+      const response = await fetchPendingPosts();
+      setPosts(response);
     };
 
     fetchPosts();

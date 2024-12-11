@@ -5,8 +5,8 @@ import SearchBar from './SearchBar';
 import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
 import { SSEEvent, Post } from '../../types/postTypes';
-import { getImageSrc } from '../../utils/GetImageSrc';
 import { formatDateWithOffset } from '../../utils/formatDate';
+import { getImageSrc } from '../../utils/GetImageSrc';
 
 interface PostListProps {
   selectedCategory: string;

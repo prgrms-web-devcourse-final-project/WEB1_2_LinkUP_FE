@@ -16,7 +16,6 @@ import CategoryWrapper from '../../common/CategoryWrapper';
 import { POST_CATEGORIES } from './postCategories';
 import { Post, PostDetailResponse } from '../../../types/postTypes';
 import { getImageSrc } from '../../../utils/GetImageSrc';
-
 const PostEditPage = () => {
   const { communityPostId } = useParams<{ communityPostId: string }>();
   const navigate = useNavigate();
@@ -128,8 +127,8 @@ const PostEditPage = () => {
       await updatePost(Number(communityPostId), updatedPost); // 게시글 수정 API 호출
       alert('게시글이 성공적으로 수정되었습니다.');
       navigate(`/mypage/post/${communityPostId}`);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.error('게시글 수정 중 오류 발생:', error);
       alert('게시글 수정에 실패했습니다. 다시 시도해주세요.');
     }
   };
@@ -253,8 +252,8 @@ const PostEditPage = () => {
       await deletePostById(Number(communityPostId)); // 삭제 API 호출
       alert('게시글이 성공적으로 삭제되었습니다.');
       navigate('/mypage/post');
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.error('게시글 삭제 중 오류 발생:', error);
       alert('게시글 삭제에 실패했습니다. 다시 시도해주세요.');
     }
   };

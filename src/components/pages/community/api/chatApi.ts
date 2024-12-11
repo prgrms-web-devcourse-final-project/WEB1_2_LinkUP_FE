@@ -9,15 +9,14 @@ export const createChatRoom = async (postId: number) => {
     throw new Error('Failed to create chat room');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { id, roomName } = response.data;
-  console.log(`Chat room created: ${roomName} (ID: ${id})`);
 
   // 채팅방 구독 시작
   webSocketService.subscribe(
     `/sub/message/${id}`,
-    (message) => {
-      console.log(`Message in room ${id}:`, message);
-    },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (message) => {},
     true
   );
 
@@ -36,8 +35,6 @@ export const deleteChatRoom = async (chatRoomId: number) => {
     throw new Error('Failed to delete chat room');
   }
 
-  console.log(`Chat room ${chatRoomId} deleted`);
-
   // 채팅방 구독 취소
   webSocketService.unsubscribe(`/sub/message/${chatRoomId}`);
   return response.data;
@@ -55,7 +52,6 @@ export const fetchMyChatRooms = async () => {
     throw new Error('Failed to fetch my chat rooms');
   }
 
-  console.log('Fetched my chat rooms:', response.data);
   return response.data;
 };
 
@@ -71,7 +67,6 @@ export const fetchAllChatRooms = async () => {
     throw new Error('Failed to fetch all chat rooms');
   }
 
-  console.log('Fetched all chat rooms:', response.data);
   return response.data;
 };
 
@@ -89,7 +84,6 @@ export const sendMessage = (
   };
 
   webSocketService.send(`/pub/message/${chatRoomId}`, payload);
-  console.log(`Message sent to room ${chatRoomId}:`, payload);
 };
 
 // 채팅 메시지 구독
@@ -99,35 +93,24 @@ export const subscribeToChatMessages = (
   callback: (message: any) => void
 ) => {
   webSocketService.subscribe(`/sub/message/${chatRoomId}`, callback, true);
-  console.log(`Subscribed to messages for room ${chatRoomId}`);
 };
 
 // 채팅 메시지 구독 취소
 export const unsubscribeFromChatMessages = (chatRoomId: number) => {
   webSocketService.unsubscribe(`/sub/message/${chatRoomId}`);
-  console.log(`Unsubscribed from messages for room ${chatRoomId}`);
 };
 
 // 채팅 내용 조회
 export const fetchChatMessages = async (chatRoomId: number) => {
-  try {
-    const response = await axiosInstance.get(`/api/chat/${chatRoomId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('jwt')}`,
-      },
-    });
+  const response = await axiosInstance.get(`/api/chat/${chatRoomId}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+    },
+  });
 
-    if (response.status !== 200) {
-      throw new Error('Failed to fetch chat messages');
-    }
-
-    console.log(`Fetched messages for chat room ${chatRoomId}:`, response.data);
-    return response.data;
-  } catch (error) {
-    console.error(
-      `Error fetching messages for chat room ${chatRoomId}:`,
-      error
-    );
-    throw error;
+  if (response.status !== 200) {
+    throw new Error('Failed to fetch chat messages');
   }
+
+  return response.data;
 };

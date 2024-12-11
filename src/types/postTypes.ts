@@ -16,7 +16,7 @@ export interface Post {
   nickname: string;
   paymentDeadline?: string;
   stateUpdatedAt?: string;
-  comments: Comment[];
+  comments?: Comment[];
 }
 
 // 포스트 상태 타입
@@ -68,6 +68,10 @@ export interface SSEEvent {
   participationCount: number;
   postStatus: POST_STATUS;
   paymentCount: number;
+  participationStatus?: 'JOIN' | 'PAYMENT_STANDBY' | null;
+  participants?: Participant[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
 }
 
 // 댓글 타입

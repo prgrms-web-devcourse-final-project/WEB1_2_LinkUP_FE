@@ -7,4 +7,8 @@ export interface User {
   token: string;
 }
 
-export const currentUserAtom = atom<User | null>(null);
+export const currentUserAtom = atom<{
+  id: number;
+  nickname: string;
+  isAdmin: boolean;
+} | null>(null);

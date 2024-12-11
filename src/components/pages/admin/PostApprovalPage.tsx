@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { fetchPostById } from '../community/api/postApi';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { fetchPostById, handleSSEUpdate } from '../community/api/postApi';
 import { approvePost, rejectPost } from './api/adminApi';
 import { FaBackspace, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import { Post } from '../../../types/postTypes';
@@ -9,9 +9,10 @@ import { getImageSrc } from '../../../utils/GetImageSrc';
 import { formatDateWithOffset } from '../../../utils/formatDate';
 
 const PostApprovalPage = () => {
+  const { postId: paramPostId } = useParams<{ postId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
-  const { postId } = location.state || {}; // PostList에서 전달된 postId
+  const postId = paramPostId || location.state?.communityPostId;
   const [post, setPost] = useState<Post | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -21,12 +22,8 @@ const PostApprovalPage = () => {
         navigate('/admin/post'); // postId가 없을 경우 관리자 페이지로 리다이렉트
         return;
       }
-      try {
-        const postDetails = await fetchPostById(postId); // 포스트 세부 정보 가져오기
-        setPost(postDetails.communityPost);
-      } catch (error) {
-        console.error('Failed to fetch post details:', error);
-      }
+      const postDetails = await fetchPostById(postId); // 포스트 세부 정보 가져오기
+      setPost(postDetails.communityPost);
     };
     fetchPost();
   }, [postId, navigate]);
@@ -53,12 +50,12 @@ const PostApprovalPage = () => {
       const updatedTitle = post.title.startsWith('(수정요망)')
         ? post.title.replace(/^\(수정요망\)\s*/, '')
         : post.title;
-
+      handleSSEUpdate(postId); // SSE 구독 시작
       await approvePost(postId, updatedTitle); // 포스트 상태를 APPROVED로 변경
       alert('게시물이 승인되었습니다.');
       navigate('/admin/post'); // 승인 후 관리자 페이지로 리다이렉트
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.error('Failed to approve post:', error);
       alert('승인 처리 중 오류가 발생했습니다.');
     }
   };
@@ -67,15 +64,15 @@ const PostApprovalPage = () => {
     if (!post) return;
     try {
       // 제목에 '(수정요망)' 추가
-      const updatedTitle = post.title.startsWith('(수정요망)')
+      const updatedTitle = post.title.startsWith('(수정요망) ')
         ? post.title // 이미 '(수정요망)'이 있으면 그대로 유지
         : `(수정요망) ${post.title}`;
-
+      handleSSEUpdate(postId); // SSE 구독 시작
       await rejectPost(postId, updatedTitle); // 포스트 상태를 REJECTED로 변경
       alert('게시물이 거절 처리되었습니다.');
       navigate('/admin/post'); // 거절 후 관리자 페이지로 리다이렉트
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.error('Failed to reject post:', error);
       alert('거절 처리 중 오류가 발생했습니다.');
     }
   };

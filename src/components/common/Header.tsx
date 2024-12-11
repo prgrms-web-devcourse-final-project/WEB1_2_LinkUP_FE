@@ -57,7 +57,7 @@ const Header = () => {
                   to={isAdmin ? '#' : '/mypage/setting'}
                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     if (isAdmin) {
-                      e.preventDefault(); // Admin일 경우 링크 동작 차단
+                      e.preventDefault();
                     } else {
                       toggleMobileMenu();
                     }

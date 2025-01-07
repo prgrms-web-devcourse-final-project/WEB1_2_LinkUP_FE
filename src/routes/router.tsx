@@ -30,8 +30,7 @@ import PaymentSuccessPage from '../components/pages/Payment/PaymentSuccessPage';
 import ScrollToTop from '../components/common/ScrollToTop';
 import PostEditPage from '../components/pages/community/PostEditPage';
 import SetLocationPage from '../components/pages/login/SetLocationPage';
-import PaymentAuthorPage from '../components/pages/community/PaymentAuthorPage';
-import PaymentParticipantPage from '../components/pages/community/PaymentParticipantPage';
+
 import PaymentCompletePage from '../components/pages/community/PaymentCompletePage';
 import PostManagementPage from '../components/pages/admin/PostManagementPage';
 import PostApprovalPage from '../components/pages/admin/PostApprovalPage';
@@ -40,6 +39,8 @@ import ChatRoomManagementPage from '../components/pages/admin/ChatRoomManagement
 import ScrollToTopButton from '../components/common/ScrollToTopButton';
 import DepositPage from '../components/pages/community/DepositPage';
 import ProtectedRoutes from './ProtectedRoutes';
+import ParticipantsForm from '../components/pages/Payment/ParticipantsForm';
+import AuthorForm from '../components/pages/Payment/AuthorForm';
 
 const router = createBrowserRouter(
   [
@@ -108,11 +109,11 @@ const router = createBrowserRouter(
         },
         {
           path: '/community/post/:communityPostId/payment/author',
-          element: <PaymentAuthorPage />,
+          element: <AuthorForm />,
         },
         {
           path: '/community/post/:communityPostId/payment/participant',
-          element: <PaymentParticipantPage />,
+          element: <ParticipantsForm />,
         },
         {
           path: '/community/post/:communityPostId/payment/deposit',

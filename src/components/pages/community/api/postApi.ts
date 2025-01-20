@@ -45,7 +45,7 @@ export const createPost = async (
   postData: CreatePostData
 ): Promise<{ message: string }> => {
   const formData = new FormData();
-  const jsonContent = JSON.stringify({
+  const content = {
     title: postData.title,
     category: postData.category,
     availableNumber: postData.availableNumber,
@@ -54,20 +54,23 @@ export const createPost = async (
     unitAmount: postData.unitAmount,
     productUrl: postData.productUrl,
     description: postData.description,
-  });
-  const blobContent = new Blob([jsonContent], { type: 'application/json' });
-  formData.append('content', blobContent);
+  };
+  formData.append(
+    'content',
+    new Blob([JSON.stringify(content)], { type: 'application/json' })
+  );
 
-  // 이미지 파일 추가
-  postData.imageUrls.forEach((file) => {
-    if (file instanceof File) {
-      formData.append('images', file); // Content-Type은 자동 설정됨
-    }
-  });
+  if (postData) {
+    postData.imageUrls.forEach((file) => {
+      if (file instanceof File) {
+        formData.append('images', file); // Content-Type은 자동 설정됨
+      }
+    });
+  }
 
   const response = await axiosInstance.post('/api/community/post', formData, {
     headers: {
-      Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+      'Content-Type': 'multipart/form-data',
     },
   });
   if (response.status !== 200) throw new Error('Failed to create post');

@@ -35,7 +35,7 @@ const PostCreatePage = () => {
   const [urlError, setUrlError] = useState(false);
 
   const createPostMutation = useMutation({
-    mutationFn: (postData: CreatePostData) => createPost(postData),
+    mutationFn: (payload: CreatePostData) => createPost(payload),
     onSuccess: () => {
       // 생성 성공 시 목록 업데이트
       queryClient.invalidateQueries({ queryKey: ['postList'] });
@@ -62,7 +62,7 @@ const PostCreatePage = () => {
       !availableNumber ||
       !totalAmount ||
       deadline === '마감 기한' ||
-      imageUrls.length === 0 || // 최소 한 개의 이미지 추가 확인
+      !imageUrls ||
       !urlInput ||
       !description
     ) {
@@ -83,7 +83,7 @@ const PostCreatePage = () => {
       return;
     }
 
-    const postData: CreatePostData = {
+    const payload = {
       title: title.trim(),
       description: description.trim(),
       imageUrls: imageUrls,
@@ -95,7 +95,7 @@ const PostCreatePage = () => {
       period,
     };
 
-    createPostMutation.mutate(postData);
+    createPostMutation.mutate(payload);
   };
 
   const handleAvailableNumberChange = (

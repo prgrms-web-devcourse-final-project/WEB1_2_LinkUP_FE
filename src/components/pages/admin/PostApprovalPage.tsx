@@ -51,7 +51,7 @@ const PostApprovalPage = () => {
         ? post.title.replace(/^\(수정요망\)\s*/, '')
         : post.title;
       handleSSEUpdate(postId); // SSE 구독 시작
-      await approvePost(postId, updatedTitle); // 포스트 상태를 APPROVED로 변경
+      await approvePost(postId, { title: updatedTitle }); // 포스트 상태를 APPROVED로 변경
       alert('게시물이 승인되었습니다.');
       navigate('/admin/post'); // 승인 후 관리자 페이지로 리다이렉트
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -68,7 +68,7 @@ const PostApprovalPage = () => {
         ? post.title // 이미 '(수정요망)'이 있으면 그대로 유지
         : `(수정요망) ${post.title}`;
       handleSSEUpdate(postId); // SSE 구독 시작
-      await rejectPost(postId, updatedTitle); // 포스트 상태를 REJECTED로 변경
+      await rejectPost(postId, { title: updatedTitle }); // 포스트 상태를 REJECTED로 변경
       alert('게시물이 거절 처리되었습니다.');
       navigate('/admin/post'); // 거절 후 관리자 페이지로 리다이렉트
       // eslint-disable-next-line @typescript-eslint/no-unused-vars

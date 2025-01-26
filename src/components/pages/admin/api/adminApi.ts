@@ -1,6 +1,8 @@
 import axiosInstance from '../../../../api/axiosInstance';
 import { Post } from '../../../../types/postTypes';
-
+export interface Title {
+  title: string;
+}
 export const fetchPendingPosts = async (): Promise<Post[]> => {
   try {
     const URL = `/api/admin/post`;
@@ -13,11 +15,11 @@ export const fetchPendingPosts = async (): Promise<Post[]> => {
 
 export const approvePost = async (
   postId: number,
-  title: string
+  payload: Title
 ): Promise<Post> => {
   try {
     const URL = `/api/admin/post/approve/${postId}`;
-    const response = await axiosInstance.patch(URL, title);
+    const response = await axiosInstance.patch(URL, payload);
     return response.data;
   } catch {
     throw new Error(`ID ${postId}의 포스트 승인을 처리하는 데 실패했습니다.`);
@@ -26,11 +28,11 @@ export const approvePost = async (
 
 export const rejectPost = async (
   postId: number,
-  title: string
+  payload: Title
 ): Promise<Post> => {
   try {
     const URL = `/api/admin/post/reject/${postId}`;
-    const response = await axiosInstance.patch(URL, title);
+    const response = await axiosInstance.patch(URL, payload);
     return response.data;
   } catch {
     throw new Error(`ID ${postId}의 포스트 거절을 처리하는 데 실패했습니다.`);

@@ -6,8 +6,7 @@ import {
   deleteComment,
   updateComment,
 } from '../../community/api/postApi';
-import { useAtom } from 'jotai';
-import { currentUserAtom } from '../../../../store/userStore';
+
 import { formatDateWithOffset } from '../../../../utils/formatDate';
 
 interface PostCommentsSectionProps {
@@ -26,21 +25,18 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
   comments,
 }) => {
   const queryClient = useQueryClient();
-  const [currentUser] = useAtom(currentUserAtom);
+
   const [newCommentContent, setNewCommentContent] = useState<string>('');
   const [editCommentId, setEditCommentId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState<string>('');
 
   const queryKey = ['postDetail', communityPostId];
 
+  const userId = parseInt(localStorage.getItem('userid') || '0', 10);
+
   const addCommentMutation = useMutation({
     mutationFn: () =>
-      addComment(
-        communityPostId,
-        currentUser?.id || 0,
-        currentUser?.nickname || '',
-        newCommentContent
-      ),
+      addComment(communityPostId, userId || null, newCommentContent),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
       setNewCommentContent('');
@@ -124,7 +120,7 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
                   onChange={(e) => setEditContent(e.target.value)}
                 />
                 <ActionButtonsWrapper>
-                  <CharacterCount overLimit={editContent.length > 300}>
+                  <CharacterCount $overLimit={editContent.length > 300}>
                     ({editContent.length}/300)
                   </CharacterCount>
                   <ActionButton onClick={handleUpdateComment}>
@@ -138,7 +134,7 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
             ) : (
               <>
                 <CommentContent>{comment.content}</CommentContent>
-                {comment.userId === currentUser?.id && (
+                {comment.userId === userId && (
                   <CommentActions>
                     <ActionButton
                       onClick={() =>
@@ -166,7 +162,7 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
             maxLength={300} // 브라우저에서 강제 제한
           />
           <ActionButtonsWrapper>
-            <CharacterCount overLimit={newCommentContent.length > 300}>
+            <CharacterCount $overLimit={newCommentContent.length > 300}>
               ({newCommentContent.length}/300)
             </CharacterCount>
             <SubmitCommentButton onClick={handleAddComment}>
@@ -238,13 +234,13 @@ const EditCommentContainer = styled.div`
 `;
 
 interface CharacterCountProps {
-  overLimit?: boolean;
+  $overLimit?: boolean;
 }
 
 const CharacterCount = styled.span<CharacterCountProps>`
   font-size: 0.9rem;
   color: ${(props) =>
-    props.overLimit ? 'red' : '#666'}; /* 300자를 초과하면 빨간색 */
+    props.$overLimit ? 'red' : '#666'}; /* 300자를 초과하면 빨간색 */
   margin-right: 10px; /* 버튼과 간격 */
 `;
 

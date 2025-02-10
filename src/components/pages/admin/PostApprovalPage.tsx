@@ -50,12 +50,11 @@ const PostApprovalPage = () => {
       const updatedTitle = post.title.startsWith('(수정요망)')
         ? post.title.replace(/^\(수정요망\)\s*/, '')
         : post.title;
-      handleSSEUpdate(postId); // SSE 구독 시작
-      await approvePost(postId, { title: updatedTitle }); // 포스트 상태를 APPROVED로 변경
+      handleSSEUpdate(postId);
+      await approvePost(postId, { title: updatedTitle });
       alert('게시물이 승인되었습니다.');
       navigate('/admin/post'); // 승인 후 관리자 페이지로 리다이렉트
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+    } catch {
       alert('승인 처리 중 오류가 발생했습니다.');
     }
   };
@@ -67,8 +66,8 @@ const PostApprovalPage = () => {
       const updatedTitle = post.title.startsWith('(수정요망) ')
         ? post.title // 이미 '(수정요망)'이 있으면 그대로 유지
         : `(수정요망) ${post.title}`;
-      handleSSEUpdate(postId); // SSE 구독 시작
-      await rejectPost(postId, { title: updatedTitle }); // 포스트 상태를 REJECTED로 변경
+      handleSSEUpdate(postId);
+      await rejectPost(postId, { title: updatedTitle });
       alert('게시물이 거절 처리되었습니다.');
       navigate('/admin/post'); // 거절 후 관리자 페이지로 리다이렉트
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -297,7 +296,7 @@ const ImagePreview = styled.div`
   align-items: center;
   justify-content: center;
   width: 400px;
-  height: 100%;
+  height: 310px;
   border: 1px solid #ccc;
   border-radius: 10px;
   overflow: hidden; /* 콘텐츠가 영역을 벗어나지 않도록 */

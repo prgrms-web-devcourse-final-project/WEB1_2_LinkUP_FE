@@ -9,6 +9,7 @@ import { usePostQuery } from '../../../hooks/useGetPost';
 const AuthorForm = () => {
   const { quantity } = useQuantity();
   const { id } = useParams();
+
   const postId = useMemo(() => {
     if (!id || isNaN(Number(id))) {
       return null;
@@ -82,15 +83,17 @@ const AuthorForm = () => {
             <Title>공구 모집 상품 정보</Title>
             <ContentBox>
               <FlexRow>
-                <ProductName>{post.title}</ProductName>
-                <Price>{post.unitAmount}원</Price>
+                <ProductName>{post.communityPost.title}</ProductName>
+                <Price>{post.communityPost.unitAmount}원</Price>
               </FlexRow>
               <FlexRow>
                 <Quantity>수량 : {quantity}</Quantity>
               </FlexRow>
               <TotalRow>
                 <span>합계:</span>
-                <TotalPrice>{post.unitAmount * quantity}원</TotalPrice>
+                <TotalPrice>
+                  {post.communityPost.unitAmount * quantity}원
+                </TotalPrice>
               </TotalRow>
             </ContentBox>
           </Section>

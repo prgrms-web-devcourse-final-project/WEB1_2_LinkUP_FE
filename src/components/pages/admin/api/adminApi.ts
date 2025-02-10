@@ -1,12 +1,13 @@
 import axiosInstance from '../../../../api/axiosInstance';
-import { Post } from '../../../../types/postTypes';
+import { AdminPost, Post } from '../../../../types/postTypes';
 export interface Title {
   title: string;
 }
-export const fetchPendingPosts = async (): Promise<Post[]> => {
+export const fetchPendingPosts = async (): Promise<AdminPost[]> => {
   try {
     const URL = `/api/admin/post`;
     const response = await axiosInstance.get(URL);
+
     return response.data;
   } catch {
     throw new Error('승인 대기 중인 포스트 목록을 가져오는 데 실패했습니다.');

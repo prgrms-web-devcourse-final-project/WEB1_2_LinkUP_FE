@@ -75,13 +75,14 @@ export const postSignUpLast = async (profile: File | null) => {
 
 export const postSignIn = async (body: { email: string; password: string }) => {
   const response = await axiosInstance.post(`/users/login`, body);
-
   const token =
     response.headers['authorization'] || response.headers['Authorization'];
   const role = response.data.roles;
+  const userId = response.data.userid;
   if (token) {
     localStorage.setItem('token', token);
     localStorage.setItem('role', role);
+    localStorage.setItem('userid', userId);
   }
   return response;
 };

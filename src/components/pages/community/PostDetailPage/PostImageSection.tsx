@@ -118,7 +118,7 @@ const ImagePreview = styled.div`
   align-items: center;
   justify-content: center;
   width: 400px;
-  height: 100%;
+  height: 310px;
   border: 1px solid #ccc;
   border-radius: 10px;
   overflow: hidden;

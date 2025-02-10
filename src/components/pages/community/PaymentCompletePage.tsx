@@ -1,83 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { fetchPaymentStatus } from './api/paymentApi';
-import { fetchPostById } from './api/postApi';
+import { useNavigate, useParams } from 'react-router-dom';
+
 import { createChatRoom } from './api/chatApi';
 import ChatRoomModal from './modal/ChatRoomModal';
 import { webSocketService } from '../../../utils/webSocket';
-
-interface Post {
-  title: string;
-  unitAmount: number;
-}
+import { useQuantity } from '../../../context/QuantityContext';
+import { usePostQuery } from '../../../hooks/useGetPost';
+import { QueryHandler } from '../../../hooks/useGetProduct';
 
 const PaymentCompletePage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const state = location.state;
-
-  if (!state || !state.communityPostId || !state.quantity) {
-    return <div>잘못된 접근입니다.</div>;
+  const { quantity } = useQuantity();
+  const { id } = useParams();
+  if (!id) {
+    return <p>상품 번호가 유실되었습니다.</p>;
   }
+  const postId = Number(id);
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
 
-  const { communityPostId, quantity } = state;
+  const price = urlParams.get('amount');
+  const { data: post, isLoading, isError } = usePostQuery(postId);
 
-  const [paymentData, setPaymentData] = useState<{
-    paymentKey: string;
-    orderId: string;
-    totalAmount: number;
-  } | null>(null);
-
-  const [post, setPost] = useState<Post | null>(null);
-  const [status, setStatus] = useState<'WAITING_FOR_DEPOSIT' | 'DONE'>(
-    'WAITING_FOR_DEPOSIT'
-  );
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatRoom, setChatRoom] = useState<{
     id: number;
     roomName: string;
   } | null>(null);
 
-  useEffect(() => {
-    // 결제 상태 가져오기
-    const fetchPayment = async () => {
-      try {
-        const data = await fetchPaymentStatus(communityPostId);
-        setPaymentData(data);
-        if (data.status === 'DONE') {
-          setStatus('DONE');
-        }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
-        alert('결제 상태를 확인할 수 없습니다.');
-      }
-    };
-
-    // 게시물 정보 가져오기
-    const fetchPost = async () => {
-      try {
-        const postData = await fetchPostById(Number(communityPostId));
-        setPost({
-          title: postData.communityPost.title,
-          unitAmount: postData.communityPost.unitAmount,
-        });
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
-        alert('게시물 정보를 가져올 수 없습니다.');
-      }
-    };
-
-    fetchPayment();
-    fetchPost();
-  }, [communityPostId]);
-
   const handleChatRoomCreation = async () => {
     try {
-      const chatRoom = await createChatRoom(parseInt(communityPostId));
+      const chatRoom = await createChatRoom(parseInt(id));
       setChatRoom(chatRoom);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+    } catch {
       alert('채팅방을 생성할 수 없습니다.');
     }
   };
@@ -91,94 +47,150 @@ const PaymentCompletePage: React.FC = () => {
 
   const closeChat = () => setIsChatOpen(false);
 
-  if (!paymentData || !post) {
-    return <div>로딩 중...</div>;
-  }
-
   return (
-    <PaymentCompleteContainer>
-      {status === 'WAITING_FOR_DEPOSIT' ? (
-        <>
-          <Message>결제 상태를 확인 중입니다...</Message>
-        </>
-      ) : (
-        <>
-          <Message>결제가 정상적으로 완료되었습니다.</Message>
-          <OrderInformation>
-            <p>주문 ID: {paymentData.orderId}</p>
-            <p>상품명: {post.title}</p>
-            <p>개당 가격: {post.unitAmount.toLocaleString()} 원</p>
-            <p>수량: {quantity}</p>
-            <p>결제 금액: {paymentData.totalAmount.toLocaleString()} 원</p>
-          </OrderInformation>
-        </>
-      )}
-      <ButtonContainer>
-        <ActionButton onClick={openChat}>채팅방 열기</ActionButton>
-        <ActionButton onClick={() => navigate('/mypage/orderlist')}>
-          주문내역 보기
-        </ActionButton>
-      </ButtonContainer>
+    <QueryHandler isLoading={isLoading} isError={isError}>
+      <Container>
+        <SuccessSection>
+          <Title>결제 완료</Title>
+          <Subtitle>결제가 정상적으로 완료되었습니다.</Subtitle>
 
-      {/* 채팅방 모달 */}
-      {chatRoom && (
-        <ChatRoomModal
-          isOpen={isChatOpen}
-          onClose={closeChat}
-          chatRoomId={chatRoom.id.toString()}
-          chatRoomTitle={chatRoom.roomName} // 채팅방 제목 전달
-          webSocketService={webSocketService} // WebSocket 서비스 전달
-          isAdminPage={false}
-        />
-      )}
-    </PaymentCompleteContainer>
+          <OrderSummary>
+            <SummaryRow>
+              <Label>상품명</Label>
+              <Value>{post?.communityPost.title}</Value>
+            </SummaryRow>
+            <SummaryRow>
+              <Label>수량</Label>
+              <Value>{quantity}</Value>
+            </SummaryRow>
+            <SummaryRow>
+              <Label>결제 금액</Label>
+              <Value>{price}원</Value>
+            </SummaryRow>
+          </OrderSummary>
+        </SuccessSection>
+
+        <ButtonGroup>
+          <OrderDetailButton onClick={openChat}>채팅방 열기</OrderDetailButton>
+          <BackButton onClick={() => navigate('/mypage/orderlist')}>
+            주문내역 보기
+          </BackButton>
+        </ButtonGroup>
+
+        {chatRoom && (
+          <ChatRoomModal
+            isOpen={isChatOpen}
+            onClose={closeChat}
+            chatRoomId={chatRoom.id.toString()}
+            chatRoomTitle={chatRoom.roomName}
+            webSocketService={webSocketService}
+            isAdminPage={false}
+          />
+        )}
+      </Container>
+    </QueryHandler>
   );
 };
 
-export default PaymentCompletePage;
-
-const PaymentCompleteContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+const Container = styled.div`
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto;
   padding: 20px;
-  height: 100vh;
-  text-align: center;
-`;
-
-const Message = styled.h1`
-  font-size: 2rem;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 20px;
-`;
-
-const OrderInformation = styled.div`
+  background-color: #f8fafc;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
 `;
 
-const ButtonContainer = styled.div`
-  display: flex;
-  gap: 20px;
+const SuccessSection = styled.div`
+  width: 100%;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 32px 20px;
+  text-align: center;
+  margin-bottom: 24px;
+`;
+
+const Title = styled.h1`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 12px;
+`;
+
+const Subtitle = styled.p`
+  color: #64748b;
+  font-size: 1rem;
+  margin-bottom: 24px;
+`;
+
+const OrderSummary = styled.div`
+  background-color: #f8fafc;
+  border-radius: 8px;
+  padding: 16px;
   margin-top: 20px;
 `;
 
-const ActionButton = styled.button`
-  padding: 10px 20px;
-  font-size: 1rem;
-  font-weight: bold;
-  color: #fff;
-  background-color: #000;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+const SummaryRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
 
-  &:hover {
-    background-color: #444;
+  &:last-child {
+    margin-bottom: 0;
   }
 `;
+
+const Label = styled.span`
+  color: #64748b;
+  font-size: 0.875rem;
+`;
+
+const Value = styled.span`
+  color: #1e293b;
+  font-weight: 500;
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 12px;
+  width: 100%;
+`;
+
+const BaseButton = styled.button`
+  flex: 1;
+  text-decoration: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+`;
+
+const OrderDetailButton = styled(BaseButton)`
+  background-color: #2563eb;
+  border: none;
+  color: white;
+
+  &:hover {
+    background-color: #1d4ed8;
+  }
+`;
+
+const BackButton = styled(BaseButton)`
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+
+  &:hover {
+    background-color: #f8fafc;
+  }
+`;
+
+export default PaymentCompletePage;

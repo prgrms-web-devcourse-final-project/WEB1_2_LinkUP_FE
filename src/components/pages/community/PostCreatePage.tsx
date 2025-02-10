@@ -148,7 +148,11 @@ const PostCreatePage: React.FC = () => {
         const uploadedFiles = Array.from(e.target.files).filter(
           (file) => file instanceof File
         );
+
         setImageUrls((prev) => [...prev, ...uploadedFiles]);
+        setCurrentIndex((prev) =>
+          uploadedFiles.length > 0 ? prev + uploadedFiles.length : prev
+        );
       }
     },
     []

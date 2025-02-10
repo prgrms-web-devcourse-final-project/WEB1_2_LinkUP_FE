@@ -9,6 +9,7 @@ import { QueryHandler, useProductsQuery } from '../../../hooks/useGetProduct';
 import { Link } from 'react-router-dom';
 import { categories } from './model/categories';
 import ReviewModal, { Question } from '../../common/ReviewModal';
+import { reviewUser } from '../../../api/reviewApi';
 
 const HomePage: React.FC = () => {
   const { data: products, isLoading, isError } = useProductsQuery();
@@ -20,8 +21,15 @@ const HomePage: React.FC = () => {
   )[0];
   const [isModalOpen, setIsModalOpen] = useState(false);
   const handleSubmit = (ratings: Question[], review: string) => {
-    console.log('Ratings:', ratings);
-    console.log('Review:', review);
+    const reviewContent = {
+      reviewerId: 2,
+      hostId: 2,
+      question1Score: ratings[0]?.rating ?? null,
+      question2Score: ratings[1]?.rating ?? null,
+      question3Score: ratings[2]?.rating ?? null,
+      content: review,
+    };
+    reviewUser(reviewContent);
   };
 
   return (

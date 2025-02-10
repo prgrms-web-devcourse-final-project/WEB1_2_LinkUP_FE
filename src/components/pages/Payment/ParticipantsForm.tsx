@@ -9,6 +9,8 @@ import { usePostQuery } from '../../../hooks/useGetPost';
 const ParticipantsForm = () => {
   const { quantity } = useQuantity();
   const { id } = useParams();
+  const [payment, setPayment] = useState('');
+
   const postId = useMemo(() => {
     if (!id || isNaN(Number(id))) {
       return null;
@@ -17,13 +19,13 @@ const ParticipantsForm = () => {
   }, [id]);
 
   if (!postId) {
-    return <p>잘못된 게시글 ID입니다.</p>;
+    return <p>잘못된 상품 ID입니다.</p>;
   }
   const { data: post, isLoading, isError } = usePostQuery(postId);
+
   if (!post) {
-    return <p>해당 게시글을 찾을 수 없습니다.</p>;
+    return <p>해당 상품을 찾을 수 없습니다.</p>;
   }
-  const [payment, setPayment] = useState('');
 
   const validateForm = () => {
     if (!payment) {
@@ -61,15 +63,17 @@ const ParticipantsForm = () => {
             <Title>공구 모집 상품 정보</Title>
             <ContentBox>
               <FlexRow>
-                <ProductName>{post.title}</ProductName>
-                <Price>{post.unitAmount}</Price>
+                <ProductName>{post?.communityPost.title}</ProductName>
+                <Price>{post?.communityPost.unitAmount}</Price>
               </FlexRow>
               <FlexRow>
                 <Quantity>수량 : {quantity}</Quantity>
               </FlexRow>
               <TotalRow>
                 <span>합계:</span>
-                <TotalPrice>{post.unitAmount * quantity}원</TotalPrice>
+                <TotalPrice>
+                  {post?.communityPost?.unitAmount ?? 0 * quantity}원
+                </TotalPrice>
               </TotalRow>
             </ContentBox>
           </Section>

@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
 import { ADMIN_CATEGORIES } from './adminCategories';
 import CategoryWrapper from '../../../components/common/CategoryWrapper';
 import PostList from '../../../components/common/PostList';
-import { fetchPendingPosts } from './api/adminApi';
 import { useAtom } from 'jotai';
 import { realTimeDataAtom, selectedPostIdAtom } from '../../../store/postStore';
-import { Post, POST_STATUS, SSEEvent } from '../../../types/postTypes';
+import { POST_STATUS, SSEEvent } from '../../../types/postTypes';
+import { usePendingPostsQuery } from '../../../hooks/useGetPage';
+import { QueryHandler } from '../../../hooks/useGetProduct';
 
 const PostManagementPage = () => {
   const location = useLocation();
   const initialCategory = location.state?.selectedCategory || 'NOT_APPROVED';
   const [selectedCategory, setSelectedCategory] =
     useState<POST_STATUS>(initialCategory);
-  const [posts, setPosts] = useState<Post[]>([]);
   const [, setSelectedPostId] = useAtom(selectedPostIdAtom); // 선택된 포스트 ID 설정 함수
   const [realTimeData] = useAtom(realTimeDataAtom); // 실시간 데이터 상태
 
@@ -24,14 +24,7 @@ const PostManagementPage = () => {
       ? (realTimeData as unknown as Record<number, SSEEvent>)
       : {};
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const response = await fetchPendingPosts();
-      setPosts(response);
-    };
-
-    fetchPosts();
-  }, [selectedCategory]);
+  const { data: posts, isLoading, isError } = usePendingPostsQuery();
 
   // 포스트 선택 핸들러
   const handlePostSelect = (postId: number) => {
@@ -39,7 +32,7 @@ const PostManagementPage = () => {
   };
 
   return (
-    <div>
+    <QueryHandler isLoading={isLoading} isError={isError}>
       <PageContainer>
         <ContentWrapper>
           <Title>관리자 페이지</Title>
@@ -57,14 +50,14 @@ const PostManagementPage = () => {
           </Header>
           <PostList
             selectedCategory={selectedCategory}
-            posts={posts}
+            posts={posts || []}
             hideWriteButton
             realTimeData={formattedRealTimeData} // 변환된 realTimeData 전달
             onPostSelect={handlePostSelect}
           />
         </ContentWrapper>
       </PageContainer>
-    </div>
+    </QueryHandler>
   );
 };
 

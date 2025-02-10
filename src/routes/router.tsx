@@ -108,11 +108,11 @@ const router = createBrowserRouter(
           element: <PostEditPage />,
         },
         {
-          path: '/community/post/:communityPostId/payment/author',
+          path: '/community/post/:id/payment/author',
           element: <AuthorForm />,
         },
         {
-          path: '/community/post/:communityPostId/payment/participant',
+          path: '/community/post/:id/payment/participant',
           element: <ParticipantsForm />,
         },
         {
@@ -120,7 +120,7 @@ const router = createBrowserRouter(
           element: <DepositPage />,
         },
         {
-          path: '/community/post/:communityPostId/payment/complete',
+          path: '/community/success/:id',
           element: <PaymentCompletePage />,
         },
         {

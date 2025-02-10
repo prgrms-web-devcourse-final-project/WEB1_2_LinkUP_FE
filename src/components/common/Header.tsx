@@ -53,30 +53,9 @@ const Header = () => {
             </NavItem>
             <NavItem>
               {isLoggedIn && (
-                <StyledLink
-                  to={isAdmin ? '#' : '/mypage/setting'}
-                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                    if (isAdmin) {
-                      e.preventDefault();
-                    } else {
-                      toggleMobileMenu();
-                    }
-                  }}
-                >
+                <StyledLink to={isAdmin ? '/admin/post' : '/mypage/setting'}>
                   {isAdmin ? 'Admin Page' : 'My Page'}
                 </StyledLink>
-              )}
-              {isAdmin && (
-                <SubMenu>
-                  <SubMenuItem>
-                    <StyledLink to="/admin/post">Post Management</StyledLink>
-                  </SubMenuItem>
-                  <SubMenuItem>
-                    <StyledLink to="/admin/chatlist">
-                      Chat Management
-                    </StyledLink>
-                  </SubMenuItem>
-                </SubMenu>
               )}
             </NavItem>
             {!isLoggedIn ? (
@@ -221,24 +200,6 @@ const SubMenu = styled.ul`
   }
 `;
 
-const SubMenuItem = styled.li`
-  padding: 8px 12px;
-
-  a {
-    text-decoration: none;
-    color: black;
-    display: block;
-  }
-
-  &:hover {
-    background: #f4f4f4;
-  }
-
-  @media (min-width: 576px) and (max-width: 767px) {
-    padding: 10px;
-    text-align: center;
-  }
-`;
 const NavItem = styled.li`
   margin: 0;
   position: relative;

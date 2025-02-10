@@ -5,6 +5,8 @@ import { POST_STATUS } from '../../../../types/postTypes';
 import { formatDateWithOffset } from '../../../../utils/formatDate';
 
 interface PostDetailsSectionProps {
+  remainQuantity: number | undefined;
+  isWriter: boolean | undefined;
   selectedPost: {
     title: string;
     nickname: string;
@@ -14,9 +16,6 @@ interface PostDetailsSectionProps {
     totalAmount: number;
     unitAmount: number;
     status: string;
-  } | null;
-  realTimeData: {
-    participationCount: number;
   } | null;
   quantity: number;
   isParticipant: boolean;
@@ -31,16 +30,16 @@ interface PostDetailsSectionProps {
 }
 
 const PostDetailsSection: React.FC<PostDetailsSectionProps> = ({
+  remainQuantity,
   selectedPost,
-  realTimeData,
   quantity,
   isParticipant,
   isNotParticipant,
   remainingTime,
   paymentRemainingTime,
   handleQuantityChange,
-  handleJoin,
   handleCancel,
+  handleJoin,
   handleRefund,
   handlePayment,
 }) => {
@@ -59,29 +58,34 @@ const PostDetailsSection: React.FC<PostDetailsSectionProps> = ({
             <AuthorNickname>{selectedPost.nickname}</AuthorNickname>
           </AuthorDetail>
           <Detail>
-            <Label>참여 현황</Label> {realTimeData?.participationCount || 0}
+            <Label>참여 현황</Label>{' '}
+            {selectedPost.availableNumber - (remainQuantity ?? 0)}
             {' / '}
             {selectedPost.availableNumber}
           </Detail>
           <Detail>
-            <Label>개당 가격</Label> {selectedPost.unitAmount.toLocaleString()}{' '}
-            원
+            <Label>개당 가격</Label>{' '}
+            {selectedPost?.unitAmount?.toLocaleString() ?? '0'} 원
           </Detail>
           <Detail>
-            <Label>총 가격</Label> {selectedPost.totalAmount.toLocaleString()}{' '}
-            원
+            <Label>총 가격</Label>{' '}
+            {selectedPost?.totalAmount.toLocaleString() ?? '0'} 원
           </Detail>
           <Detail>
             <Label>수량</Label>
             <Quantity>
-              {isNotParticipant && (
+              {selectedPost.status === POST_STATUS.APPROVED &&
+              isNotParticipant ? (
                 <>
                   <FaMinusCircle onClick={() => handleQuantityChange(-1)} />
                   <span>{quantity}</span>
                   <FaPlusCircle onClick={() => handleQuantityChange(1)} />
                 </>
-              )}
-              {isParticipant && <span>{quantity}</span>}
+              ) : (selectedPost.status === POST_STATUS.APPROVED &&
+                  isParticipant) ||
+                selectedPost.status === POST_STATUS.PAYMENT_STANDBY ? (
+                <span>{quantity}</span>
+              ) : null}
             </Quantity>
           </Detail>
         </LeftContainer>
@@ -117,31 +121,30 @@ const PostDetailsSection: React.FC<PostDetailsSectionProps> = ({
       <ButtonContainer>
         <ActionButtons>
           {selectedPost.status === POST_STATUS.PAYMENT_COMPLETED ? (
-            <ActionButton primary onClick={handleRefund}>
+            <ActionButton $primary onClick={handleRefund}>
               환불
             </ActionButton>
           ) : selectedPost.status === POST_STATUS.PAYMENT_STANDBY ? (
             <>
-              {isParticipant && (
-                <>
-                  <ActionButton primary onClick={handlePayment}>
-                    결제
+              <ActionButton $primary onClick={handlePayment}>
+                결제
+              </ActionButton>
+              <ActionButton onClick={handleCancel}>취소</ActionButton>
+            </>
+          ) : (
+            selectedPost.status === POST_STATUS.APPROVED &&
+            remainingTime !== '마감되었습니다.' && (
+              <>
+                {!isParticipant ? (
+                  <ActionButton $primary onClick={handleJoin}>
+                    참여
                   </ActionButton>
+                ) : (
                   <ActionButton onClick={handleCancel}>취소</ActionButton>
-                </>
-              )}
-            </>
-          ) : selectedPost.status === POST_STATUS.APPROVED ? (
-            <>
-              {isNotParticipant ? (
-                <ActionButton primary onClick={handleJoin}>
-                  참여
-                </ActionButton>
-              ) : (
-                <ActionButton onClick={handleCancel}>취소</ActionButton>
-              )}
-            </>
-          ) : null}
+                )}
+              </>
+            )
+          )}
         </ActionButtons>
       </ButtonContainer>
     </DetailsAndInfoContainer>
@@ -225,11 +228,10 @@ const ActionButtons = styled.div`
   display: flex;
   gap: 10px;
 `;
-
-const ActionButton = styled.button<{ primary?: boolean }>`
+const ActionButton = styled.button<{ $primary?: boolean }>`
   padding: 10px 20px;
-  background: ${(props) => (props.primary ? '#000' : '#fff')};
-  color: ${(props) => (props.primary ? '#fff' : '#000')};
+  background: ${(props) => (props.$primary ? '#000' : '#fff')};
+  color: ${(props) => (props.$primary ? '#fff' : '#000')};
   border: 1px solid #000;
   border-radius: 5px;
   cursor: pointer;

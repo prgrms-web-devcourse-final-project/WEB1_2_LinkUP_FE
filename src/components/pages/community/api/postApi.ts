@@ -2,39 +2,27 @@ import axiosInstance from '../../../../api/axiosInstance';
 import {
   Post,
   CreatePostData,
-  PostDetailResponse,
   POST_STATUS,
   SSEEvent,
 } from '../../../../types/postTypes';
 
 // 포스트 목록 가져오기 (카테고리와 검색어 기반)
-export const fetchPosts = async (
-  category?: string,
-  searchQuery?: string
-): Promise<Post[]> => {
+export const fetchPosts = async (category?: string): Promise<Post[]> => {
   const response = await axiosInstance.get('/api/community/post');
   if (response.status !== 200) throw new Error('Failed to fetch posts');
-  return response.data.filter((post: Post) => {
-    const categoryMatch = !category || post.category === category;
-    const searchMatch =
-      !searchQuery ||
-      post.title.includes(searchQuery) ||
-      post.description.includes(searchQuery);
-    return categoryMatch && searchMatch;
-  });
+  console.log(response.data);
+  const categoryMatch = response.data.filter(
+    (post: Post) => !category || post.communityPost.category === category
+  );
+
+  console.log(categoryMatch);
+  return categoryMatch;
 };
 
 // 포스트 상세 조회
-export const fetchPostById = async (
-  communityPostId: number
-): Promise<PostDetailResponse> => {
+export const fetchPostById = async (communityPostId: number): Promise<Post> => {
   const response = await axiosInstance.get(
-    `/api/community/post/${communityPostId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('jwt')}`,
-      },
-    }
+    `/api/community/post/${communityPostId}`
   );
   if (response.status !== 200) throw new Error('Failed to fetch post details');
   return response.data;
@@ -91,13 +79,17 @@ export const updatePostStatus = async (
   switch (newStatus) {
     case 'APPROVED': {
       if (
-        communityPost.status === 'NOT_APPROVED' ||
-        communityPost.status === 'REJECTED'
+        communityPost.communityPost.status === 'NOT_APPROVED' ||
+        communityPost.communityPost.status === 'REJECTED'
       ) {
         // '(수정요망)' 제거 로직
-        const cleanedTitle = communityPost.title.startsWith('(수정요망)')
-          ? communityPost.title.replace(/^\(수정요망\)/, '').trim()
-          : communityPost.title;
+        const cleanedTitle = communityPost.communityPost.title.startsWith(
+          '(수정요망)'
+        )
+          ? communityPost.communityPost.title
+              .replace(/^\(수정요망\)/, '')
+              .trim()
+          : communityPost.communityPost.title;
 
         // 'APPROVED' 상태로 업데이트 요청
         const updatedResponse = await axiosInstance.patch(
@@ -125,13 +117,15 @@ export const updatePostStatus = async (
     case 'REJECTED': {
       // 실제 API 사용
       if (
-        communityPost.status === 'NOT_APPROVED' ||
-        communityPost.status === 'REJECTED'
+        communityPost.communityPost.status === 'NOT_APPROVED' ||
+        communityPost.communityPost.status === 'REJECTED'
       ) {
         // '(수정요망)' 추가 로직
-        const updatedTitle = communityPost.title.startsWith('(수정요망)')
-          ? communityPost.title
-          : `(수정요망)${communityPost.title}`;
+        const updatedTitle = communityPost.communityPost.title.startsWith(
+          '(수정요망)'
+        )
+          ? communityPost.communityPost.title
+          : `(수정요망)${communityPost.communityPost.title}`;
 
         // 'REJECTED' 상태로 업데이트 요청
         const updatedResponse = await axiosInstance.patch(
@@ -182,81 +176,36 @@ export const deletePostById = async (
 };
 
 // 공구 진행 포스트 참여
-export const joinPost = async (
-  communityPostId: number,
-  quantity: number
-): Promise<{ message: string }> => {
-  const response = await axiosInstance.post(
-    `/api/community/post/${communityPostId}/join`,
-    {
-      number: quantity,
-    }
-  );
-  if (response.status !== 200) throw new Error('Failed to join post');
-  return response.data;
+export const joinPost = async (communityPostId: number, quantity: number) => {
+  try {
+    const URL = `/api/community/post/${communityPostId}/join`;
+    const response = await axiosInstance.post(URL, { number: quantity });
+    console.log(response.data);
+    return response.data;
+  } catch {
+    throw new Error('공구 참여에 실패했습니다.');
+  }
 };
 
 // 공구 진행 포스트 참여 취소
-export const cancelJoinPost = async (
-  communityPostId: number
-): Promise<{ message: string }> => {
-  const response = await axiosInstance.put(
-    `/api/community/post/${communityPostId}/cancel`
-  );
-  if (response.status !== 200)
-    throw new Error('Failed to cancel participation');
-  return response.data;
-};
-
-// SSE: 실시간 정보 구독 (참여 현황, 포스트 상태, 결제 현황) 데이터 수신 및 상태 갱신
-export const handleSSEUpdate = (
-  postId: number,
-  updateState?: (state: {
-    postStatus?: POST_STATUS;
-    participationCount?: number;
-    paymentCount?: number;
-  }) => void
-): void => {
-  const url = `/api/community/post/${postId}/participants`;
-
-  const xhr = new XMLHttpRequest();
-  xhr.open('GET', url, true);
-  xhr.send();
-
-  // SSE 연결
-  const eventSource = new EventSource(url);
-
-  // SSE 메시지 수신
-  eventSource.onmessage = (event) => {
-    const data: SSEEvent = JSON.parse(event.data);
-
-    // 상태 갱신 함수가 있을 경우 호출
-    if (updateState) {
-      updateState({
-        postStatus: data.postStatus,
-        participationCount: data.participationCount,
-        paymentCount: data.paymentCount,
-      });
-    }
-  };
-
-  // SSE 연결 오류 처리
-  eventSource.onerror = () => {
-    eventSource.close();
-  };
+export const cancelJoinPost = async (communityPostId: number) => {
+  try {
+    const URL = `/api/community/post/${communityPostId}/cancel`;
+    const response = await axiosInstance.put(URL);
+    return response.data;
+  } catch {
+    throw new Error('공구 참여 취소에 실패했습니다.');
+  }
 };
 
 // 댓글 작성
 export const addComment = async (
   communityPostId: number,
-  userId: number,
-  userNickname: string,
+  userId: number | null,
   content: string
 ): Promise<void> => {
-  // 실제 API 사용
   await axiosInstance.post(`/api/community/post/${communityPostId}/comments`, {
     userId,
-    userNickname,
     content,
   });
 };
@@ -285,4 +234,38 @@ export const updateComment = async (
       content,
     }
   );
+};
+
+// SSE: 실시간 정보 구독 (참여 현황, 포스트 상태, 결제 현황) 데이터 수신 및 상태 갱신
+export const handleSSEUpdate = (
+  postId: number,
+  updateState?: (state: {
+    postStatus?: POST_STATUS;
+    participationCount?: number;
+    paymentCount?: number;
+  }) => void
+): void => {
+  const url = `/api/community/post/${postId}/participants`;
+
+  // SSE 연결
+  const eventSource = new EventSource(url);
+
+  // SSE 메시지 수신
+  eventSource.onmessage = (event) => {
+    const data: SSEEvent = JSON.parse(event.data);
+
+    // 상태 갱신 함수가 있을 경우 호출
+    if (updateState) {
+      updateState({
+        postStatus: data.postStatus,
+        participationCount: data.participationCount,
+        paymentCount: data.paymentCount,
+      });
+    }
+  };
+
+  // SSE 연결 오류 처리
+  eventSource.onerror = () => {
+    eventSource.close();
+  };
 };

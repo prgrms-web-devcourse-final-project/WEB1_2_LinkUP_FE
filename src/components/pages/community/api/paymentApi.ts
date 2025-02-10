@@ -53,8 +53,7 @@ export const fetchPaymentStatus = async (paymentKey: string) => {
       `/api/v1/virtual/update-payment/${paymentKey}`
     );
     return response.data;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
+  } catch {
     throw new Error('결제 상태 확인에 실패했습니다.');
   }
 };

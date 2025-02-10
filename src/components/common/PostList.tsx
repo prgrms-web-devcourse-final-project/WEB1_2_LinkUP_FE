@@ -4,13 +4,13 @@ import WriteButton from './WriteButton';
 import SearchBar from './SearchBar';
 import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
-import { SSEEvent, Post } from '../../types/postTypes';
+import { SSEEvent, AdminPost } from '../../types/postTypes';
 import { formatDateWithOffset } from '../../utils/formatDate';
 import { getImageSrc } from '../../utils/GetImageSrc';
 
 interface PostListProps {
   selectedCategory: string;
-  posts: Post[];
+  posts: AdminPost[];
   onPostSelect?: (postId: number) => void; // onPostSelect 추가
   realTimeData: Record<number, SSEEvent>; // 실시간 데이터 매핑 추가
 }
@@ -32,6 +32,7 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
   // 선택된 카테고리에 따른 게시글 필터링
   const categoryFilteredPosts = posts
     .filter((post) => {
+      if (!post) return false;
       if (selectedCategory === 'NOT_APPROVED') {
         return post.status === 'NOT_APPROVED' || post.status === 'REJECTED';
       }

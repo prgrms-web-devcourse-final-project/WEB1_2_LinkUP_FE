@@ -7,7 +7,7 @@ import {
 } from '../../../../utils/webSocket';
 import { FaTrashAlt } from 'react-icons/fa';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { deleteChatRoom } from '../api/chatApi';
+import { deleteChatRoom } from '../../../../api/chatApi';
 
 interface ChatRoomModalProps {
   chatRoomId: string;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { FaRegComment } from 'react-icons/fa';
-import { fetchChatMessages } from '../pages/community/api/chatApi';
+import { fetchChatMessages } from '../../api/chatApi';
 import { webSocketService } from '../../utils/webSocket';
 
 interface Message {

@@ -1,6 +1,6 @@
-import { formatDateWithOffset } from './../../../../utils/formatDate';
-import axiosInstance from '../../../../api/axiosInstance';
-import { webSocketService } from '../../../../utils/webSocket';
+import { formatDateWithOffset } from '../utils/formatDate';
+import axiosInstance from './axiosInstance';
+import { webSocketService } from '../utils/webSocket';
 
 // 채팅방 생성
 export const createChatRoom = async (postId: number) => {

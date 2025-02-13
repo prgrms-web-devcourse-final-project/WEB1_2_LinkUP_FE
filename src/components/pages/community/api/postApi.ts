@@ -5,6 +5,10 @@ import {
   POST_STATUS,
   SSEEvent,
 } from '../../../../types/postTypes';
+export interface CommentForm {
+  parentId: number | null;
+  content: string;
+}
 
 // 포스트 목록 가져오기 (카테고리와 검색어 기반)
 export const fetchPosts = async (category?: string): Promise<Post[]> => {
@@ -201,13 +205,11 @@ export const cancelJoinPost = async (communityPostId: number) => {
 // 댓글 작성
 export const addComment = async (
   communityPostId: number,
-  userId: number | null,
-  content: string
+  payload: CommentForm
 ): Promise<void> => {
-  await axiosInstance.post(`/api/community/post/${communityPostId}/comments`, {
-    userId,
-    content,
-  });
+  const URL = `/api/community/comment/${communityPostId}`;
+  const response = await axiosInstance.post(URL, payload);
+  return response.data;
 };
 
 // 댓글 삭제

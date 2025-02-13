@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import WriteButton from './WriteButton';
-import SearchBar from './SearchBar';
 import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
 import { SSEEvent, AdminPost } from '../../types/postTypes';
@@ -26,8 +25,6 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
 }) => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState(''); // 입력된 검색어
-  const [searchQuery, setSearchQuery] = useState(''); // 실제 검색 실행 시의 검색어
 
   // 선택된 카테고리에 따른 게시글 필터링
   const categoryFilteredPosts = posts
@@ -55,16 +52,8 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
     startIndex + POSTS_PER_PAGE
   );
 
-  // 검색 실행 핸들러
-  const handleSearch = () => {
-    setSearchQuery(searchTerm); // 검색어 설정
-    setCurrentPage(1); // 검색 실행 시 페이지 초기화
-  };
-
-  // 카테고리 변경 시 검색 초기화 및 페이지 초기화
+  // 카테고리 변경 시 페이지 초기화
   useEffect(() => {
-    setSearchQuery(''); // 검색 쿼리 초기화
-    setSearchTerm(''); // 검색 입력 초기화
     setCurrentPage(1);
   }, [selectedCategory]);
 
@@ -97,20 +86,11 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
     <Container>
       <ActionsContainer>
         {!hideWriteButton && <WriteButton onClick={handleWriteButtonClick} />}
-        <SearchBar
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          onSearch={handleSearch} // 검색 실행 핸들러
-        />
       </ActionsContainer>
 
       {categoryFilteredPosts.length === 0 ? (
         <NoPostMessage>
           선택된 카테고리에 해당하는 게시글이 없습니다.
-        </NoPostMessage>
-      ) : currentPosts.length === 0 ? (
-        <NoPostMessage>
-          &apos;{searchQuery}&apos;의 검색 결과가 존재하지 않습니다.
         </NoPostMessage>
       ) : (
         currentPosts.map((post) => (
@@ -123,28 +103,24 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
               alt={`post.title`}
             />
             <PostContent>
-              <PostTitle>{post.title}</PostTitle>
+              <PostTitle>글 제목 : {post.title}</PostTitle>
               <PostDetails>
-                <PostAuthor>{post.nickname}</PostAuthor>
-                <PostDate>
-                  <PostCreatedAt>
-                    {formatDateWithOffset(post.createdAt)}
-                  </PostCreatedAt>
-                  {selectedCategory !== 'NOT_APPROVED' && (
-                    <>
-                      {'~'}
-                      <PostCloseAt>
-                        {formatDateWithOffset(post.closeAt)}
-                      </PostCloseAt>
-                    </>
-                  )}
-                </PostDate>
+                <PostMeta>
+                  <PostAuthor>작성자 : {post.nickname}</PostAuthor>
+                  <PostDate>{formatDateWithOffset(post.createdAt)}</PostDate>
+                </PostMeta>
+                {selectedCategory !== 'NOT_APPROVED' && (
+                  <PostDate>
+                    <PostAuthor>
+                      마감 기한 : 글 작성으로부터 {post.period}일
+                    </PostAuthor>
+                  </PostDate>
+                )}
                 <PostJoinStatus>
                   참여 현황: {getParticipationCount(post.communityPostId)} /{' '}
                   {post.availableNumber}
                 </PostJoinStatus>
               </PostDetails>
-              <PostDescription>{post.description}</PostDescription>
             </PostContent>
           </PostItem>
         ))
@@ -162,35 +138,34 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
 };
 
 const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin: 20px auto;
+  width: 100%;
   max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #f8fafc;
 `;
 
 const ActionsContainer = styled.div`
   display: flex;
-  justify-content: flex-end; /* 오른쪽 정렬 */
+  justify-content: flex-end;
   align-items: center;
-  margin-bottom: 16px;
-  gap: 20px; /* 버튼과 검색바 사이의 간격 */
+  margin-bottom: 24px;
 `;
 
 const PostItem = styled.div`
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
+  background-color: white;
+  border-radius: 12px;
   padding: 16px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   cursor: pointer;
+  transition: all 0.2s;
 
   &:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
   }
 `;
 
@@ -201,77 +176,55 @@ const PostImage = styled.img`
   border-radius: 8px;
   margin-right: 16px;
 `;
-
 const PostContent = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: flex-start;
-  height: 100%;
-  padding: 4px 0;
+  gap: 6px; /* 요소 간 간격 */
 `;
 
 const PostTitle = styled.h3`
-  font-size: 1.4rem;
+  font-size: 1.125rem;
   font-weight: 700;
-  margin-top: 0;
-  margin-bottom: 8px;
-  color: #333;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: #1e293b;
+  margin-bottom: 4px;
 `;
 
-const PostDescription = styled.p`
-  font-size: 0.9rem;
-  margin-bottom: 0;
-  color: #555;
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+const PostAuthor = styled.span`
+  color: #475569;
 `;
 
 const PostDetails = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  font-size: 0.9rem;
-  color: #777;
+  flex-direction: column;
+  gap: 4px;
 `;
 
-const PostAuthor = styled.span`
-  font-weight: 400;
+const PostMeta = styled.div`
+  display: flex;
+  justify-content: space-between; /* 작성자 & 날짜 한 줄 배치 */
+  align-items: center;
+  font-size: 0.875rem;
+  color: #64748b;
 `;
 
 const PostDate = styled.span`
-  font-weight: 400;
-`;
-
-const PostCreatedAt = styled.span`
-  font-weight: 400;
-  margin-right: 10px;
-`;
-
-const PostCloseAt = styled.span`
-  font-weight: 400;
-  margin-left: 10px;
+  font-size: 0.75rem;
+  color: #94a3b8;
 `;
 
 const PostJoinStatus = styled.div`
-  font-weight: 400;
+  color: #2563eb;
+  font-weight: 600;
 `;
 
 const NoPostMessage = styled.p`
   text-align: center;
-  color: #888;
-  font-size: 1.2rem;
-  padding: 20px;
+  padding: 48px 20px;
+  color: #94a3b8;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 `;
-
 export default PostList;

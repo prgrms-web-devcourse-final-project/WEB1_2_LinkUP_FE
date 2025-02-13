@@ -31,7 +31,7 @@ import ScrollToTop from '../components/common/ScrollToTop';
 import PostEditPage from '../components/pages/community/PostEditPage';
 import SetLocationPage from '../components/pages/login/SetLocationPage';
 
-import PaymentCompletePage from '../components/pages/community/PaymentCompletePage';
+import PaymentCompletePage from '../components/pages/Payment/PaymentCompletePage';
 import PostManagementPage from '../components/pages/admin/PostManagementPage';
 import PostApprovalPage from '../components/pages/admin/PostApprovalPage';
 import PaymentFailPage from '../components/pages/Payment/PaymentFailPage';
@@ -115,8 +115,9 @@ const router = createBrowserRouter(
           path: '/community/post/:id/payment/participant',
           element: <ParticipantsForm />,
         },
+
         {
-          path: '/community/post/:communityPostId/payment/deposit',
+          path: '/community/post/:id/payment/deposit',
           element: <DepositPage />,
         },
         {

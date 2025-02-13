@@ -20,6 +20,10 @@ interface PostCommentsSectionProps {
   }[];
 }
 
+interface CharacterCountProps {
+  $overLimit: boolean;
+}
+
 const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
   communityPostId,
   comments,
@@ -31,12 +35,14 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
   const [editContent, setEditContent] = useState<string>('');
 
   const queryKey = ['postDetail', communityPostId];
-
   const userId = parseInt(localStorage.getItem('userid') || '0', 10);
 
   const addCommentMutation = useMutation({
     mutationFn: () =>
-      addComment(communityPostId, userId || null, newCommentContent),
+      addComment(communityPostId, {
+        parentId: userId,
+        content: newCommentContent,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
       setNewCommentContent('');
@@ -180,28 +186,28 @@ export default PostCommentsSection;
 const CommentsContainer = styled.div`
   width: 100%;
   margin-top: 20px;
-  border: 1px solid #ddd;
+  border: 1px solid #f0f8ff;
   border-radius: 10px;
-  padding: 20px;
 `;
 
 const CommentsHeader = styled.h3`
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: bold;
   margin-bottom: 20px;
+  margin-left: 10px;
 `;
 
-const CommentsWrapper = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0;
+const CommentsWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
 
 const Comment = styled.li`
   margin-bottom: 15px;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px;
   border-radius: 8px;
+  background-color: #e3f2fd;
   display: flex;
   flex-direction: column;
 `;
@@ -209,12 +215,12 @@ const Comment = styled.li`
 const CommentHeader = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 `;
 
 const CommentAuthor = styled.div`
   font-weight: bold;
+  color: #007bff;
 `;
 
 const CommentDate = styled.div`
@@ -227,75 +233,66 @@ const CommentContent = styled.p`
   font-size: 1rem;
 `;
 
-const EditCommentContainer = styled.div`
+const CommentInputContainer = styled.div`
+  margin-top: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-`;
-
-interface CharacterCountProps {
-  $overLimit?: boolean;
-}
-
-const CharacterCount = styled.span<CharacterCountProps>`
-  font-size: 0.9rem;
-  color: ${(props) =>
-    props.$overLimit ? 'red' : '#666'}; /* 300자를 초과하면 빨간색 */
-  margin-right: 10px; /* 버튼과 간격 */
-`;
-
-const EditCommentInput = styled.textarea`
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  resize: none;
-`;
-
-const CommentActions = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 10px;
-`;
-
-const CommentInputContainer = styled.div`
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
 `;
 
 const CommentInput = styled.textarea`
   flex: 1;
+  margin: 10px;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid #f0f8ff;
   border-radius: 8px;
   resize: none;
 `;
 
+const ActionButtonsWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+`;
+
+const CharacterCount = styled.span<CharacterCountProps>`
+  font-size: 0.875rem;
+  color: ${({ $overLimit }) => ($overLimit ? '#ff0000' : '#666')};
+`;
+
 const ActionButton = styled.button`
   padding: 10px 20px;
-  background: #000;
+  background: #007bff;
   color: #fff;
-  border: none;
+  border: 1px solid #007bff;
   border-radius: 5px;
   cursor: pointer;
 `;
 
 const SubmitCommentButton = styled.button`
   padding: 10px 20px;
-  background: #000;
+  background: #007bff;
   color: #fff;
-  border: 1px solid #000;
+  border: 1px solid #007bff;
   border-radius: 5px;
   cursor: pointer;
-  align-self: flex-end; /* 오른쪽 정렬 */
+  align-self: flex-end;
 `;
 
-const ActionButtonsWrapper = styled.div`
+const EditCommentContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
+
+const EditCommentInput = styled.textarea`
+  padding: 10px;
+  border: 1px solid #00b0ff;
+  border-radius: 8px;
+  resize: none;
+`;
+
+const CommentActions = styled.div`
+  margin-top: 10px;
   display: flex;
   gap: 10px;
-  justify-content: flex-end;
-  align-items: center;
-  margin-top: 10px;
 `;

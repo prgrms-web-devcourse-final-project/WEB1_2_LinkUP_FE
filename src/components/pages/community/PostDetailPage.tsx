@@ -73,8 +73,14 @@ const PostDetailPage: React.FC = () => {
       alert('공구 참여에 실패했습니다. 다시 시도해주세요.');
     }
   };
-  // 취소 버튼 핸들러러
+  // 취소 버튼 핸들러
   const handleCancel = async () => {
+    const confirmCancel = window.confirm(
+      '취소하면 다시는 참여가 불가능합니다. 정말 취소하시겠습니까?'
+    );
+
+    if (!confirmCancel) return;
+
     try {
       await cancelJoinPost(postId);
       alert('공구 참여를 취소했습니다.');
@@ -128,31 +134,6 @@ const PostDetailPage: React.FC = () => {
     }
   };
 
-  // 환불 요청 페이지로 이동
-  const handleRefund = () => {
-    if (post?.participationStatus === 'PAYMENT_COMPLETE') {
-      const refundState = {
-        post: {
-          title: post?.communityPost.title,
-          unitAmount: post?.communityPost.unitAmount,
-        },
-        quantity,
-      };
-
-      if (post?.isWriter) {
-        navigate(`/community/post/${communityPostId}/refund/author`, {
-          state: refundState,
-        });
-      } else {
-        navigate(`/community/post/${communityPostId}/refund/participant`, {
-          state: refundState,
-        });
-      }
-    } else {
-      alert('환불 요청이 불가능한 상태입니다.');
-    }
-  };
-
   return (
     <QueryHandler isLoading={isLoading} isError={isError}>
       <PostDetailContainer>
@@ -163,11 +144,6 @@ const PostDetailPage: React.FC = () => {
               <BackButton onClick={() => navigate(-1)}>
                 <FaBackspace size={24} />
               </BackButton>
-              <HeaderButtonsWrapper>
-                {post?.isWriter && (
-                  <HeaderButton onClick={handleDelete}>글 삭제</HeaderButton>
-                )}
-              </HeaderButtonsWrapper>
             </HeaderWrapper>
           </Header>
 
@@ -184,6 +160,7 @@ const PostDetailPage: React.FC = () => {
               />
 
               <PostDetailsSection
+                postId={postId}
                 isWriter={post?.isWriter}
                 remainQuantity={post?.remainQuantity}
                 selectedPost={post?.communityPost ?? null}
@@ -195,8 +172,8 @@ const PostDetailPage: React.FC = () => {
                 handleQuantityChange={handleQuantityChange}
                 handleJoin={handleJoin}
                 handleCancel={handleCancel}
-                handleRefund={handleRefund}
                 handlePayment={handlePayment}
+                handleDelete={handleDelete}
               />
             </ImageAndDetailsContainer>
 
@@ -231,101 +208,85 @@ const PostDetailPage: React.FC = () => {
   );
 };
 
-export default PostDetailPage;
-
 const PostDetailContainer = styled.div`
-  display: flex;
-  justify-content: center;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
   padding: 20px;
+  background-color: #f8fafc;
 `;
 
 const ContentWrapper = styled.div`
-  width: 100%;
-  max-width: 1120px;
-  margin: 0 auto;
+  background-color: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 `;
 
 const Header = styled.div`
   display: flex;
-  flex-direction: column; /* Title과 HeaderWrapper를 세로로 배치 */
-  gap: 10px; /* Title과 HeaderWrapper 사이 간격 */
-  margin-bottom: 1.5rem;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 `;
 
 const HeaderWrapper = styled.div`
-  width: 1000px;
-  margin: 30px auto 0;
   display: flex;
-  justify-content: space-between;
   align-items: center;
 `;
 
 const BackButton = styled.button`
-  background: none;
+  background-color: white;
   border: none;
+  padding: 8px;
   cursor: pointer;
-`;
+  color: #2563eb;
+  border-radius: 8px;
+  transition: background-color 0.2s;
 
-const HeaderButtonsWrapper = styled.div`
-  display: flex;
-  gap: 10px;
-`;
-
-const HeaderButton = styled.button`
-  padding: 10px 15px;
-  background: #000;
-  color: #fff;
-  border: 1px solid #000;
-  border-radius: 5px;
-  cursor: pointer;
+  &:hover {
+    background-color: #f3f4f6;
+  }
 `;
 
 const Title = styled.h1`
-  font-size: 1.8rem;
-  font-weight: bold;
-  text-align: left;
-  margin: 0; /* Title의 기본 마진 제거 */
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
 `;
 
 const FormContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
 `;
 
 const ImageAndDetailsContainer = styled.div`
-  display: flex; /* 가로 정렬 */
-  flex-direction: row; /* 기본값이므로 명시적으로 추가 */
-  align-items: stretch; /* 양쪽 요소의 높이를 동일하게 */
-  justify-content: center; /* 양쪽 여백 균등 배치 */
-  gap: 20px; /* 두 컨테이너 사이 간격 */
-  margin-bottom: 20px; /* 아래 요소와의 간격 */
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
 `;
 
 const TextAreaWrapper = styled.div`
-  width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-sizing: border-box;
+  margin-top: 20px;
 `;
 
 const TextArea = styled.textarea`
   width: 100%;
-  height: 460px; /* 고정된 높이 */
-  border: none; /* 테두리 제거 */
-  border-radius: 10px;
-  padding: 20px;
-  outline: none; /* 포커스 시 외곽선 제거 */
-  resize: none; /* 크기 조절 비활성화 */
-  font-size: 1rem; /* 텍스트 크기 */
-  line-height: 1.5;
-  color: #333; /* 텍스트 색상 */
-  box-sizing: border-box;
+  height: 200px;
+
+  font-size: 0.875rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  resize: vertical;
+  background-color: #f9fafb;
+  color: #475569;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: #2563eb;
+    outline: none;
+  }
 `;
+export default PostDetailPage;

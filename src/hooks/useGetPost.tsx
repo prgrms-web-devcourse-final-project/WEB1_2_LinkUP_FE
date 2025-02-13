@@ -21,6 +21,7 @@ export const usePostQuery = (postId: number, checkParticipant?: boolean) => {
     enabled: !!postId,
   });
 };
+
 //로딩과 에러 처리
 export const QueryHandler = ({
   isLoading,

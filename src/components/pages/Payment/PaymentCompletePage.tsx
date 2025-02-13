@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { createChatRoom } from './api/chatApi';
-import ChatRoomModal from './modal/ChatRoomModal';
+import { createChatRoom } from '../../../api/chatApi';
+import ChatRoomModal from '../community/modal/ChatRoomModal';
 import { webSocketService } from '../../../utils/webSocket';
 import { useQuantity } from '../../../context/QuantityContext';
 import { usePostQuery } from '../../../hooks/useGetPost';

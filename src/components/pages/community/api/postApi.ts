@@ -4,23 +4,18 @@ import {
   CreatePostData,
   POST_STATUS,
   SSEEvent,
+  AdminPost,
 } from '../../../../types/postTypes';
 export interface CommentForm {
-  parentId: number | null;
   content: string;
+  parentId: number | null;
 }
 
 // 포스트 목록 가져오기 (카테고리와 검색어 기반)
-export const fetchPosts = async (category?: string): Promise<Post[]> => {
-  const response = await axiosInstance.get('/api/community/post');
-  if (response.status !== 200) throw new Error('Failed to fetch posts');
-  console.log(response.data);
-  const categoryMatch = response.data.filter(
-    (post: Post) => !category || post.communityPost.category === category
-  );
-
-  console.log(categoryMatch);
-  return categoryMatch;
+export const fetchPosts = async (): Promise<AdminPost[]> => {
+  const URL = '/api/community/post';
+  const response = await axiosInstance.get(URL);
+  return response.data;
 };
 
 // 포스트 상세 조회
@@ -213,29 +208,20 @@ export const addComment = async (
 };
 
 // 댓글 삭제
-export const deleteComment = async (
-  communityPostId: number,
-  commentId: number
-): Promise<void> => {
-  // 실제 API 사용
-  await axiosInstance.delete(
-    `/api/community/post/${communityPostId}/comments/${commentId}`
-  );
+export const deleteComment = async (commentId: number): Promise<void> => {
+  const URL = `/api/community/comment/${commentId}`;
+  const response = await axiosInstance.delete(URL);
+  return response.data;
 };
 
 // 댓글 수정
 export const updateComment = async (
-  communityPostId: number,
   commentId: number,
   content: string
 ): Promise<void> => {
-  // 실제 API 사용
-  await axiosInstance.put(
-    `/api/community/post/${communityPostId}/comments/${commentId}`,
-    {
-      content,
-    }
-  );
+  await axiosInstance.put(`/api/community/comment/${commentId}`, {
+    content,
+  });
 };
 
 // SSE: 실시간 정보 구독 (참여 현황, 포스트 상태, 결제 현황) 데이터 수신 및 상태 갱신

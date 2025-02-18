@@ -3,46 +3,43 @@ import styled from 'styled-components';
 import WriteButton from './WriteButton';
 import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
-import { SSEEvent, AdminPost } from '../../types/postTypes';
+
 import { formatDateWithOffset } from '../../utils/formatDate';
 import { getImageSrc } from '../../utils/GetImageSrc';
+import { usePostsQuery } from '../../hooks/useGetPost';
+import { QueryHandler } from '../../hooks/useGetProduct';
+import { AdminPost } from '../../types/postTypes';
 
 interface PostListProps {
   selectedCategory: string;
-  posts: AdminPost[];
-  onPostSelect?: (postId: number) => void; // onPostSelect 추가
-  realTimeData: Record<number, SSEEvent>; // 실시간 데이터 매핑 추가
 }
 
 const POSTS_PER_PAGE = 6; // 한 페이지에 표시할 게시글 수
 
-const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
-  selectedCategory,
-  posts,
-  realTimeData,
-  onPostSelect,
-  hideWriteButton,
-}) => {
+const PostList: React.FC<PostListProps> = ({ selectedCategory }) => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
+  const { data: posts, isLoading, isError } = usePostsQuery();
 
   // 선택된 카테고리에 따른 게시글 필터링
   const categoryFilteredPosts = posts
-    .filter((post) => {
-      if (!post) return false;
-      if (selectedCategory === 'NOT_APPROVED') {
-        return post.status === 'NOT_APPROVED' || post.status === 'REJECTED';
-      }
-      return (
-        post.category === selectedCategory &&
-        post.status !== 'NOT_APPROVED' &&
-        post.status !== 'REJECTED'
-      );
-    })
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    ); // 최신순 정렬
+    ? posts
+        .filter((post: AdminPost) => {
+          if (!post) return false;
+          if (selectedCategory === 'NOT_APPROVED') {
+            return post.status === 'NOT_APPROVED' || post.status === 'REJECTED';
+          }
+          return (
+            post.category === selectedCategory &&
+            post.status !== 'NOT_APPROVED' &&
+            post.status !== 'REJECTED'
+          );
+        })
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
+    : []; // 최신순 정렬
 
   // 페이지네이션 계산
   const totalPages = Math.ceil(categoryFilteredPosts.length / POSTS_PER_PAGE);
@@ -64,76 +61,62 @@ const PostList: React.FC<PostListProps & { hideWriteButton?: boolean }> = ({
 
   // 포스트 클릭 핸들러
   const handlePostClick = (communityPostId: number) => {
-    if (onPostSelect) {
-      onPostSelect(communityPostId); // 부모 컴포넌트에 선택 이벤트 전달
-    }
-
-    if (selectedCategory === 'NOT_APPROVED') {
-      navigate(`/admin/post/approval/${communityPostId}`, {
-        state: { communityPostId },
-      }); // 승인 대기 페이지로 이동
-    } else {
-      navigate(`/community/post/${communityPostId}`); // 일반 포스트 상세 페이지로 이동
-    }
-  };
-
-  // 특정 포스트의 현재 참여 수 계산
-  const getParticipationCount = (postId: number): number => {
-    return realTimeData[postId]?.participationCount || 0;
+    navigate(`/community/post/${communityPostId}`);
   };
 
   return (
-    <Container>
-      <ActionsContainer>
-        {!hideWriteButton && <WriteButton onClick={handleWriteButtonClick} />}
-      </ActionsContainer>
+    <QueryHandler isLoading={isLoading} isError={isError}>
+      <Container>
+        <ActionsContainer>
+          {<WriteButton onClick={handleWriteButtonClick} />}
+        </ActionsContainer>
 
-      {categoryFilteredPosts.length === 0 ? (
-        <NoPostMessage>
-          선택된 카테고리에 해당하는 게시글이 없습니다.
-        </NoPostMessage>
-      ) : (
-        currentPosts.map((post) => (
-          <PostItem
-            key={post.communityPostId}
-            onClick={() => handlePostClick(post.communityPostId)}
-          >
-            <PostImage
-              src={getImageSrc(post.imageUrls[0])}
-              alt={`post.title`}
-            />
-            <PostContent>
-              <PostTitle>글 제목 : {post.title}</PostTitle>
-              <PostDetails>
-                <PostMeta>
-                  <PostAuthor>작성자 : {post.nickname}</PostAuthor>
-                  <PostDate>{formatDateWithOffset(post.createdAt)}</PostDate>
-                </PostMeta>
-                {selectedCategory !== 'NOT_APPROVED' && (
-                  <PostDate>
-                    <PostAuthor>
-                      마감 기한 : 글 작성으로부터 {post.period}일
-                    </PostAuthor>
-                  </PostDate>
-                )}
-                <PostJoinStatus>
-                  참여 현황: {getParticipationCount(post.communityPostId)} /{' '}
-                  {post.availableNumber}
-                </PostJoinStatus>
-              </PostDetails>
-            </PostContent>
-          </PostItem>
-        ))
-      )}
+        {categoryFilteredPosts.length === 0 ? (
+          <NoPostMessage>
+            선택된 카테고리에 해당하는 게시글이 없습니다.
+          </NoPostMessage>
+        ) : (
+          currentPosts.map((post: AdminPost) => (
+            <PostItem
+              key={post.communityPostId}
+              onClick={() => handlePostClick(post.communityPostId)}
+            >
+              <PostImage
+                src={getImageSrc(post.imageUrls[0])}
+                alt={`post.title`}
+              />
+              <PostContent>
+                <PostTitle>글 제목 : {post.title}</PostTitle>
+                <PostDetails>
+                  <PostMeta>
+                    <PostAuthor>작성자 : {post.nickname}</PostAuthor>
+                    <PostDate>{formatDateWithOffset(post.createdAt)}</PostDate>
+                  </PostMeta>
+                  {selectedCategory !== 'NOT_APPROVED' && (
+                    <PostDate>
+                      <PostAuthor>
+                        마감 기한 : 글 작성으로부터 {post.period}일
+                      </PostAuthor>
+                    </PostDate>
+                  )}
+                  <PostJoinStatus>
+                    최대 참여 : {post.availableNumber}
+                  </PostJoinStatus>
+                </PostDetails>
+              </PostContent>
+            </PostItem>
+          ))
+        )}
 
-      {totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={(page) => setCurrentPage(page)}
-        />
-      )}
-    </Container>
+        {totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => setCurrentPage(page)}
+          />
+        )}
+      </Container>
+    </QueryHandler>
   );
 };
 

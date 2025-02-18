@@ -186,15 +186,7 @@ const PostDetailPage: React.FC = () => {
             </TextAreaWrapper>
 
             {/* 댓글 컨테이너 */}
-            <PostCommentsSection
-              communityPostId={postId}
-              comments={
-                post?.communityPost.comments?.map((comment) => ({
-                  ...comment,
-                  commentId: Number(comment.commentId),
-                })) || []
-              }
-            />
+            <PostCommentsSection communityPostId={postId} />
           </FormContainer>
           {isAdmin && (
             <>

@@ -3,33 +3,19 @@ import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
 import { ADMIN_CATEGORIES } from './adminCategories';
 import CategoryWrapper from '../../../components/common/CategoryWrapper';
-import PostList from '../../../components/common/PostList';
-import { useAtom } from 'jotai';
-import { realTimeDataAtom, selectedPostIdAtom } from '../../../store/postStore';
-import { POST_STATUS, SSEEvent } from '../../../types/postTypes';
+
+import { POST_STATUS } from '../../../types/postTypes';
 import { usePendingPostsQuery } from '../../../hooks/useGetPage';
 import { QueryHandler } from '../../../hooks/useGetProduct';
+import AdminPostList from './AdminPostList';
 
 const PostManagementPage = () => {
   const location = useLocation();
   const initialCategory = location.state?.selectedCategory || 'NOT_APPROVED';
   const [selectedCategory, setSelectedCategory] =
     useState<POST_STATUS>(initialCategory);
-  const [, setSelectedPostId] = useAtom(selectedPostIdAtom); // 선택된 포스트 ID 설정 함수
-  const [realTimeData] = useAtom(realTimeDataAtom); // 실시간 데이터 상태
-
-  // `realTimeData`를 안전하게 변환
-  const formattedRealTimeData: Record<number, SSEEvent> =
-    typeof realTimeData === 'object' && realTimeData !== null
-      ? (realTimeData as unknown as Record<number, SSEEvent>)
-      : {};
 
   const { data: posts, isLoading, isError } = usePendingPostsQuery();
-
-  // 포스트 선택 핸들러
-  const handlePostSelect = (postId: number) => {
-    setSelectedPostId(postId);
-  };
 
   return (
     <QueryHandler isLoading={isLoading} isError={isError}>
@@ -48,12 +34,9 @@ const PostManagementPage = () => {
               />
             </Wrapper>
           </Header>
-          <PostList
+          <AdminPostList
             selectedCategory={selectedCategory}
             posts={posts || []}
-            hideWriteButton
-            realTimeData={formattedRealTimeData} // 변환된 realTimeData 전달
-            onPostSelect={handlePostSelect}
           />
         </ContentWrapper>
       </PageContainer>

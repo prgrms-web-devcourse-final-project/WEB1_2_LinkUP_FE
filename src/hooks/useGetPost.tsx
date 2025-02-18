@@ -6,10 +6,10 @@ import {
 } from '../components/pages/community/api/postApi';
 
 // 전체 게시물을 가져오는 훅
-export const usePostsQuery = (category?: string) => {
+export const usePostsQuery = () => {
   return useQuery({
-    queryKey: ['posts', category],
-    queryFn: () => fetchPosts(category),
+    queryKey: ['posts'],
+    queryFn: () => fetchPosts(),
   });
 };
 

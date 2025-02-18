@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { handleSSEUpdate } from '../community/api/postApi';
 import { approvePost, rejectPost } from './api/adminApi';
 import { FaBackspace, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
@@ -11,10 +11,9 @@ import { usePostQuery } from '../../../hooks/useGetPost';
 import { QueryHandler } from '../../../hooks/useGetProduct';
 
 const PostApprovalPage = () => {
-  const { postId: paramPostId } = useParams<{ postId: string }>();
-  const location = useLocation();
+  const { communityPostId } = useParams<{ communityPostId: string }>();
   const navigate = useNavigate();
-  const postId = paramPostId || location.state?.communityPostId;
+  const postId = Number(communityPostId);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const { data: post, isLoading, isError } = usePostQuery(postId);

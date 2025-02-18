@@ -17,8 +17,8 @@ export interface Post {
     nickname: string;
     paymentDeadline?: string;
     stateUpdatedAt?: string;
-    comments?: Comment[];
   };
+  comment?: Comment[];
   participationStatus: string;
   isWriter: boolean;
   remainQuantity: number;
@@ -102,8 +102,10 @@ export interface SSEEvent {
 export interface Comment {
   id: number;
   userId: number;
-  userNickname: string;
-  commentId: string;
+  communityPostId: number;
+  nickname: string;
+  profile: string;
   createdAt: string;
+  parentId: number | null;
   content: string;
 }

@@ -26,11 +26,9 @@ import SetNicknamePage from '../components/pages/login/SetNicknamePage';
 import SetProfilePage from '../components/pages/login/SetProfilePage';
 import LoginCompletePage from '../components/pages/login/LoginCompletePage';
 import PaymentForm from '../components/pages/Payment/PaymentForm';
-import PaymentSuccessPage from '../components/pages/Payment/PaymentSuccessPage';
 import ScrollToTop from '../components/common/ScrollToTop';
 import PostEditPage from '../components/pages/community/PostEditPage';
 import SetLocationPage from '../components/pages/login/SetLocationPage';
-
 import PaymentCompletePage from '../components/pages/Payment/PaymentCompletePage';
 import PostManagementPage from '../components/pages/admin/PostManagementPage';
 import PostApprovalPage from '../components/pages/admin/PostApprovalPage';
@@ -81,7 +79,7 @@ const router = createBrowserRouter(
         },
         {
           path: '/products/payment-success/:id',
-          element: <PaymentSuccessPage />,
+          element: <PaymentCompletePage />,
         },
         {
           path: '/products/payment-fail/:id',

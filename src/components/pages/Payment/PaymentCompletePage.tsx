@@ -51,8 +51,8 @@ const PaymentCompletePage: React.FC = () => {
     <QueryHandler isLoading={isLoading} isError={isError}>
       <Container>
         <SuccessSection>
-          <Title>결제 완료</Title>
-          <Subtitle>결제가 정상적으로 완료되었습니다.</Subtitle>
+          <Title>입금 확인 대기중</Title>
+          <Subtitle>입금이 확인되면 주문이 완료됩니다.</Subtitle>
 
           <OrderSummary>
             <SummaryRow>

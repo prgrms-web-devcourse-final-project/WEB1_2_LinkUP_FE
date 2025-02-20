@@ -190,7 +190,6 @@ const PostCreatePage: React.FC = () => {
     },
     [imageUrls.length]
   );
-
   const unitAmount = useMemo(() => {
     return totalAmount && availableNumber
       ? formatCurrency(
@@ -221,23 +220,41 @@ const PostCreatePage: React.FC = () => {
     <div>
       <PostCreatePageContainer>
         <ContentWrapper>
-          <Title>공구 모집 및 진행</Title>
+          <Header>
+            <Title>공구 모집 및 진행</Title>
+          </Header>
+
           <FormContainer>
+            {/* 이미지 업로드 섹션 */}
             <ImageAndDetailsContainer>
-              {/* 이미지 업로드 섹션 */}
               <ImageUploadContainer>
                 <ImagePreviewWrapper>
-                  <PreviousButtonWrapper>
+                  <ButtonWrapper>
+                    {/* 이미지가 있고 이미지 추가 화면(-1)일 때는 왼쪽 버튼만 */}
+                    {imageUrls.length > 0 && currentIndex === -1 && (
+                      <PrevButton onClick={() => handleNavigation('prev')}>
+                        <FaAngleLeft size={20} />
+                      </PrevButton>
+                    )}
+
+                    {/* 이미지가 있고 이미지 추가 화면이 아니고 0번이 아닐 때만 왼쪽 버튼 */}
                     {imageUrls.length > 0 &&
-                      (currentIndex > 0 || currentIndex === -1) && (
-                        <PreviousButton
+                      currentIndex !== -1 &&
+                      currentIndex !== 0 && (
+                        <NavigationButton
                           onClick={() => handleNavigation('prev')}
                         >
                           <FaAngleLeft size={20} />
-                        </PreviousButton>
+                        </NavigationButton>
                       )}
-                  </PreviousButtonWrapper>
 
+                    {/* 이미지가 있고 이미지 추가 화면이 아닐 때 오른쪽 버튼 */}
+                    {imageUrls.length > 0 && currentIndex !== -1 && (
+                      <NextButton onClick={() => handleNavigation('next')}>
+                        <FaAngleRight size={20} />
+                      </NextButton>
+                    )}
+                  </ButtonWrapper>
                   {currentIndex === -1 ? (
                     <AddImageButton>
                       <FaPlusCircle size={30} />
@@ -260,17 +277,8 @@ const PostCreatePage: React.FC = () => {
                       </RemoveImageButton>
                     </ImagePreview>
                   )}
-
-                  <NextButtonWrapper>
-                    {imageUrls.length > 0 && currentIndex !== -1 && (
-                      <NextButton onClick={() => handleNavigation('next')}>
-                        <FaAngleRight size={20} />
-                      </NextButton>
-                    )}
-                  </NextButtonWrapper>
                 </ImagePreviewWrapper>
 
-                {/* PaginationDots */}
                 <PaginationDotsWrapper>
                   {imageUrls.length > 0 && (
                     <PaginationDots>
@@ -287,9 +295,8 @@ const PostCreatePage: React.FC = () => {
 
                 <UrlInputContainer>
                   <UrlInputWrapper>
-                    <Label htmlFor="urlInput">URL 주소</Label>
+                    <Label>URL 주소</Label>
                     <URLInput
-                      id="urlInput"
                       type="text"
                       placeholder="상품 관련 URL 주소를 입력해주세요."
                       value={urlInput}
@@ -305,9 +312,16 @@ const PostCreatePage: React.FC = () => {
               </ImageUploadContainer>
 
               <DetailsAndInfoContainer>
-                {/* 제목 및 카테고리 섹션 */}
                 <DetailsContainer>
-                  <InputWrapper>
+                  <CategoryWrapperStyled
+                    title="카테고리 선택"
+                    categories={POST_CATEGORIES}
+                    selectedCategory={selectedCategory}
+                    onCategoryChange={(category) =>
+                      setSelectedCategory(category)
+                    }
+                  />
+                  <Detail>
                     <Label>제목</Label>
                     <TextInput
                       placeholder="제목을 입력해주세요."
@@ -315,74 +329,74 @@ const PostCreatePage: React.FC = () => {
                       onChange={(e) => setTitle(e.target.value)}
                       spellCheck={false}
                     />
-                  </InputWrapper>
-                  <CategoryInputWrapper>
-                    <CategoryWrapperStyled
-                      title="카테고리 선택"
-                      categories={POST_CATEGORIES}
-                      selectedCategory={selectedCategory}
-                      onCategoryChange={(category: string) =>
-                        setSelectedCategory(category)
-                      }
-                    />
-                  </CategoryInputWrapper>
-                </DetailsContainer>
+                  </Detail>
 
-                {/* 모집 정보 섹션 */}
-                <InfoContainer>
-                  <InputWrapper>
-                    <Label>참여 필요 수량 선택</Label>
-                    <SmallInput
-                      type="text"
-                      placeholder="수량 입력"
-                      value={availableNumber}
-                      onChange={(e) =>
-                        handleNumberChange(e, setAvailableNumber)
-                      }
-                    />
-                  </InputWrapper>
-                  <InputWrapper>
-                    <Label>모집 마감 기한 설정</Label>
-                    <DropdownWrapper>
-                      <DropdownButton onClick={handleDropdownToggle}>
-                        {deadline}
-                        <FaCaretDown />
-                      </DropdownButton>
-                      {dropdownVisible && (
-                        <DropdownMenu>
-                          {Array.from({ length: 7 }, (_, index) => (
-                            <DropdownItem
-                              key={index}
-                              onClick={() =>
-                                handleDeadlineSelect(`${index + 1}일  `)
+                  {/* 모집 정보 섹션 */}
+                  <InfoContainer>
+                    <Row>
+                      <Detail>
+                        <Label>참여 필요 수량 선택</Label>
+                        <SmallInput
+                          type="text"
+                          placeholder="수량 입력"
+                          value={availableNumber}
+                          onChange={(e) =>
+                            handleNumberChange(e, setAvailableNumber)
+                          }
+                        />
+                      </Detail>
+                      <Detail>
+                        <Label>모집 마감 기한 설정</Label>
+                        <DropdownWrapper>
+                          <DropdownButton onClick={handleDropdownToggle}>
+                            {deadline}
+                            <FaCaretDown />
+                          </DropdownButton>
+                          {dropdownVisible && (
+                            <DropdownMenu>
+                              {Array.from({ length: 7 }, (_, index) => (
+                                <DropdownItem
+                                  key={index}
+                                  onClick={() =>
+                                    handleDeadlineSelect(`${index + 1}일  `)
+                                  }
+                                  $isSelected={deadline === `${index + 1}일  `}
+                                >
+                                  {index + 1}일
+                                </DropdownItem>
+                              ))}
+                            </DropdownMenu>
+                          )}
+                        </DropdownWrapper>
+                      </Detail>
+                    </Row>
+                    <Row>
+                      <PriceWrapper>
+                        <Detail>
+                          <Label>총 가격 설정</Label>
+                          <PriceDetail>
+                            <PriceInput
+                              type="text"
+                              placeholder="총 가격 입력"
+                              value={totalAmount}
+                              onChange={(e) =>
+                                handleNumberChange(e, setTotalAmount)
                               }
-                              $isSelected={deadline === `${index + 1}일  `}
-                            >
-                              {index + 1}일
-                            </DropdownItem>
-                          ))}
-                        </DropdownMenu>
-                      )}
-                    </DropdownWrapper>
-                  </InputWrapper>
-                  <PriceWrapper>
-                    <InputWrapper>
-                      <Label>총 가격 설정</Label>
-                      <SmallInput
-                        type="text"
-                        placeholder="총 가격 입력"
-                        value={totalAmount}
-                        onChange={(e) => handleNumberChange(e, setTotalAmount)}
-                      />
-                      {' 원'}
-                    </InputWrapper>
-                    <InputWrapper>
-                      <Label>개당 가격</Label>
-                      <SmallInput disabled value={unitAmount} />
-                      {' 원'}
-                    </InputWrapper>
-                  </PriceWrapper>
-                </InfoContainer>
+                            />
+                            <CurrencyText>원</CurrencyText>
+                          </PriceDetail>
+                        </Detail>
+                        <Detail>
+                          <Label>개당 가격</Label>
+                          <PriceDetail>
+                            <PriceInput disabled value={unitAmount} />
+                            <CurrencyText>원</CurrencyText>
+                          </PriceDetail>
+                        </Detail>
+                      </PriceWrapper>
+                    </Row>
+                  </InfoContainer>
+                </DetailsContainer>
               </DetailsAndInfoContainer>
             </ImageAndDetailsContainer>
 
@@ -398,8 +412,12 @@ const PostCreatePage: React.FC = () => {
 
             {/* 하단 버튼 섹션 */}
             <ButtonContainer>
-              <Button onClick={handlePostSubmit}>확인</Button>
-              <Button onClick={handleCancel}>취소</Button>
+              <Buttons>
+                <Button $primary onClick={handlePostSubmit}>
+                  확인
+                </Button>
+                <Button onClick={handleCancel}>취소</Button>
+              </Buttons>
             </ButtonContainer>
           </FormContainer>
         </ContentWrapper>
@@ -408,98 +426,140 @@ const PostCreatePage: React.FC = () => {
   );
 };
 
-export default PostCreatePage;
-
 const PostCreatePageContainer = styled.div`
-  display: flex;
-  justify-content: center;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
   padding: 20px;
+  background-color: #f8fafc;
 `;
 
 const ContentWrapper = styled.div`
-  width: 100%;
-  max-width: 1120px;
-  margin: 0 auto;
+  background-color: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+`;
+
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 `;
 
 const Title = styled.h1`
-  font-size: 1.8rem;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
-  text-align: left;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
 `;
 
 const FormContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
 `;
 
 const ImageAndDetailsContainer = styled.div`
   display: flex;
-  flex-direction: row;
-  align-items: stretch;
   justify-content: center;
   gap: 20px;
   margin-bottom: 20px;
 `;
 
 const ImageUploadContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 490px;
-  height: 495px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 20px 11px;
-  position: relative;
-  box-sizing: border-box;
+  flex: 1;
 `;
 
 const ImagePreviewWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+  border-radius: 12px;
+`;
+
+const ButtonWrapper = styled.div`
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
   display: flex;
   justify-content: space-between;
-  align-items: center;
   width: 100%;
-  height: 320px;
-  position: relative;
-  overflow: hidden;
+`;
+
+const PrevButton = styled.button`
+  background-color: rgba(0, 0, 0, 0.3);
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+`;
+const NavigationButton = styled.button`
+  background-color: rgba(0, 0, 0, 0.3);
+  border: none;
+  padding: 8px;
+  margin-right: -60px;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+`;
+
+const NextButton = styled.button`
+  background-color: rgba(0, 0, 0, 0.3);
+  border: none;
+  padding: 8px;
+  margin-left: 264px;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
 `;
 
 const ImagePreview = styled.div`
-  flex: 1;
+  width: 300px;
+  height: 290px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  width: 400px;
-  height: 310px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  overflow: hidden;
+  align-items: center;
 
   img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 `;
 
 const AddImageButton = styled.label`
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
-  color: #555;
+  align-items: center;
+  width: 300px;
+  height: 290px;
+  background-color: #f9fafb;
+  border: 2px dashed #e2e8f0;
+  border-radius: 12px;
   cursor: pointer;
-  border-radius: 10px;
-  width: 400px;
-  height: 100%;
-  background-color: #ececec;
+  color: #64748b;
+
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #2563eb;
+    color: #2563eb;
+  }
 
   input {
     display: none;
@@ -508,220 +568,193 @@ const AddImageButton = styled.label`
 
 const RemoveImageButton = styled.button`
   position: absolute;
-  top: 0px;
-  right: 45px;
+  top: 10px;
+  right: 10px;
   background: none;
   border: none;
-  padding: 8px;
+  color: #ef4444;
   cursor: pointer;
+  padding: 4px;
   z-index: 1;
 `;
 
-const PreviousButtonWrapper = styled.div`
-  flex: 0 0 32px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-`;
-
-const NextButtonWrapper = styled.div`
-  flex: 0 0 32px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-`;
-
-const PreviousButton = styled.button`
-  background: none;
-  border: none;
-  color: #333;
-  cursor: pointer;
-`;
-
-const NextButton = styled.button`
-  background: none;
-  border: none;
-  color: #333;
-  cursor: pointer;
-`;
-
 const PaginationDotsWrapper = styled.div`
-  width: 100%;
-  height: 54px;
   display: flex;
-  align-items: center;
   justify-content: center;
+  margin-top: 12px;
 `;
 
 const PaginationDots = styled.div`
   display: flex;
-  justify-content: center;
-  gap: 5px;
+  gap: 8px;
 
   span {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    background: #ddd;
+    background-color: #e2e8f0;
     cursor: pointer;
-  }
 
-  span.active {
-    background: #000;
+    &.active {
+      background-color: #2563eb;
+    }
   }
 `;
 
 const UrlInputContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
+  margin-top: 70px;
 `;
 
 const UrlInputWrapper = styled.div`
-  margin-left: 20px;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  border: none;
+  flex-direction: column;
+  gap: 4px;
 `;
 
 const URLInput = styled.input<{ $isError: boolean }>`
-  width: 285px;
-  flex: 1;
-  padding: 10px;
-  background-color: #ececec;
-  border: 1px solid ${({ $isError }) => ($isError ? 'red' : '#ccc')};
-  border-radius: 5px;
+  width: 100%;
+  height: 40px;
+  border: 1px solid ${({ $isError }) => ($isError ? '#ef4444' : '#e2e8f0')};
+  border-radius: 8px;
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #2563eb;
+  }
 `;
 
 const ErrorMessage = styled.span`
-  margin-left: 125px;
-  color: red;
-  font-size: 0.8rem;
-  margin-top: 5px;
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 4px;
 `;
 
 const DetailsAndInfoContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 490px;
-  height: 495px;
-  flex-grow: 1;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 20px;
-  gap: 20px;
-  box-sizing: border-box;
+  flex: 2;
+  background-color: white;
+  border-radius: 12px;
+
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 `;
 
 const DetailsContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  width: 100%;
+  gap: 16px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+`;
+const InfoContainer = styled.div`
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 `;
 
-const InputWrapper = styled.div`
+const Row = styled.div`
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
+  gap: 16px;
+`;
+
+const Detail = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 6px;
+  padding: 12px;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
 `;
 
 const Label = styled.label`
-  font-size: 1.2rem;
-  font-weight: bold;
-  flex-shrink: 0;
-  text-align: left;
-`;
-
-const TextInput = styled.input`
-  width: 80%;
-  padding: 10px;
-  background-color: #ececec;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-`;
-
-const CategoryInputWrapper = styled.div`
-  display: flex;
-  justify-content: flex-start;
-`;
-
-const CategoryWrapperStyled = styled(CategoryWrapper)`
-  display: flex;
-  margin-left: 50px;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 10px 0;
-
-  div {
-    padding: 12px !important;
-    flex: 1 1 calc(25% - 8px);
-    box-sizing: border-box;
-
-    &:hover {
-      background-color: #f0f0f0 !important;
-    }
-
-    &.active {
-      font-weight: bold !important;
-      border-bottom: 2px solid black !important;
-    }
-  }
-`;
-
-const InfoContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: 100%;
+  font-size: 0.875rem;
+  color: #475569;
+  font-weight: 600;
 `;
 
 const SmallInput = styled.input`
-  width: 100px;
-  padding: 10px 0px;
+  width: 100%;
+  height: 40px;
+  margin-top: 5px;
+  border: 1px solid #e2e8f0;
+  margin-top: 5px;
+  border-radius: 8px;
+  font-size: 0.875rem;
   text-align: center;
-  background-color: #ececec;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #2563eb;
+  }
+
+  &:disabled {
+    background-color: #f9fafb;
+    cursor: not-allowed;
+  }
+`;
+const PriceDetail = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  padding: 12px;
+  background-color: white;
+  border-radius: 8px;
+
+  flex: 1;
+  align-items: center;
+`;
+
+const PriceInput = styled.input`
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  text-align: center;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #2563eb;
+  }
+
+  &:disabled {
+    background-color: #f9fafb;
+    cursor: not-allowed;
+  }
+`;
+
+const CurrencyText = styled.span`
+  font-size: 1rem;
+  color: #2563eb;
+  font-weight: 600;
+  margin-left: 4px;
+  display: inline-flex;
+  align-items: center;
+  padding-top: 2px;
+  user-select: none;
 `;
 
 const DropdownWrapper = styled.div`
   position: relative;
 `;
 
-const DropdownButton = styled.button`
-  width: 120px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-weight: bold;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
-`;
-
 const DropdownMenu = styled.div`
   position: absolute;
-  width: 120px;
   top: 100%;
   left: 0;
-  right: 0;
-  font-size: 0.9rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background: #fff;
-  z-index: 1000;
-  box-sizing: border-box;
+  width: 120px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-top: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
 `;
 
 const DropdownItem = styled.div<{ $isSelected: boolean }>`
@@ -742,6 +775,44 @@ const PriceWrapper = styled.div`
   gap: 20px;
   width: 100%;
   align-items: center;
+`;
+
+const DropdownButton = styled.button`
+  width: 100%;
+  height: 40px;
+  margin-top: 5px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: #2563eb;
+  }
+`;
+
+const TextInput = styled.input`
+  width: 100%;
+  height: 40px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #2563eb;
+  }
+`;
+
+const CategoryWrapperStyled = styled(CategoryWrapper)`
+  margin-top: 8px;
 `;
 
 const TextAreaWrapper = styled.div`
@@ -776,15 +847,24 @@ const ButtonContainer = styled.div`
   gap: 10px;
 `;
 
-const Button = styled.button`
+const Buttons = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
+const Button = styled.button<{ $primary?: boolean }>`
   padding: 10px 20px;
-  background: #000;
-  color: #fff;
-  border: 1px solid #000;
-  border-radius: 5px;
+  background: ${({ $primary }) => ($primary ? '#2563eb' : 'white')};
+  color: ${({ $primary }) => ($primary ? 'white' : '#2563eb')};
+  border: 1px solid #2563eb;
+  border-radius: 6px;
   cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
 
   &:hover {
-    background: #333;
+    background: ${({ $primary }) => ($primary ? '#1d4ed8' : '#eff6ff')};
   }
 `;
+
+export default PostCreatePage;

@@ -94,15 +94,60 @@ const PostImageSection: React.FC<PostImageSectionProps> = ({
 
 export default PostImageSection;
 
-const FormContainer = styled.div`
-  margin-top: 20px;
-`;
 const ImagePreviewWrapper = styled.div`
   position: relative;
   width: 100%;
   height: 300px;
   overflow: hidden;
   border-radius: 12px;
+`;
+
+const ImagePreview = styled.div`
+  width: 300px;
+  height: 290px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+const PaginationDotsWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+`;
+
+const PaginationDots = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #e2e8f0;
+    cursor: pointer;
+
+    &.active {
+      background-color: #2563eb;
+    }
+  }
+`;
+
+const UrlContainer = styled.div`
+  margin-top: 20px;
+`;
+
+const UrlWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+const FormContainer = styled.div`
+  margin-top: 20px;
 `;
 
 const PreviousButtonWrapper = styled.div`
@@ -147,18 +192,6 @@ const NextButton = styled.button`
   }
 `;
 
-const ImagePreview = styled.div`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-`;
-
 const ImageAndDetailsContainer = styled.div`
   display: flex;
   justify-content: space-between;
@@ -168,39 +201,6 @@ const ImageAndDetailsContainer = styled.div`
 
 const ImageContainer = styled.div`
   flex: 1;
-`;
-
-const PaginationDotsWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-top: 12px;
-`;
-
-const PaginationDots = styled.div`
-  display: flex;
-  gap: 8px;
-  align-items: center;
-
-  span {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: #e2e8f0;
-    cursor: pointer;
-
-    &.active {
-      background-color: #2563eb;
-    }
-  }
-`;
-
-const UrlContainer = styled.div`
-  margin-top: 20px;
-`;
-
-const UrlWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
 `;
 
 const Url = styled.a`

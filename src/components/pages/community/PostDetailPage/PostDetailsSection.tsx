@@ -180,10 +180,9 @@ const PostDetailsSection: React.FC<PostDetailsSectionProps> = ({
 };
 
 export default PostDetailsSection;
-
 const DetailsAndInfoContainer = styled.div`
   flex: 2;
-  background-color: #ffffff;
+  background-color: white;
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
@@ -203,7 +202,7 @@ const Detail = styled.div`
   flex-direction: column;
   gap: 6px;
   padding: 12px;
-  background-color: #ffffff;
+  background-color: white;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
 `;
@@ -225,6 +224,49 @@ const DetailText = styled.span`
   color: #1e293b;
   font-weight: 500;
   line-height: 1.5;
+`;
+
+const Quantity = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+
+  svg {
+    cursor: pointer;
+    color: #2563eb;
+
+    &:hover {
+      color: #1d4ed8;
+    }
+  }
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 16px;
+`;
+
+const ActionButtons = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
+const ActionButton = styled.button<{ $primary?: boolean }>`
+  padding: 10px 20px;
+  background: ${({ $primary }) => ($primary ? '#2563eb' : 'white')};
+  color: ${({ $primary }) => ($primary ? 'white' : '#2563eb')};
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+
+  &:hover {
+    background: ${({ $primary }) => ($primary ? '#1d4ed8' : '#eff6ff')};
+  }
 `;
 const AuthorDetail = styled.div`
   flex: 1;
@@ -261,52 +303,7 @@ const Date = styled.span`
   color: #4b5563;
 `;
 
-const Quantity = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 1rem;
-
-  svg {
-    cursor: pointer;
-    color: #2563eb;
-
-    &:hover {
-      color: #1d4ed8;
-    }
-  }
-`;
-
 const PaymentAmount = styled.span`
   color: #334155;
   font-weight: 600;
-`;
-
-const ActionButtons = styled.div`
-  display: flex;
-  gap: 10px;
-`;
-
-const ActionButton = styled.button<{ $primary?: boolean }>`
-  padding: 10px 20px;
-  background: ${(props) => (props.$primary ? '#2563eb' : '#ffffff')};
-  color: ${(props) => (props.$primary ? '#ffffff' : '#2563eb')};
-  border: 1px solid #2563eb;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition:
-    background 0.2s,
-    color 0.2s;
-
-  &:hover {
-    background: ${(props) => (props.$primary ? '#1d4ed8' : '#eff6ff')};
-  }
-`;
-
-const ButtonContainer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  width: 100%;
-  margin-top: 16px;
 `;

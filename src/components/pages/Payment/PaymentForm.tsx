@@ -4,10 +4,15 @@ import styled from 'styled-components';
 import { handlePayment } from './api/paymentApi';
 import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 import { useQuantity } from '../../../context/QuantityContext';
+import { useDaumPostcodePopup } from 'react-daum-postcode';
 
 const PaymentForm = () => {
   const { quantity } = useQuantity();
   const { id } = useParams();
+  const postcodeScriptUrl =
+    'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+  const open = useDaumPostcodePopup(postcodeScriptUrl);
+
   const productId = useMemo(() => {
     if (!id || isNaN(Number(id))) {
       return null;
@@ -28,6 +33,15 @@ const PaymentForm = () => {
   const [detailAddress, setDetailAddress] = useState('');
   const [needed, setNeeded] = useState('');
   const [payment, setPayment] = useState('');
+
+  // 주소 검색 팝업 실행
+  const handleAddressSearch = () => {
+    open({
+      onComplete: (data) => {
+        setBasicAddress(data.address);
+      },
+    });
+  };
 
   const validateForm = () => {
     if (!userName.trim()) {
@@ -125,9 +139,10 @@ const PaymentForm = () => {
                 <InputWrapper>
                   <BasicAddressInput
                     type="text"
-                    placeholder="기본 주소를 입력해주세요"
+                    placeholder="기본 주소를 선택해주세요"
                     value={basicAddress}
-                    onChange={(e) => setBasicAddress(e.target.value)}
+                    readOnly
+                    onClick={handleAddressSearch} // 클릭 시 주소 검색 팝업 실행
                   />
                 </InputWrapper>
                 <InputWrapper>

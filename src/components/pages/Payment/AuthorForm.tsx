@@ -5,10 +5,14 @@ import { handleCommunityPayment } from './api/paymentApi';
 import { QueryHandler } from '../../../hooks/useGetProduct';
 import { useQuantity } from '../../../context/QuantityContext';
 import { usePostQuery } from '../../../hooks/useGetPost';
+import { useDaumPostcodePopup } from 'react-daum-postcode';
 
 const AuthorForm = () => {
   const { quantity } = useQuantity();
   const { id } = useParams();
+  const postcodeScriptUrl =
+    'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+  const open = useDaumPostcodePopup(postcodeScriptUrl);
 
   const postId = useMemo(() => {
     if (!id || isNaN(Number(id))) {
@@ -20,15 +24,26 @@ const AuthorForm = () => {
   if (!postId) {
     return <p>잘못된 게시글 ID입니다.</p>;
   }
+
   const { data: post, isLoading, isError } = usePostQuery(postId);
   if (!post) {
     return <p>해당 게시글을 찾을 수 없습니다.</p>;
   }
+
   const [userName, setName] = useState('');
   const [basicAddress, setBasicAddress] = useState('');
   const [detailAddress, setDetailAddress] = useState('');
   const [needed, setNeeded] = useState('');
   const [payment, setPayment] = useState('');
+
+  // 주소 검색 팝업 실행
+  const handleAddressSearch = () => {
+    open({
+      onComplete: (data) => {
+        setBasicAddress(data.address);
+      },
+    });
+  };
 
   const validateForm = () => {
     if (!userName.trim()) {
@@ -36,7 +51,7 @@ const AuthorForm = () => {
       return false;
     }
     if (!basicAddress.trim()) {
-      alert('기본 주소를 입력해주세요.');
+      alert('주소를 입력해주세요.');
       return false;
     }
     if (!detailAddress.trim()) {
@@ -53,16 +68,17 @@ const AuthorForm = () => {
     }
     return true;
   };
-  const address = `${basicAddress} ${detailAddress}`;
 
   const payload = {
     recipientName: userName,
-    recipientAddress: address,
+    recipientAddress: `${basicAddress} ${detailAddress}`,
     deliveryRequest: needed,
   };
+
   const handleRadio = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPayment(e.target.value);
   };
+
   const onPaymentSubmit = async () => {
     if (!validateForm()) {
       return;
@@ -114,14 +130,16 @@ const AuthorForm = () => {
                   </InputWrapper>
                 </Label>
               </FormGroup>
+
               <FormGroup>
                 <Label>배송지</Label>
                 <InputWrapper>
                   <BasicAddressInput
                     type="text"
-                    placeholder="기본 주소를 입력해주세요"
+                    placeholder="기본 주소를 선택해주세요"
                     value={basicAddress}
-                    onChange={(e) => setBasicAddress(e.target.value)}
+                    readOnly
+                    onClick={handleAddressSearch} // 클릭 시 주소 검색 팝업 실행
                   />
                 </InputWrapper>
                 <InputWrapper>
@@ -133,6 +151,7 @@ const AuthorForm = () => {
                   />
                 </InputWrapper>
               </FormGroup>
+
               <FormGroup>
                 <Label>
                   배송 시 요청사항
@@ -167,13 +186,7 @@ const AuthorForm = () => {
           </Section>
 
           <ButtonGroup>
-            <PayButton
-              onClick={() => {
-                onPaymentSubmit();
-              }}
-            >
-              결제하기
-            </PayButton>
+            <PayButton onClick={onPaymentSubmit}>결제하기</PayButton>
             <BackButton to={`/community/post/${postId}`}>뒤로 가기</BackButton>
           </ButtonGroup>
         </Container>

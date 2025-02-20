@@ -104,10 +104,17 @@ const PostApprovalPage = () => {
 
                   <ImagePreview>
                     <img
-                      src={getImageSrc(
-                        post.communityPost.imageUrls[currentIndex]
-                      )}
-                      alt={`이미지 ${currentIndex + 1}`}
+                      src={
+                        // post?.communityPost.imageUrls[currentIndex]가 URL일 때는 그 URL을 사용하고,
+                        // imageUrls[currentIndex]가 File 객체일 때는 getImageSrc를 사용
+                        typeof post?.communityPost.imageUrls[currentIndex] ===
+                        'string'
+                          ? getImageSrc(
+                              post?.communityPost.imageUrls[currentIndex]
+                            )
+                          : post?.communityPost.imageUrls[currentIndex]
+                      }
+                      alt="이미지 미리보기"
                     />
                   </ImagePreview>
 

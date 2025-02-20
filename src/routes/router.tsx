@@ -102,7 +102,7 @@ const router = createBrowserRouter(
           element: <PostDetailPage />,
         },
         {
-          path: '/mypage/post/:communityPostId/edit',
+          path: '/community/post/:communityPostId/edit',
           element: <PostEditPage />,
         },
         {

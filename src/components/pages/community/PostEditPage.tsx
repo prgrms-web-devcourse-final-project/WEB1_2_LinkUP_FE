@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -13,7 +13,7 @@ import { createPost } from './api/postApi';
 import CategoryWrapper from '../../common/CategoryWrapper';
 import { POST_CATEGORIES } from './postCategories';
 import { CreatePostData } from '../../../types/postTypes';
-import { getImageSrc, urlToFile } from '../../../utils/GetImageSrc';
+import { getImageSrc } from '../../../utils/GetImageSrc';
 import { usePostQuery } from '../../../hooks/useGetPost';
 import { QueryHandler } from '../../../hooks/useGetProduct';
 
@@ -44,25 +44,6 @@ const PostEditPage: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [urlInput, setUrlInput] = useState(post?.communityPost.productUrl);
   const [urlError, setUrlError] = useState(false);
-
-  useEffect(() => {
-    const fetchImagesAsFiles = async () => {
-      if (post?.communityPost.imageUrls) {
-        const filePromises = post.communityPost.imageUrls.map(
-          async (url: string, index: number) => {
-            // URL을 File 객체로 변환
-            return await urlToFile(url, `image_${index}.png`);
-          }
-        );
-
-        // 파일 배열을 상태에 설정
-        const files = await Promise.all(filePromises);
-        setImageUrls(files);
-      }
-    };
-
-    fetchImagesAsFiles();
-  }, [post?.communityPost.imageUrls]);
 
   const createPostMutation = useMutation({
     mutationFn: (payload: CreatePostData) => createPost(payload),
@@ -304,8 +285,6 @@ const PostEditPage: React.FC = () => {
                     <ImagePreview>
                       <img
                         src={
-                          // post?.communityPost.imageUrls[currentIndex]가 URL일 때는 그 URL을 사용하고,
-                          // imageUrls[currentIndex]가 File 객체일 때는 getImageSrc를 사용
                           typeof post?.communityPost.imageUrls[currentIndex] ===
                           'string'
                             ? getImageSrc(
@@ -318,10 +297,16 @@ const PostEditPage: React.FC = () => {
                       <RemoveImageButton onClick={handleRemoveImage}>
                         <FaMinusCircle size={30} />
                       </RemoveImageButton>
-                    </ImagePreview>
-                  )}
-                </ImagePreviewWrapper>
 
+                      {/* 추가된 부분 */}
+                    </ImagePreview>
+                  )}{' '}
+                </ImagePreviewWrapper>
+                <ReUploadText>
+                  {imageUrls.length > 0
+                    ? '이미지는 삭제 후 다시 업로드해주세요.'
+                    : ''}
+                </ReUploadText>{' '}
                 <PaginationDotsWrapper>
                   {imageUrls.length > 0 && (
                     <PaginationDots>
@@ -335,7 +320,6 @@ const PostEditPage: React.FC = () => {
                     </PaginationDots>
                   )}
                 </PaginationDotsWrapper>
-
                 <UrlInputContainer>
                   <UrlInputWrapper>
                     <Label>URL 주소</Label>
@@ -620,6 +604,13 @@ const RemoveImageButton = styled.button`
   cursor: pointer;
   padding: 4px;
   z-index: 1;
+`;
+
+const ReUploadText = styled.p`
+  margin-top: 8px;
+  font-size: 14px;
+  color: #ff4d4d;
+  text-align: center;
 `;
 
 const PaginationDotsWrapper = styled.div`

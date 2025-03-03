@@ -10,15 +10,24 @@ import { Link } from 'react-router-dom';
 import { categories } from './model/categories';
 import ReviewModal, { Question } from '../../common/ReviewModal';
 import { reviewUser } from '../../../api/reviewApi';
+import ChatRoomModal from '../community/modal/ChatRoomModal';
+
+import { useChatQuery } from '../../../hooks/useGetChatRoom';
 
 const HomePage: React.FC = () => {
   const { data: products, isLoading, isError } = useProductsQuery();
   const availableProduct = products?.filter(
     (p) => p.available === true && new Date(p.deadline) > new Date()
   );
+
+  //할인율이 가장 높은 물건을 인기 상품으로
   const popularProduct = availableProduct?.sort(
-    (a, b) => b.currentStock - a.currentStock
+    (a, b) =>
+      (b.originalprice - b.discountprice) / b.originalprice -
+      (a.originalprice - a.discountprice) / a.originalprice
   )[0];
+
+  // 사용자 리뷰 테스트
   const [isModalOpen, setIsModalOpen] = useState(false);
   const handleSubmit = (ratings: Question[], review: string) => {
     const reviewContent = {
@@ -32,22 +41,40 @@ const HomePage: React.FC = () => {
     reviewUser(reviewContent);
   };
 
+  // 채팅방 테스트
+  const roomId = 5;
+  const {
+    data: chats,
+    isLoading: LoadingChat,
+    isError: ErrorChat,
+  } = useChatQuery();
+  console.log(chats);
+  const [isModalOpenc, setModalOpenc] = useState(false);
   return (
     <>
       <QueryHandler isLoading={isLoading} isError={isError}>
         <button onClick={() => setIsModalOpen(true)}>리뷰 작성하기</button>
+        <button onClick={() => setModalOpenc(true)}>채팅 작성하기</button>
 
         <ReviewModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onSubmit={handleSubmit}
         />
+        <QueryHandler isLoading={LoadingChat} isError={ErrorChat}>
+          <ChatRoomModal
+            chatRoomId={roomId}
+            isOpen={isModalOpenc}
+            onClose={() => setModalOpenc(false)}
+            isAdminPage={true}
+          />
+        </QueryHandler>
         <ContainerBox>
           <Container>
-            <StyledLink to={`/products/${popularProduct?.id}`}>
+            <StyledLink to={`/products/${popularProduct?.productPostId}`}>
               {' '}
               <PopularProduct
-                popular={popularProduct}
+                productId={popularProduct?.productPostId}
                 category={popularProduct?.category}
               />
             </StyledLink>

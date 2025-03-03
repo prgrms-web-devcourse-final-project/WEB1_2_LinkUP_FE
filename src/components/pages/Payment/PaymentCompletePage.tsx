@@ -31,8 +31,8 @@ const PaymentCompletePage: React.FC = () => {
 
   const handleChatRoomCreation = async () => {
     try {
-      const chatRoom = await createChatRoom(parseInt(id));
-      setChatRoom(chatRoom);
+      // const chatRoom = await createChatRoom(parseInt(id));
+      // setChatRoom(chatRoom);
     } catch {
       alert('채팅방을 생성할 수 없습니다.');
     }

@@ -156,9 +156,11 @@ const PostDetailsSection: React.FC<PostDetailsSectionProps> = ({
                   </>
                 ) : (
                   <>
-                    <ActionButton $primary onClick={handlePayment}>
-                      결제
-                    </ActionButton>
+                    {remainQuantity === 0 && (
+                      <ActionButton $primary onClick={handlePayment}>
+                        결제
+                      </ActionButton>
+                    )}
                     <ActionButton onClick={handleCancel}>
                       {isWriter ? '취소(삭제)' : '취소'}
                     </ActionButton>

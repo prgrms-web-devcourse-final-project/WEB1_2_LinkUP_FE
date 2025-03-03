@@ -22,3 +22,24 @@ export interface Product {
   likes: boolean;
   available: boolean;
 }
+
+export interface AllProducts {
+  productPostId: number;
+  name: string;
+  rating: number;
+  originalprice: number;
+  discountprice: number;
+  url: string;
+  category: string;
+  minamount: number;
+  deadline: string;
+  available: boolean;
+}
+
+export interface WishProducts {
+  productPostId: number;
+  productName: string;
+  productPrice: number;
+  productImage: string;
+  addedAt: string;
+}

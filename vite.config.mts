@@ -9,6 +9,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), tsconfigPaths()],
     define: {
       'process.env': env,
+      global: {},
     },
     server: {
       proxy: {
@@ -21,6 +22,11 @@ export default defineConfig(({ mode }) => {
           target: env.VITE_API_URL,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, '/api'),
+        },
+        '/websocket': {
+          target: 'http://15.164.5.135',
+          ws: true,
+          changeOrigin: true,
         },
       },
     },

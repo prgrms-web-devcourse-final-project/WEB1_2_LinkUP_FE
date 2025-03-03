@@ -2,26 +2,12 @@ import { formatDateWithOffset } from '../utils/formatDate';
 import axiosInstance from './axiosInstance';
 import { webSocketService } from '../utils/webSocket';
 
-// 채팅방 생성
-export const createChatRoom = async (postId: number) => {
-  const response = await axiosInstance.post('/api/chat', { postId });
-  if (response.status !== 200) {
-    throw new Error('Failed to create chat room');
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, roomName } = response.data;
-
-  // 채팅방 구독 시작
-  webSocketService.subscribe(
-    `/sub/message/${id}`,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    (message) => {},
-    true
-  );
-
-  return response.data;
-};
+export interface ChatRoom {
+  postId: number;
+  capacity: number;
+  roomName: string;
+  chatMembers: string[];
+}
 
 // 채팅방 삭제
 export const deleteChatRoom = async (chatRoomId: number) => {
@@ -42,11 +28,7 @@ export const deleteChatRoom = async (chatRoomId: number) => {
 
 // 내 채팅방 목록 조회
 export const fetchMyChatRooms = async () => {
-  const response = await axiosInstance.get('/api/mypage/chatlist', {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('jwt')}`,
-    },
-  });
+  const response = await axiosInstance.get('/api/mypage/chatlist');
 
   if (response.status !== 200) {
     throw new Error('Failed to fetch my chat rooms');
@@ -56,12 +38,8 @@ export const fetchMyChatRooms = async () => {
 };
 
 // 전체 채팅방 목록 조회 (관리자)
-export const fetchAllChatRooms = async () => {
-  const response = await axiosInstance.get('/api/admin/chatlist', {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('jwt')}`,
-    },
-  });
+export const fetchAllChatRooms = async (): Promise<ChatRoom[]> => {
+  const response = await axiosInstance.get('/api/admin/chatlist');
 
   if (response.status !== 200) {
     throw new Error('Failed to fetch all chat rooms');
@@ -102,11 +80,7 @@ export const unsubscribeFromChatMessages = (chatRoomId: number) => {
 
 // 채팅 내용 조회
 export const fetchChatMessages = async (chatRoomId: number) => {
-  const response = await axiosInstance.get(`/api/chat/${chatRoomId}`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('jwt')}`,
-    },
-  });
+  const response = await axiosInstance.get(`/api/chat/${chatRoomId}`);
 
   if (response.status !== 200) {
     throw new Error('Failed to fetch chat messages');

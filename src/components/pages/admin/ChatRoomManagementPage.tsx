@@ -24,7 +24,7 @@ const ChatRoomManagementPage = () => {
 
   // URL에서 chatRoomId 동적으로 가져오기
   const urlParams = new URLSearchParams(location.search);
-  const roomId = urlParams.get('roomId'); // URL에서 roomId 가져오기
+  const roomId = Number(urlParams.get('roomId')); // URL에서 roomId 가져오기
 
   // 총 페이지 수 계산
   const totalPages = Math.ceil(chatRooms.length / ITEMS_PER_PAGE);
@@ -86,8 +86,7 @@ const ChatRoomManagementPage = () => {
             <ChatRoomModal
               chatRoomId={roomId} // roomId는 URL에서 가져옴
               chatRoomTitle={
-                chatRooms.find((room) => room.postId.toString() === roomId)
-                  ?.roomName || ''
+                chatRooms.find((room) => room.postId === roomId)?.roomName || ''
               }
               isOpen={isModalOpen}
               onClose={closeModal}

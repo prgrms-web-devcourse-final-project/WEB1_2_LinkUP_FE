@@ -5,12 +5,14 @@ import Pagination from '../../common/Pagination';
 import StarRating from '../../common/StarRating';
 import Heart from '../../../assets/icons/heart.png';
 import FilledHeart from '../../../assets/icons/filled-heart.png';
-import { Product } from '../HomePage/model/productSchema';
+import { AllProducts } from '../HomePage/model/productSchema';
 import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
+import { QueryHandler, useWishQuery } from '../../../hooks/useGetProduct';
+import { postWishProduct } from '../HomePage/api/wish';
 
 type ProductComponentProps = {
   input: string;
-  products: Product[];
+  products: AllProducts[];
 };
 
 const ProductComponent: React.FC<ProductComponentProps> = ({
@@ -35,6 +37,16 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCT_PER_PAGE);
 
+  const { data: wish, isLoading, isError } = useWishQuery();
+
+  const changeLike = (productPostId: number) => {
+    const payload = {
+      productPostId: productPostId,
+    };
+
+    postWishProduct(payload);
+  };
+
   // 선택된 탭이 변경되면 페이지를 1로 초기화
   useEffect(() => {
     setCurrentPage(1);
@@ -44,70 +56,84 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
     startIndex + PRODUCT_PER_PAGE
   );
   return (
-    <Recommend>
-      <RecommendTitle>
-        <TextWrapper>
-          <Text
-            selected={selectedText === '판매 상품'}
-            onClick={() => setSelectedText('판매 상품')}
-          >
-            판매 상품
-          </Text>
-          <Text
-            selected={selectedText === '마감 상품'}
-            onClick={() => setSelectedText('마감 상품')}
-          >
-            마감 상품
-          </Text>
-        </TextWrapper>
-        {input ? `${input}에 대한 검색 결과` : ''}
-      </RecommendTitle>
+    <QueryHandler isLoading={isLoading} isError={isError}>
+      <Recommend>
+        <RecommendTitle>
+          <TextWrapper>
+            <Text
+              selected={selectedText === '판매 상품'}
+              onClick={() => setSelectedText('판매 상품')}
+            >
+              판매 상품
+            </Text>
+            <Text
+              selected={selectedText === '마감 상품'}
+              onClick={() => setSelectedText('마감 상품')}
+            >
+              마감 상품
+            </Text>
+          </TextWrapper>
+          {input ? `${input}에 대한 검색 결과` : ''}
+        </RecommendTitle>
 
-      <CardWrapper>
-        {currentProducts.map((product) => (
-          <Card key={product.id} selected={selectedText === '판매 상품'}>
-            <StyledLink to={`/products/${product.id}`}>
-              <ProductImg
-                src={product.url || DEFAULT_IMG}
-                alt={product.name}
-                onError={(e) => {
-                  e.currentTarget.src = DEFAULT_IMG;
+        <CardWrapper>
+          {currentProducts.map((product) => (
+            <Card
+              key={product.productPostId}
+              selected={selectedText === '판매 상품'}
+            >
+              <StyledLink to={`/products/${product.productPostId}`}>
+                <ProductImg
+                  src={product.url || DEFAULT_IMG}
+                  alt={product.name}
+                  onError={(e) => {
+                    e.currentTarget.src = DEFAULT_IMG;
+                  }}
+                />
+                <ProductWrapper>
+                  <ProductName>{product.name}</ProductName>
+                  <ProductStar>
+                    {' '}
+                    <StarRating rating={product.rating} />
+                  </ProductStar>
+                  <PriceWrapper>
+                    {product.available ? (
+                      <>
+                        <OriginalPrice>{product.originalprice}원</OriginalPrice>
+                        <DiscountedPrice>
+                          {product.discountprice}원
+                        </DiscountedPrice>
+                      </>
+                    ) : (
+                      <UnavailablePrice>∞ (판매 종료)</UnavailablePrice>
+                    )}
+                  </PriceWrapper>
+                </ProductWrapper>
+              </StyledLink>
+              <LikeButton
+                likes={
+                  wish?.some(
+                    (item) => item.productPostId === product.productPostId
+                  ) || false
+                }
+                onClick={() => {
+                  changeLike(product.productPostId);
                 }}
               />
-              <ProductWrapper>
-                <ProductName>{product.name}</ProductName>
-                <ProductStar>
-                  {' '}
-                  <StarRating rating={product.rating} />
-                </ProductStar>
-                <PriceWrapper>
-                  {product.available ? (
-                    <>
-                      <OriginalPrice>{product.originalprice}원</OriginalPrice>
-                      <DiscountedPrice>
-                        {product.discountprice}원
-                      </DiscountedPrice>
-                    </>
-                  ) : (
-                    <UnavailablePrice>∞ (판매 종료)</UnavailablePrice>
-                  )}
-                </PriceWrapper>
-              </ProductWrapper>
-            </StyledLink>
-            <LikeButton likes={product.likes} />
-          </Card>
-        ))}
-      </CardWrapper>
-      {totalPages > 1 && (
-        <PagenationWrapper>
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={(page) => setCurrentPage(page)}
-          />
-        </PagenationWrapper>
-      )}
-    </Recommend>
+            </Card>
+          ))}
+        </CardWrapper>
+        {totalPages > 1 && (
+          <PagenationWrapper>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => setCurrentPage(page)}
+            />
+          </PagenationWrapper>
+        )}
+      </Recommend>
+    </QueryHandler>
   );
 };
 

@@ -64,7 +64,7 @@ const ParticipantsForm = () => {
             <ContentBox>
               <FlexRow>
                 <ProductName>{post?.communityPost.title}</ProductName>
-                <Price>{post?.communityPost.unitAmount}</Price>
+                <Price>개당 가격 : {post?.communityPost.unitAmount}원</Price>
               </FlexRow>
               <FlexRow>
                 <Quantity>수량 : {quantity}</Quantity>

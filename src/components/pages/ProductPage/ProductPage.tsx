@@ -3,7 +3,7 @@ import InputComponent from '../ProductPage/InputComponent';
 import ProductComponent from '../ProductPage/ProductComponent';
 import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
-import { Product } from '../HomePage/model/productSchema';
+import { AllProducts } from '../HomePage/model/productSchema';
 import { QueryHandler, useProductsQuery } from '../../../hooks/useGetProduct';
 import ScrollToTopButton from '../../common/ScrollToTopButton';
 
@@ -21,11 +21,12 @@ const ProductPage = () => {
     }
   }, []);
 
-  const getTopProducts = (products: Product[]): Product[] => {
-    const sortedByreviews = [...products].sort(
-      (a, b) => (b.reviews?.length || 0) - (a.reviews?.length || 0)
+  const getTopProducts = (products: AllProducts[]): AllProducts[] => {
+    // 마감임박순서
+    const sortedByDeadline = [...products].sort(
+      (a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
     );
-    return sortedByreviews;
+    return sortedByDeadline;
   };
 
   const displayedProducts = useMemo(() => {
@@ -33,7 +34,7 @@ const ProductPage = () => {
   }, [products]);
 
   const filtered = displayedProducts.filter(
-    (product: Product) =>
+    (product: AllProducts) =>
       product.name.toLowerCase().includes(input.toLowerCase()) ||
       product.category.toLowerCase().includes(input.toLowerCase())
   );

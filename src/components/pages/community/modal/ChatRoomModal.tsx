@@ -1,20 +1,16 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import ChatRoom from '../../../common/ChatRoom'; // 채팅방 컴포넌트
-import {
-  webSocketService,
-  WebSocketService,
-} from '../../../../utils/webSocket';
 import { FaTrashAlt } from 'react-icons/fa';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { deleteChatRoom } from '../../../../api/chatApi';
 
 interface ChatRoomModalProps {
-  chatRoomId: string;
-  chatRoomTitle: string;
+  chatRoomId: number;
+
   isOpen: boolean;
   onClose: () => void;
-  webSocketService: WebSocketService;
+
   isAdminPage: boolean; // 관리자 페이지 여부를 나타내는 프롭
 }
 
@@ -22,7 +18,7 @@ const ChatRoomModal: React.FC<ChatRoomModalProps> = ({
   isOpen,
   onClose,
   chatRoomId,
-  chatRoomTitle,
+
   isAdminPage = false,
 }) => {
   const navigate = useNavigate();
@@ -35,7 +31,7 @@ const ChatRoomModal: React.FC<ChatRoomModalProps> = ({
     if (isOpen) {
       navigate(`?roomId=${chatRoomId}`, { replace: true });
     } else {
-      navigate(-1); // 원래 페이지로 돌아감
+      // navigate(-1); // 원래 페이지로 돌아감
     }
   }, [isOpen, chatRoomId, navigate]);
 
@@ -60,7 +56,7 @@ const ChatRoomModal: React.FC<ChatRoomModalProps> = ({
     <ModalOverlay>
       <ModalContainer>
         <ModalHeader>
-          <ModalTitle>{chatRoomTitle}</ModalTitle>
+          <ModalTitle>채팅방 제목목</ModalTitle>
           <HeaderButtons>
             {/* 삭제 버튼: 관리자 채팅방 관리 페이지에서만 보이도록 조건부 렌더링 */}
             {isChatAdminPage && (
@@ -72,12 +68,7 @@ const ChatRoomModal: React.FC<ChatRoomModalProps> = ({
           </HeaderButtons>
         </ModalHeader>
         <ModalContent>
-          <ChatRoom
-            chatRoomId={parseInt(chatRoomId, 10)}
-            chatMembers={[]}
-            webSocketService={webSocketService}
-            isAdmin={isAdminPage}
-          />
+          <ChatRoom roomId={chatRoomId} isAdmin={isAdminPage} />
         </ModalContent>
       </ModalContainer>
     </ModalOverlay>

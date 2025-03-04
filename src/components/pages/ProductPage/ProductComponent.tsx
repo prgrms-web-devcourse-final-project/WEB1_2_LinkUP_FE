@@ -39,12 +39,21 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
 
   const { data: wish, isLoading, isError } = useWishQuery();
 
-  const changeLike = (productPostId: number) => {
-    const payload = {
-      productPostId: productPostId,
-    };
+  // 상태를 관리하기 위한 useState 훅. 초기값은 빈 배열로 설정.
+  const [likedProducts, setLikedProducts] = useState<number[]>(
+    () => (wish ? wish.map((item) => item.productPostId) : []) // wish가 존재하면 likedProducts 초기화
+  );
 
-    postWishProduct(payload);
+  const changeLike = async (productPostId: number) => {
+    setLikedProducts(
+      (prev) =>
+        prev.includes(productPostId) // productPostId가 이미 likedProducts에 포함되어 있으면
+          ? prev.filter((id) => id !== productPostId) // 제거
+          : [...prev, productPostId] // 추가
+    );
+
+    // 서버에 좋아요 요청 전송
+    await postWishProduct({ productPostId });
   };
 
   // 선택된 탭이 변경되면 페이지를 1로 초기화
@@ -111,11 +120,7 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
                 </ProductWrapper>
               </StyledLink>
               <LikeButton
-                likes={
-                  wish?.some(
-                    (item) => item.productPostId === product.productPostId
-                  ) || false
-                }
+                likes={likedProducts.includes(product.productPostId)}
                 onClick={() => {
                   changeLike(product.productPostId);
                 }}

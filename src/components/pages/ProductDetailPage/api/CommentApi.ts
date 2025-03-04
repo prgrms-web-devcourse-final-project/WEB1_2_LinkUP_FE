@@ -12,7 +12,9 @@ export const addComment = async (productId: number, payload: Review) => {
 
 export const editComment = async (reviewId: number, payload: Review) => {
   const URL = `/api/review/update/${reviewId}`;
+  console.log(payload);
   const response = await axiosInstance.put(URL, payload);
+
   return response;
 };
 

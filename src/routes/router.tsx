@@ -39,6 +39,7 @@ import DepositPage from '../components/pages/community/DepositPage';
 import ProtectedRoutes from './ProtectedRoutes';
 import ParticipantsForm from '../components/pages/Payment/ParticipantsForm';
 import AuthorForm from '../components/pages/Payment/AuthorForm';
+import PaymentSuccessPage from '../components/pages/Payment/PaymentSuccessPage';
 
 const router = createBrowserRouter(
   [
@@ -79,7 +80,7 @@ const router = createBrowserRouter(
         },
         {
           path: '/products/payment-success/:id',
-          element: <PaymentCompletePage />,
+          element: <PaymentSuccessPage />,
         },
         {
           path: '/products/payment-fail/:id',

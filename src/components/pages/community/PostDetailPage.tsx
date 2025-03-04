@@ -42,9 +42,6 @@ const PostDetailPage: React.FC = () => {
     post?.participationStatus === 'PAYMENT_STANDBY';
   const isNotParticipant = !isParticipant; // isParticipant가 false면 true가 됨
 
-  // SSE 구독 설정
-  // usePostSSE(postId);
-
   // 남은 시간 계산
   const remainingTime = useRemainingTime(post?.communityPost.closeAt, 'close');
   const paymentRemainingTime = useRemainingTime(

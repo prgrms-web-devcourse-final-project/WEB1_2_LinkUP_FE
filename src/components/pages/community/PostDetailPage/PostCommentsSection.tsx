@@ -29,23 +29,29 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
   const { data: post, isLoading, isError } = usePostQuery(communityPostId);
   const queryClient = useQueryClient();
 
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (!newCommentContent.trim()) {
       alert('댓글 내용을 입력해주세요.');
       return;
     }
-    addComment(communityPostId, {
+    if (newCommentContent.length > 300) {
+      alert('댓글은 최대 300자까지만 입력 가능합니다.');
+      return;
+    }
+    await addComment(communityPostId, {
       content: newCommentContent,
       parentId: null,
     });
 
-    setNewCommentContent('');
+    alert('댓글이 등록되었습니다.');
     queryClient.invalidateQueries({ queryKey: ['post', communityPostId] });
+
+    setNewCommentContent('');
   };
 
-  const handleDeleteComment = (commentId: number) => {
+  const handleDeleteComment = async (commentId: number) => {
     if (window.confirm('이 댓글을 삭제하시겠습니까?')) {
-      deleteComment(commentId);
+      await deleteComment(commentId);
     }
     queryClient.invalidateQueries({ queryKey: ['post', communityPostId] });
   };
@@ -55,7 +61,7 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
     setEditContent(content);
   };
 
-  const handleUpdateComment = () => {
+  const handleUpdateComment = async () => {
     if (!editContent.trim()) {
       alert('수정할 댓글 내용을 입력하세요.');
       return;
@@ -64,11 +70,11 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
       alert('댓글은 최대 300자까지만 입력 가능합니다.');
       return;
     }
-    updateComment(editCommentId!, editContent);
-
+    await updateComment(editCommentId!, editContent);
+    alert('댓글이 수정되었습니다.');
+    queryClient.invalidateQueries({ queryKey: ['post', communityPostId] });
     setEditCommentId(null);
     setEditContent('');
-    queryClient.invalidateQueries({ queryKey: ['post', communityPostId] });
   };
 
   return (
@@ -77,7 +83,10 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
         <CommentsHeader>댓글</CommentsHeader>
         <CommentsWrapper>
           {post?.comment?.map((comment) => (
-            <Comment key={comment.id}>
+            <Comment
+              key={comment.id}
+              $isEditing={editCommentId === Number(comment.id)}
+            >
               <CommentHeader>
                 <CommentAuthor>{comment.nickname}</CommentAuthor>
                 <CommentDate>
@@ -89,18 +98,21 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
                   <EditCommentInput
                     value={editContent}
                     onChange={(e) => setEditContent(e.target.value)}
+                    autoFocus
                   />
-                  <ActionButtonsWrapper>
+                  <EditActionButtonsWrapper>
                     <CharacterCount $overLimit={editContent.length > 300}>
                       ({editContent.length}/300)
                     </CharacterCount>
-                    <ActionButton onClick={handleUpdateComment}>
-                      확인
-                    </ActionButton>
-                    <ActionButton onClick={() => setEditCommentId(null)}>
-                      취소
-                    </ActionButton>
-                  </ActionButtonsWrapper>
+                    <EditActionButtons>
+                      <ConfirmEditButton onClick={handleUpdateComment}>
+                        수정 완료
+                      </ConfirmEditButton>
+                      <CancelEditButton onClick={() => setEditCommentId(null)}>
+                        취소
+                      </CancelEditButton>
+                    </EditActionButtons>
+                  </EditActionButtonsWrapper>
                 </EditCommentContainer>
               ) : (
                 <>
@@ -130,7 +142,7 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
               value={newCommentContent}
               onChange={(e) => setNewCommentContent(e.target.value)}
               placeholder="댓글을 입력하세요."
-              maxLength={300} // 브라우저에서 강제 제한
+              maxLength={300}
             />
             <ActionButtonsWrapper>
               <CharacterCount $overLimit={newCommentContent.length > 300}>
@@ -146,6 +158,7 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
     </QueryHandler>
   );
 };
+
 const CommentsContainer = styled.div`
   width: 100%;
   margin-top: 20px;
@@ -171,16 +184,18 @@ const CommentsWrapper = styled.div`
   padding: 0 20px 20px;
 `;
 
-const Comment = styled.li`
+const Comment = styled.li<{ $isEditing?: boolean }>`
   list-style: none;
   padding: 16px;
   border-radius: 10px;
-  background-color: #f8faff;
+  background-color: ${({ $isEditing }) => ($isEditing ? '#f0f7ff' : '#f8faff')};
   display: flex;
   flex-direction: column;
   gap: 8px;
   transition: all 0.2s ease;
-  border: 1px solid #e6f3ff;
+  border: 1px solid ${({ $isEditing }) => ($isEditing ? '#007bff' : '#e6f3ff')};
+  box-shadow: ${({ $isEditing }) =>
+    $isEditing ? '0 2px 8px rgba(0, 123, 255, 0.15)' : 'none'};
 
   &:hover {
     background-color: #f0f7ff;
@@ -301,9 +316,38 @@ const EditCommentInput = styled(CommentInput)`
   background-color: #ffffff;
 `;
 
+const EditActionButtonsWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+`;
+
+const EditActionButtons = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const CancelEditButton = styled(ActionButton)`
+  background: #6c757d;
+
+  &:hover {
+    background: #545b62;
+  }
+`;
+
+const ConfirmEditButton = styled(ActionButton)`
+  background: #28a745;
+
+  &:hover {
+    background: #218838;
+  }
+`;
+
 const CommentActions = styled.div`
   display: flex;
   gap: 8px;
   align-self: flex-end;
 `;
+
 export default PostCommentsSection;

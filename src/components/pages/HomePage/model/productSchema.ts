@@ -1,4 +1,5 @@
 interface Review {
+  reviewId: number;
   content: string;
   rating: number;
   using: boolean;

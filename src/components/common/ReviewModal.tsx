@@ -26,6 +26,20 @@ const ReviewModal = ({ isOpen, onClose, onSubmit }: ReviewModalProps) => {
   const [review, setReview] = useState('');
   const [error, setError] = useState('');
 
+  //입력값 초기화 함수
+  const resetReviewState = () => {
+    setQuestions([
+      {
+        id: 1,
+        text: '구매자와 함께한 공동구매 상품에 대해서 만족하시나요?',
+        rating: null,
+      },
+      { id: 2, text: '구매자의 응답은 친절했나요?', rating: null },
+      { id: 3, text: '구매자와의 소통은 원활하게 진행되었나요?', rating: null },
+    ]);
+    setReview('');
+    setError('');
+  };
   if (!isOpen) return null;
 
   const handleRatingClick = (questionId: number, rating: number) => {
@@ -45,6 +59,12 @@ const ReviewModal = ({ isOpen, onClose, onSubmit }: ReviewModalProps) => {
     }
 
     onSubmit(questions, review);
+    resetReviewState();
+    onClose();
+  };
+
+  const handleClose = () => {
+    resetReviewState();
     onClose();
   };
 
@@ -59,7 +79,7 @@ const ReviewModal = ({ isOpen, onClose, onSubmit }: ReviewModalProps) => {
       <ModalContainer>
         <ModalHeader>
           <Title>서비스 리뷰</Title>
-          <CloseButton onClick={onClose}>✕</CloseButton>
+          <CloseButton onClick={handleClose}>✕</CloseButton>
         </ModalHeader>
 
         {questions.map((question) => (
@@ -91,7 +111,7 @@ const ReviewModal = ({ isOpen, onClose, onSubmit }: ReviewModalProps) => {
         {error && <ErrorMessage>{error}</ErrorMessage>}
 
         <ButtonContainer>
-          <CancelButton onClick={onClose}>취소</CancelButton>
+          <CancelButton onClick={handleClose}>취소</CancelButton>
           <SubmitButton onClick={handleSubmit}>제출하기</SubmitButton>
         </ButtonContainer>
       </ModalContainer>

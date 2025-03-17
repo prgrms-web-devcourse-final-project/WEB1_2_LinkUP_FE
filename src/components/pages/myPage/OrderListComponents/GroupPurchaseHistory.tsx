@@ -2,11 +2,36 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { getCommunity, GroupPurchaseType } from '../../../../api/mypageApi';
+import ReviewModal, { Question } from '../../../common/ReviewModal';
+import { reviewUser } from '../../../../api/reviewApi';
 
 const GroupPurchaseHistory = () => {
   const [groupPurchaseList, setGroupPurchaseList] = useState<
     GroupPurchaseType[]
   >([]);
+
+  //사용자 리뷰 모달
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  // 리뷰 제출
+  const handleSubmit = async (ratings: Question[], review: string) => {
+    const reviewContent = {
+      reviewerId: 2,
+      hostId: 2,
+      question1Score: ratings[0]?.rating ?? null,
+      question2Score: ratings[1]?.rating ?? null,
+      question3Score: ratings[2]?.rating ?? null,
+      content: review,
+    };
+
+    try {
+      await reviewUser(reviewContent);
+      alert('리뷰가 성공적으로 제출되었습니다.');
+      setIsModalOpen(false); // 모달 닫기
+    } catch {
+      alert('리뷰 제출에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -62,15 +87,17 @@ const GroupPurchaseHistory = () => {
               >
                 상품 페이지 이동
               </ActionButton>
-              {groupPurchase.status === 'APPROVED' && (
+              {(groupPurchase.status === 'APPROVED' ||
+                groupPurchase.status === 'PAYMENT_COMPLETED') && (
                 <>
                   <QRCodeButton>QR 코드 확인</QRCodeButton>
-                  <ReviewLink>
+                  <ReviewLink onClick={() => setIsModalOpen(true)}>
                     <ReviewIcon src="/images/qricon.png" alt="review icon" />
                     <span>리뷰 작성하기</span>
                   </ReviewLink>
                 </>
               )}
+
               {groupPurchase.status === 'NOT_APPROVED' && (
                 <>
                   <CancelButton>주문 취소하기</CancelButton>
@@ -79,6 +106,11 @@ const GroupPurchaseHistory = () => {
             </Actions>
           </GroupPurchaseItem>
         ))}
+        <ReviewModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleSubmit}
+        />
       </OrderList>
     </Container>
   );

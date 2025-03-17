@@ -56,7 +56,7 @@ const ChatRoomModal: React.FC<ChatRoomModalProps> = ({
     <ModalOverlay>
       <ModalContainer>
         <ModalHeader>
-          <ModalTitle>채팅방 제목목</ModalTitle>
+          <ModalTitle>채팅방 제목</ModalTitle>
           <HeaderButtons>
             {/* 삭제 버튼: 관리자 채팅방 관리 페이지에서만 보이도록 조건부 렌더링 */}
             {isChatAdminPage && (

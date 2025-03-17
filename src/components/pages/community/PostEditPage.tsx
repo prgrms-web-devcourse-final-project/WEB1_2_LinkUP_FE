@@ -297,16 +297,10 @@ const PostEditPage: React.FC = () => {
                       <RemoveImageButton onClick={handleRemoveImage}>
                         <FaMinusCircle size={30} />
                       </RemoveImageButton>
-
-                      {/* 추가된 부분 */}
                     </ImagePreview>
                   )}{' '}
                 </ImagePreviewWrapper>
-                <ReUploadText>
-                  {imageUrls.length > 0
-                    ? '이미지는 삭제 후 다시 업로드해주세요.'
-                    : ''}
-                </ReUploadText>{' '}
+                <ReUploadText>{'이미지는 다시 업로드해주세요.'}</ReUploadText>{' '}
                 <PaginationDotsWrapper>
                   {imageUrls.length > 0 && (
                     <PaginationDots>

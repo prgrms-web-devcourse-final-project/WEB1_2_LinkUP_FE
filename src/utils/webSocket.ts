@@ -5,8 +5,8 @@ class WebSocketService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private stompClient: any;
 
-  connect(url: string, onConnect: () => void) {
-    const socket = new SockJS(url);
+  connect(onConnect: () => void) {
+    const socket = new SockJS('/websocket');
     this.stompClient = Stomp.over(socket);
 
     this.stompClient.connect({}, (frame: string) => {

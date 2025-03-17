@@ -23,10 +23,12 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, '/api'),
         },
+
         '/websocket': {
-          target: 'http://15.164.5.135',
+          target: env.VITE_WEBSOCKET_URL,
           ws: true,
           changeOrigin: true,
+          secure: false,
         },
       },
     },

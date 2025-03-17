@@ -61,7 +61,8 @@ export const sendMessage = (
     time: formatDateWithOffset(new Date().toISOString()),
   };
 
-  webSocketService.send(`/pub/message/${chatRoomId}`, payload);
+  // JSON.stringify()로 문자열 변환
+  webSocketService.send(`/pub/message/${chatRoomId}`, JSON.stringify(payload));
 };
 
 // 채팅 메시지 구독
@@ -70,7 +71,7 @@ export const subscribeToChatMessages = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   callback: (message: any) => void
 ) => {
-  webSocketService.subscribe(`/sub/message/${chatRoomId}`, callback, true);
+  webSocketService.subscribe(`/sub/message/${chatRoomId}`, callback);
 };
 
 // 채팅 메시지 구독 취소

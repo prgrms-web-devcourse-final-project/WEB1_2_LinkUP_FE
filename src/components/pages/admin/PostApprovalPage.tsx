@@ -9,6 +9,7 @@ import { getImageSrc } from '../../../utils/GetImageSrc';
 import { formatDateWithOffset } from '../../../utils/formatDate';
 import { usePostQuery } from '../../../hooks/useGetPost';
 import { QueryHandler } from '../../../hooks/useGetProduct';
+import { FiImage } from 'react-icons/fi';
 
 const PostApprovalPage = () => {
   const { communityPostId } = useParams<{ communityPostId: string }>();
@@ -18,6 +19,19 @@ const PostApprovalPage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { data: post, isLoading, isError } = usePostQuery(postId);
 
+  // 이미지 오류 처리
+  interface ErrorIndices {
+    [key: number]: boolean;
+  }
+  const [errorIndices, setErrorIndices] = useState<ErrorIndices>({});
+
+  // 이미지 오류 처리 함수
+  const handleImageError = (index: number) => {
+    setErrorIndices((prev) => ({
+      ...prev,
+      [index]: true,
+    }));
+  };
   const handleNextImage = () => {
     if (post)
       setCurrentIndex(
@@ -103,12 +117,17 @@ const PostApprovalPage = () => {
                   </PreviousButtonWrapper>
 
                   <ImagePreview>
-                    <img
-                      src={getImageSrc(
-                        post?.communityPost.imageUrls[currentIndex]
-                      )}
-                      alt="이미지 미리보기"
-                    />
+                    {errorIndices[currentIndex] ? (
+                      <FiImage size={260} color="#cccccc" />
+                    ) : (
+                      <img
+                        src={getImageSrc(
+                          post?.communityPost.imageUrls[currentIndex]
+                        )}
+                        alt="이미지 미리보기"
+                        onError={() => handleImageError(currentIndex)}
+                      />
+                    )}
                   </ImagePreview>
 
                   <NextButtonWrapper>

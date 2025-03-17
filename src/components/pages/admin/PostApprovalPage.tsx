@@ -74,7 +74,7 @@ const PostApprovalPage = () => {
   if (!post) {
     return <div>Loading...</div>;
   }
-  console.log(post.communityPost.imageUrls);
+
   return (
     <QueryHandler isLoading={isLoading} isError={isError}>
       <PageContainer>

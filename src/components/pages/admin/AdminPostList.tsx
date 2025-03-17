@@ -7,6 +7,7 @@ import { AdminPost } from '../../../types/postTypes';
 import { getImageSrc } from '../../../utils/GetImageSrc';
 import Pagination from '../../common/Pagination';
 import { formatDateWithOffset } from '../../../utils/formatDate';
+import PostImage from '../../common/PostImage';
 
 interface PostListProps {
   selectedCategory: string;
@@ -72,7 +73,8 @@ const AdminPostList: React.FC<PostListProps> = ({
           >
             <PostImage
               src={getImageSrc(post.imageUrls[0])}
-              alt={`post.title`}
+              imageUrls={post.imageUrls}
+              alt={post.title}
             />
             <PostContent>
               <PostTitle>글 제목 : {post.title}</PostTitle>
@@ -133,13 +135,6 @@ const PostItem = styled.div`
   }
 `;
 
-const PostImage = styled.img`
-  width: 172px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-right: 16px;
-`;
 const PostContent = styled.div`
   flex: 1;
   display: flex;

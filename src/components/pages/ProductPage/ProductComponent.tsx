@@ -86,48 +86,58 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
         </RecommendTitle>
 
         <CardWrapper>
-          {currentProducts.map((product) => (
-            <Card
-              key={product.productPostId}
-              selected={selectedText === '판매 상품'}
-            >
-              <StyledLink to={`/products/${product.productPostId}`}>
-                <ProductImg
-                  src={product.url || DEFAULT_IMG}
-                  alt={product.name}
-                  onError={(e) => {
-                    e.currentTarget.src = DEFAULT_IMG;
+          {currentProducts.length === 0 ? (
+            <NoProductMessage>
+              {selectedText === '판매 상품'
+                ? '현재 판매 상품이 없습니다.'
+                : '현재 마감 상품이 없습니다.'}
+            </NoProductMessage>
+          ) : (
+            currentProducts.map((product) => (
+              <Card
+                key={product.productPostId}
+                selected={selectedText === '판매 상품'}
+              >
+                <StyledLink to={`/products/${product.productPostId}`}>
+                  <ProductImg
+                    src={product.url || DEFAULT_IMG}
+                    alt={product.name}
+                    onError={(e) => {
+                      e.currentTarget.src = DEFAULT_IMG;
+                    }}
+                  />
+                  <ProductWrapper>
+                    <ProductName>{product.name}</ProductName>
+                    <ProductStar>
+                      <StarRating rating={product.rating} />
+                    </ProductStar>
+                    <PriceWrapper>
+                      {product.available ? (
+                        <>
+                          <OriginalPrice>
+                            {product.originalprice}원
+                          </OriginalPrice>
+                          <DiscountedPrice>
+                            {product.discountprice}원
+                          </DiscountedPrice>
+                        </>
+                      ) : (
+                        <UnavailablePrice>∞ (판매 종료)</UnavailablePrice>
+                      )}
+                    </PriceWrapper>
+                  </ProductWrapper>
+                </StyledLink>
+                <LikeButton
+                  likes={likedProducts.includes(product.productPostId)}
+                  onClick={() => {
+                    changeLike(product.productPostId);
                   }}
                 />
-                <ProductWrapper>
-                  <ProductName>{product.name}</ProductName>
-                  <ProductStar>
-                    {' '}
-                    <StarRating rating={product.rating} />
-                  </ProductStar>
-                  <PriceWrapper>
-                    {product.available ? (
-                      <>
-                        <OriginalPrice>{product.originalprice}원</OriginalPrice>
-                        <DiscountedPrice>
-                          {product.discountprice}원
-                        </DiscountedPrice>
-                      </>
-                    ) : (
-                      <UnavailablePrice>∞ (판매 종료)</UnavailablePrice>
-                    )}
-                  </PriceWrapper>
-                </ProductWrapper>
-              </StyledLink>
-              <LikeButton
-                likes={likedProducts.includes(product.productPostId)}
-                onClick={() => {
-                  changeLike(product.productPostId);
-                }}
-              />
-            </Card>
-          ))}
+              </Card>
+            ))
+          )}
         </CardWrapper>
+
         {totalPages > 1 && (
           <PagenationWrapper>
             <Pagination
@@ -148,6 +158,14 @@ const Recommend = styled.div`
   width: 80%;
   height: auto;
   margin: 0 auto;
+`;
+const NoProductMessage = styled.div`
+  width: 100%;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: gray;
+  margin: 50px 0;
 `;
 
 const RecommendTitle = styled.h2`

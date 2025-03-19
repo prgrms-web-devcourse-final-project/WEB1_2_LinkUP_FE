@@ -3,35 +3,47 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 interface AuthContextType {
   isLoggedIn: boolean;
   isAdmin: boolean;
-  login: () => void;
+  login: (token: string, role: string) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    !!sessionStorage.getItem('token')
+  );
+  const [isAdmin, setIsAdmin] = useState(
+    sessionStorage.getItem('role') === 'ROLE_ADMIN'
+  );
+
   const checkAuthStatus = () => {
-    const token = localStorage.getItem('token');
-    const userRole = localStorage.getItem('role');
-    setIsLoggedIn(!!token);
-    setIsAdmin(userRole === 'ROLE_ADMIN');
+    const token = sessionStorage.getItem('token');
+    const userRole = sessionStorage.getItem('role');
+
+    if (token) {
+      setIsLoggedIn(true);
+      setIsAdmin(userRole === 'ROLE_ADMIN');
+    } else {
+      setIsLoggedIn(false);
+      setIsAdmin(false);
+    }
   };
 
   useEffect(() => {
     checkAuthStatus();
-  }, [isLoggedIn]);
+  }, []);
 
-  const login = () => {
+  const login = (token: string, role: string) => {
+    sessionStorage.setItem('token', token);
+    sessionStorage.setItem('role', role);
     setIsLoggedIn(true);
-    const userRole = localStorage.getItem('role');
-    setIsAdmin(userRole === 'ROLE_ADMIN');
+    setIsAdmin(role === 'ROLE_ADMIN');
   };
 
   const logout = () => {
-    localStorage.removeItem('role');
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('role');
     setIsLoggedIn(false);
     setIsAdmin(false);
   };

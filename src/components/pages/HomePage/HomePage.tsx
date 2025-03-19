@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import RecommendProduct from './RecommendProduct';
 import PopularProduct from './PopularProduct';
@@ -8,9 +8,9 @@ import ScrollToTopButton from '../../common/ScrollToTopButton';
 import { QueryHandler, useProductsQuery } from '../../../hooks/useGetProduct';
 import { Link } from 'react-router-dom';
 import { categories } from './model/categories';
-import ChatRoomModal from '../community/modal/ChatRoomModal';
+// import ChatRoomModal from '../community/modal/ChatRoomModal';
 
-import { useChatQuery } from '../../../hooks/useGetChatRoom';
+// import { useChatQuery } from '../../../hooks/useGetChatRoom';
 
 const HomePage: React.FC = () => {
   const { data: products, isLoading, isError } = useProductsQuery();
@@ -26,18 +26,18 @@ const HomePage: React.FC = () => {
   )[0];
 
   // 채팅방 테스트
-  const roomId = 5;
-  const {
-    data: chats,
-    isLoading: LoadingChat,
-    isError: ErrorChat,
-  } = useChatQuery();
-  console.log(chats);
-  const [isModalOpenc, setModalOpenc] = useState(false);
+  // const roomId = 5;
+  // const {
+  //   data: chats,
+  //   isLoading: LoadingChat,
+  //   isError: ErrorChat,
+  // } = useChatQuery();
+  // console.log(chats);
+  // const [isModalOpenc, setModalOpenc] = useState(false);
   return (
     <>
       <QueryHandler isLoading={isLoading} isError={isError}>
-        <button onClick={() => setModalOpenc(true)}>채팅 작성하기</button>
+        {/* <button onClick={() => setModalOpenc(true)}>채팅 작성하기</button>
 
         <QueryHandler isLoading={LoadingChat} isError={ErrorChat}>
           <ChatRoomModal
@@ -46,7 +46,7 @@ const HomePage: React.FC = () => {
             onClose={() => setModalOpenc(false)}
             isAdminPage={true}
           />
-        </QueryHandler>
+        </QueryHandler> */}
         <ContainerBox>
           <Container>
             <StyledLink to={`/products/${popularProduct?.productPostId}`}>

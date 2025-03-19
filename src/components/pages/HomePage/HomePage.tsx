@@ -15,7 +15,10 @@ import { categories } from './model/categories';
 const HomePage: React.FC = () => {
   const { data: products, isLoading, isError } = useProductsQuery();
   const availableProduct = products?.filter(
-    (p) => p.available === true && new Date(p.deadline) > new Date()
+    (p) =>
+      p.available === true &&
+      new Date(p.deadline) > new Date() &&
+      p.discountprice > 1
   );
 
   //할인율이 가장 높은 물건을 인기 상품으로

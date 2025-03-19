@@ -28,7 +28,10 @@ const ProductDetail: React.FC = () => {
   const { quantity, setQuantity } = useQuantity();
   const [remainingTime, setRemainingTime] = useState('');
   const navigate = useNavigate();
-  const isOutOfStock = product ? product.currentStock < 0 : false;
+  const isSoldOut = product
+    ? product.initstock - product.currentStock >= product.initstock
+    : false;
+  const isOutOfStock = product ? product.currentStock <= 0 || isSoldOut : false;
   const isDeadlinePassed = remainingTime === '마감되었습니다.';
   const isButtonDisabled = isOutOfStock || isDeadlinePassed;
   useEffect(() => {
@@ -149,6 +152,7 @@ const ProductDetail: React.FC = () => {
                 <StockStatus>
                   {product.initstock - product.currentStock} /{' '}
                   {product.initstock} 구매됨
+                  {isOutOfStock && <SoldOutBadge>재고 소진</SoldOutBadge>}
                 </StockStatus>
               </StockWrapper>
               <ActionWrapper>
@@ -309,7 +313,16 @@ const RemainingCount = styled.div`
     width: 220px;
   }
 `;
-
+const SoldOutBadge = styled.span`
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 8px;
+  background-color: #ef4444;
+  color: white;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 12px;
+`;
 const Description = styled.p`
   margin-bottom: 30px;
   line-height: 1.6;

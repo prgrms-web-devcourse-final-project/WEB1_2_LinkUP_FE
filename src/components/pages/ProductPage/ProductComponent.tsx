@@ -20,19 +20,24 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
   products,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedText, setSelectedText] = useState<'판매 상품' | '마감 상품'>(
-    '판매 상품'
-  );
+  const [selectedText, setSelectedText] = useState<
+    '판매 상품' | '기한 마감 상품'
+  >('판매 상품');
   const PRODUCT_PER_PAGE = 16;
-
+  console.log(products);
   const startIndex = (currentPage - 1) * PRODUCT_PER_PAGE;
   const filteredProducts =
-    selectedText === '마감 상품'
+    selectedText === '기한 마감 상품'
       ? products.filter(
-          (p) => p.available === false || new Date(p.deadline) < new Date()
+          (p) =>
+            p.available === false ||
+            (new Date(p.deadline) < new Date() && p.discountprice > 1)
         )
       : products.filter(
-          (p) => p.available === true && new Date(p.deadline) > new Date()
+          (p) =>
+            p.available === true &&
+            new Date(p.deadline) > new Date() &&
+            p.discountprice > 1
         );
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCT_PER_PAGE);
@@ -76,10 +81,10 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
               판매 상품
             </Text>
             <Text
-              selected={selectedText === '마감 상품'}
-              onClick={() => setSelectedText('마감 상품')}
+              selected={selectedText === '기한 마감 상품'}
+              onClick={() => setSelectedText('기한 마감 상품')}
             >
-              마감 상품
+              기한 마감 상품
             </Text>
           </TextWrapper>
           {input ? `${input}에 대한 검색 결과` : ''}
@@ -90,7 +95,7 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
             <NoProductMessage>
               {selectedText === '판매 상품'
                 ? '현재 판매 상품이 없습니다.'
-                : '현재 마감 상품이 없습니다.'}
+                : '현재 기한 마감 상품이 없습니다.'}
             </NoProductMessage>
           ) : (
             currentProducts.map((product) => (

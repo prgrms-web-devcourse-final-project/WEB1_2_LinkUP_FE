@@ -79,8 +79,15 @@ const SignInPage = () => {
               password: pw,
             });
             if (response.status === 200) {
-              login();
-              navigate('/');
+              const token =
+                response.headers['authorization'] ||
+                response.headers['Authorization'];
+              const role = response.data.roles;
+
+              if (token) {
+                login(token, role);
+                navigate('/');
+              }
             } else {
               alert('틀렸습니다.');
             }

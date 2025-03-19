@@ -25,6 +25,7 @@ const ProductDetail: React.FC = () => {
   }
 
   const { data: product, isLoading, isError } = useProductQuery(productId || 0);
+  console.log(product);
   const { quantity, setQuantity } = useQuantity();
   const [remainingTime, setRemainingTime] = useState('');
   const navigate = useNavigate();

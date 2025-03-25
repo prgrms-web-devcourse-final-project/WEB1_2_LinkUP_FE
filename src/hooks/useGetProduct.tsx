@@ -1,7 +1,10 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getProductbyId } from '../components/pages/ProductDetailPage/api/productDetailApi';
-import { getProducts } from '../components/pages/HomePage/api/productApi';
+import {
+  getProducts,
+  getWishProducts,
+} from '../components/pages/HomePage/api/productApi';
 
 // 제품 ID로 제품 정보를 가져오는 훅
 export const useProductQuery = (id: number) => {
@@ -16,6 +19,14 @@ export const useProductsQuery = () => {
   return useQuery({
     queryKey: ['products'],
     queryFn: getProducts,
+  });
+};
+
+// 모든 찜 제품을 가져오는 훅
+export const useWishQuery = () => {
+  return useQuery({
+    queryKey: ['wish'],
+    queryFn: getWishProducts,
   });
 };
 

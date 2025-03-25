@@ -1,31 +1,33 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { handlePayment } from './api/paymentApi';
-import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
+import { handleCommunityPayment } from './api/paymentApi';
+import { QueryHandler } from '../../../hooks/useGetProduct';
 import { useQuantity } from '../../../context/QuantityContext';
+import { usePostQuery } from '../../../hooks/useGetPost';
 import { useDaumPostcodePopup } from 'react-daum-postcode';
 
-const PaymentForm = () => {
+const AuthorForm = () => {
   const { quantity } = useQuantity();
   const { id } = useParams();
   const postcodeScriptUrl =
     'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
   const open = useDaumPostcodePopup(postcodeScriptUrl);
 
-  const productId = useMemo(() => {
+  const postId = useMemo(() => {
     if (!id || isNaN(Number(id))) {
       return null;
     }
     return Number(id);
   }, [id]);
 
-  if (!productId) {
-    return <p>잘못된 상품 ID입니다.</p>;
+  if (!postId) {
+    return <p>잘못된 게시글 ID입니다.</p>;
   }
-  const { data: product, isLoading, isError } = useProductQuery(productId);
-  if (!product) {
-    return <p>해당 상품을 찾을 수 없습니다.</p>;
+
+  const { data: post, isLoading, isError } = usePostQuery(postId);
+  if (!post) {
+    return <p>해당 게시글을 찾을 수 없습니다.</p>;
   }
 
   const [userName, setName] = useState('');
@@ -49,7 +51,7 @@ const PaymentForm = () => {
       return false;
     }
     if (!basicAddress.trim()) {
-      alert('기본 주소를 입력해주세요.');
+      alert('주소를 입력해주세요.');
       return false;
     }
     if (!detailAddress.trim()) {
@@ -68,29 +70,21 @@ const PaymentForm = () => {
   };
 
   const payload = {
-    productName: product.name,
-    url: product.url,
-    price: product.discountprice * quantity,
-    quantity: quantity,
-    payMethod: payment,
-    deliveryRequestDTO: {
-      name: userName,
-      address: {
-        street: basicAddress,
-        detail: detailAddress,
-      },
-      needed: needed,
-    },
+    recipientName: userName,
+    recipientAddress: `${basicAddress} ${detailAddress}`,
+    deliveryRequest: needed,
   };
+
   const handleRadio = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPayment(e.target.value);
   };
+
   const onPaymentSubmit = async () => {
     if (!validateForm()) {
       return;
     }
     try {
-      const paymentResult = await handlePayment(productId, payload);
+      const paymentResult = await handleCommunityPayment(postId, payload);
       window.location.href = paymentResult;
     } catch (e) {
       alert(`결제에 실패하였습니다 ${e}`);
@@ -102,18 +96,20 @@ const PaymentForm = () => {
       <QueryHandler isLoading={isLoading} isError={isError}>
         <Container>
           <Section>
-            <Title>주문 상품 정보</Title>
+            <Title>공구 모집 상품 정보</Title>
             <ContentBox>
               <FlexRow>
-                <ProductName>{product.name}</ProductName>
-                <Price>{product.discountprice}원</Price>
+                <ProductName>{post.communityPost.title}</ProductName>
+                <Price>{post.communityPost.unitAmount}원</Price>
               </FlexRow>
               <FlexRow>
                 <Quantity>수량 : {quantity}</Quantity>
               </FlexRow>
               <TotalRow>
                 <span>합계:</span>
-                <TotalPrice>{product.discountprice * quantity}원</TotalPrice>
+                <TotalPrice>
+                  {post.communityPost.unitAmount * quantity}원
+                </TotalPrice>
               </TotalRow>
             </ContentBox>
           </Section>
@@ -134,6 +130,7 @@ const PaymentForm = () => {
                   </InputWrapper>
                 </Label>
               </FormGroup>
+
               <FormGroup>
                 <Label>배송지</Label>
                 <InputWrapper>
@@ -154,6 +151,7 @@ const PaymentForm = () => {
                   />
                 </InputWrapper>
               </FormGroup>
+
               <FormGroup>
                 <Label>
                   배송 시 요청사항
@@ -181,21 +179,15 @@ const PaymentForm = () => {
                     value="카드"
                     onChange={handleRadio}
                   />
-                  <RadioText>카드 결제</RadioText>
+                  <RadioText>가상계좌 입금</RadioText>
                 </RadioLabel>
               </RadioGroup>
             </ContentBox>
           </Section>
 
           <ButtonGroup>
-            <PayButton
-              onClick={() => {
-                onPaymentSubmit();
-              }}
-            >
-              결제하기
-            </PayButton>
-            <BackButton to={`/products/${product.id}`}>뒤로 가기</BackButton>
+            <PayButton onClick={onPaymentSubmit}>결제하기</PayButton>
+            <BackButton to={`/community/post/${postId}`}>뒤로 가기</BackButton>
           </ButtonGroup>
         </Container>
       </QueryHandler>
@@ -416,4 +408,4 @@ const PayButton = styled(Button)`
   }
 `;
 
-export default PaymentForm;
+export default AuthorForm;

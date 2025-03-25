@@ -8,25 +8,54 @@ import ScrollToTopButton from '../../common/ScrollToTopButton';
 import { QueryHandler, useProductsQuery } from '../../../hooks/useGetProduct';
 import { Link } from 'react-router-dom';
 import { categories } from './model/categories';
+// import ChatRoomModal from '../community/modal/ChatRoomModal';
+
+// import { useChatQuery } from '../../../hooks/useGetChatRoom';
 
 const HomePage: React.FC = () => {
   const { data: products, isLoading, isError } = useProductsQuery();
   const availableProduct = products?.filter(
-    (p) => p.available === true && new Date(p.deadline) > new Date()
+    (p) =>
+      p.available === true &&
+      new Date(p.deadline) > new Date() &&
+      p.discountprice > 1
   );
+
+  //할인율이 가장 높은 물건을 인기 상품으로
   const popularProduct = availableProduct?.sort(
-    (a, b) => b.currentStock - a.currentStock
+    (a, b) =>
+      (b.originalprice - b.discountprice) / b.originalprice -
+      (a.originalprice - a.discountprice) / a.originalprice
   )[0];
 
+  // 채팅방 테스트
+  // const roomId = 5;
+  // const {
+  //   data: chats,
+  //   isLoading: LoadingChat,
+  //   isError: ErrorChat,
+  // } = useChatQuery();
+  // console.log(chats);
+  // const [isModalOpenc, setModalOpenc] = useState(false);
   return (
     <>
       <QueryHandler isLoading={isLoading} isError={isError}>
+        {/* <button onClick={() => setModalOpenc(true)}>채팅 작성하기</button>
+
+        <QueryHandler isLoading={LoadingChat} isError={ErrorChat}>
+          <ChatRoomModal
+            chatRoomId={roomId}
+            isOpen={isModalOpenc}
+            onClose={() => setModalOpenc(false)}
+            isAdminPage={true}
+          />
+        </QueryHandler> */}
         <ContainerBox>
           <Container>
-            <StyledLink to={`/products/${popularProduct?.id}`}>
+            <StyledLink to={`/products/${popularProduct?.productPostId}`}>
               {' '}
               <PopularProduct
-                popular={popularProduct}
+                productId={popularProduct?.productPostId}
                 category={popularProduct?.category}
               />
             </StyledLink>

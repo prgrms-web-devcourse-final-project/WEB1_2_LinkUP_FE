@@ -1,4 +1,29 @@
 export interface Post {
+  communityPost: {
+    communityPostId: number;
+    title: string;
+    totalAmount: number;
+    description: string;
+    productUrl: string;
+    category: string;
+    availableNumber: number;
+    createdAt: string;
+    period: number;
+    closeAt: string;
+    unitAmount: number;
+    imageUrls: string[];
+    status: POST_STATUS;
+    userId: number;
+    nickname: string;
+    paymentDeadline?: string;
+    stateUpdatedAt?: string;
+  };
+  comment?: Comment[];
+  participationStatus: string;
+  isWriter: boolean;
+  remainQuantity: number;
+}
+export interface AdminPost {
   communityPostId: number;
   title: string;
   totalAmount: number;
@@ -10,7 +35,7 @@ export interface Post {
   period: number;
   closeAt: string;
   unitAmount: number;
-  imageUrls: File[];
+  imageUrls: string[];
   status: POST_STATUS;
   userId: number;
   nickname: string;
@@ -18,7 +43,6 @@ export interface Post {
   stateUpdatedAt?: string;
   comments?: Comment[];
 }
-
 // 포스트 상태 타입
 export enum POST_STATUS {
   NOT_APPROVED = 'NOT_APPROVED',
@@ -78,8 +102,10 @@ export interface SSEEvent {
 export interface Comment {
   id: number;
   userId: number;
-  userNickname: string;
-  commentId: string;
+  communityPostId: number;
+  nickname: string;
+  profile: string;
   createdAt: string;
+  parentId: number | null;
   content: string;
 }

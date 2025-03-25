@@ -72,17 +72,19 @@ export const postSignUpLast = async (profile: File | null) => {
 
   return response.data;
 };
-
 export const postSignIn = async (body: { email: string; password: string }) => {
   const response = await axiosInstance.post(`/users/login`, body);
-
   const token =
     response.headers['authorization'] || response.headers['Authorization'];
   const role = response.data.roles;
+  const userId = response.data.userid;
+
   if (token) {
-    localStorage.setItem('token', token);
-    localStorage.setItem('role', role);
+    sessionStorage.setItem('token', token); // ✅ sessionStorage 사용
+    sessionStorage.setItem('role', role);
+    sessionStorage.setItem('userid', userId);
   }
+
   return response;
 };
 

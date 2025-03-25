@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ChatRoomModal from '../community/modal/ChatRoomModal'; // 기존 채팅 모달 컴포넌트
 import Pagination from '../../common/Pagination'; // 기존 페이지네이션 컴포넌트
-import { fetchAllChatRooms } from '../community/api/chatApi';
+import { fetchAllChatRooms } from '../../../api/chatApi';
 import { FaBackspace } from 'react-icons/fa';
 import { webSocketService } from '../../../utils/webSocket';
 
@@ -24,7 +24,7 @@ const ChatRoomManagementPage = () => {
 
   // URL에서 chatRoomId 동적으로 가져오기
   const urlParams = new URLSearchParams(location.search);
-  const roomId = urlParams.get('roomId'); // URL에서 roomId 가져오기
+  const roomId = Number(urlParams.get('roomId')); // URL에서 roomId 가져오기
 
   // 총 페이지 수 계산
   const totalPages = Math.ceil(chatRooms.length / ITEMS_PER_PAGE);
@@ -86,8 +86,7 @@ const ChatRoomManagementPage = () => {
             <ChatRoomModal
               chatRoomId={roomId} // roomId는 URL에서 가져옴
               chatRoomTitle={
-                chatRooms.find((room) => room.postId.toString() === roomId)
-                  ?.roomName || ''
+                chatRooms.find((room) => room.postId === roomId)?.roomName || ''
               }
               isOpen={isModalOpen}
               onClose={closeModal}

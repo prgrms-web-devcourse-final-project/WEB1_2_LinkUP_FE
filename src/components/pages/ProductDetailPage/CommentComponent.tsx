@@ -1,26 +1,22 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { addComment, deleteComment, editComment } from './api/commentApi';
+import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface CommentProps {
-  initReviews: Array<{ content: string; rating: number; using: boolean }>;
   productId: number;
 }
 
-const CommentComponent: React.FC<CommentProps> = ({
-  initReviews,
-  productId,
-}) => {
-  const [reviews, setReviews] = useState(initReviews);
+const CommentComponent: React.FC<CommentProps> = ({ productId }) => {
+  const queryClient = useQueryClient();
+  const { data: product, isLoading, isError } = useProductQuery(productId || 0);
   const [newComment, setNewComment] = useState('');
   const [newCommentStar, setNewCommentStar] = useState(5);
   const [visibleCount, setVisibleCount] = useState(10);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingText, setEditingText] = useState('');
   const [editingRating, setEditingRating] = useState(5);
-  const activeReviewsWithIndex = reviews
-    .map((review, index) => ({ ...review, originalIndex: index }))
-    .filter((review) => review.using === true);
 
   const handleShowMore = () => {
     setVisibleCount((prevCount) => prevCount + 10);
@@ -33,19 +29,13 @@ const CommentComponent: React.FC<CommentProps> = ({
         content: newComment,
         rate: newCommentStar,
       });
+      alert('댓글이 등록되었습니다.');
+      queryClient.invalidateQueries({ queryKey: ['product', productId] });
 
-      setReviews((prevReviews) => [
-        ...prevReviews,
-        {
-          content: newComment,
-          rating: newCommentStar,
-          using: true,
-        },
-      ]);
       setNewComment('');
       setNewCommentStar(5);
     } catch {
-      alert('현재 댓글을 작성할 수 없는 상태입니다.');
+      alert('현재 댓글을 작성할 수 없습니다.');
     }
   };
 
@@ -59,29 +49,20 @@ const CommentComponent: React.FC<CommentProps> = ({
     setEditingRating(rating);
   };
 
-  const handleUpdateComment = async (activeIndex: number) => {
+  const handleUpdateComment = async (reviewId: number) => {
     try {
-      const originalIndex = activeReviewsWithIndex[activeIndex].originalIndex;
-      const reviewId = originalIndex + 1;
-
       await editComment(reviewId, {
         content: editingText,
         rate: editingRating,
       });
-
-      setReviews((prevReviews) =>
-        prevReviews.map((review, index) =>
-          index === originalIndex
-            ? { ...review, content: editingText, rating: editingRating }
-            : review
-        )
-      );
+      alert('댓글이 수정되었습니다.');
+      queryClient.invalidateQueries({ queryKey: ['product', productId] });
 
       setEditingId(null);
       setEditingText('');
       setEditingRating(5);
     } catch {
-      alert('현재 댓글을 수정할 수 없는 상태입니다.');
+      alert('현재 댓글을 수정할 수 없습니다.');
     }
   };
 
@@ -91,114 +72,115 @@ const CommentComponent: React.FC<CommentProps> = ({
     setEditingRating(5);
   };
 
-  const handleDeleteComment = async (activeIndex: number) => {
+  const handleDeleteComment = async (reviewId: number) => {
     try {
-      const originalIndex = activeReviewsWithIndex[activeIndex].originalIndex;
-      const reviewId = originalIndex + 1;
-
-      await deleteComment(reviewId);
-
-      setReviews((prevReviews) =>
-        prevReviews.map((review, index) =>
-          index === originalIndex ? { ...review, using: false } : review
-        )
-      );
+      if (window.confirm('이 댓글을 삭제하시겠습니까?')) {
+        await deleteComment(reviewId);
+      }
+      queryClient.invalidateQueries({ queryKey: ['product', productId] });
     } catch {
-      alert('현재 댓글을 삭제할 수 없는 상태입니다.');
+      alert('현재 댓글을 삭제할 수 없습니다.');
     }
   };
 
   return (
-    <CommentSection>
-      <CommentForm onSubmit={handleCommentSubmit}>
-        <CommentInputWrapper>
-          <CommentInput
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="댓글을 입력하세요"
-          />
-          <StarSelector
-            value={newCommentStar}
-            onChange={(e) => setNewCommentStar(Number(e.target.value))}
-          >
-            {[1, 2, 3, 4, 5].map((num) => (
-              <option key={num} value={num}>
-                {'⭐'.repeat(num)}
-              </option>
+    <QueryHandler isLoading={isLoading} isError={isError}>
+      <CommentSection>
+        <CommentForm onSubmit={handleCommentSubmit}>
+          <CommentInputWrapper>
+            <CommentInput
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="댓글을 입력하세요"
+            />
+            <StarSelector
+              value={newCommentStar}
+              onChange={(e) => setNewCommentStar(Number(e.target.value))}
+            >
+              {[1, 2, 3, 4, 5].map((num) => (
+                <option key={num} value={num}>
+                  {'⭐'.repeat(num)}
+                </option>
+              ))}
+            </StarSelector>
+            <CommentSubmitButton type="submit">댓글 달기</CommentSubmitButton>
+          </CommentInputWrapper>
+        </CommentForm>
+        <div>
+          {product?.reviews
+            .filter((review) => review.using) // 'using'이 true인 것만 필터링
+            .slice(0, visibleCount)
+            .map((review, activeIndex) => (
+              <Comment key={review.reviewId}>
+                {editingId === activeIndex ? (
+                  <EditCommentForm>
+                    <EditInput
+                      value={editingText}
+                      onChange={(e) => setEditingText(e.target.value)}
+                    />
+                    <StarSelector
+                      value={editingRating}
+                      onChange={(e) => setEditingRating(Number(e.target.value))}
+                    >
+                      {[1, 2, 3, 4, 5].map((num) => (
+                        <option key={num} value={num}>
+                          {'⭐'.repeat(num)}
+                        </option>
+                      ))}
+                    </StarSelector>
+                    <EditActions>
+                      <ActionButton
+                        onClick={() => handleUpdateComment(review.reviewId)}
+                        color="primary"
+                      >
+                        저장
+                      </ActionButton>
+                      <ActionButton
+                        onClick={handleCancelEdit}
+                        color="secondary"
+                      >
+                        취소
+                      </ActionButton>
+                    </EditActions>
+                  </EditCommentForm>
+                ) : (
+                  <>
+                    <CommentContent>
+                      <CommentText>{review.content}</CommentText>
+                      <CommentStars>{'⭐'.repeat(review.rating)}</CommentStars>
+                    </CommentContent>
+                    <CommentActions>
+                      <ActionButton
+                        onClick={() =>
+                          handleEditComment(
+                            activeIndex,
+                            review.content,
+                            review.rating
+                          )
+                        }
+                      >
+                        수정
+                      </ActionButton>
+                      <ActionButton
+                        onClick={() => handleDeleteComment(review.reviewId)}
+                      >
+                        삭제
+                      </ActionButton>
+                    </CommentActions>
+                  </>
+                )}
+              </Comment>
             ))}
-          </StarSelector>
-          <CommentSubmitButton type="submit">댓글 달기</CommentSubmitButton>
-        </CommentInputWrapper>
-      </CommentForm>
-      <div>
-        {activeReviewsWithIndex
-          .slice(0, visibleCount)
-          .map((review, activeIndex) => (
-            <Comment key={review.originalIndex}>
-              {editingId === activeIndex ? (
-                <EditCommentForm>
-                  <EditInput
-                    value={editingText}
-                    onChange={(e) => setEditingText(e.target.value)}
-                  />
-                  <StarSelector
-                    value={editingRating}
-                    onChange={(e) => setEditingRating(Number(e.target.value))}
-                  >
-                    {[1, 2, 3, 4, 5].map((num) => (
-                      <option key={num} value={num}>
-                        {'⭐'.repeat(num)}
-                      </option>
-                    ))}
-                  </StarSelector>
-                  <EditActions>
-                    <ActionButton
-                      onClick={() => handleUpdateComment(activeIndex)}
-                      color="primary"
-                    >
-                      저장
-                    </ActionButton>
-                    <ActionButton onClick={handleCancelEdit} color="secondary">
-                      취소
-                    </ActionButton>
-                  </EditActions>
-                </EditCommentForm>
-              ) : (
-                <>
-                  <CommentContent>
-                    <CommentText>{review.content}</CommentText>
-                    <CommentStars>{'⭐'.repeat(review.rating)}</CommentStars>
-                  </CommentContent>
-                  <CommentActions>
-                    <ActionButton
-                      onClick={() =>
-                        handleEditComment(
-                          activeIndex,
-                          review.content,
-                          review.rating
-                        )
-                      }
-                    >
-                      수정
-                    </ActionButton>
-                    <ActionButton
-                      onClick={() => handleDeleteComment(activeIndex)}
-                    >
-                      삭제
-                    </ActionButton>
-                  </CommentActions>
-                </>
-              )}
-            </Comment>
-          ))}
 
-        <ButtonContainer>
-          {visibleCount < activeReviewsWithIndex.length && (
-            <ViewMore onClick={handleShowMore}>더보기</ViewMore>
-          )}
-        </ButtonContainer>
-      </div>
-    </CommentSection>
+          <ButtonContainer>
+            {visibleCount <
+              product!.reviews.filter((review) => review.using).length && (
+              <ViewMore onClick={handleShowMore}>더보기</ViewMore>
+            )}
+          </ButtonContainer>
+        </div>
+      </CommentSection>
+    </QueryHandler>
   );
 };
 

@@ -71,7 +71,9 @@ function MyPostsPage() {
                     <ButtonWrapper>
                       <EditButton
                         onClick={() => {
-                          navigate(`/community/post/${myPost.communityPostId}`);
+                          navigate(
+                            `/community/post/${myPost.communityPostId}/edit`
+                          );
                         }}
                       >
                         수정

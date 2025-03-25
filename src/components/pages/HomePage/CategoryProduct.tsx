@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import StarRating from '../../common/StarRating';
 import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
-import { Product } from './model/productSchema';
+import { AllProducts } from './model/productSchema';
 import {
   Card,
   CardWrapper,
@@ -21,10 +21,12 @@ import {
   StyledLink,
   StyledMoreButton,
 } from './style/CardStyle';
+import { QueryHandler, useWishQuery } from '../../../hooks/useGetProduct';
+import { postWishProduct } from './api/wish';
 
 interface CategoryProductsProps {
   categories: string[];
-  products: Product[] | undefined;
+  products: AllProducts[] | undefined;
 }
 
 const CategoryProduct: React.FC<CategoryProductsProps> = ({
@@ -49,6 +51,24 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
       ) || [],
     [selectedCategory, products]
   );
+  const { data: wish, isLoading, isError } = useWishQuery();
+
+  // 상태를 관리하기 위한 useState 훅. 초기값은 빈 배열로 설정.
+  const [likedProducts, setLikedProducts] = useState<number[]>(
+    () => (wish ? wish.map((item) => item.productPostId) : []) // wish가 존재하면 likedProducts 초기화
+  );
+
+  const changeLike = async (productPostId: number) => {
+    setLikedProducts(
+      (prev) =>
+        prev.includes(productPostId) // productPostId가 이미 likedProducts에 포함되어 있으면
+          ? prev.filter((id) => id !== productPostId) // 제거
+          : [...prev, productPostId] // 추가
+    );
+
+    // 서버에 좋아요 요청 전송
+    await postWishProduct({ productPostId });
+  };
 
   const displayedProducts = useMemo(() => {
     const shuffled = [...filtered].sort(() => 0.5 - Math.random());
@@ -56,56 +76,63 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
   }, [filtered]);
 
   return (
-    <Recommend>
-      <CategoryWrapper>
-        <RecommendTitle onClick={handleToggle}>
-          {selectedCategory}
-        </RecommendTitle>
-        <CategoryContainer expanded={isExpanded}>
-          {categories.map((category) => (
-            <CategoryItem
-              key={category}
-              selected={category == selectedCategory}
-              onClick={() => handleCategoryClick(category)}
-            >
-              {category}
-            </CategoryItem>
-          ))}
-        </CategoryContainer>
-      </CategoryWrapper>
-      <CardWrapper>
-        {displayedProducts.map((product) => (
-          <Card key={product.id}>
-            <StyledLink to={`/products/${product.id}`}>
-              <ProductImg
-                src={product.url || DEFAULT_IMG}
-                alt={product.name}
-                onError={(e) => {
-                  e.currentTarget.src = DEFAULT_IMG;
+    <QueryHandler isLoading={isLoading} isError={isError}>
+      <Recommend>
+        <CategoryWrapper>
+          <RecommendTitle onClick={handleToggle}>
+            {selectedCategory}
+          </RecommendTitle>
+          <CategoryContainer expanded={isExpanded}>
+            {categories.map((category, index) => (
+              <CategoryItem
+                key={`${category}-${index}`}
+                selected={category == selectedCategory}
+                onClick={() => handleCategoryClick(category)}
+              >
+                {category}
+              </CategoryItem>
+            ))}
+          </CategoryContainer>
+        </CategoryWrapper>
+        <CardWrapper>
+          {displayedProducts.map((product, index) => (
+            <Card key={product.productPostId || `product-${index}`}>
+              <StyledLink to={`/products/${product.productPostId}`}>
+                <ProductImg
+                  src={product.url || DEFAULT_IMG}
+                  alt={product.name}
+                  onError={(e) => {
+                    e.currentTarget.src = DEFAULT_IMG;
+                  }}
+                />
+                <ProductWrapper>
+                  <ProductName>{product.name}</ProductName>
+                  <ProductStar>
+                    {' '}
+                    <StarRating rating={product.rating} />
+                  </ProductStar>
+                  <PriceWrapper>
+                    <OriginalPrice>{product.originalprice}원</OriginalPrice>
+                    <DiscountedPrice>{product.discountprice}원</DiscountedPrice>
+                  </PriceWrapper>
+                </ProductWrapper>
+              </StyledLink>
+              <LikeButton
+                likes={likedProducts.includes(product.productPostId)}
+                onClick={() => {
+                  changeLike(product.productPostId);
                 }}
               />
-              <ProductWrapper>
-                <ProductName>{product.name}</ProductName>
-                <ProductStar>
-                  {' '}
-                  <StarRating rating={product.rating} />
-                </ProductStar>
-                <PriceWrapper>
-                  <OriginalPrice>{product.originalprice}원</OriginalPrice>
-                  <DiscountedPrice>{product.discountprice}원</DiscountedPrice>
-                </PriceWrapper>
-              </ProductWrapper>
-            </StyledLink>
-            <LikeButton likes={product.likes} />
-          </Card>
-        ))}
-      </CardWrapper>
-      <MoreButtonWrapper>
-        <StyledMoreButton to={`/products?category=${selectedCategory}`}>
-          더보기
-        </StyledMoreButton>
-      </MoreButtonWrapper>
-    </Recommend>
+            </Card>
+          ))}
+        </CardWrapper>
+        <MoreButtonWrapper>
+          <StyledMoreButton to={`/products?category=${selectedCategory}`}>
+            더보기
+          </StyledMoreButton>
+        </MoreButtonWrapper>
+      </Recommend>
+    </QueryHandler>
   );
 };
 const Recommend = styled.div`

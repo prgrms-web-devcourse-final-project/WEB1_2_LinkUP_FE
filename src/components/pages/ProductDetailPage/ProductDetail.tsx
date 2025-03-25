@@ -3,11 +3,15 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import StarRating from '../../common/StarRating';
 import { submitOrder } from './api/submitApi';
-import { addWishList } from './api/wishApi';
-import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
+import {
+  QueryHandler,
+  useProductQuery,
+  useWishQuery,
+} from '../../../hooks/useGetProduct';
 import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
 import CommentComponent from './CommentComponent';
 import { useQuantity } from '../../../context/QuantityContext';
+import { postWishProduct } from '../HomePage/api/wish';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams();
@@ -21,10 +25,14 @@ const ProductDetail: React.FC = () => {
   }
 
   const { data: product, isLoading, isError } = useProductQuery(productId || 0);
+  console.log(product);
   const { quantity, setQuantity } = useQuantity();
   const [remainingTime, setRemainingTime] = useState('');
   const navigate = useNavigate();
-  const isOutOfStock = product ? product.currentStock < 0 : false;
+  const isSoldOut = product
+    ? product.initstock - product.currentStock >= product.initstock
+    : false;
+  const isOutOfStock = product ? product.currentStock <= 0 || isSoldOut : false;
   const isDeadlinePassed = remainingTime === '마감되었습니다.';
   const isButtonDisabled = isOutOfStock || isDeadlinePassed;
   useEffect(() => {
@@ -58,6 +66,25 @@ const ProductDetail: React.FC = () => {
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     if (value > 0) setQuantity(value);
+  };
+
+  const { data: wish } = useWishQuery();
+
+  // 상태를 관리하기 위한 useState 훅. 초기값은 빈 배열로 설정.
+  const [likedProducts, setLikedProducts] = useState<number[]>(() =>
+    wish ? wish.map((item) => item.productPostId) : []
+  );
+
+  const changeLike = async (productPostId: number) => {
+    setLikedProducts(
+      (prev) =>
+        prev.includes(productPostId) // productPostId가 이미 likedProducts에 포함되어 있으면
+          ? prev.filter((id) => id !== productPostId) // 제거
+          : [...prev, productPostId] // 추가
+    );
+
+    // 서버에 좋아요 요청 전송
+    await postWishProduct({ productPostId });
   };
 
   const handleSubmit = async () => {
@@ -126,6 +153,7 @@ const ProductDetail: React.FC = () => {
                 <StockStatus>
                   {product.initstock - product.currentStock} /{' '}
                   {product.initstock} 구매됨
+                  {isOutOfStock && <SoldOutBadge>재고 소진</SoldOutBadge>}
                 </StockStatus>
               </StockWrapper>
               <ActionWrapper>
@@ -145,17 +173,17 @@ const ProductDetail: React.FC = () => {
                   >
                     구매하기
                   </PurchaseButton>
-                  <WishButton onClick={() => addWishList(product.id)}>
-                    찜하기
+                  <WishButton
+                    onClick={() => changeLike(productId)}
+                    $isLiked={likedProducts.includes(productId)}
+                  >
+                    {likedProducts.includes(productId) ? '찜 취소' : '찜하기'}
                   </WishButton>
                 </ButtonWrapper>
               </ActionWrapper>
             </InfoSection>
           </ContentWrapper>
-          <CommentComponent
-            productId={productId}
-            initReviews={product.reviews}
-          />
+          <CommentComponent productId={productId} />
         </Container>
       </QueryHandler>
     </>
@@ -286,7 +314,16 @@ const RemainingCount = styled.div`
     width: 220px;
   }
 `;
-
+const SoldOutBadge = styled.span`
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 8px;
+  background-color: #ef4444;
+  color: white;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 12px;
+`;
 const Description = styled.p`
   margin-bottom: 30px;
   line-height: 1.6;
@@ -411,19 +448,18 @@ const PurchaseButton = styled.button<{ disabled?: boolean }>`
     border: ${({ disabled }) => (disabled ? 'none' : '1px solid #2563eb')};
   }
 `;
-
-const WishButton = styled.button`
+const WishButton = styled.button<{ $isLiked: boolean }>`
   flex: 1;
   padding: 15px;
-  background-color: white;
-  color: #2563eb;
+  background-color: ${(props) => (props.$isLiked ? '#2563eb' : 'white')};
+  color: ${(props) => (props.$isLiked ? 'white' : '#2563eb')};
   border: 1px solid #2563eb;
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
   font-weight: bold;
+
   &:hover {
-    cursor: pointer;
     background-color: #2563eb;
     color: white;
   }

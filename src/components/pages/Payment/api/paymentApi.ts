@@ -8,6 +8,22 @@ export interface PaymentForm {
   deliveryRequestDTO: UserForm;
 }
 
+export interface CommnunityPaymentForm {
+  recipientName: string;
+  recipientAddress: string;
+  deliveryRequest: string;
+}
+
+export interface RefundForm {
+  paymentKey: string;
+  cancelReason: string;
+  refundReceiveAccount: {
+    bank: string;
+    accountNumber: string;
+    holderName: string;
+  };
+}
+
 export interface UserForm {
   name: string;
   address: {
@@ -28,4 +44,25 @@ export const handlePayment = async (
   } catch {
     throw new Error('결제에 실패하였습니다.');
   }
+};
+
+export const handleCommunityPayment = async (
+  postId: number,
+  payload: CommnunityPaymentForm
+) => {
+  try {
+    const URL = `/api/v1/virtual/${postId}`;
+    const response = await axiosInstance.post(URL, payload);
+    return response.data.checkoutPageUrl;
+  } catch {
+    throw new Error('결제에 실패하였습니다.');
+  }
+};
+
+// 환불 요청
+export const handleRefund = async (postId: number, payload: RefundForm) => {
+  const URL = `/api/v1/virtual/cancel-payment/${postId}`;
+  const response = await axiosInstance.post(URL, payload);
+  console.log(response.data);
+  return response.data;
 };

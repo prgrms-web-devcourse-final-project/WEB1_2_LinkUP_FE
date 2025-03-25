@@ -13,11 +13,13 @@ export const addComment = async (productId: number, payload: Review) => {
 export const editComment = async (reviewId: number, payload: Review) => {
   const URL = `/api/review/update/${reviewId}`;
   const response = await axiosInstance.put(URL, payload);
+
   return response;
 };
 
 export const deleteComment = async (reviewId: number) => {
   const URL = `/api/review/remove/${reviewId}`;
   const response = await axiosInstance.put(URL);
+  console.log(response);
   return response;
 };

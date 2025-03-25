@@ -26,13 +26,10 @@ import SetNicknamePage from '../components/pages/login/SetNicknamePage';
 import SetProfilePage from '../components/pages/login/SetProfilePage';
 import LoginCompletePage from '../components/pages/login/LoginCompletePage';
 import PaymentForm from '../components/pages/Payment/PaymentForm';
-import PaymentSuccessPage from '../components/pages/Payment/PaymentSuccessPage';
 import ScrollToTop from '../components/common/ScrollToTop';
 import PostEditPage from '../components/pages/community/PostEditPage';
 import SetLocationPage from '../components/pages/login/SetLocationPage';
-import PaymentAuthorPage from '../components/pages/community/PaymentAuthorPage';
-import PaymentParticipantPage from '../components/pages/community/PaymentParticipantPage';
-import PaymentCompletePage from '../components/pages/community/PaymentCompletePage';
+import PaymentCompletePage from '../components/pages/Payment/PaymentCompletePage';
 import PostManagementPage from '../components/pages/admin/PostManagementPage';
 import PostApprovalPage from '../components/pages/admin/PostApprovalPage';
 import PaymentFailPage from '../components/pages/Payment/PaymentFailPage';
@@ -40,6 +37,9 @@ import ChatRoomManagementPage from '../components/pages/admin/ChatRoomManagement
 import ScrollToTopButton from '../components/common/ScrollToTopButton';
 import DepositPage from '../components/pages/community/DepositPage';
 import ProtectedRoutes from './ProtectedRoutes';
+import ParticipantsForm from '../components/pages/Payment/ParticipantsForm';
+import AuthorForm from '../components/pages/Payment/AuthorForm';
+import PaymentSuccessPage from '../components/pages/Payment/PaymentSuccessPage';
 
 const router = createBrowserRouter(
   [
@@ -103,23 +103,24 @@ const router = createBrowserRouter(
           element: <PostDetailPage />,
         },
         {
-          path: '/mypage/post/:communityPostId/edit',
+          path: '/community/post/:communityPostId/edit',
           element: <PostEditPage />,
         },
         {
-          path: '/community/post/:communityPostId/payment/author',
-          element: <PaymentAuthorPage />,
+          path: '/community/post/:id/payment/author',
+          element: <AuthorForm />,
         },
         {
-          path: '/community/post/:communityPostId/payment/participant',
-          element: <PaymentParticipantPage />,
+          path: '/community/post/:id/payment/participant',
+          element: <ParticipantsForm />,
         },
+
         {
-          path: '/community/post/:communityPostId/payment/deposit',
+          path: '/community/post/:id/payment/deposit',
           element: <DepositPage />,
         },
         {
-          path: '/community/post/:communityPostId/payment/complete',
+          path: '/community/success/:id',
           element: <PaymentCompletePage />,
         },
         {

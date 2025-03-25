@@ -1,45 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
 import { ADMIN_CATEGORIES } from './adminCategories';
 import CategoryWrapper from '../../../components/common/CategoryWrapper';
-import PostList from '../../../components/common/PostList';
-import { fetchPendingPosts } from './api/adminApi';
-import { useAtom } from 'jotai';
-import { realTimeDataAtom, selectedPostIdAtom } from '../../../store/postStore';
-import { Post, POST_STATUS, SSEEvent } from '../../../types/postTypes';
+
+import { POST_STATUS } from '../../../types/postTypes';
+import { usePendingPostsQuery } from '../../../hooks/useGetPage';
+import { QueryHandler } from '../../../hooks/useGetProduct';
+import AdminPostList from './AdminPostList';
 
 const PostManagementPage = () => {
   const location = useLocation();
   const initialCategory = location.state?.selectedCategory || 'NOT_APPROVED';
   const [selectedCategory, setSelectedCategory] =
     useState<POST_STATUS>(initialCategory);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [, setSelectedPostId] = useAtom(selectedPostIdAtom); // 선택된 포스트 ID 설정 함수
-  const [realTimeData] = useAtom(realTimeDataAtom); // 실시간 데이터 상태
 
-  // `realTimeData`를 안전하게 변환
-  const formattedRealTimeData: Record<number, SSEEvent> =
-    typeof realTimeData === 'object' && realTimeData !== null
-      ? (realTimeData as unknown as Record<number, SSEEvent>)
-      : {};
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const response = await fetchPendingPosts();
-      setPosts(response);
-    };
-
-    fetchPosts();
-  }, [selectedCategory]);
-
-  // 포스트 선택 핸들러
-  const handlePostSelect = (postId: number) => {
-    setSelectedPostId(postId);
-  };
+  const { data: posts, isLoading, isError } = usePendingPostsQuery();
 
   return (
-    <div>
+    <QueryHandler isLoading={isLoading} isError={isError}>
       <PageContainer>
         <ContentWrapper>
           <Title>관리자 페이지</Title>
@@ -55,16 +34,13 @@ const PostManagementPage = () => {
               />
             </Wrapper>
           </Header>
-          <PostList
+          <AdminPostList
             selectedCategory={selectedCategory}
-            posts={posts}
-            hideWriteButton
-            realTimeData={formattedRealTimeData} // 변환된 realTimeData 전달
-            onPostSelect={handlePostSelect}
+            posts={posts || []}
           />
         </ContentWrapper>
       </PageContainer>
-    </div>
+    </QueryHandler>
   );
 };
 

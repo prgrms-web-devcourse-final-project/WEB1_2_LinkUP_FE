@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -15,12 +15,15 @@ import { POST_CATEGORIES } from './postCategories';
 import { CreatePostData } from '../../../types/postTypes';
 import { getImageSrc } from '../../../utils/GetImageSrc';
 
-const PostCreatePage = () => {
+const PostCreatePage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const defaultCategory =
-    location.state?.selectedCategory || POST_CATEGORIES[0].id; // 이전 페이지에서 전달된 카테고리
+
+  const defaultCategory = useMemo(
+    () => location.state?.selectedCategory || POST_CATEGORIES[0].id,
+    [location.state]
+  );
 
   const [selectedCategory, setSelectedCategory] = useState(defaultCategory);
   const [availableNumber, setAvailableNumber] = useState('');
@@ -30,14 +33,13 @@ const PostCreatePage = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [imageUrls, setImageUrls] = useState<Array<File>>([]);
-  const [currentIndex, setCurrentIndex] = useState(-1); // -1: AddImageButton 상태
+  const [currentIndex, setCurrentIndex] = useState(-1);
   const [urlInput, setUrlInput] = useState('');
   const [urlError, setUrlError] = useState(false);
 
   const createPostMutation = useMutation({
-    mutationFn: (postData: CreatePostData) => createPost(postData),
+    mutationFn: (payload: CreatePostData) => createPost(payload),
     onSuccess: () => {
-      // 생성 성공 시 목록 업데이트
       queryClient.invalidateQueries({ queryKey: ['postList'] });
       alert('포스트가 작성되었습니다. 관리자의 승인을 대기 중입니다.');
       navigate('/community/post');
@@ -47,28 +49,46 @@ const PostCreatePage = () => {
     },
   });
 
-  const handleDropdownToggle = () => {
-    setDropdownVisible(!dropdownVisible);
-  };
+  const handleDropdownToggle = useCallback(() => {
+    setDropdownVisible((prev) => !prev);
+  }, []);
 
-  const handleDeadlineSelect = (day: string) => {
+  const handleDeadlineSelect = useCallback((day: string) => {
     setDeadline(day);
     setDropdownVisible(false);
-  };
+  }, []);
 
-  const handlePostSubmit = async () => {
+  const isValidUrl = useCallback((productUrl: string) => {
+    const pattern = new RegExp(
+      '^(https?:\\/\\/)?' +
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|(\\d{1,3}\\.){3}\\d{1,3})' +
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' +
+        '(\\?[;&a-z\\d%_.~+=-]*)?' +
+        '(\\#[-a-z\\d_]*)?$',
+      'i'
+    );
+    return !!pattern.test(productUrl);
+  }, []);
+
+  const formatCurrency = useCallback((value: string) => {
+    const numberValue = value.replace(/\D/g, '');
+    return new Intl.NumberFormat().format(Number(numberValue));
+  }, []);
+
+  const handlePostSubmit = useCallback(() => {
     if (
       !title ||
       !availableNumber ||
       !totalAmount ||
       deadline === '마감 기한' ||
-      imageUrls.length === 0 || // 최소 한 개의 이미지 추가 확인
+      !imageUrls.length ||
       !urlInput ||
       !description
     ) {
       alert('모든 필수 정보를 입력하세요.');
       return;
     }
+
     if (!isValidUrl(urlInput)) {
       setUrlError(true);
       return;
@@ -83,7 +103,7 @@ const PostCreatePage = () => {
       return;
     }
 
-    const postData: CreatePostData = {
+    const payload = {
       title: title.trim(),
       description: description.trim(),
       imageUrls: imageUrls,
@@ -95,44 +115,83 @@ const PostCreatePage = () => {
       period,
     };
 
-    createPostMutation.mutate(postData);
-  };
+    createPostMutation.mutate(payload);
+  }, [
+    title,
+    availableNumber,
+    totalAmount,
+    deadline,
+    imageUrls,
+    urlInput,
+    description,
+    selectedCategory,
+    isValidUrl,
+    createPostMutation,
+  ]);
 
-  const handleAvailableNumberChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
-    const numericValue = Number(value);
+  const handleNumberChange = useCallback(
+    (
+      e: React.ChangeEvent<HTMLInputElement>,
+      setter: React.Dispatch<React.SetStateAction<string>>
+    ) => {
+      const value = e.target.value.replace(/[^0-9]/g, '');
+      const numericValue = Number(value);
 
-    if (value === '' || numericValue <= 0) {
-      setAvailableNumber(''); // 입력 중 모두 지웠거나, 음수 또는 0인 경우 초기화
-    } else {
-      setAvailableNumber(value); // 유효한 값 업데이트
+      setter(value === '' || numericValue <= 0 ? '' : value);
+    },
+    []
+  );
+
+  const handleImageUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files) {
+        const uploadedFiles = Array.from(e.target.files).filter(
+          (file) => file instanceof File
+        );
+
+        setImageUrls((prev) => [...prev, ...uploadedFiles]);
+        setCurrentIndex((prev) =>
+          uploadedFiles.length > 0 ? prev + uploadedFiles.length : prev
+        );
+      }
+    },
+    []
+  );
+
+  const handleRemoveImage = useCallback(() => {
+    if (currentIndex >= 0) {
+      setImageUrls((prev) => {
+        const updatedImages = prev.filter((_, i) => i !== currentIndex);
+        setCurrentIndex(
+          updatedImages.length > 0
+            ? currentIndex >= updatedImages.length
+              ? currentIndex - 1
+              : currentIndex
+            : -1
+        );
+        return updatedImages;
+      });
     }
-  };
+  }, [currentIndex]);
 
-  const handleTotalAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 허용
-    const numericValue = Number(value);
+  const handleNavigation = useCallback(
+    (direction: 'next' | 'prev') => {
+      const lastIndex = imageUrls.length - 1;
 
-    if (value === '' || numericValue <= 0) {
-      setTotalAmount(''); // 입력 중 모두 지웠거나, 음수 또는 0인 경우 초기화
-    } else {
-      setTotalAmount(formatCurrency(value)); // 통화 형식으로 변환
-    }
-  };
-
-  const handleCancel = () => {
-    navigate('/community/post', { state: { selectedCategory } }); // // CommunityPage 경로와 state 전달
-  };
-
-  const formatCurrency = (value: string) => {
-    const numberValue = value.replace(/\D/g, ''); // 숫자만 남기기
-    return new Intl.NumberFormat().format(Number(numberValue)); // 통화 형식으로 변환
-  };
-
-  const unitAmount =
-    totalAmount && availableNumber
+      if (direction === 'next') {
+        setCurrentIndex((prev) =>
+          prev < lastIndex ? prev + 1 : prev === lastIndex ? -1 : prev
+        );
+      } else {
+        setCurrentIndex((prev) =>
+          prev === -1 ? lastIndex : prev > 0 ? prev - 1 : 0
+        );
+      }
+    },
+    [imageUrls.length]
+  );
+  const unitAmount = useMemo(() => {
+    return totalAmount && availableNumber
       ? formatCurrency(
           String(
             Math.floor(
@@ -142,93 +201,60 @@ const PostCreatePage = () => {
           )
         )
       : '자동 계산';
+  }, [totalAmount, availableNumber, formatCurrency]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const uploadedFiles = Array.from(e.target.files).filter(
-        (file) => file instanceof File
-      );
-      setImageUrls((prev) => [...prev, ...uploadedFiles]);
-    }
-  };
+  const handleCancel = useCallback(() => {
+    navigate('/community/post', { state: { selectedCategory } });
+  }, [navigate, selectedCategory]);
 
-  const handleRemoveImage = () => {
-    if (currentIndex >= 0) {
-      setImageUrls((prev) => {
-        const updatedImages = prev.filter((_, i) => i !== currentIndex);
-
-        // 다음 이미지 또는 이전 이미지로 이동
-        if (updatedImages.length > 0) {
-          const nextIndex =
-            currentIndex >= updatedImages.length
-              ? currentIndex - 1
-              : currentIndex;
-          setCurrentIndex(nextIndex); // 다음 이미지가 없으면 이전 이미지로 이동
-        } else {
-          setCurrentIndex(-1); // 모든 이미지가 제거되었을 때 AddImageButton으로 이동
-        }
-
-        return updatedImages;
-      });
-    }
-  };
-
-  const handleNextImage = () => {
-    if (currentIndex < imageUrls.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-    } else if (currentIndex === imageUrls.length - 1) {
-      setCurrentIndex(-1); // AddImageButton 상태로 전환
-    }
-  };
-
-  const handlePreviousImage = () => {
-    if (currentIndex === -1) {
-      setCurrentIndex(imageUrls.length - 1); // 마지막 이미지로 이동
-    } else {
-      setCurrentIndex((prev) => Math.max(prev - 1, 0));
-    }
-  };
-
-  const handleDotClick = (index: number) => {
-    setCurrentIndex(index);
-  };
-
-  const isValidUrl = (productUrl: string) => {
-    const pattern = new RegExp(
-      '^(https?:\\/\\/)?' +
-        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|(\\d{1,3}\\.){3}\\d{1,3})' +
-        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' +
-        '(\\?[;&a-z\\d%_.~+=-]*)?' +
-        '(\\#[-a-z\\d_]*)?$',
-      'i'
-    );
-    return !!pattern.test(productUrl);
-  };
-
-  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUrlInput(e.target.value);
-    setUrlError(!isValidUrl(e.target.value));
-  };
+  const handleUrlChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setUrlInput(value);
+      setUrlError(!isValidUrl(value));
+    },
+    [isValidUrl]
+  );
 
   return (
     <div>
       <PostCreatePageContainer>
         <ContentWrapper>
-          <Title>공구 모집 및 진행</Title>
+          <Header>
+            <Title>공구 모집 및 진행</Title>
+          </Header>
+
           <FormContainer>
+            {/* 이미지 업로드 섹션 */}
             <ImageAndDetailsContainer>
-              {/* 이미지 업로드 섹션 */}
               <ImageUploadContainer>
                 <ImagePreviewWrapper>
-                  <PreviousButtonWrapper>
-                    {imageUrls.length > 0 &&
-                      (currentIndex > 0 || currentIndex === -1) && (
-                        <PreviousButton onClick={handlePreviousImage}>
-                          <FaAngleLeft size={20} />
-                        </PreviousButton>
-                      )}
-                  </PreviousButtonWrapper>
+                  <ButtonWrapper>
+                    {/* 이미지가 있고 이미지 추가 화면(-1)일 때는 왼쪽 버튼만 */}
+                    {imageUrls.length > 0 && currentIndex === -1 && (
+                      <PrevButton onClick={() => handleNavigation('prev')}>
+                        <FaAngleLeft size={20} />
+                      </PrevButton>
+                    )}
 
+                    {/* 이미지가 있고 이미지 추가 화면이 아니고 0번이 아닐 때만 왼쪽 버튼 */}
+                    {imageUrls.length > 0 &&
+                      currentIndex !== -1 &&
+                      currentIndex !== 0 && (
+                        <NavigationButton
+                          onClick={() => handleNavigation('prev')}
+                        >
+                          <FaAngleLeft size={20} />
+                        </NavigationButton>
+                      )}
+
+                    {/* 이미지가 있고 이미지 추가 화면이 아닐 때 오른쪽 버튼 */}
+                    {imageUrls.length > 0 && currentIndex !== -1 && (
+                      <NextButton onClick={() => handleNavigation('next')}>
+                        <FaAngleRight size={20} />
+                      </NextButton>
+                    )}
+                  </ButtonWrapper>
                   {currentIndex === -1 ? (
                     <AddImageButton>
                       <FaPlusCircle size={30} />
@@ -251,17 +277,8 @@ const PostCreatePage = () => {
                       </RemoveImageButton>
                     </ImagePreview>
                   )}
-
-                  <NextButtonWrapper>
-                    {imageUrls.length > 0 && currentIndex !== -1 && (
-                      <NextButton onClick={handleNextImage}>
-                        <FaAngleRight size={20} />
-                      </NextButton>
-                    )}
-                  </NextButtonWrapper>
                 </ImagePreviewWrapper>
 
-                {/* PaginationDots */}
                 <PaginationDotsWrapper>
                   {imageUrls.length > 0 && (
                     <PaginationDots>
@@ -269,7 +286,7 @@ const PostCreatePage = () => {
                         <span
                           key={index}
                           className={currentIndex === index ? 'active' : ''}
-                          onClick={() => handleDotClick(index)}
+                          onClick={() => setCurrentIndex(index)}
                         />
                       ))}
                     </PaginationDots>
@@ -278,9 +295,8 @@ const PostCreatePage = () => {
 
                 <UrlInputContainer>
                   <UrlInputWrapper>
-                    <Label htmlFor="urlInput">URL 주소</Label>
+                    <Label>URL 주소</Label>
                     <URLInput
-                      id="urlInput"
                       type="text"
                       placeholder="상품 관련 URL 주소를 입력해주세요."
                       value={urlInput}
@@ -296,9 +312,16 @@ const PostCreatePage = () => {
               </ImageUploadContainer>
 
               <DetailsAndInfoContainer>
-                {/* 제목 및 카테고리 섹션 */}
                 <DetailsContainer>
-                  <InputWrapper>
+                  <CategoryWrapperStyled
+                    title="카테고리 선택"
+                    categories={POST_CATEGORIES}
+                    selectedCategory={selectedCategory}
+                    onCategoryChange={(category) =>
+                      setSelectedCategory(category)
+                    }
+                  />
+                  <Detail>
                     <Label>제목</Label>
                     <TextInput
                       placeholder="제목을 입력해주세요."
@@ -306,72 +329,74 @@ const PostCreatePage = () => {
                       onChange={(e) => setTitle(e.target.value)}
                       spellCheck={false}
                     />
-                  </InputWrapper>
-                  <CategoryInputWrapper>
-                    <CategoryWrapperStyled
-                      title="카테고리 선택"
-                      categories={POST_CATEGORIES}
-                      selectedCategory={selectedCategory} // 현재 선택된 카테고리를 전달
-                      onCategoryChange={
-                        (category: string) => setSelectedCategory(category) // 카테고리 변경 시 상태 업데이트
-                      }
-                    />
-                  </CategoryInputWrapper>
-                </DetailsContainer>
+                  </Detail>
 
-                {/* 모집 정보 섹션 */}
-                <InfoContainer>
-                  <InputWrapper>
-                    <Label>참여 필요 수량 선택</Label>
-                    <SmallInput
-                      type="text" // 숫자만 입력되도록 onChange에서 제어
-                      placeholder="수량 입력"
-                      value={availableNumber}
-                      onChange={handleAvailableNumberChange}
-                    />
-                  </InputWrapper>
-                  <InputWrapper>
-                    <Label>모집 마감 기한 설정</Label>
-                    <DropdownWrapper>
-                      <DropdownButton onClick={handleDropdownToggle}>
-                        {deadline}
-                        <FaCaretDown />
-                      </DropdownButton>
-                      {dropdownVisible && (
-                        <DropdownMenu>
-                          {Array.from({ length: 7 }, (_, index) => (
-                            <DropdownItem
-                              key={index}
-                              onClick={() =>
-                                handleDeadlineSelect(`${index + 1}일  `)
+                  {/* 모집 정보 섹션 */}
+                  <InfoContainer>
+                    <Row>
+                      <Detail>
+                        <Label>참여 필요 수량 선택</Label>
+                        <SmallInput
+                          type="text"
+                          placeholder="수량 입력"
+                          value={availableNumber}
+                          onChange={(e) =>
+                            handleNumberChange(e, setAvailableNumber)
+                          }
+                        />
+                      </Detail>
+                      <Detail>
+                        <Label>모집 마감 기한 설정</Label>
+                        <DropdownWrapper>
+                          <DropdownButton onClick={handleDropdownToggle}>
+                            {deadline}
+                            <FaCaretDown />
+                          </DropdownButton>
+                          {dropdownVisible && (
+                            <DropdownMenu>
+                              {Array.from({ length: 7 }, (_, index) => (
+                                <DropdownItem
+                                  key={index}
+                                  onClick={() =>
+                                    handleDeadlineSelect(`${index + 1}일  `)
+                                  }
+                                  $isSelected={deadline === `${index + 1}일  `}
+                                >
+                                  {index + 1}일
+                                </DropdownItem>
+                              ))}
+                            </DropdownMenu>
+                          )}
+                        </DropdownWrapper>
+                      </Detail>
+                    </Row>
+                    <Row>
+                      <PriceWrapper>
+                        <Detail>
+                          <Label>총 가격 설정</Label>
+                          <PriceDetail>
+                            <PriceInput
+                              type="text"
+                              placeholder="총 가격 입력"
+                              value={totalAmount}
+                              onChange={(e) =>
+                                handleNumberChange(e, setTotalAmount)
                               }
-                              $isSelected={deadline === `${index + 1}일  `}
-                            >
-                              {index + 1}일
-                            </DropdownItem>
-                          ))}
-                        </DropdownMenu>
-                      )}
-                    </DropdownWrapper>
-                  </InputWrapper>
-                  <PriceWrapper>
-                    <InputWrapper>
-                      <Label>총 가격 설정</Label>
-                      <SmallInput
-                        type="text" // 숫자만 입력되도록 onChange에서 제어
-                        placeholder="총 가격 입력"
-                        value={totalAmount}
-                        onChange={handleTotalAmountChange}
-                      />
-                      {' 원'}
-                    </InputWrapper>
-                    <InputWrapper>
-                      <Label>개당 가격</Label>
-                      <SmallInput disabled value={unitAmount} />
-                      {' 원'}
-                    </InputWrapper>
-                  </PriceWrapper>
-                </InfoContainer>
+                            />
+                            <CurrencyText>원</CurrencyText>
+                          </PriceDetail>
+                        </Detail>
+                        <Detail>
+                          <Label>개당 가격</Label>
+                          <PriceDetail>
+                            <PriceInput disabled value={unitAmount} />
+                            <CurrencyText>원</CurrencyText>
+                          </PriceDetail>
+                        </Detail>
+                      </PriceWrapper>
+                    </Row>
+                  </InfoContainer>
+                </DetailsContainer>
               </DetailsAndInfoContainer>
             </ImageAndDetailsContainer>
 
@@ -387,8 +412,12 @@ const PostCreatePage = () => {
 
             {/* 하단 버튼 섹션 */}
             <ButtonContainer>
-              <Button onClick={handlePostSubmit}>확인</Button>
-              <Button onClick={handleCancel}>취소</Button>
+              <Buttons>
+                <Button $primary onClick={handlePostSubmit}>
+                  확인
+                </Button>
+                <Button onClick={handleCancel}>취소</Button>
+              </Buttons>
             </ButtonContainer>
           </FormContainer>
         </ContentWrapper>
@@ -397,98 +426,140 @@ const PostCreatePage = () => {
   );
 };
 
-export default PostCreatePage;
-
 const PostCreatePageContainer = styled.div`
-  display: flex;
-  justify-content: center;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
   padding: 20px;
+  background-color: #f8fafc;
 `;
 
 const ContentWrapper = styled.div`
-  width: 100%;
-  max-width: 1120px;
-  margin: 0 auto;
+  background-color: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+`;
+
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 `;
 
 const Title = styled.h1`
-  font-size: 1.8rem;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
-  text-align: left;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
 `;
 
 const FormContainer = styled.div`
-  display: flex;
-  flex-direction: column; /* 내부 요소를 세로로 정렬 */
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
 `;
 
 const ImageAndDetailsContainer = styled.div`
-  display: flex; /* 가로 정렬 */
-  flex-direction: row; /* 기본값이므로 명시적으로 추가 */
-  align-items: stretch; /* 양쪽 요소의 높이를 동일하게 */
-  justify-content: center; /* 양쪽 여백 균등 배치 */
-  gap: 20px; /* 두 컨테이너 사이 간격 */
-  margin-bottom: 20px; /* 아래 요소와의 간격 */
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
 `;
 
 const ImageUploadContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 490px;
-  height: 495px; /* 고정된 높이 설정 */
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 20px 11px;
-  position: relative;
-  box-sizing: border-box; /* 패딩과 보더 포함한 크기 계산 */
+  flex: 1;
 `;
 
 const ImagePreviewWrapper = styled.div`
-  display: flex;
-  justify-content: space-between; /* 좌우 버튼 공간 확보 */
-  align-items: center; /* 수직 중앙 정렬 */
+  position: relative;
   width: 100%;
-  height: 320px; /* 기준 높이 */
-  position: relative; /* 자식 요소 위치 기준 */
-  overflow: hidden; /* 높이를 벗어난 콘텐츠 숨김 */
+  height: 300px;
+  overflow: hidden;
+  border-radius: 12px;
+`;
+
+const ButtonWrapper = styled.div`
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+`;
+
+const PrevButton = styled.button`
+  background-color: rgba(0, 0, 0, 0.3);
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+`;
+const NavigationButton = styled.button`
+  background-color: rgba(0, 0, 0, 0.3);
+  border: none;
+  padding: 8px;
+  margin-right: -60px;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+`;
+
+const NextButton = styled.button`
+  background-color: rgba(0, 0, 0, 0.3);
+  border: none;
+  padding: 8px;
+  margin-left: 264px;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
 `;
 
 const ImagePreview = styled.div`
-  flex: 1; /* 이미지 영역이 버튼 사이에 위치 */
+  width: 300px;
+  height: 290px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  width: 400px;
-  height: 100%;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  overflow: hidden; /* 콘텐츠가 영역을 벗어나지 않도록 */
+  align-items: center;
 
   img {
-    max-width: 100%; /* 부모 너비를 넘지 않도록 */
-    max-height: 100%; /* 부모 높이를 넘지 않도록 */
-    object-fit: contain; /* 비율을 유지하며 부모 크기 안에 맞춤 */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 `;
 
 const AddImageButton = styled.label`
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
-  color: #555;
+  align-items: center;
+  width: 300px;
+  height: 290px;
+  background-color: #f9fafb;
+  border: 2px dashed #e2e8f0;
+  border-radius: 12px;
   cursor: pointer;
-  border-radius: 10px;
-  width: 400px; /* img의 크기와 동일하게 설정 */
-  height: 100%; /* img의 높이와 동일하게 설정 */
-  background-color: #ececec; /* 요구된 배경색 추가 */
+  color: #64748b;
+
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #2563eb;
+    color: #2563eb;
+  }
 
   input {
     display: none;
@@ -497,220 +568,193 @@ const AddImageButton = styled.label`
 
 const RemoveImageButton = styled.button`
   position: absolute;
-  top: 0px;
-  right: 45px;
+  top: 10px;
+  right: 10px;
   background: none;
   border: none;
-  padding: 8px;
+  color: #ef4444;
   cursor: pointer;
+  padding: 4px;
   z-index: 1;
 `;
 
-const PreviousButtonWrapper = styled.div`
-  flex: 0 0 32px; /* 버튼 고정 너비 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%; /* PreviewWrapper의 높이에 맞춤 */
-`;
-
-const NextButtonWrapper = styled.div`
-  flex: 0 0 32px; /* 버튼 고정 너비 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%; /* PreviewWrapper의 높이에 맞춤 */
-`;
-
-const PreviousButton = styled.button`
-  background: none;
-  border: none;
-  color: #333;
-  cursor: pointer;
-`;
-
-const NextButton = styled.button`
-  background: none;
-  border: none;
-  color: #333;
-  cursor: pointer;
-`;
-
 const PaginationDotsWrapper = styled.div`
-  width: 100%;
-  height: 54px; /* 높이 설정 */
-  display: flex; /* 플렉스 박스로 변경 */
-  align-items: center; /* 세로 중앙 정렬 */
-  justify-content: center; /* 가로 중앙 정렬 */
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
 `;
 
 const PaginationDots = styled.div`
   display: flex;
-  justify-content: center;
-  gap: 5px;
+  gap: 8px;
 
   span {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    background: #ddd;
+    background-color: #e2e8f0;
     cursor: pointer;
-  }
 
-  span.active {
-    background: #000;
+    &.active {
+      background-color: #2563eb;
+    }
   }
 `;
 
 const UrlInputContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start; /* 세로로 가운데 정렬 */
-  width: 100%;
+  margin-top: 70px;
 `;
 
 const UrlInputWrapper = styled.div`
-  margin-left: 20px;
   display: flex;
-  align-items: center; /* Label과 Url을 같은 높이에 배치 */
-  gap: 10px; /* Label과 Url 사이 간격 */
-  padding: 10px;
-  border: none;
+  flex-direction: column;
+  gap: 4px;
 `;
 
 const URLInput = styled.input<{ $isError: boolean }>`
-  width: 285px;
-  flex: 1;
-  padding: 10px;
-  background-color: #ececec;
-  border: 1px solid ${({ $isError }) => ($isError ? 'red' : '#ccc')};
-  border-radius: 5px;
+  width: 100%;
+  height: 40px;
+  border: 1px solid ${({ $isError }) => ($isError ? '#ef4444' : '#e2e8f0')};
+  border-radius: 8px;
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #2563eb;
+  }
 `;
 
 const ErrorMessage = styled.span`
-  margin-left: 125px;
-  color: red;
-  font-size: 0.8rem;
-  margin-top: 5px;
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 4px;
 `;
 
 const DetailsAndInfoContainer = styled.div`
-  display: flex;
-  flex-direction: column; /* 세로 정렬 */
-  align-items: flex-start; /* 왼쪽 정렬 */
-  width: 490px;
-  height: 495px; /* ImageUploadContainer와 동일한 고정 높이 */
-  flex-grow: 1; /* 가로 공간을 균등 분배 */
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 20px;
-  gap: 20px;
-  box-sizing: border-box;
+  flex: 2;
+  background-color: white;
+  border-radius: 12px;
+
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 `;
 
 const DetailsContainer = styled.div`
   display: flex;
-  flex-direction: column; /* 세로 정렬 */
-  gap: 20px; /* 컴포넌트 간 간격 */
-  width: 100%;
+  flex-direction: column;
+  gap: 16px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+`;
+const InfoContainer = styled.div`
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 `;
 
-const InputWrapper = styled.div`
+const Row = styled.div`
   display: flex;
-  flex-direction: row; /* 가로 배치 */
-  align-items: center; /* 세로 중앙 정렬 */
-  gap: 10px; /* 컴포넌트 간 간격 */
-  width: 100%;
+  gap: 16px;
+`;
+
+const Detail = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 6px;
+  padding: 12px;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
 `;
 
 const Label = styled.label`
-  font-size: 1.2rem;
-  font-weight: bold;
-  flex-shrink: 0; /* 라벨 크기를 고정 */
-  text-align: left; /* 라벨 텍스트 왼쪽 정렬 */
-`;
-
-const TextInput = styled.input`
-  width: 80%;
-  padding: 10px;
-  background-color: #ececec;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-`;
-
-const CategoryInputWrapper = styled.div`
-  display: flex;
-  justify-content: flex-start;
-`;
-
-const CategoryWrapperStyled = styled(CategoryWrapper)`
-  display: flex;
-  margin-left: 50px;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 10px 0;
-
-  div {
-    padding: 12px !important; /* 강제로 적용 */
-    flex: 1 1 calc(25% - 8px);
-    box-sizing: border-box;
-
-    &:hover {
-      background-color: #f0f0f0 !important; /* 호버 스타일도 강제 */
-    }
-
-    &.active {
-      font-weight: bold !important; /* 활성 상태 스타일 강제 */
-      border-bottom: 2px solid black !important;
-    }
-  }
-`;
-
-const InfoContainer = styled.div`
-  display: flex;
-  flex-direction: column; /* 세로 정렬 */
-  gap: 20px; /* 컴포넌트 간 간격 */
-  width: 100%;
+  font-size: 0.875rem;
+  color: #475569;
+  font-weight: 600;
 `;
 
 const SmallInput = styled.input`
-  width: 100px;
-  padding: 10px 0px;
+  width: 100%;
+  height: 40px;
+  margin-top: 5px;
+  border: 1px solid #e2e8f0;
+  margin-top: 5px;
+  border-radius: 8px;
+  font-size: 0.875rem;
   text-align: center;
-  background-color: #ececec;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #2563eb;
+  }
+
+  &:disabled {
+    background-color: #f9fafb;
+    cursor: not-allowed;
+  }
+`;
+const PriceDetail = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  padding: 12px;
+  background-color: white;
+  border-radius: 8px;
+
+  flex: 1;
+  align-items: center;
+`;
+
+const PriceInput = styled.input`
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  text-align: center;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #2563eb;
+  }
+
+  &:disabled {
+    background-color: #f9fafb;
+    cursor: not-allowed;
+  }
+`;
+
+const CurrencyText = styled.span`
+  font-size: 1rem;
+  color: #2563eb;
+  font-weight: 600;
+  margin-left: 4px;
+  display: inline-flex;
+  align-items: center;
+  padding-top: 2px;
+  user-select: none;
 `;
 
 const DropdownWrapper = styled.div`
   position: relative;
 `;
 
-const DropdownButton = styled.button`
-  width: 120px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-weight: bold;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
-`;
-
 const DropdownMenu = styled.div`
   position: absolute;
-  width: 120px;
   top: 100%;
   left: 0;
-  right: 0;
-  font-size: 0.9rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background: #fff;
-  z-index: 1000;
-  box-sizing: border-box;
+  width: 120px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-top: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
 `;
 
 const DropdownItem = styled.div<{ $isSelected: boolean }>`
@@ -727,35 +771,73 @@ const DropdownItem = styled.div<{ $isSelected: boolean }>`
 
 const PriceWrapper = styled.div`
   display: flex;
-  flex-direction: row; /* 가로 배치 */
-  gap: 20px; /* 두 요소 간 간격 */
-  width: 100%; /* 부모 컨테이너에 맞게 확장 */
-  align-items: center; /* 세로 중앙 정렬 */
+  flex-direction: row;
+  gap: 20px;
+  width: 100%;
+  align-items: center;
+`;
+
+const DropdownButton = styled.button`
+  width: 100%;
+  height: 40px;
+  margin-top: 5px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: #2563eb;
+  }
+`;
+
+const TextInput = styled.input`
+  width: 100%;
+  height: 40px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #2563eb;
+  }
+`;
+
+const CategoryWrapperStyled = styled(CategoryWrapper)`
+  margin-top: 8px;
 `;
 
 const TextAreaWrapper = styled.div`
-  width: 100%; /* Wrapper 크기는 기존 유지 */
+  width: 100%;
   max-width: 1100px;
   margin: 0 auto;
   border: 1px solid #ccc;
   border-radius: 10px;
-  padding: 20px; /* 내부 여백 */
+  padding: 20px;
   margin-bottom: 20px;
   box-sizing: border-box;
 `;
 
 const TextArea = styled.textarea`
   width: 100%;
-  height: 460px; /* 고정된 높이 */
+  height: 460px;
   background-color: #ececec;
-  border: none; /* 테두리 제거 */
+  border: none;
   border-radius: 10px;
   padding: 20px;
-  outline: none; /* 포커스 시 외곽선 제거 */
-  resize: none; /* 크기 조절 비활성화 */
-  font-size: 1rem; /* 텍스트 크기 */
+  outline: none;
+  resize: none;
+  font-size: 1rem;
   line-height: 1.5;
-  color: #333; /* 텍스트 색상 */
+  color: #333;
   box-sizing: border-box;
 `;
 
@@ -765,15 +847,24 @@ const ButtonContainer = styled.div`
   gap: 10px;
 `;
 
-const Button = styled.button`
+const Buttons = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
+const Button = styled.button<{ $primary?: boolean }>`
   padding: 10px 20px;
-  background: #000;
-  color: #fff;
-  border: 1px solid #000;
-  border-radius: 5px;
+  background: ${({ $primary }) => ($primary ? '#2563eb' : 'white')};
+  color: ${({ $primary }) => ($primary ? 'white' : '#2563eb')};
+  border: 1px solid #2563eb;
+  border-radius: 6px;
   cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
 
   &:hover {
-    background: #333;
+    background: ${({ $primary }) => ($primary ? '#1d4ed8' : '#eff6ff')};
   }
 `;
+
+export default PostCreatePage;

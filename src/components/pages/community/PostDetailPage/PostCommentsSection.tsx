@@ -1,78 +1,59 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+
 import {
   addComment,
   deleteComment,
   updateComment,
 } from '../../community/api/postApi';
-import { useAtom } from 'jotai';
-import { currentUserAtom } from '../../../../store/userStore';
-import { formatDateWithOffset } from '../../../../utils/formatDate';
 
+import { formatDateWithOffset } from '../../../../utils/formatDate';
+import { usePostQuery } from '../../../../hooks/useGetPost';
+import { QueryHandler } from '../../../../hooks/useGetProduct';
+import { useQueryClient } from '@tanstack/react-query';
 interface PostCommentsSectionProps {
   communityPostId: number;
-  comments: {
-    commentId: number;
-    userId: number;
-    userNickname: string;
-    content: string;
-    createdAt: string;
-  }[];
+}
+
+interface CharacterCountProps {
+  $overLimit: boolean;
 }
 
 const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
   communityPostId,
-  comments,
 }) => {
-  const queryClient = useQueryClient();
-  const [currentUser] = useAtom(currentUserAtom);
   const [newCommentContent, setNewCommentContent] = useState<string>('');
   const [editCommentId, setEditCommentId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState<string>('');
+  const userId = parseInt(localStorage.getItem('userid') || '0', 10);
+  const { data: post, isLoading, isError } = usePostQuery(communityPostId);
+  const queryClient = useQueryClient();
 
-  const queryKey = ['postDetail', communityPostId];
-
-  const addCommentMutation = useMutation({
-    mutationFn: () =>
-      addComment(
-        communityPostId,
-        currentUser?.id || 0,
-        currentUser?.nickname || '',
-        newCommentContent
-      ),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey });
-      setNewCommentContent('');
-    },
-    onError: () => {
-      alert('댓글 작성에 실패했습니다.');
-    },
-  });
-
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (!newCommentContent.trim()) {
       alert('댓글 내용을 입력해주세요.');
       return;
     }
-    addCommentMutation.mutate();
+    if (newCommentContent.length > 300) {
+      alert('댓글은 최대 300자까지만 입력 가능합니다.');
+      return;
+    }
+    await addComment(communityPostId, {
+      content: newCommentContent,
+      parentId: null,
+    });
+
+    alert('댓글이 등록되었습니다.');
+    queryClient.invalidateQueries({ queryKey: ['post', communityPostId] });
+
+    setNewCommentContent('');
   };
 
-  const deleteCommentMutation = useMutation({
-    mutationFn: (commentId: number) =>
-      deleteComment(communityPostId, commentId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey });
-    },
-    onError: () => {
-      alert('댓글 삭제에 실패했습니다.');
-    },
-  });
-
-  const handleDeleteComment = (commentId: number) => {
+  const handleDeleteComment = async (commentId: number) => {
     if (window.confirm('이 댓글을 삭제하시겠습니까?')) {
-      deleteCommentMutation.mutate(commentId);
+      await deleteComment(commentId);
     }
+    queryClient.invalidateQueries({ queryKey: ['post', communityPostId] });
   };
 
   const handleEditComment = (commentId: number, content: string) => {
@@ -80,20 +61,7 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
     setEditContent(content);
   };
 
-  const updateCommentMutation = useMutation({
-    mutationFn: () =>
-      updateComment(communityPostId, editCommentId!, editContent),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey });
-      setEditCommentId(null);
-      setEditContent('');
-    },
-    onError: () => {
-      alert('댓글 수정에 실패했습니다.');
-    },
-  });
-
-  const handleUpdateComment = () => {
+  const handleUpdateComment = async () => {
     if (!editContent.trim()) {
       alert('수정할 댓글 내용을 입력하세요.');
       return;
@@ -102,204 +70,284 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
       alert('댓글은 최대 300자까지만 입력 가능합니다.');
       return;
     }
-    updateCommentMutation.mutate();
+    await updateComment(editCommentId!, editContent);
+    alert('댓글이 수정되었습니다.');
+    queryClient.invalidateQueries({ queryKey: ['post', communityPostId] });
+    setEditCommentId(null);
+    setEditContent('');
   };
 
   return (
-    <CommentsContainer>
-      <CommentsHeader>댓글</CommentsHeader>
-      <CommentsWrapper>
-        {comments.map((comment) => (
-          <Comment key={comment.commentId}>
-            <CommentHeader>
-              <CommentAuthor>{comment.userNickname}</CommentAuthor>
-              <CommentDate>
-                {formatDateWithOffset(comment.createdAt).toLocaleString()}
-              </CommentDate>
-            </CommentHeader>
-            {editCommentId === comment.commentId ? (
-              <EditCommentContainer>
-                <EditCommentInput
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                />
-                <ActionButtonsWrapper>
-                  <CharacterCount overLimit={editContent.length > 300}>
-                    ({editContent.length}/300)
-                  </CharacterCount>
-                  <ActionButton onClick={handleUpdateComment}>
-                    확인
-                  </ActionButton>
-                  <ActionButton onClick={() => setEditCommentId(null)}>
-                    취소
-                  </ActionButton>
-                </ActionButtonsWrapper>
-              </EditCommentContainer>
-            ) : (
-              <>
-                <CommentContent>{comment.content}</CommentContent>
-                {comment.userId === currentUser?.id && (
-                  <CommentActions>
-                    <ActionButton
-                      onClick={() =>
-                        handleEditComment(comment.commentId, comment.content)
-                      }
-                    >
-                      수정
-                    </ActionButton>
-                    <ActionButton
-                      onClick={() => handleDeleteComment(comment.commentId)}
-                    >
-                      삭제
-                    </ActionButton>
-                  </CommentActions>
-                )}
-              </>
-            )}
-          </Comment>
-        ))}
-        <CommentInputContainer>
-          <CommentInput
-            value={newCommentContent}
-            onChange={(e) => setNewCommentContent(e.target.value)}
-            placeholder="댓글을 입력하세요."
-            maxLength={300} // 브라우저에서 강제 제한
-          />
-          <ActionButtonsWrapper>
-            <CharacterCount overLimit={newCommentContent.length > 300}>
-              ({newCommentContent.length}/300)
-            </CharacterCount>
-            <SubmitCommentButton onClick={handleAddComment}>
-              작성
-            </SubmitCommentButton>
-          </ActionButtonsWrapper>
-        </CommentInputContainer>
-      </CommentsWrapper>
-    </CommentsContainer>
+    <QueryHandler isLoading={isLoading} isError={isError}>
+      <CommentsContainer>
+        <CommentsHeader>댓글</CommentsHeader>
+        <CommentsWrapper>
+          {post?.comment?.map((comment) => (
+            <Comment
+              key={comment.id}
+              $isEditing={editCommentId === Number(comment.id)}
+            >
+              <CommentHeader>
+                <CommentAuthor>{comment.nickname}</CommentAuthor>
+                <CommentDate>
+                  {formatDateWithOffset(comment.createdAt).toLocaleString()}
+                </CommentDate>
+              </CommentHeader>
+              {editCommentId === Number(comment.id) ? (
+                <EditCommentContainer>
+                  <EditCommentInput
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    autoFocus
+                  />
+                  <EditActionButtonsWrapper>
+                    <CharacterCount $overLimit={editContent.length > 300}>
+                      ({editContent.length}/300)
+                    </CharacterCount>
+                    <EditActionButtons>
+                      <ConfirmEditButton onClick={handleUpdateComment}>
+                        수정 완료
+                      </ConfirmEditButton>
+                      <CancelEditButton onClick={() => setEditCommentId(null)}>
+                        취소
+                      </CancelEditButton>
+                    </EditActionButtons>
+                  </EditActionButtonsWrapper>
+                </EditCommentContainer>
+              ) : (
+                <>
+                  <CommentContent>{comment.content}</CommentContent>
+                  {comment.userId === userId && (
+                    <CommentActions>
+                      <ActionButton
+                        onClick={() =>
+                          handleEditComment(comment.id, comment.content)
+                        }
+                      >
+                        수정
+                      </ActionButton>
+                      <ActionButton
+                        onClick={() => handleDeleteComment(comment.id)}
+                      >
+                        삭제
+                      </ActionButton>
+                    </CommentActions>
+                  )}
+                </>
+              )}
+            </Comment>
+          ))}
+          <CommentInputContainer>
+            <CommentInput
+              value={newCommentContent}
+              onChange={(e) => setNewCommentContent(e.target.value)}
+              placeholder="댓글을 입력하세요."
+              maxLength={300}
+            />
+            <ActionButtonsWrapper>
+              <CharacterCount $overLimit={newCommentContent.length > 300}>
+                ({newCommentContent.length}/300)
+              </CharacterCount>
+              <SubmitCommentButton onClick={handleAddComment}>
+                작성
+              </SubmitCommentButton>
+            </ActionButtonsWrapper>
+          </CommentInputContainer>
+        </CommentsWrapper>
+      </CommentsContainer>
+    </QueryHandler>
   );
 };
-
-export default PostCommentsSection;
 
 const CommentsContainer = styled.div`
   width: 100%;
   margin-top: 20px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 20px;
+  border: 1px solid #e6f3ff;
+  border-radius: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.06);
 `;
 
 const CommentsHeader = styled.h3`
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 20px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 16px 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e6f3ff;
+  color: #2c3e50;
 `;
 
-const CommentsWrapper = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0;
-`;
-
-const Comment = styled.li`
-  margin-bottom: 15px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+const CommentsWrapper = styled.div`
   display: flex;
   flex-direction: column;
+  gap: 16px;
+  padding: 0 20px 20px;
+`;
+
+const Comment = styled.li<{ $isEditing?: boolean }>`
+  list-style: none;
+  padding: 16px;
+  border-radius: 10px;
+  background-color: ${({ $isEditing }) => ($isEditing ? '#f0f7ff' : '#f8faff')};
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+  border: 1px solid ${({ $isEditing }) => ($isEditing ? '#007bff' : '#e6f3ff')};
+  box-shadow: ${({ $isEditing }) =>
+    $isEditing ? '0 2px 8px rgba(0, 123, 255, 0.15)' : 'none'};
+
+  &:hover {
+    background-color: #f0f7ff;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, 0.08);
+  }
 `;
 
 const CommentHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 `;
 
 const CommentAuthor = styled.div`
-  font-weight: bold;
+  font-weight: 600;
+  color: #007bff;
+  font-size: 0.95rem;
 `;
 
 const CommentDate = styled.div`
-  font-size: 0.9rem;
-  color: #666;
+  font-size: 0.85rem;
+  color: #6c757d;
 `;
 
 const CommentContent = styled.p`
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #2c3e50;
+  word-break: break-word;
+`;
+
+const CommentInputContainer = styled.div`
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border: 1px solid #e6f3ff;
+  border-radius: 10px;
+  padding: 16px;
+`;
+
+const CommentInput = styled.textarea`
+  width: 100%;
+  min-height: 80px;
+  border: 1px solid #e6f3ff;
+  border-radius: 8px;
+  resize: vertical;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  transition: border-color 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+  }
+
+  &::placeholder {
+    color: #a0aec0;
+  }
+`;
+
+const ActionButtonsWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+`;
+
+const CharacterCount = styled.span<CharacterCountProps>`
+  font-size: 0.875rem;
+  color: ${({ $overLimit }) => ($overLimit ? '#dc3545' : '#6c757d')};
+  transition: color 0.2s ease;
+`;
+
+const ActionButton = styled.button`
+  padding: 8px 16px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #0056b3;
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+`;
+
+const SubmitCommentButton = styled(ActionButton)`
+  align-self: flex-end;
+  min-width: 80px;
+
+  &:disabled {
+    background: #a0aec0;
+    cursor: not-allowed;
+    transform: none;
+  }
 `;
 
 const EditCommentContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
-`;
-
-interface CharacterCountProps {
-  overLimit?: boolean;
-}
-
-const CharacterCount = styled.span<CharacterCountProps>`
-  font-size: 0.9rem;
-  color: ${(props) =>
-    props.overLimit ? 'red' : '#666'}; /* 300자를 초과하면 빨간색 */
-  margin-right: 10px; /* 버튼과 간격 */
-`;
-
-const EditCommentInput = styled.textarea`
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  resize: none;
+  gap: 12px;
+`;
+
+const EditCommentInput = styled(CommentInput)`
+  border-color: #007bff;
+  background-color: #ffffff;
+`;
+
+const EditActionButtonsWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+`;
+
+const EditActionButtons = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const CancelEditButton = styled(ActionButton)`
+  background: #6c757d;
+
+  &:hover {
+    background: #545b62;
+  }
+`;
+
+const ConfirmEditButton = styled(ActionButton)`
+  background: #28a745;
+
+  &:hover {
+    background: #218838;
+  }
 `;
 
 const CommentActions = styled.div`
   display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 8px;
+  align-self: flex-end;
 `;
 
-const CommentInputContainer = styled.div`
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-`;
-
-const CommentInput = styled.textarea`
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  resize: none;
-`;
-
-const ActionButton = styled.button`
-  padding: 10px 20px;
-  background: #000;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-`;
-
-const SubmitCommentButton = styled.button`
-  padding: 10px 20px;
-  background: #000;
-  color: #fff;
-  border: 1px solid #000;
-  border-radius: 5px;
-  cursor: pointer;
-  align-self: flex-end; /* 오른쪽 정렬 */
-`;
-
-const ActionButtonsWrapper = styled.div`
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  align-items: center;
-  margin-top: 10px;
-`;
+export default PostCommentsSection;

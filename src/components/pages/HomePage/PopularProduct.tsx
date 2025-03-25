@@ -3,22 +3,20 @@ import styled from 'styled-components';
 import StarRating from '../../common/StarRating';
 import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
-import { Product } from './model/productSchema';
 
 interface PopularProductProps {
-  popular: Product | undefined;
+  productId: number | undefined;
   category: string | undefined;
 }
 const PopularProduct: React.FC<PopularProductProps> = ({
-  popular,
+  productId,
   category,
 }) => {
-  if (!popular) {
+  if (!productId) {
     return <div>No popular product available</div>;
   }
 
-  const { data: product, isLoading, isError } = useProductQuery(popular.id);
-
+  const { data: product, isLoading, isError } = useProductQuery(productId);
   if (!product) {
     return <div>Product data is not available</div>;
   }

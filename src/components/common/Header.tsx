@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import cart from '../../assets/icons/icon.png';
+import { FiShoppingCart } from 'react-icons/fi';
 import logo from '../../assets/icons/goodbuyus-logo.svg';
 import menu from '../../assets/icons/menu.svg';
 import { useAuth } from '../../context/AuthContext';
@@ -36,49 +36,40 @@ const Header = () => {
                 Home
               </StyledLink>
             </NavItem>
-            <NavItem>
-              <StyledLink to="/products" onClick={toggleMobileMenu}>
-                Products
-              </StyledLink>
-            </NavItem>
-            <NavItem>
-              <StyledLink to="/mypage/notification" onClick={toggleMobileMenu}>
-                Notifications
-              </StyledLink>
-            </NavItem>
-            <NavItem>
-              <StyledLink to="/community/post" onClick={toggleMobileMenu}>
-                Community
-              </StyledLink>
-            </NavItem>
-            <NavItem>
-              {isLoggedIn && (
-                <StyledLink
-                  to={isAdmin ? '#' : '/mypage/setting'}
-                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                    if (isAdmin) {
-                      e.preventDefault();
-                    } else {
-                      toggleMobileMenu();
-                    }
-                  }}
-                >
+            {/* 관리자 아닐 때만 일반 메뉴 표시 */}
+            {!isAdmin && (
+              <>
+                <NavItem>
+                  <StyledLink to="/products" onClick={toggleMobileMenu}>
+                    Products
+                  </StyledLink>
+                </NavItem>
+                <NavItem>
+                  <StyledLink
+                    to="/mypage/notification"
+                    onClick={toggleMobileMenu}
+                  >
+                    Notifications
+                  </StyledLink>
+                </NavItem>
+                <NavItem>
+                  <StyledLink to="/community/post" onClick={toggleMobileMenu}>
+                    Community
+                  </StyledLink>
+                </NavItem>
+              </>
+            )}
+
+            {/* 로그인 시 표시되는 메뉴 */}
+            {isLoggedIn && (
+              <NavItem>
+                <StyledLink to={isAdmin ? '/admin/post' : '/mypage/setting'}>
                   {isAdmin ? 'Admin Page' : 'My Page'}
                 </StyledLink>
-              )}
-              {isAdmin && (
-                <SubMenu>
-                  <SubMenuItem>
-                    <StyledLink to="/admin/post">Post Management</StyledLink>
-                  </SubMenuItem>
-                  <SubMenuItem>
-                    <StyledLink to="/admin/chatlist">
-                      Chat Management
-                    </StyledLink>
-                  </SubMenuItem>
-                </SubMenu>
-              )}
-            </NavItem>
+              </NavItem>
+            )}
+
+            {/* 비로그인 시 로그인 버튼 */}
             {!isLoggedIn ? (
               <Login>
                 <Link to="/signin" onClick={toggleMobileMenu}>
@@ -90,18 +81,21 @@ const Header = () => {
                 <LogOut onClick={logout}>
                   <a>LogOut</a>
                 </LogOut>
-                <LogOut>
-                  <CartIcon>
-                    <StyledLink
-                      to="/mypage/wishlist"
-                      onClick={toggleMobileMenu}
-                    >
-                      <img src={cart} alt="장바구니 아이콘" />
-                    </StyledLink>
-                  </CartIcon>
-                </LogOut>
+                {/* 관리자가 아닐 때만 장바구니 표시 */}
+                {!isAdmin && (
+                  <LogOut>
+                    <CartIcon>
+                      <StyledLink
+                        to="/mypage/wishlist"
+                        onClick={toggleMobileMenu}
+                      >
+                        <FiShoppingCart size={22} color="white" />
+                      </StyledLink>
+                    </CartIcon>
+                  </LogOut>
+                )}
               </>
-            )}{' '}
+            )}
           </NavList>
         </NavBar>
       </HeaderContent>
@@ -221,24 +215,6 @@ const SubMenu = styled.ul`
   }
 `;
 
-const SubMenuItem = styled.li`
-  padding: 8px 12px;
-
-  a {
-    text-decoration: none;
-    color: black;
-    display: block;
-  }
-
-  &:hover {
-    background: #f4f4f4;
-  }
-
-  @media (min-width: 576px) and (max-width: 767px) {
-    padding: 10px;
-    text-align: center;
-  }
-`;
 const NavItem = styled.li`
   margin: 0;
   position: relative;
@@ -343,8 +319,8 @@ const LogOut = styled.li`
 const StyledLink = styled(Link)`
   text-decoration: none;
   color: #000;
-  padding: 5px 12px;
-  margin-top: 10px;
+  padding: 5px;
+  margin-top: 7px;
   transition: background-color 0.2s;
   border-radius: 5px;
 

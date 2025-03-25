@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import StarRating from '../../common/StarRating';
-import { Product } from './model/productSchema';
+import { AllProducts } from './model/productSchema';
 import {
   Card,
   CardWrapper,
@@ -19,64 +19,89 @@ import {
   StyledMoreButton,
 } from './style/CardStyle';
 import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
+import { postWishProduct } from './api/wish';
+import { QueryHandler, useWishQuery } from '../../../hooks/useGetProduct';
 
 interface PopularProductsListProps {
-  products: Product[] | undefined;
+  products: AllProducts[] | undefined;
 }
 
 const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => {
   if (!products) {
     return <div>No products available</div>;
   }
-  const getTopProducts = (products: Product[]): Product[] => {
-    // comments.length를 기준으로 내림차순 정렬
-    const sortedByComments = [...products].sort(
-      (a, b) => (b.reviews?.length || 0) - (a.reviews?.length || 0)
+  const getTopProducts = (products: AllProducts[]): AllProducts[] => {
+    // 마감임박순서
+    const sortedByDeadline = [...products].sort(
+      (a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
     );
+
     // 상위 8개 선택
-    return sortedByComments.slice(0, 8);
+    return sortedByDeadline.slice(0, 8);
   };
 
   const displayedProducts = useMemo(() => getTopProducts(products), [products]);
 
-  const changeLike = () => {
-    //찜하기, 찜 취소하기 api
+  const { data: wish, isLoading, isError } = useWishQuery();
+
+  // 상태를 관리하기 위한 useState 훅. 초기값은 빈 배열로 설정.
+  const [likedProducts, setLikedProducts] = useState<number[]>(
+    () => (wish ? wish.map((item) => item.productPostId) : []) // wish가 존재하면 likedProducts 초기화
+  );
+
+  const changeLike = async (productPostId: number) => {
+    setLikedProducts(
+      (prev) =>
+        prev.includes(productPostId) // productPostId가 이미 likedProducts에 포함되어 있으면
+          ? prev.filter((id) => id !== productPostId) // 제거
+          : [...prev, productPostId] // 추가
+    );
+
+    // 서버에 좋아요 요청 전송
+    await postWishProduct({ productPostId });
   };
 
   return (
-    <Recommend>
-      <RecommendTitle>실시간 인기 상품</RecommendTitle>
+    <QueryHandler isLoading={isLoading} isError={isError}>
+      <Recommend>
+        <RecommendTitle>실시간 인기 상품</RecommendTitle>
 
-      <CardWrapper>
-        {displayedProducts.map((product) => (
-          <Card key={product.id}>
-            <StyledLink to={`/products/${product.id}`}>
-              <ProductImg
-                src={product.url || DEFAULT_IMG}
-                alt={product.name}
-                onError={(e) => {
-                  e.currentTarget.src = DEFAULT_IMG;
+        <CardWrapper>
+          {displayedProducts.map((product, index) => (
+            <Card key={product.productPostId || `product-${index}`}>
+              <StyledLink to={`/products/${product.productPostId}`}>
+                <ProductImg
+                  src={product.url || DEFAULT_IMG}
+                  alt={product.name}
+                  onError={(e) => {
+                    e.currentTarget.src = DEFAULT_IMG;
+                  }}
+                />
+                <ProductWrapper>
+                  <ProductName>{product.name}</ProductName>
+                  <ProductStar>
+                    <StarRating rating={product.rating} />
+                  </ProductStar>
+                  <PriceWrapper>
+                    <OriginalPrice>{product.originalprice}원</OriginalPrice>
+                    <DiscountedPrice>{product.discountprice}원</DiscountedPrice>
+                  </PriceWrapper>
+                </ProductWrapper>
+              </StyledLink>
+              <LikeButton
+                likes={likedProducts.includes(product.productPostId)}
+                onClick={() => {
+                  changeLike(product.productPostId);
                 }}
               />
-              <ProductWrapper>
-                <ProductName>{product.name}</ProductName>
-                <ProductStar>
-                  <StarRating rating={product.rating} />
-                </ProductStar>
-                <PriceWrapper>
-                  <OriginalPrice>{product.originalprice}원</OriginalPrice>
-                  <DiscountedPrice>{product.discountprice}원</DiscountedPrice>
-                </PriceWrapper>
-              </ProductWrapper>
-            </StyledLink>
-            <LikeButton likes={product.likes} onClick={changeLike} />
-          </Card>
-        ))}
-      </CardWrapper>
-      <MoreButtonWrapper>
-        <StyledMoreButton to="/products">더보기</StyledMoreButton>
-      </MoreButtonWrapper>
-    </Recommend>
+            </Card>
+          ))}
+        </CardWrapper>
+        <MoreButtonWrapper>
+          <StyledMoreButton to="/products">더보기</StyledMoreButton>
+        </MoreButtonWrapper>
+      </Recommend>
+    </QueryHandler>
   );
 };
 

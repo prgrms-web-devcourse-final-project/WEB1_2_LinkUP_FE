@@ -4,13 +4,14 @@ import GS from './GS';
 import KakaoMap from '../../common/KakaoMap';
 import styled from 'styled-components';
 import { putLocationChange } from '../../../api/mypageApi';
+import { useLocation } from '../../../context/LocationContext';
 
 function LocationPage() {
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
-  const [region, setRegion] = useState<string | null>(null);
+  const { region, setRegion } = useLocation();
   const [called, setCalled] = useState<boolean>(false);
 
   useEffect(() => {

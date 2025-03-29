@@ -1,138 +1,153 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { FaRegComment } from 'react-icons/fa';
-import SockJS from 'sockjs-client';
-import Stomp from 'stompjs';
+import { fetchChatMessages } from '../../api/chatApi';
+import { webSocketService } from '../../utils/webSocket';
 
 interface Message {
   senderId: string;
   content: string;
-  timestamp: string;
+  timestamp: string | null;
   type?: string;
 }
 
 interface ChatRoomProps {
-  roomId: number;
-  isAdmin?: boolean;
+  chatRoomId: number;
+  chatMembers: string[];
+  webSocketService: typeof webSocketService;
+  isAdmin?: boolean; // 관리자 여부
 }
 
-const ChatRoom: React.FC<ChatRoomProps> = ({ roomId, isAdmin = false }) => {
+const ChatRoom: React.FC<ChatRoomProps> = ({
+  chatRoomId,
+  chatMembers,
+  webSocketService,
+  isAdmin = false,
+}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [isConnected, setIsConnected] = useState(false);
   const chatBoxRef = useRef<HTMLDivElement>(null);
-  const stompClientRef = useRef<Stomp.Client | null>(null);
-  const userId = localStorage.getItem('userid') || '';
-  // const baseURL = import.meta.env.VITE_API_URL || '';
-  const token = localStorage.getItem('token');
-  // 웹소켓 연결
-  const connectWebSocket = () => {
-    const socket = new SockJS(`http://15.164.5.135/websocket`);
-    stompClientRef.current = Stomp.over(socket);
+  const currentUserId = 'user-00001'; // Mock 로그인 사용자 ID
 
-    const headers = { Authorization: `Bearer ${token}` };
+  useEffect(() => {
+    // 채팅방 초기 메시지 및 채팅 메시지 가져오기
+    const fetchMessages = async () => {
+      const fetchedMessages = await fetchChatMessages(chatRoomId);
 
-    stompClientRef.current.connect(
-      headers,
-      () => {
-        console.log(`Connected to WebSocket: roomId=${roomId}`);
-        setIsConnected(true);
+      // 입장 메시지 추가
+      const joinMessage: Message = {
+        senderId: 'system',
+        content: `${chatMembers
+          .map((member) => getNicknameDisplay(member))
+          .join(', ')}님이 입장하셨습니다.`,
+        timestamp: null, // timestamp 표시하지 않음
+      };
 
-        // 구독
-        stompClientRef.current?.subscribe(
-          `/sub/message/${roomId}`,
-          (messageOutput) => {
-            const message = JSON.parse(messageOutput.body);
-            setMessages((prevMessages) => [...prevMessages, message]);
-          }
-        );
-      },
-      (error) => {
-        console.error('WebSocket 연결 실패:', error);
-        setIsConnected(false);
-        if (error) {
-          console.error('WebSocket 오류 코드:', error);
-        }
+      // 그룹 채팅 안내 메시지 추가
+      const groupChatNotice: Message = {
+        senderId: 'system',
+        content: `
+안내사항: 환불 및 이탈 관련 정책
+  1. 환불 및 수령 시간/위치 조율
+    - 공구 진행 중(최종 승인 이후)인 채팅방에서
+    수령 위치 및 시간을 조율합니다.
+    - 이탈자가 발생하거나 환불 요청이 있을 경우,
+      이탈자는 채팅방에서 환불 의사를 명확히
+      표시해야 하며, 모든 참여 인원이 동의한
+      경우에 한해 환불이 진행됩니다.
+  2. 환불 및 비용 부담
+    - 환불 진행 시, 전체 환불 처리 및 해당 인원에
+      대한 신고 접수가 이루어지며, 이로 인해
+      발생하는 모든 비용(공구 물품 반송 등)은
+      이탈자 본인이 전액 부담합니다.
+  3. 이탈자에 대한 페널티 제도
+    - 이탈 행위가 반복될 경우, 아래와 같은
+      경고 시스템이 적용됩니다.
+      - 1회 경고: 계정 일주일 정지
+      - 3회 경고: 계정 한 달 정지
+      - 5회 경고: 계정 영구 정지
 
-        if (error) {
-          console.error('WebSocket 오류 메시지:', error);
-        }
-        if (stompClientRef.current) {
-          console.error('현재 stompClient 상태:', stompClientRef.current);
-        }
-      }
-    );
+  💡 주의: 본 안내사항을 숙지하지 않아 발생하는
+              불이익은 본인에게 책임이 있습니다.
+
+공구 진행에 차질이 없도록 적극적인 협조
+부탁드립니다. 😊`,
+        timestamp: null,
+      };
+
+      setMessages([joinMessage, groupChatNotice, ...fetchedMessages]);
+    };
+
+    fetchMessages();
+  }, [chatRoomId, chatMembers]);
+
+  const getNicknameDisplay = (senderId: string): string => {
+    if (senderId === 'system') return '';
+    return senderId === currentUserId ? '나' : senderId;
   };
 
-  // 메세지 불러오기
-  // const loadExistingMessages = () => {
-  //   fetch(`${baseURL}/chat/${roomId}`)
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         throw new Error('서버에서 메시지를 가져오는데 실패했습니다.');
-  //       }
-  //       return response.json();
-  //     })
-  //     .then((existingMessages) => {
-  //       setMessages(existingMessages);
-  //     })
-  //     .catch((error) => {
-  //       console.error('기존 메시지 로드 실패:', error);
-  //     });
-  // };
-
-  // 페이지 렌더링시 웹소켓 연결, 메세지 불러오는 함수 호출
   useEffect(() => {
-    connectWebSocket();
-    // loadExistingMessages();
+    // WebSocket 연결
+    const handleIncomingMessage = (data: Message) => {
+      setMessages((prev) => [...prev, data]);
+    };
+
+    webSocketService.connect(() => {
+      webSocketService.subscribe(
+        `/sub/message/${chatRoomId}`,
+        (messageOutput) => {
+          try {
+            // messageOutput이 string이므로 JSON.parse() 수행
+            const parsedMessage = JSON.parse(messageOutput);
+
+            // 'body' 속성이 있는지 확인 후 처리
+            if (
+              parsedMessage &&
+              typeof parsedMessage === 'object' &&
+              'body' in parsedMessage
+            ) {
+              const data = JSON.parse(parsedMessage.body);
+              handleIncomingMessage(data);
+            } else {
+              console.error('Invalid message format:', parsedMessage);
+            }
+          } catch (error) {
+            console.error('Failed to parse WebSocket message:', error);
+          }
+        }
+      );
+    });
 
     return () => {
-      if (stompClientRef.current && stompClientRef.current.connected) {
-        stompClientRef.current.disconnect(() => {
-          console.log('WebSocket 연결이 종료되었습니다.');
-        });
-      }
+      webSocketService.unsubscribe(`/sub/message/${chatRoomId}`);
+      webSocketService.close();
     };
-  }, [roomId]);
+  }, [chatRoomId]);
 
-  // 오토스크롤
   useEffect(() => {
+    // 채팅 박스 스크롤 관리
     if (chatBoxRef.current) {
       chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
     }
   }, [messages]);
 
-  // 메세지 보내기
   const handleSendMessage = () => {
-    if (!input.trim() || !isConnected) return;
+    if (!input.trim()) return;
 
     const message: Message = {
-      senderId: isAdmin ? 'system' : userId,
+      senderId: isAdmin ? 'system' : currentUserId,
       content: isAdmin ? `[관리자 메시지] ${input.trim()}` : input.trim(),
       timestamp: new Date().toISOString(),
     };
 
-    if (stompClientRef.current && stompClientRef.current.connected) {
-      stompClientRef.current.send(
-        `/pub/message/${roomId}`,
-        {},
-        JSON.stringify(message)
-      );
-      setInput('');
-    } else {
-      alert('WebSocket이 연결되지 않았습니다. 잠시 후 다시 시도하세요.');
-      // 재연결 시도
-      connectWebSocket();
-    }
+    webSocketService.send(
+      `/pub/message/${chatRoomId}`,
+      JSON.stringify(message)
+    );
+    setMessages((prev) => [...prev, message]);
+    setInput('');
   };
 
-  // '시스템'이 보내는 메시지는 표시x, 내가 보내는 메시지는 '나'로 표시
-  const getNicknameDisplay = (senderId: string): string => {
-    if (senderId === 'system') return '';
-    return senderId === userId ? '나' : senderId;
-  };
-
-  // 날짜 포맷
   const formatDate = (timestamp: string) => {
     const date = new Date(timestamp);
     return date.toLocaleDateString('ko-KR', {
@@ -143,31 +158,22 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ roomId, isAdmin = false }) => {
     });
   };
 
-  // 시간 포맷
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString('ko-KR', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
   const addDateSeparators = (messages: Message[]) => {
     const result: Message[] = [];
     let lastDate = '';
 
     for (const message of messages) {
-      if (message.timestamp) {
-        const messageDate = formatDate(message.timestamp);
-        if (messageDate !== lastDate) {
-          result.push({
-            type: 'date',
-            content: messageDate,
-            senderId: 'system',
-            timestamp: message.timestamp,
-          });
-          lastDate = messageDate;
-        }
+      const messageDate = message.timestamp
+        ? formatDate(message.timestamp)
+        : null;
+      if (messageDate && messageDate !== lastDate) {
+        result.push({
+          type: 'date',
+          content: messageDate,
+          senderId: 'system',
+          timestamp: null,
+        });
+        lastDate = messageDate;
       }
       result.push(message);
     }
@@ -175,67 +181,65 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ roomId, isAdmin = false }) => {
     return result;
   };
 
-  const messagesWithDateSeparators = addDateSeparators(messages);
+  const formattedMessages = addDateSeparators(messages);
 
   return (
     <ChatRoomContainer>
-      <ConnectionStatus connected={isConnected.toString()}>
-        {isConnected ? '연결됨' : '연결 중...'}
-      </ConnectionStatus>
-
-      <ChatMessagesContainer ref={chatBoxRef}>
-        {messagesWithDateSeparators.length === 0 ? (
-          <EmptyStateMessage>메시지가 없습니다.</EmptyStateMessage>
-        ) : (
-          messagesWithDateSeparators.map((msg, index) => (
+      <ChatMessagesContainer>
+        {formattedMessages.map((msg, index) => {
+          const isGroupNotice =
+            msg.senderId === 'system' &&
+            msg.content?.includes('안내사항: 환불 및 이탈 관련 정책');
+          if (msg.type === 'date') {
+            return (
+              <DateSeparator key={`date-${index}`}>{msg.content}</DateSeparator>
+            );
+          }
+          return (
             <MessageWrapper
               key={index}
-              isCurrentUser={msg.senderId === userId}
+              isCurrentUser={msg.senderId === currentUserId}
               isSystemMessage={msg.senderId === 'system'}
-              isDateDivider={msg.type === 'date'}
             >
-              {msg.type === 'date' ? (
-                <DateDivider>{msg.content}</DateDivider>
-              ) : (
-                <>
-                  {msg.senderId !== 'system' && (
-                    <SenderName>{getNicknameDisplay(msg.senderId)}</SenderName>
-                  )}
-                  <MessageContent
-                    isCurrentUser={msg.senderId === userId}
-                    isSystemMessage={msg.senderId === 'system'}
-                  >
-                    {msg.content}
-                  </MessageContent>
-                  {msg.timestamp && msg.senderId !== 'system' && (
-                    <Timestamp>{formatTime(msg.timestamp)}</Timestamp>
-                  )}
-                </>
+              <SenderName>
+                {msg.senderId === 'system'
+                  ? ''
+                  : getNicknameDisplay(msg.senderId)}
+              </SenderName>
+              <MessageContent
+                isCurrentUser={msg.senderId === currentUserId}
+                isGroupNotice={isGroupNotice}
+                isSystemMessage={msg.senderId === 'system'}
+              >
+                {msg.content}
+              </MessageContent>
+              {msg.timestamp && msg.senderId !== 'system' && (
+                <Timestamp>
+                  {new Date(msg.timestamp).toLocaleTimeString()}
+                </Timestamp>
               )}
             </MessageWrapper>
-          ))
-        )}
+          );
+        })}
+        <div ref={chatBoxRef}></div>
       </ChatMessagesContainer>
-
       <MessageInputContainer>
         <MessageInput
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={isConnected ? '메시지를 입력하세요.' : '연결 중...'}
-          onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-          disabled={!isConnected}
+          placeholder="메시지를 입력하세요."
+          onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()} // Enter 키 처리
         />
-        <SendButton
-          onClick={handleSendMessage}
-          disabled={!isConnected || !input.trim()}
-        >
+        <SendButton onClick={handleSendMessage} disabled={!input.trim()}>
           <FaRegComment />
         </SendButton>
       </MessageInputContainer>
     </ChatRoomContainer>
   );
 };
+
+export default ChatRoom;
 
 const ChatRoomContainer = styled.div`
   display: flex;
@@ -246,19 +250,6 @@ const ChatRoomContainer = styled.div`
   border-radius: 8px;
   overflow: hidden;
   background-color: #fff;
-  position: relative;
-`;
-const ConnectionStatus = styled.div<{ connected: string }>`
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: 4px 8px;
-  background-color: ${({ connected }) =>
-    connected === 'true' ? '#4caf50' : '#f44336'};
-  color: white;
-  font-size: 0.8rem;
-  border-bottom-left-radius: 8px;
-  z-index: 10;
 `;
 
 const ChatMessagesContainer = styled.div`
@@ -268,42 +259,23 @@ const ChatMessagesContainer = styled.div`
   background-color: #f9f9f9;
 `;
 
-const EmptyStateMessage = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
+const DateSeparator = styled.div`
+  text-align: center;
+  margin: 10px 0;
+  font-size: 0.9rem;
   color: #888;
-  font-style: italic;
+  font-weight: bold;
 `;
 
 const MessageWrapper = styled.div<{
   isCurrentUser: boolean;
-  isSystemMessage: boolean;
-  isDateDivider?: boolean;
+  isSystemMessage?: boolean;
 }>`
   display: flex;
   flex-direction: column;
-  align-items: ${({ isCurrentUser, isSystemMessage, isDateDivider }) =>
-    isDateDivider || isSystemMessage
-      ? 'center'
-      : isCurrentUser
-        ? 'flex-end'
-        : 'flex-start'};
-  margin-bottom: ${({ isDateDivider }) => (isDateDivider ? '16px' : '12px')};
-  width: 100%;
-`;
-
-const DateDivider = styled.div`
-  text-align: center;
-  padding: 4px 12px;
-  background-color: #e2e2e2;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  color: #666;
-  margin: 8px 0;
-  position: relative;
-  width: auto;
+  align-items: ${({ isCurrentUser, isSystemMessage }) =>
+    isSystemMessage ? 'center' : isCurrentUser ? 'flex-end' : 'flex-start'};
+  margin-bottom: 12px;
 `;
 
 const SenderName = styled.div`
@@ -315,17 +287,23 @@ const SenderName = styled.div`
 
 const MessageContent = styled.div<{
   isCurrentUser: boolean;
-  isSystemMessage: boolean;
+  isGroupNotice?: boolean;
+  isSystemMessage?: boolean;
 }>`
   max-width: 70%;
-  background-color: ${({ isCurrentUser, isSystemMessage }) =>
-    isSystemMessage ? '#f0f0f0' : isCurrentUser ? '#d9f9d9' : '#e9e9e9'};
+  background-color: ${({ isCurrentUser, isGroupNotice, isSystemMessage }) =>
+    isGroupNotice || isSystemMessage
+      ? '#cecece'
+      : isCurrentUser
+        ? '#d9f9d9'
+        : '#e9e9e9'};
   color: #333;
   padding: 10px;
   border-radius: 12px;
   word-wrap: break-word;
   font-size: 1rem;
-  white-space: pre-wrap;
+  white-space: pre-wrap; /* 줄바꿈 유지 */
+  text-align: ${({ isGroupNotice }) => (isGroupNotice ? 'left' : 'inherit')};
 `;
 
 const Timestamp = styled.div`
@@ -349,26 +327,19 @@ const MessageInput = styled.input`
   border-radius: 8px;
   outline: none;
   margin-right: 8px;
-
-  &:disabled {
-    background-color: #f9f9f9;
-    cursor: not-allowed;
-  }
 `;
 
 const SendButton = styled.button`
   padding: 10px 16px;
   font-size: 1rem;
+  font-weight: bold;
   color: #fff;
   background-color: #4caf50;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 
-  &:hover:not(:disabled) {
+  &:hover {
     background-color: #45a049;
   }
 
@@ -377,5 +348,3 @@ const SendButton = styled.button`
     cursor: not-allowed;
   }
 `;
-
-export default ChatRoom;

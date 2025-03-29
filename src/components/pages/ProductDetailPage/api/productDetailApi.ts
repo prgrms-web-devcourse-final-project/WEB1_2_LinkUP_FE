@@ -3,7 +3,7 @@ import { Product } from '../../HomePage/model/productSchema';
 
 export const getProductbyId = async (productId: number): Promise<Product> => {
   try {
-    const URL = `/goodbuyUs/product?postid=${productId}`;
+    const URL = `/api/goodbuyUs/product?postid=${productId}`;
     const response = await axiosInstance.get(URL);
     return response.data;
   } catch {

@@ -7,19 +7,19 @@ export const postSignUp = async (body: {
   name: string;
   phone: string;
 }) => {
-  const response = await axiosInstance.post(`/users/checkemail`, body);
+  const response = await axiosInstance.post(`/api/users/checkemail`, body);
 
   return response.data;
 };
 
 export const postSignUpLocation = async (body: { address: string }) => {
-  const response = await axiosInstance.post(`/users/checkaddress`, body);
+  const response = await axiosInstance.post(`/api/users/checkaddress`, body);
 
   return response.data;
 };
 
 export const postSignUpNickname = async (body: { nickname: string }) => {
-  const response = await axiosInstance.post(`/users/checknickname`, body);
+  const response = await axiosInstance.post(`/api/users/checknickname`, body);
 
   return response.data;
 };
@@ -64,7 +64,7 @@ export const postSignUpLast = async (profile: File | null) => {
     formData.append('profile', defaultImageFile);
   }
 
-  const response = await axiosInstance.post(`/users`, formData, {
+  const response = await axiosInstance.post(`/api/users`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -72,15 +72,17 @@ export const postSignUpLast = async (profile: File | null) => {
 
   return response.data;
 };
+
 export const postSignIn = async (body: { email: string; password: string }) => {
-  const response = await axiosInstance.post(`/users/login`, body);
+  const response = await axiosInstance.post(`/api/users/login`, body);
   const token =
     response.headers['authorization'] || response.headers['Authorization'];
   const role = response.data.roles;
   const userId = response.data.userid;
 
   if (token) {
-    sessionStorage.setItem('token', token); // ✅ sessionStorage 사용
+    sessionStorage.setItem('token', token);
+    localStorage.setItem('token', token);
     sessionStorage.setItem('role', role);
     sessionStorage.setItem('userid', userId);
   }
@@ -89,7 +91,7 @@ export const postSignIn = async (body: { email: string; password: string }) => {
 };
 
 export const postFindPassword = async (body: { email: string }) => {
-  const response = await axiosInstance.post(`/users/find`, body);
+  const response = await axiosInstance.post(`/api/users/find`, body);
 
   return response.data;
 };
@@ -99,7 +101,7 @@ export const postResetPassword = async (
   token: string
 ) => {
   const response = await axiosInstance.post(
-    `/users/reset?token=${token}`,
+    `/api/users/reset?token=${token}`,
     body
   );
 
@@ -107,7 +109,7 @@ export const postResetPassword = async (
 };
 
 export const postSignInSNS = async () => {
-  const response = await axiosInstance.post(`/users/sociallogin`);
+  const response = await axiosInstance.post(`/api/users/sociallogin`);
 
   return response.data;
 };

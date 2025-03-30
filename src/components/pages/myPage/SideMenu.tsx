@@ -93,18 +93,7 @@ const Sidemenu = () => {
           />
           동네인증
         </MenuItem>
-        <MenuItem
-          $isActive={isActive('/mypage/refund')}
-          onClick={() => navigate('/mypage/refund')}
-        >
-          <img
-            src={`/images/refund${isActive('/mypage/refund') ? '_on' : ''}.png`}
-            width={24}
-            height={24}
-            alt="Icon"
-          />
-          환불계좌 관리
-        </MenuItem>
+
         <MenuItem
           $isActive={isActive('/mypage/notification')}
           onClick={() => navigate('/mypage/notification')}
@@ -152,21 +141,25 @@ const Sidemenu = () => {
 
 const Line = styled.div`
   width: 100%;
-  border: 0.5px solid #888;
+  border: 0.5px solid #dae8f2;
 `;
 
 const Wrapper = styled.div`
   width: 260px;
   min-width: 260px;
-  background-color: #fff;
+  height: 100%;
+  background-color: #f7fafd;
   border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 50, 0.1);
+  border: 1px solid #e3eef7;
 `;
 
 const ProfileSection = styled.div`
   display: flex;
   align-items: center;
-  padding: 10px 20px;
+  padding: 15px 20px;
+  background-color: #fff;
+  border-radius: 10px 10px 0 0;
 `;
 
 const ProfileImage = styled.img`
@@ -174,6 +167,8 @@ const ProfileImage = styled.img`
   height: 50px;
   border-radius: 50%;
   margin-right: 15px;
+  border: 2px solid #4e8ac9;
+  box-shadow: 0 0 5px rgba(78, 138, 201, 0.3);
 `;
 
 const ProfileText = styled.div`
@@ -183,20 +178,21 @@ const ProfileText = styled.div`
 
 const Hello = styled.div`
   font-size: 14px;
-  color: #888;
+  color: #6f8ca7;
 `;
 
 const Username = styled.div`
-  margin-top: 15px;
+  margin-top: 8px;
   font-size: 16px;
   font-weight: bold;
+  color: #2a5985;
 `;
 
 const Menu = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  padding: 10px 20px;
+  gap: 8px;
+  padding: 15px 20px;
 `;
 
 const MenuItem = styled.div<{ $isActive?: boolean }>`
@@ -204,19 +200,21 @@ const MenuItem = styled.div<{ $isActive?: boolean }>`
   align-items: center;
   font-size: 14px;
   font-weight: 500;
-  color: ${({ $isActive: isActive }) => (isActive ? '#fff' : '#333')};
+  color: ${({ $isActive: isActive }) => (isActive ? '#fff' : '#4a6b8a')};
   cursor: pointer;
-  height: 30px;
+  height: 38px;
   gap: 10px;
   background-color: ${({ $isActive: isActive }) =>
-    isActive ? '#000' : 'transparent'};
-  border-radius: 5px;
-  padding: 5px 10px;
+    isActive ? '#3b7fc4' : 'transparent'};
+  border-radius: 6px;
+  padding: 5px 12px;
+  transition: all 0.2s ease;
 
   &:hover {
     background-color: ${({ $isActive: isActive }) =>
-      isActive ? '#000' : '#f1f1f1'};
-    color: ${({ $isActive: isActive }) => (isActive ? '#fff' : '#000')};
+      isActive ? '#2d6cae' : '#e6f0fa'};
+    color: ${({ $isActive: isActive }) => (isActive ? '#fff' : '#1d5996')};
+    transform: translateX(2px);
   }
 `;
 

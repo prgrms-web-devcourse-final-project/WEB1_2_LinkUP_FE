@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import StarRating from '../../common/StarRating';
 import { AllProducts } from './model/productSchema';
 import {
@@ -45,9 +45,13 @@ const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => {
   const { data: wish, isLoading, isError } = useWishQuery();
 
   // 상태를 관리하기 위한 useState 훅. 초기값은 빈 배열로 설정.
-  const [likedProducts, setLikedProducts] = useState<number[]>(
-    () => (wish ? wish.map((item) => item.productPostId) : []) // wish가 존재하면 likedProducts 초기화
-  );
+  const [likedProducts, setLikedProducts] = useState<number[]>([]);
+
+  useEffect(() => {
+    if (wish) {
+      setLikedProducts(wish.map((item) => item.productPostId));
+    }
+  }, [wish]);
 
   const changeLike = async (productPostId: number) => {
     setLikedProducts(

@@ -1,80 +1,77 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidemenu from './SideMenu';
 import GS from './GS';
 import { styled } from 'styled-components';
-import { wishHistoryData as initialWishHistoryData } from './mockData';
+import { QueryHandler, useWishQuery } from '../../../hooks/useGetProduct';
+import { postWishProduct } from '../HomePage/api/wish';
+import { LikeButton } from '../HomePage/style/CardStyle';
 
-interface Wish {
-  id: number;
-  name: string;
-  quantity: number;
-  price: string;
-  thumb: string;
-}
+const WishListPage: React.FC = () => {
+  const { data: wish, isLoading, isError } = useWishQuery();
+  const [likedProducts, setLikedProducts] = useState<number[]>([]);
 
-function WishListPage() {
-  const [wishHistoryData, setWishHistoryData] = useState<Wish[]>(
-    initialWishHistoryData
-  );
+  useEffect(() => {
+    if (wish) {
+      setLikedProducts(wish.map((item) => item.productPostId));
+    }
+  }, [wish]);
 
-  const removeWish = (id: number): void => {
-    setWishHistoryData((prev) => prev.filter((wish) => wish.id !== id));
+  const changeLike = async (productPostId: number) => {
+    setLikedProducts(
+      (prev) =>
+        prev.includes(productPostId) // productPostId가 이미 likedProducts에 포함되어 있으면
+          ? prev.filter((id) => id !== productPostId) // 제거
+          : [...prev, productPostId] // 추가
+    );
+
+    // 서버에 좋아요 요청 전송
+    await postWishProduct({ productPostId });
   };
-
   return (
-    <GS.Wrapper>
-      <Sidemenu />
-      <GS.Content>
-        <Title>찜한 상품</Title>
-        <Container>
-          <WishList>
-            {wishHistoryData.map((wish) => (
-              <WishItem key={wish.id}>
-                <WishWrapper>
-                  <ImageContainer>
-                    {wish.thumb !== '' ? (
-                      <img
-                        src={wish.thumb}
-                        alt={wish.name}
-                        width={60}
-                        height={60}
-                      />
-                    ) : (
-                      <ImagePlaceholder />
-                    )}
-                  </ImageContainer>
-                  <WishDetails>
-                    <ProductName>{wish.name}</ProductName>
-                    <ProductInfo>수량: {wish.quantity}</ProductInfo>
-                  </WishDetails>
-                </WishWrapper>
-                <Price>{wish.price}</Price>
-                <Actions>
-                  <HeartIcon
-                    src="/images/wish_on.png"
-                    onClick={() => removeWish(wish.id)}
-                    alt="찜하기"
-                  />
-                </Actions>
-              </WishItem>
-            ))}
-          </WishList>
-        </Container>
-      </GS.Content>
-    </GS.Wrapper>
+    <QueryHandler isLoading={isLoading} isError={isError}>
+      <GS.Wrapper>
+        <Sidemenu />
+        <GS.Content>
+          <Title>찜한 상품</Title>
+          <Container>
+            <WishList>
+              {wish?.map((wish, index) => (
+                <WishItem key={index}>
+                  <WishWrapper>
+                    <ImageContainer>
+                      {wish.productImage !== '' ? (
+                        <img
+                          src={wish.productImage}
+                          alt={wish.productName}
+                          width={60}
+                          height={60}
+                        />
+                      ) : (
+                        <ImagePlaceholder />
+                      )}
+                    </ImageContainer>
+                    <WishDetails>
+                      <ProductName>{wish.productName}</ProductName>
+                    </WishDetails>
+                  </WishWrapper>
+                  <Price>{wish.productPrice}</Price>
+                  <Actions>
+                    <LikeButton
+                      likes={likedProducts.includes(wish.productPostId)}
+                      onClick={() => {
+                        changeLike(wish.productPostId);
+                      }}
+                    />
+                  </Actions>
+                </WishItem>
+              ))}
+            </WishList>
+          </Container>
+        </GS.Content>
+      </GS.Wrapper>
+    </QueryHandler>
   );
-}
-
-const HeartIcon = styled.img`
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  transition: transform 0.2s;
-
-  &:hover {
-    transform: scale(1.1);
-  }
-`;
+};
 
 const Title = styled.div`
   font-size: 16px;
@@ -126,12 +123,6 @@ const WishDetails = styled.div`
 const ProductName = styled.div`
   font-size: 16px;
   font-weight: bold;
-`;
-
-const ProductInfo = styled.div`
-  font-size: 14px;
-  color: #555;
-  margin-top: 4px;
 `;
 
 const Price = styled.div`

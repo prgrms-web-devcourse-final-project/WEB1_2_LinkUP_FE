@@ -13,14 +13,13 @@ interface Message {
 
 interface ChatRoomProps {
   chatRoomId: number;
-  chatMembers: string[];
+
   webSocketService: typeof webSocketService;
   isAdmin?: boolean; // 관리자 여부
 }
 
 const ChatRoom: React.FC<ChatRoomProps> = ({
   chatRoomId,
-  chatMembers,
   webSocketService,
   isAdmin = false,
 }) => {
@@ -37,9 +36,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
       // 입장 메시지 추가
       const joinMessage: Message = {
         senderId: 'system',
-        content: `${chatMembers
-          .map((member) => getNicknameDisplay(member))
-          .join(', ')}님이 입장하셨습니다.`,
+        content: `윤성성님이 입장하셨습니다.`,
         timestamp: null, // timestamp 표시하지 않음
       };
 
@@ -79,7 +76,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     };
 
     fetchMessages();
-  }, [chatRoomId, chatMembers]);
+  }, [chatRoomId]);
 
   const getNicknameDisplay = (senderId: string): string => {
     if (senderId === 'system') return '';

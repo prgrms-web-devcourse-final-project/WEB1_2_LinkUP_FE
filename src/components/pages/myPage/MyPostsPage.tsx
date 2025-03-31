@@ -8,8 +8,9 @@ import {
   MyPostType,
 } from '../../../api/mypageApi';
 import { useNavigate } from 'react-router-dom';
+import { PageTitle } from './OrderListPage';
 
-function MyPostsPage() {
+const MyPostsPage: React.FC = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [myPostList, setMyPostList] = useState<MyPostType[]>([]);
@@ -52,7 +53,7 @@ function MyPostsPage() {
     <GS.Wrapper>
       <Sidemenu />
       <GS.Content>
-        <Title>나의 게시글</Title>
+        <PageTitle>나의 게시글</PageTitle>
         <TableWrapper>
           <Table>
             <thead>
@@ -114,70 +115,88 @@ function MyPostsPage() {
       </GS.Content>
     </GS.Wrapper>
   );
-}
+};
 
 const TableWrapper = styled.div`
   width: 100%;
   overflow-x: auto;
-  margin-top: 20px;
-  border-top: 1px solid #000;
-  border-bottom: 1px solid #000;
+  margin-top: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 `;
 
 const Table = styled.table`
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   text-align: left;
+  overflow: hidden;
 `;
 
 const Th = styled.th`
-  padding: 12px;
-  background-color: #f9f9f9;
-  border-bottom: 1px solid #ddd;
+  padding: 14px 16px;
+  background-color: #ebf5ff;
   font-size: 14px;
-  font-weight: bold;
-  color: #333;
+  font-weight: 600;
+  color: #4a90e2;
   text-align: center;
+  border-bottom: 1px solid #e1efff;
 `;
 
 const Td = styled.td`
-  padding: 12px;
-  border-bottom: 1px solid #ddd;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f0f7ff;
   font-size: 14px;
   color: #555;
   text-align: center;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #f8fbff;
+  }
 `;
 
 const ButtonWrapper = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 12px;
   justify-content: center;
 `;
 
 const EditButton = styled.button`
-  padding: 8px 16px;
+  padding: 8px 18px;
   font-size: 14px;
   color: #fff;
-  background-color: #333;
+  background-color: #64b5f6;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+
+  &:hover {
+    background-color: #42a5f5;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(66, 165, 245, 0.3);
+  }
 `;
 
 const DeleteButton = styled.button`
-  padding: 8px 16px;
+  padding: 8px 18px;
   font-size: 14px;
-  color: #333;
+  color: #5c93ce;
   background-color: #fff;
-  border: 1px solid #333;
-  border-radius: 4px;
+  border: 1px solid #bbdefb;
+  border-radius: 6px;
   cursor: pointer;
-`;
+  transition: all 0.2s ease;
+  font-weight: 500;
 
-const Title = styled.div`
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 20px;
+  &:hover {
+    background-color: #f5faff;
+    color: #4a90e2;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(100, 181, 246, 0.15);
+  }
 `;
 
 const ModalOverlay = styled.div`
@@ -186,44 +205,67 @@ const ModalOverlay = styled.div`
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(2px);
 `;
 
 const ModalContent = styled.div`
   background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  width: 250px;
+  padding: 28px 24px;
+  border-radius: 12px;
+  width: 300px;
   max-width: 90%;
   text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  font-size: 16px;
+  color: #444;
 `;
 
 const ModalButtons = styled.div`
-  margin-top: 30px;
+  margin-top: 32px;
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
+  gap: 16px;
 `;
 
 const RegisterButton = styled.button`
-  padding: 10px 20px;
-  background-color: #333;
+  padding: 10px 24px;
+  background-color: #64b5f6;
   color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 14px;
+
+  &:hover {
+    background-color: #42a5f5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(66, 165, 245, 0.25);
+  }
 `;
 
 const CancelButton = styled.button`
-  padding: 10px 20px;
+  padding: 10px 24px;
   background-color: #fff;
-  color: #333;
-  border: 1px solid #333;
-  border-radius: 4px;
+  color: #5c93ce;
+  border: 1px solid #bbdefb;
+  border-radius: 6px;
   cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 14px;
+
+  &:hover {
+    background-color: #f5faff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(100, 181, 246, 0.15);
+  }
 `;
 
 export default MyPostsPage;

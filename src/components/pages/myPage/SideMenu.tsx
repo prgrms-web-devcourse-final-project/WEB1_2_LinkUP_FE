@@ -94,7 +94,7 @@ const Sidemenu = () => {
           동네인증
         </MenuItem>
 
-        <MenuItem
+        {/* <MenuItem
           $isActive={isActive('/mypage/notification')}
           onClick={() => navigate('/mypage/notification')}
         >
@@ -107,7 +107,7 @@ const Sidemenu = () => {
             alt="Icon"
           />
           알림내역
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem
           $isActive={isActive('/mypage/myposts')}
           onClick={() => navigate('/mypage/myposts')}

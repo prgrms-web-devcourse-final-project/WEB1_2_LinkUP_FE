@@ -7,10 +7,11 @@ import LogoutModal from './Modal/LogoutModal';
 import WithdrawModal from './Modal/WithdrawModal';
 
 import { getUser } from '../../../api/mypageApi';
+import { PageTitle } from './OrderListPage';
 
 const SettingPage = () => {
   const [number, setNumber] = useState<string | undefined>();
-
+  const [nickname, setNickname] = useState();
   const [address, setAddress] = useState();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -24,7 +25,8 @@ const SettingPage = () => {
     const fetchUser = async () => {
       try {
         const response = await getUser();
-        console.log(response);
+
+        setNickname(response.nickname);
         setNumber(formatPhoneNumber(response.phoneNum));
         setAddress(response.address);
       } catch (error) {
@@ -42,10 +44,14 @@ const SettingPage = () => {
         <AddressList>
           <AddressItem>
             <AddressInfo>
-              <Name>최윤성</Name>
+              <NameWrapper>
+                <Name>최윤성</Name>
+                <Nickname>{nickname}</Nickname>
+              </NameWrapper>
               <Details>{address}</Details>
               <Phone>{number}</Phone>
             </AddressInfo>
+
             <EditButton>수정</EditButton>
           </AddressItem>
         </AddressList>
@@ -105,15 +111,6 @@ const SettingPage = () => {
   );
 };
 
-const PageTitle = styled.h1`
-  font-size: 24px;
-  font-weight: 600;
-  color: #1a56db;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #e2e8f0;
-  padding-bottom: 10px;
-`;
-
 const AddressList = styled.div`
   margin-top: 20px;
   background-color: #f0f7ff;
@@ -134,17 +131,35 @@ const AddressItem = styled.div`
     background-color: #e6f0ff;
   }
 `;
-
 const AddressInfo = styled.div`
   display: flex;
   flex-direction: column;
+`;
+
+const NameWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px; /* 이름과 닉네임 간격 */
 `;
 
 const Name = styled.div`
   font-size: 16px;
   font-weight: bold;
   color: #2d3748;
-  margin-bottom: 6px;
+`;
+
+const Nickname = styled.div`
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  background-color: #3182ce;
+  padding: 3px 8px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  text-align: center;
 `;
 
 const Details = styled.div`

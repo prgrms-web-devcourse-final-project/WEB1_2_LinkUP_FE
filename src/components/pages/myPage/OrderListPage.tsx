@@ -6,7 +6,7 @@ import OrderHistory from './OrderListComponents/OrderHistory';
 import RefundHistory from './OrderListComponents/RefundHistory';
 import GroupPurchaseHistory from './OrderListComponents/GroupPurchaseHistory';
 
-function OrderListPage() {
+const OrderListPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('order');
 
   const renderContent = () => {
@@ -51,9 +51,9 @@ function OrderListPage() {
       </GS.Content>
     </GS.Wrapper>
   );
-}
+};
 
-const PageTitle = styled.h1`
+export const PageTitle = styled.h1`
   font-size: 22px;
   font-weight: 600;
   color: #2a5985;

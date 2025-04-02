@@ -56,7 +56,11 @@ const router = createBrowserRouter(
       children: [
         {
           path: '/',
-          element: <HomePage />,
+          element: (
+            <ProtectedRoutes>
+              <HomePage />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: '/products',

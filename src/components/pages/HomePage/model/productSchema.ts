@@ -3,6 +3,7 @@ interface Review {
   content: string;
   rating: number;
   using: boolean;
+  userId: number;
 }
 
 export interface Product {

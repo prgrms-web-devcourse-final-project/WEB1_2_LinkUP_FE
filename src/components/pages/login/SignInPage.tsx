@@ -83,7 +83,8 @@ const SignInPage = () => {
                 response.headers['authorization'] ||
                 response.headers['Authorization'];
               const role = response.data.roles;
-
+              const userId = response.data.userid;
+              localStorage.setItem('userid', userId);
               if (token) {
                 login(token, role);
                 navigate('/');
@@ -97,7 +98,7 @@ const SignInPage = () => {
         </LoginButton>
         <SNSButton>
           <a
-            href="http://15.164.5.135:8080/users/sociallogin"
+            href="http://goodbuyus.store:8080/users/sociallogin"
             style={{
               textDecoration: 'none',
               color: 'inherit',

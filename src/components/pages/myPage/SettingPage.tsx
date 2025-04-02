@@ -25,7 +25,6 @@ const SettingPage = () => {
     const fetchUser = async () => {
       try {
         const response = await getUser();
-
         setNickname(response.nickname);
         setNumber(formatPhoneNumber(response.phoneNum));
         setAddress(response.address);

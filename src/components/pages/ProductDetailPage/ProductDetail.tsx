@@ -70,10 +70,13 @@ const ProductDetail: React.FC = () => {
   const { data: wish } = useWishQuery();
 
   // 상태를 관리하기 위한 useState 훅. 초기값은 빈 배열로 설정.
-  const [likedProducts, setLikedProducts] = useState<number[]>(() =>
-    wish ? wish.map((item) => item.productPostId) : []
-  );
+  const [likedProducts, setLikedProducts] = useState<number[]>([]);
 
+  useEffect(() => {
+    if (wish) {
+      setLikedProducts(wish.map((item) => item.productPostId));
+    }
+  }, [wish]);
   const changeLike = async (productPostId: number) => {
     setLikedProducts(
       (prev) =>

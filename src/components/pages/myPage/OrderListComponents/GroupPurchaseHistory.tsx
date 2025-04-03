@@ -73,7 +73,7 @@ const GroupPurchaseHistory = () => {
                 <ProductInfo>
                   Quantity: {groupPurchase.availableNumber}
                 </ProductInfo>
-                <StatusBadge>
+                <StatusBadge status={groupPurchase.status}>
                   {getStatusLabel(groupPurchase.status)}
                 </StatusBadge>
               </GroupPurchaseDetails>
@@ -132,8 +132,11 @@ const GroupPurchaseWrapper = styled.div`
 `;
 
 const Container = styled.div`
-  width: 100%;
+  width: 97%;
   margin: 20px 0;
+  background-color: #f5f9ff;
+  padding: 20px;
+  border-radius: 12px;
 `;
 
 const OrderList = styled.div`
@@ -147,20 +150,34 @@ const GroupPurchaseItem = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 1px solid #e0e8f7;
+  border-radius: 12px;
   background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 83, 219, 0.05);
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0, 83, 219, 0.1);
+  }
 `;
 
 const ImageContainer = styled.div`
   flex-shrink: 0;
+
+  img {
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid #e0e8f7;
+  }
 `;
 
 const ImagePlaceholder = styled.div`
   width: 60px;
   height: 60px;
-  background-color: #f0f0f0;
-  border-radius: 8px;
+  background-color: #e8f0fe;
+  border-radius: 10px;
+  border: 1px dashed #a0c0ff;
 `;
 
 const GroupPurchaseDetails = styled.div`
@@ -170,24 +187,50 @@ const GroupPurchaseDetails = styled.div`
 const ProductName = styled.div`
   font-size: 16px;
   font-weight: bold;
+  color: #1a3b7a;
 `;
 
 const ProductInfo = styled.div`
   font-size: 14px;
-  color: #555;
+  color: #5b7aac;
   margin-top: 4px;
 `;
 
-const StatusBadge = styled.div`
+const StatusBadge = styled.div<{ status: string }>`
   margin-top: 10px;
   font-size: 12px;
   font-weight: bold;
-  color: #000;
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+
+  ${({ status }) => {
+    if (status === 'APPROVED' || status === 'PAYMENT_COMPLETED') {
+      return `
+        color: #0062ff;
+        background-color: rgba(0, 98, 255, 0.1);
+        border: 1px solid rgba(0, 98, 255, 0.3);
+      `;
+    } else if (status === 'REJECTED' || status === 'DELETED') {
+      return `
+        color: #ff3a4c;
+        background-color: rgba(255, 58, 76, 0.1);
+        border: 1px solid rgba(255, 58, 76, 0.3);
+      `;
+    } else {
+      return `
+        color: #ff8a00;
+        background-color: rgba(255, 138, 0, 0.1);
+        border: 1px solid rgba(255, 138, 0, 0.3);
+      `;
+    }
+  }}
 `;
 
 const Price = styled.div`
   font-size: 16px;
   font-weight: bold;
+  color: #1a3b7a;
 `;
 
 const Actions = styled.div`
@@ -198,30 +241,35 @@ const Actions = styled.div`
 
 const ActionButton = styled.div`
   background: #fff;
-  color: #131118;
-  border: 1px solid #131118;
-  padding: 10px 10px;
+  color: #0053db;
+  border: 1px solid #0053db;
+  padding: 10px 15px;
   border-radius: 8px;
   cursor: pointer;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.3s ease;
+
   &:hover {
-    background-color: #131118;
+    background-color: #0053db;
     color: #fff;
   }
 `;
 
 const CancelButton = styled.div`
   background: #fff;
-  color: #ff7262;
-  border: 1px solid #ff7262;
-  padding: 10px 10px;
+  color: #ff3a4c;
+  border: 1px solid #ff3a4c;
+  padding: 10px 15px;
   border-radius: 8px;
   cursor: pointer;
   display: inline-flex;
   justify-content: center;
+  font-weight: 500;
   transition: all 0.3s ease;
 
   &:hover {
-    background: #ff7262;
+    background: #ff3a4c;
     color: #fff;
   }
 `;
@@ -229,12 +277,23 @@ const CancelButton = styled.div`
 const ReviewLink = styled.div`
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 6px;
   cursor: pointer;
   margin-top: 8px;
+  color: #0053db;
+  transition: color 0.2s ease;
 
   span {
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid #0053db;
+  }
+
+  &:hover {
+    color: #003ca0;
+
+    span {
+      border-bottom: 1px solid #003ca0;
+    }
   }
 `;
 
@@ -242,18 +301,22 @@ const ReviewIcon = styled.img`
   width: 16px;
   height: 16px;
 `;
+
 const QRCodeButton = styled.div`
-  background: #fff;
-  color: #131118;
-  border: 1px solid #131118;
-  padding: 10px 10px;
+  background: #0053db;
+  color: #fff;
+  border: 1px solid #0053db;
+  padding: 10px 15px;
   border-radius: 8px;
   cursor: pointer;
   display: inline-flex;
   justify-content: center;
+  font-weight: 500;
+  transition: all 0.3s ease;
+
   &:hover {
-    background: #131118;
-    color: #fff;
+    background: #003ca0;
+    border-color: #003ca0;
   }
 `;
 

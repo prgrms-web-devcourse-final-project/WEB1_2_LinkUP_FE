@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { addComment, deleteComment, editComment } from './api/commentApi';
 import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
 import { useQueryClient } from '@tanstack/react-query';
-
+import { getUser } from '../../../api/mypageApi';
+import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
 interface CommentProps {
   productId: number;
 }
@@ -17,6 +18,29 @@ const CommentComponent: React.FC<CommentProps> = ({ productId }) => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingText, setEditingText] = useState('');
   const [editingRating, setEditingRating] = useState(5);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [nickname, setNickname] = useState<string | undefined>();
+  const [profile, setProfile] = useState<string | undefined>();
+  console.log(product);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userId = localStorage.getItem('userid');
+        setCurrentUserId(Number(userId));
+        const response = await getUser();
+        setNickname(response.nickname);
+        setProfile(response.profile);
+      } catch (error) {
+        console.error('failed', error);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  // 현재 사용자가 댓글 작성자인지 확인하는 함수
+  const isCommentOwner = (reviewUserId: number) => {
+    return currentUserId === reviewUserId;
+  };
 
   const handleShowMore = () => {
     setVisibleCount((prevCount) => prevCount + 10);
@@ -24,6 +48,10 @@ const CommentComponent: React.FC<CommentProps> = ({ productId }) => {
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!currentUserId) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
     try {
       await addComment(productId, {
         content: newComment,
@@ -76,8 +104,9 @@ const CommentComponent: React.FC<CommentProps> = ({ productId }) => {
     try {
       if (window.confirm('이 댓글을 삭제하시겠습니까?')) {
         await deleteComment(reviewId);
+        alert('댓글이 삭제되었습니다.');
+        queryClient.invalidateQueries({ queryKey: ['product', productId] });
       }
-      queryClient.invalidateQueries({ queryKey: ['product', productId] });
     } catch {
       alert('현재 댓글을 삭제할 수 없습니다.');
     }
@@ -110,9 +139,28 @@ const CommentComponent: React.FC<CommentProps> = ({ productId }) => {
           {product?.reviews
             .filter((review) => review.using) // 'using'이 true인 것만 필터링
             .slice(0, visibleCount)
-            .map((review, activeIndex) => (
+            .map((review, index) => (
               <Comment key={review.reviewId}>
-                {editingId === activeIndex ? (
+                <UserInfoSection>
+                  <ProfileImage
+                    src={
+                      isCommentOwner(review.userId)
+                        ? profile || DEFAULT_IMG
+                        : DEFAULT_IMG
+                    }
+                    onError={(e) => {
+                      e.currentTarget.src = DEFAULT_IMG;
+                    }}
+                    alt="profile"
+                  />
+                  <UserName>
+                    {isCommentOwner(review.userId)
+                      ? nickname || '익명'
+                      : '익명'}
+                  </UserName>
+                </UserInfoSection>
+
+                {editingId === index ? (
                   <EditCommentForm>
                     <EditInput
                       value={editingText}
@@ -149,24 +197,26 @@ const CommentComponent: React.FC<CommentProps> = ({ productId }) => {
                       <CommentText>{review.content}</CommentText>
                       <CommentStars>{'⭐'.repeat(review.rating)}</CommentStars>
                     </CommentContent>
-                    <CommentActions>
-                      <ActionButton
-                        onClick={() =>
-                          handleEditComment(
-                            activeIndex,
-                            review.content,
-                            review.rating
-                          )
-                        }
-                      >
-                        수정
-                      </ActionButton>
-                      <ActionButton
-                        onClick={() => handleDeleteComment(review.reviewId)}
-                      >
-                        삭제
-                      </ActionButton>
-                    </CommentActions>
+                    {isCommentOwner(review.userId) && (
+                      <CommentActions>
+                        <ActionButton
+                          onClick={() =>
+                            handleEditComment(
+                              index,
+                              review.content,
+                              review.rating
+                            )
+                          }
+                        >
+                          수정
+                        </ActionButton>
+                        <ActionButton
+                          onClick={() => handleDeleteComment(review.reviewId)}
+                        >
+                          삭제
+                        </ActionButton>
+                      </CommentActions>
+                    )}
                   </>
                 )}
               </Comment>
@@ -216,6 +266,27 @@ const CommentSubmitButton = styled.button`
   border-radius: 4px;
   cursor: pointer;
 `;
+
+const UserInfoSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 15px;
+`;
+
+const ProfileImage = styled.img`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+
+  object-fit: cover;
+`;
+
+const UserName = styled.div`
+  font-weight: bold;
+  font-size: 14px;
+`;
+
 const CommentActions = styled.div`
   margin-left: 10px;
   display: flex;
@@ -223,6 +294,7 @@ const CommentActions = styled.div`
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
 `;
+
 const Comment = styled.div`
   margin-top: 10px;
   padding: 15px;
@@ -289,6 +361,7 @@ const ViewMore = styled.button`
     color: white;
   }
 `;
+
 const EditCommentForm = styled.div`
   display: flex;
   gap: 8px;
@@ -313,9 +386,11 @@ const EditActions = styled.div`
   display: flex;
   gap: 4px;
 `;
+
 const CommentSection = styled.div`
   margin-top: 40px;
   border-top: 1px solid #eee;
   padding-top: 20px;
 `;
+
 export default CommentComponent;

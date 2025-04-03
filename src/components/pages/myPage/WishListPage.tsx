@@ -1,148 +1,174 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidemenu from './SideMenu';
 import GS from './GS';
 import { styled } from 'styled-components';
-import { wishHistoryData as initialWishHistoryData } from './mockData';
+import { QueryHandler, useWishQuery } from '../../../hooks/useGetProduct';
+import { postWishProduct } from '../HomePage/api/wish';
+import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
+import Heart from '../../../assets/icons/heart.png';
+import FilledHeart from '../../../assets/icons/filled-heart.png';
+import { PageTitle } from './OrderListPage';
+import { useNavigate } from 'react-router-dom';
+const WishListPage: React.FC = () => {
+  const { data: wish, isLoading, isError } = useWishQuery();
 
-interface Wish {
-  id: number;
-  name: string;
-  quantity: number;
-  price: string;
-  thumb: string;
-}
+  const [likedProducts, setLikedProducts] = useState<number[]>([]);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (wish) {
+      setLikedProducts(wish.map((item) => item.productPostId));
+    }
+  }, [wish]);
 
-function WishListPage() {
-  const [wishHistoryData, setWishHistoryData] = useState<Wish[]>(
-    initialWishHistoryData
-  );
+  const changeLike = async (productPostId: number) => {
+    setLikedProducts((prev) =>
+      prev.includes(productPostId)
+        ? prev.filter((id) => id !== productPostId)
+        : [...prev, productPostId]
+    );
 
-  const removeWish = (id: number): void => {
-    setWishHistoryData((prev) => prev.filter((wish) => wish.id !== id));
+    await postWishProduct({ productPostId });
   };
 
   return (
-    <GS.Wrapper>
-      <Sidemenu />
-      <GS.Content>
-        <Title>찜한 상품</Title>
-        <Container>
-          <WishList>
-            {wishHistoryData.map((wish) => (
-              <WishItem key={wish.id}>
-                <WishWrapper>
+    <QueryHandler isLoading={isLoading} isError={isError}>
+      <GS.Wrapper>
+        <Sidemenu />
+        <GS.Content>
+          <PageTitle>찜한 상품</PageTitle>
+          <Container>
+            <CardGrid>
+              {wish?.map((wish, index) => (
+                <Card key={index}>
                   <ImageContainer>
-                    {wish.thumb !== '' ? (
-                      <img
-                        src={wish.thumb}
-                        alt={wish.name}
-                        width={60}
-                        height={60}
+                    <img
+                      src={wish.productImage || DEFAULT_IMG}
+                      alt={wish.productName}
+                      onClick={() =>
+                        navigate(`/products/${wish.productPostId}`)
+                      }
+                      onError={(e) => {
+                        e.currentTarget.src = DEFAULT_IMG;
+                      }}
+                    />
+                    <LikeButtonWrapper>
+                      {' '}
+                      <LikeButton
+                        likes={likedProducts.includes(wish.productPostId)}
+                        onClick={() => {
+                          changeLike(wish.productPostId);
+                        }}
                       />
-                    ) : (
-                      <ImagePlaceholder />
-                    )}
+                    </LikeButtonWrapper>
                   </ImageContainer>
-                  <WishDetails>
-                    <ProductName>{wish.name}</ProductName>
-                    <ProductInfo>수량: {wish.quantity}</ProductInfo>
-                  </WishDetails>
-                </WishWrapper>
-                <Price>{wish.price}</Price>
-                <Actions>
-                  <HeartIcon
-                    src="/images/wish_on.png"
-                    onClick={() => removeWish(wish.id)}
-                    alt="찜하기"
-                  />
-                </Actions>
-              </WishItem>
-            ))}
-          </WishList>
-        </Container>
-      </GS.Content>
-    </GS.Wrapper>
+                  <CardContent
+                    onClick={() => navigate(`/products/${wish.productPostId}`)}
+                  >
+                    <ProductName>{wish.productName}</ProductName>
+                    <Price>{wish.productPrice}원</Price>
+                  </CardContent>
+                </Card>
+              ))}
+            </CardGrid>
+          </Container>
+        </GS.Content>
+      </GS.Wrapper>
+    </QueryHandler>
   );
-}
-
-const HeartIcon = styled.img`
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  transition: transform 0.2s;
-
-  &:hover {
-    transform: scale(1.1);
-  }
-`;
-
-const Title = styled.div`
-  font-size: 16px;
-  font-weight: bold;
-`;
-
-const WishWrapper = styled.div`
-  display: inline-flex;
-  flex-direction: row;
-  width: 400px;
-`;
+};
 
 const Container = styled.div`
-  width: 100%;
+  width: 97%;
   margin: 20px 0;
+  background-color: #f0f7ff;
+  padding: 20px;
+  border-radius: 10px;
 `;
 
-const WishList = styled.div`
-  display: flex;
-  flex-direction: column;
+const CardGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 20px;
 `;
 
-const WishItem = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+const Card = styled.div`
+  border-radius: 10px;
   background-color: #fff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
+  }
 `;
 
 const ImageContainer = styled.div`
-  flex-shrink: 0;
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.05);
+  }
 `;
 
-const ImagePlaceholder = styled.div`
-  width: 60px;
-  height: 60px;
-  background-color: #f0f0f0;
-  border-radius: 8px;
+const LikeButtonWrapper = styled.div`
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  border-radius: 50%;
+  padding: 20px;
 `;
 
-const WishDetails = styled.div`
-  margin-left: 20px;
+const LikeButton = styled.img.withConfig({
+  shouldForwardProp: (prop) => prop !== 'likes',
+})<{ likes: boolean }>`
+  position: absolute;
+  bottom: 1px;
+  right: 10px;
+
+  cursor: pointer;
+  content: ${({ likes }) => `url(${likes ? FilledHeart : Heart})`};
+  color: ${({ likes }) => (likes ? 'red ' : 'transparent')};
+
+  &:hover {
+    cursor: pointer;
+    transform: scale(1.2);
+    transition: transform 0.2s ease-in-out;
+  }
+`;
+const CardContent = styled.div`
+  padding: 15px;
 `;
 
 const ProductName = styled.div`
   font-size: 16px;
   font-weight: bold;
-`;
-
-const ProductInfo = styled.div`
-  font-size: 14px;
-  color: #555;
-  margin-top: 4px;
+  color: #1e40af;
+  margin-bottom: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const Price = styled.div`
   font-size: 16px;
   font-weight: bold;
-`;
-
-const Actions = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  color: #1e40af;
+  background-color: #dbeafe;
+  padding: 6px 12px;
+  border-radius: 20px;
+  display: inline-block;
 `;
 
 export default WishListPage;

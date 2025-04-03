@@ -6,7 +6,24 @@ import {
   OrderType,
   postProductCancel,
 } from '../../../../api/mypageApi';
-
+const getStatusColor = (status: string): string => {
+  switch (status) {
+    case 'DONE':
+      return '#2d8a6a';
+    case 'PENDING':
+      return '#3b7fc4';
+    case 'AUTH_COMPLETED':
+      return '#4e8ac9';
+    case 'FAILED':
+      return '#d35858';
+    case 'CANCELED':
+      return '#939393';
+    case 'PARTIAL_CANCELED':
+      return '#b88d3b';
+    default:
+      return '#6f8ca7';
+  }
+};
 const OrderHistory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [orderList, setOrderList] = useState<OrderType[]>([]);
@@ -44,11 +61,20 @@ const OrderHistory = () => {
         return '알 수 없는 상태';
     }
   };
-
+  const formatDate = (isoString: string) => {
+    const date = new Date(isoString);
+    return date.toLocaleString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+  };
   useEffect(() => {
     const fetchOrderList = async () => {
       const response = await getOrderList();
-
       setOrderList(response);
     };
     fetchOrderList();
@@ -56,62 +82,85 @@ const OrderHistory = () => {
 
   return (
     <Container>
-      <OrderList>
-        {orderList.map((order, index) => (
-          <OrderItem key={index}>
-            <OrderWrapper>
-              <ImageContainer>
-                <ImagePlaceholder />
-              </ImageContainer>
-              <OrderDetails>
-                <ProductName>{order.productName}</ProductName>
-                <ProductInfo>Quantity: {order.quantity}</ProductInfo>
-                <StatusBadge>{getStatusLabel(order.paymentStatus)}</StatusBadge>
-              </OrderDetails>
-            </OrderWrapper>
-            <Price>{order.price}원</Price>
-            <Actions>
-              <ActionButton
-                onClick={() => {
-                  navigate(`/products/${order.postId}`);
-                }}
-              >
-                상품 페이지 이동
-              </ActionButton>
-              {order.paymentStatus === 'DONE' && (
-                <CancelButton
-                  onClick={() => {
-                    handleCancelClick();
-                    if (order.payment_key) {
-                      setPk(order.payment_key);
-                    }
-                  }}
-                >
-                  주문 취소/환불
-                </CancelButton>
-              )}
-              {order.paymentStatus === 'DONE' && (
-                <ReviewLink
-                  onClick={() => {
-                    navigate(`/products/${order.postId}`);
-                  }}
-                >
-                  <ReviewIcon src="/images/qricon.png" alt="review icon" />
-                  <span>리뷰 작성하기</span>
-                </ReviewLink>
-              )}
-            </Actions>
-          </OrderItem>
-        ))}
-      </OrderList>
+      {orderList.length === 0 ? (
+        <EmptyState>
+          <EmptyIcon>📦</EmptyIcon>
+          <EmptyText>주문 내역이 없습니다.</EmptyText>
+        </EmptyState>
+      ) : (
+        <OrderList>
+          {orderList.map((order, index) => (
+            <OrderItem key={index}>
+              <OrderHeader>
+                <OrderDate>주문일자: {formatDate(order.orderDate)}</OrderDate>
+                {order.paymentStatus === 'DONE' && (
+                  <OrderNumber>
+                    주문번호: {order.payment_key?.substring(0, 8) || '00000000'}
+                  </OrderNumber>
+                )}
+              </OrderHeader>
+              <OrderContent>
+                <OrderWrapper>
+                  <ImageContainer>
+                    <ImagePlaceholder />
+                  </ImageContainer>
+                  <OrderDetails>
+                    <ProductName>{order.productName}</ProductName>
+                    <ProductInfo>수량: {order.quantity}개</ProductInfo>
+                    <StatusBadge status={order.paymentStatus}>
+                      {getStatusLabel(order.paymentStatus)}
+                    </StatusBadge>
+                  </OrderDetails>
+                </OrderWrapper>
+                <Price>{order.price.toLocaleString()}원</Price>
+                <Actions>
+                  <ActionButton
+                    onClick={() => {
+                      navigate(`/products/${order.postId}`);
+                    }}
+                  >
+                    상품 페이지 이동
+                  </ActionButton>
+                  {order.paymentStatus === 'DONE' && (
+                    <CancelButton
+                      onClick={() => {
+                        handleCancelClick();
+                        if (order.payment_key) {
+                          setPk(order.payment_key);
+                        }
+                      }}
+                    >
+                      주문 취소/환불
+                    </CancelButton>
+                  )}
+                  {order.paymentStatus === 'DONE' && (
+                    <ReviewLink
+                      onClick={() => {
+                        navigate(`/products/${order.postId}`);
+                      }}
+                    >
+                      <ReviewIcon src="/images/qricon.png" alt="review icon" />
+                      <span>리뷰 작성하기</span>
+                    </ReviewLink>
+                  )}
+                </Actions>
+              </OrderContent>
+            </OrderItem>
+          ))}
+        </OrderList>
+      )}
 
       {isModalOpen && (
         <ModalOverlay>
           <ModalContent>
+            <ModalHeader>주문 취소 확인</ModalHeader>
             <ModalText>주문을 취소/환불하시겠습니까?</ModalText>
+            <ModalSubtext>
+              취소 후에는 되돌릴 수 없으니 신중하게 결정해주세요.
+            </ModalSubtext>
             <ModalButtons>
-              <ConfirmButton onClick={handleConfirm}>Yes</ConfirmButton>
-              <CancelModalButton onClick={handleClose}>No</CancelModalButton>
+              <ConfirmButton onClick={handleConfirm}>확인</ConfirmButton>
+              <CancelModalButton onClick={handleClose}>취소</CancelModalButton>
             </ModalButtons>
           </ModalContent>
         </ModalOverlay>
@@ -120,31 +169,79 @@ const OrderHistory = () => {
   );
 };
 
-const OrderWrapper = styled.div`
-  display: inline-flex;
-  flex-direction: row;
-  width: 400px;
-`;
-
 const Container = styled.div`
   width: 100%;
-  margin: 20px 0;
+`;
+
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+`;
+
+const EmptyIcon = styled.div`
+  font-size: 40px;
+  margin-bottom: 16px;
+`;
+
+const EmptyText = styled.div`
+  font-size: 16px;
+  color: #6f8ca7;
 `;
 
 const OrderList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 `;
 
 const OrderItem = styled.div`
   display: flex;
+  flex-direction: column;
+  border: 1px solid #dae8f2;
+  border-radius: 10px;
+  background-color: #fff;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 50, 0.03);
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 50, 0.06);
+  }
+`;
+
+const OrderHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  background-color: #f0f6fc;
+  padding: 12px 20px;
+  border-bottom: 1px solid #dae8f2;
+`;
+
+const OrderDate = styled.div`
+  font-size: 14px;
+  color: #4a6b8a;
+`;
+
+const OrderNumber = styled.div`
+  font-size: 14px;
+  color: #4a6b8a;
+`;
+
+const OrderContent = styled.div`
+  display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #fff;
+`;
+
+const OrderWrapper = styled.div`
+  display: inline-flex;
+  flex-direction: row;
+  width: 400px;
 `;
 
 const ImageContainer = styled.div`
@@ -152,10 +249,11 @@ const ImageContainer = styled.div`
 `;
 
 const ImagePlaceholder = styled.div`
-  width: 60px;
-  height: 60px;
-  background-color: #f0f0f0;
+  width: 70px;
+  height: 70px;
+  background-color: #e6f0fa;
   border-radius: 8px;
+  border: 1px solid #dae8f2;
 `;
 
 const OrderDetails = styled.div`
@@ -165,58 +263,69 @@ const OrderDetails = styled.div`
 const ProductName = styled.div`
   font-size: 16px;
   font-weight: bold;
+  color: #2a5985;
+  margin-bottom: 6px;
 `;
 
 const ProductInfo = styled.div`
   font-size: 14px;
-  color: #555;
-  margin-top: 4px;
+  color: #6f8ca7;
+  margin-bottom: 8px;
 `;
 
-const StatusBadge = styled.div`
-  margin-top: 10px;
+const StatusBadge = styled.div<{ status: string }>`
+  display: inline-block;
+  padding: 4px 10px;
   font-size: 12px;
-  font-weight: bold;
-  color: #000;
+  font-weight: 500;
+  color: white;
+  background-color: ${(props) => getStatusColor(props.status)};
+  border-radius: 20px;
 `;
 
 const Price = styled.div`
   font-size: 16px;
   font-weight: bold;
+  color: #2a5985;
 `;
 
 const Actions = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  min-width: 140px;
 `;
 
-const ActionButton = styled.div`
+const ActionButton = styled.button`
   background: #fff;
-  color: #131118;
-  border: 1px solid #131118;
-  padding: 10px 10px;
-  border-radius: 8px;
+  color: #3b7fc4;
+  border: 1px solid #3b7fc4;
+  padding: 8px 12px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
   &:hover {
-    background: #131118;
+    background: #3b7fc4;
     color: #fff;
   }
 `;
 
-const CancelButton = styled.div`
+const CancelButton = styled.button`
   background: #fff;
-  color: #ff7262;
-  border: 1px solid #ff7262;
-  padding: 10px 10px;
-  border-radius: 8px;
+  color: #d35858;
+  border: 1px solid #d35858;
+  padding: 8px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  display: inline-flex;
-  justify-content: center;
-  transition: all 0.3s ease;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 
   &:hover {
-    background: #ff7262;
+    background: #d35858;
     color: #fff;
   }
 `;
@@ -224,12 +333,23 @@ const CancelButton = styled.div`
 const ReviewLink = styled.div`
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   cursor: pointer;
-  margin-top: 8px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #3b7fc4;
+  padding: 4px 0;
 
   span {
-    border-bottom: 1px solid #131118;
+    border-bottom: 1px solid #3b7fc4;
+  }
+
+  &:hover {
+    color: #2d6cae;
+
+    span {
+      border-bottom: 1px solid #2d6cae;
+    }
   }
 `;
 
@@ -254,14 +374,28 @@ const ModalOverlay = styled.div`
 const ModalContent = styled.div`
   background-color: white;
   padding: 24px;
-  border-radius: 8px;
-  width: 300px;
+  border-radius: 10px;
+  width: 340px;
   text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 50, 0.1);
+`;
+
+const ModalHeader = styled.h3`
+  color: #2a5985;
+  margin-bottom: 16px;
+  font-size: 18px;
 `;
 
 const ModalText = styled.p`
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   font-size: 16px;
+  color: #4a6b8a;
+`;
+
+const ModalSubtext = styled.p`
+  font-size: 14px;
+  color: #6f8ca7;
+  margin-bottom: 20px;
 `;
 
 const ModalButtons = styled.div`
@@ -272,25 +406,32 @@ const ModalButtons = styled.div`
 
 const ConfirmButton = styled.button`
   padding: 8px 24px;
-  border-radius: 4px;
-  border: 1px solid #ff7262;
+  border-radius: 6px;
+  border: 1px solid #d35858;
   background-color: #fff;
-  color: #ff7262;
+  color: #d35858;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  font-weight: 500;
 
   &:hover {
-    background-color: #ff7262;
+    background-color: #d35858;
     color: #fff;
   }
 `;
 
-const CancelModalButton = styled(ConfirmButton)`
-  border: 1px solid #131118;
-  color: #131118;
+const CancelModalButton = styled.button`
+  padding: 8px 24px;
+  border-radius: 6px;
+  border: 1px solid #3b7fc4;
+  background-color: #fff;
+  color: #3b7fc4;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
 
   &:hover {
-    background-color: #131118;
+    background-color: #3b7fc4;
     color: #fff;
   }
 `;

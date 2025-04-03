@@ -88,6 +88,10 @@ const PasswordModal = ({ onClose }: { onClose: () => void }) => {
   return (
     <ModalOverlay onClick={onClose}>
       <Modal onClick={(e) => e.stopPropagation()}>
+        <ModalHeader>
+          <ModalTitle>비밀번호 변경</ModalTitle>
+          <CloseButton onClick={onClose}>×</CloseButton>
+        </ModalHeader>
         <ModalContent>
           {step === 1 && (
             <>
@@ -99,8 +103,11 @@ const PasswordModal = ({ onClose }: { onClose: () => void }) => {
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                 />
-                <Button onClick={handleNextStep}>확인</Button>
               </InputWrapper>
+              <ButtonWrapper>
+                <CancelButton onClick={onClose}>취소</CancelButton>
+                <SubmitButton onClick={handleNextStep}>확인</SubmitButton>
+              </ButtonWrapper>
             </>
           )}
           {step === 2 && (
@@ -124,9 +131,13 @@ const PasswordModal = ({ onClose }: { onClose: () => void }) => {
                   value={confirmPassword}
                   onChange={handleConfirmPasswordChange}
                 />
-                <Button onClick={handleNextStep}>변경</Button>
               </InputWrapper>
               {cpwError && <ErrorMessage>{cpwError}</ErrorMessage>}
+
+              <ButtonWrapper>
+                <CancelButton onClick={onClose}>취소</CancelButton>
+                <SubmitButton onClick={handleNextStep}>변경</SubmitButton>
+              </ButtonWrapper>
             </>
           )}
         </ModalContent>
@@ -135,70 +146,152 @@ const PasswordModal = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
-const ErrorMessage = styled.div`
-  color: red;
-  font-size: 12px;
-  margin: -15px 0 10px 0;
-`;
-
 const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(2px);
 `;
 
 const Modal = styled.div`
   background-color: #fff;
-  width: 400px;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  width: 450px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   z-index: 1001;
+  overflow: hidden;
+  animation: fadeIn 0.3s ease-out;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background-color: #3182ce;
+  color: white;
+`;
+
+const ModalTitle = styled.h3`
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 const ModalContent = styled.div`
-  font-size: 16px;
-  margin-bottom: 20px;
+  padding: 20px;
 `;
 
 const Title = styled.div`
-  font-size: 14px;
-  font-weight: bold;
+  font-size: 15px;
+  font-weight: 600;
   margin-bottom: 10px;
+  color: #2d3748;
 `;
 
 const InputWrapper = styled.div`
-  display: flex;
-  gap: 10px;
   margin-bottom: 20px;
 `;
 
 const Input = styled.input`
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  width: 93%;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
   font-size: 14px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #3182ce;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+  }
+
+  &::placeholder {
+    color: #a0aec0;
+  }
+`;
+
+const ButtonWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
 `;
 
 const Button = styled.button`
-  background-color: #000;
-  color: #fff;
-  border: none;
   padding: 10px 20px;
-  border-radius: 5px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.2s;
+
+  &:active {
+    transform: translateY(1px);
+  }
+`;
+
+const SubmitButton = styled(Button)`
+  background-color: #3182ce;
+  color: white;
+  border: none;
 
   &:hover {
-    background-color: #333;
+    background-color: #2c5282;
   }
+`;
+
+const CancelButton = styled(Button)`
+  background-color: transparent;
+  color: #4a5568;
+  border: 1px solid #e2e8f0;
+
+  &:hover {
+    background-color: #f7fafc;
+  }
+`;
+
+const ErrorMessage = styled.div`
+  color: #e53e3e;
+  font-size: 13px;
+  margin: -15px 0 20px 0;
+  padding-left: 2px;
 `;
 
 export default PasswordModal;

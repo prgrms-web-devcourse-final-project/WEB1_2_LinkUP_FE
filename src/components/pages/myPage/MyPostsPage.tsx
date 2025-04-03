@@ -66,8 +66,20 @@ const MyPostsPage: React.FC = () => {
             <tbody>
               {myPostList.map((myPost, index) => (
                 <tr key={index}>
-                  <Td>{myPost.title}</Td>
-                  <Td>{formatDate(myPost.createdAt)}</Td>
+                  <Td
+                    onClick={() =>
+                      navigate(`/community/post/${myPost.communityPostId}`)
+                    }
+                  >
+                    {myPost.title}
+                  </Td>
+                  <Td
+                    onClick={() =>
+                      navigate(`/community/post/${myPost.communityPostId}`)
+                    }
+                  >
+                    {formatDate(myPost.createdAt)}
+                  </Td>
                   <Td>
                     <ButtonWrapper>
                       <EditButton
@@ -150,7 +162,7 @@ const Td = styled.td`
   color: #555;
   text-align: center;
   transition: background-color 0.2s ease;
-
+  cursor: pointer;
   &:hover {
     background-color: #f8fbff;
   }

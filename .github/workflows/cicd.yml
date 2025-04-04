@@ -18,12 +18,14 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Create .env file for Vite
+        run: |
+          echo "VITE_KAKAO_KEY=${{ secrets.VITE_KAKAO_KEY }}" > .env
+
       - name: Install and Build
         run: |
           npm install
           npm run build
-        env:
-          VITE_KAKAO_KEY: ${{ secrets.VITE_KAKAO_KEY }}
 
       - name: Deploy to S3
         uses: aws-actions/configure-aws-credentials@v2

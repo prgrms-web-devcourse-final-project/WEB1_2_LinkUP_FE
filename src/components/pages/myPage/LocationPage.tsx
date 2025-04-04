@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Sidemenu from './SideMenu';
 import GS from './GS';
 import KakaoMap from '../../common/KakaoMap';
@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { putLocationChange } from '../../../api/mypageApi';
 import { useLocation } from '../../../context/LocationContext';
 import { PageTitle } from './OrderListPage';
+import { loadKakaoMapScript } from '../../../utils/kakaoMapLoader'; // Ensure this path is correct
 
 function LocationPage() {
   const [location, setLocation] = useState<{
@@ -15,92 +16,104 @@ function LocationPage() {
   const { region, setRegion } = useLocation();
   const [called, setCalled] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [mapScriptLoaded, setMapScriptLoaded] = useState<boolean>(false);
 
-  useEffect(() => {
-    // 카카오맵 스크립트가 로드되었는지 확인하는 함수
-    const checkKakaoMapLoaded = () => {
-      return window.kakao && window.kakao.maps && window.kakao.maps.services;
-    };
+  // Get address from coordinates
+  const getAddressFromCoords = useCallback(
+    (longitude: number, latitude: number) => {
+      if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
+        console.error('카카오맵 서비스가 로드되지 않았습니다');
+        return;
+      }
 
-    if (navigator.geolocation && !called) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setLocation({ latitude, longitude });
-          setIsLoading(false);
+      const geocoder = new window.kakao.maps.services.Geocoder();
 
-          // 카카오맵 스크립트가 로드되었는지 확인
-          if (checkKakaoMapLoaded()) {
-            const geocoder = new window.kakao.maps.services.Geocoder();
-
-            geocoder.coord2RegionCode(
-              longitude,
-              latitude,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (result: any, status: any) => {
-                if (status === window.kakao.maps.services.Status.OK) {
-                  const fullRegion = `${result[0]?.region_1depth_name || ''} ${
-                    result[0]?.region_2depth_name || ''
-                  } ${result[0]?.region_3depth_name || ''}`;
-                  setRegion(fullRegion);
-                  setCalled(true);
-                } else {
-                  console.error('주소를 가져오지 못했습니다.');
-                }
-              }
-            );
+      geocoder.coord2RegionCode(
+        longitude,
+        latitude,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (result: any, status: any) => {
+          if (
+            status === window.kakao.maps.services.Status.OK &&
+            result &&
+            result[0]
+          ) {
+            const fullRegion = `${result[0]?.region_1depth_name || ''} ${
+              result[0]?.region_2depth_name || ''
+            } ${result[0]?.region_3depth_name || ''}`;
+            setRegion(fullRegion.trim());
+            setCalled(true);
           } else {
-            // 카카오맵 스크립트가 아직 로드되지 않았다면 지연 후 다시 시도
-            const waitForKakaoMap = setInterval(() => {
-              if (checkKakaoMapLoaded()) {
-                clearInterval(waitForKakaoMap);
-                const geocoder = new window.kakao.maps.services.Geocoder();
-
-                geocoder.coord2RegionCode(
-                  longitude,
-                  latitude,
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  (result: any, status: any) => {
-                    if (status === window.kakao.maps.services.Status.OK) {
-                      const fullRegion = `${result[0]?.region_1depth_name || ''} ${
-                        result[0]?.region_2depth_name || ''
-                      } ${result[0]?.region_3depth_name || ''}`;
-                      setRegion(fullRegion);
-                      setCalled(true);
-                    } else {
-                      console.error('주소를 가져오지 못했습니다.');
-                    }
-                  }
-                );
-              }
-            }, 300);
-
-            // 일정 시간 후에도 로드되지 않으면 인터벌 정리
-            setTimeout(() => {
-              clearInterval(waitForKakaoMap);
-              if (!called) {
-                console.error('카카오맵 서비스를 로드할 수 없습니다.');
-              }
-            }, 10000);
+            console.error('주소를 가져오지 못했습니다.');
           }
-        },
-        (error) => {
-          console.error('위치 정보를 가져올 수 없습니다:', error);
-          setIsLoading(false);
         }
       );
+    },
+    [setRegion]
+  );
+
+  // Load Kakao map script
+  useEffect(() => {
+    const appKey = import.meta.env.VITE_KAKAO_KEY;
+    if (!appKey) {
+      console.error('Kakao API 키가 설정되지 않았습니다');
+      setIsLoading(false);
+      return;
     }
+
+    loadKakaoMapScript(appKey)
+      .then(() => {
+        setMapScriptLoaded(true);
+      })
+      .catch((error) => {
+        console.error('카카오맵 스크립트 로드 실패:', error);
+        setIsLoading(false);
+      });
   }, []);
 
+  // Get current position
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      console.error('Geolocation이 지원되지 않는 브라우저입니다');
+      setIsLoading(false);
+      return;
+    }
+
+    if (called) return;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setLocation({ latitude, longitude });
+        setIsLoading(false);
+      },
+      (error) => {
+        console.error('위치 정보를 가져올 수 없습니다:', error);
+        setIsLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }, [called]);
+
+  // Get address when both location and map script are ready
+  useEffect(() => {
+    if (location && mapScriptLoaded && !called) {
+      getAddressFromCoords(location.longitude, location.latitude);
+    }
+  }, [location, mapScriptLoaded, called, getAddressFromCoords]);
+
   const handleVerification = async () => {
-    if (region) {
-      try {
-        await putLocationChange({ newAddress: region });
-        alert('동네 인증이 완료되었습니다.');
-      } catch (error) {
-        console.error('동네 인증 실패:', error);
-        alert('동네 인증에 실패했습니다. 다시 시도해 주세요.');
-      }
+    if (!region) {
+      alert('동네 정보를 가져올 수 없습니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    try {
+      await putLocationChange({ newAddress: region });
+      alert('동네 인증이 완료되었습니다.');
+    } catch (error) {
+      console.error('동네 인증 실패:', error);
+      alert('동네 인증에 실패했습니다. 다시 시도해 주세요.');
     }
   };
 
@@ -136,7 +149,10 @@ function LocationPage() {
                 있습니다.
               </AddressDesc>
             </AddressCard>
-            <VerfiyButton onClick={handleVerification}>
+            <VerfiyButton
+              onClick={handleVerification}
+              disabled={!region || isLoading}
+            >
               동네인증 완료하기
             </VerfiyButton>
           </KakaoMapWrapper>
@@ -163,7 +179,7 @@ const MapContainer = styled.div`
   max-width: 600px;
 `;
 
-const VerfiyButton = styled.div`
+const VerfiyButton = styled.button`
   background: linear-gradient(45deg, #1e40af, #3b82f6);
   color: #fff;
   border-radius: 8px;
@@ -177,6 +193,7 @@ const VerfiyButton = styled.div`
   font-weight: bold;
   transition: all 0.2s ease;
   box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+  border: none;
 
   &:hover {
     transform: translateY(-2px);
@@ -186,6 +203,13 @@ const VerfiyButton = styled.div`
   &:active {
     transform: translateY(1px);
     box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  }
+
+  &:disabled {
+    background: linear-gradient(45deg, #94a3b8, #cbd5e1);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
 `;
 

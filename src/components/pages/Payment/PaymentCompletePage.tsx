@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { createChatRoom } from '../../../api/chatApi';
-import ChatRoomModal from '../community/modal/ChatRoomModal';
-import { webSocketService } from '../../../utils/webSocket';
+// import { createChatRoom } from '../../../api/chatApi';
+// import ChatRoomModal from '../community/modal/ChatRoomModal';
+// import { webSocketService } from '../../../utils/webSocket';
 import { useQuantity } from '../../../context/QuantityContext';
 import { usePostQuery } from '../../../hooks/useGetPost';
 import { QueryHandler } from '../../../hooks/useGetProduct';
@@ -23,29 +23,29 @@ const PaymentCompletePage: React.FC = () => {
   const price = urlParams.get('amount');
   const { data: post, isLoading, isError } = usePostQuery(postId);
 
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatRoom, setChatRoom] = useState<{
-    id: number;
-    roomName: string;
-  } | null>(null);
+  // const [isChatOpen, setIsChatOpen] = useState(false);
+  // const [chatRoom, setChatRoom] = useState<{
+  //   id: number;
+  //   roomName: string;
+  // } | null>(null);
 
-  const handleChatRoomCreation = async () => {
-    try {
-      // const chatRoom = await createChatRoom(parseInt(id));
-      // setChatRoom(chatRoom);
-    } catch {
-      alert('채팅방을 생성할 수 없습니다.');
-    }
-  };
+  // const handleChatRoomCreation = async () => {
+  //   try {
+  //     // const chatRoom = await createChatRoom(parseInt(id));
+  //     // setChatRoom(chatRoom);
+  //   } catch {
+  //     alert('채팅방을 생성할 수 없습니다.');
+  //   }
+  // };
 
-  const openChat = async () => {
-    if (!chatRoom) {
-      await handleChatRoomCreation();
-    }
-    setIsChatOpen(true);
-  };
+  // const openChat = async () => {
+  //   if (!chatRoom) {
+  //     await handleChatRoomCreation();
+  //   }
+  //   setIsChatOpen(true);
+  // };
 
-  const closeChat = () => setIsChatOpen(false);
+  // const closeChat = () => setIsChatOpen(false);
 
   return (
     <QueryHandler isLoading={isLoading} isError={isError}>
@@ -71,13 +71,15 @@ const PaymentCompletePage: React.FC = () => {
         </SuccessSection>
 
         <ButtonGroup>
-          <OrderDetailButton onClick={openChat}>채팅방 열기</OrderDetailButton>
+          <OrderDetailButton onClick={() => navigate('/community/post')}>
+            다른 상품 보기
+          </OrderDetailButton>
           <BackButton onClick={() => navigate('/mypage/orderlist')}>
             주문내역 보기
           </BackButton>
         </ButtonGroup>
 
-        {chatRoom && (
+        {/* {chatRoom && (
           <ChatRoomModal
             isOpen={isChatOpen}
             onClose={closeChat}
@@ -86,7 +88,7 @@ const PaymentCompletePage: React.FC = () => {
             webSocketService={webSocketService}
             isAdminPage={false}
           />
-        )}
+        )} */}
       </Container>
     </QueryHandler>
   );

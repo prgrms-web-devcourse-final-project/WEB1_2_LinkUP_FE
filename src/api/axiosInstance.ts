@@ -7,7 +7,7 @@ const axiosInstance = axios.create({
 
 // 요청/응답 인터셉터 설정 (선택 사항)
 axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token'); // 토큰 저장 방식
+  const token = sessionStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

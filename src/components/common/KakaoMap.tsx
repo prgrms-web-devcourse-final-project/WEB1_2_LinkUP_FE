@@ -1,6 +1,23 @@
 import React, { useEffect, useRef } from 'react';
 import { loadKakaoMapScript } from '../../utils/kakaoMapLoader';
 
+// 카카오맵 관련 타입 정의
+interface KakaoMapMarker {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setMap: (map: any) => void;
+}
+
+interface KakaoMapInstance {
+  maps: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Map: new (container: HTMLElement, options: any) => any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    LatLng: new (lat: number, lng: number) => any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Marker: new (options: { position: any }) => KakaoMapMarker;
+  };
+}
+
 type KakaoMapProps = {
   latitude: number;
   longitude: number;
@@ -19,7 +36,9 @@ const KakaoMap: React.FC<KakaoMapProps> = ({
   useEffect(() => {
     const initializeMap = async () => {
       try {
-        const kakao = await loadKakaoMapScript(appKey);
+        const kakao = (await loadKakaoMapScript(
+          appKey
+        )) as unknown as KakaoMapInstance;
         if (!mapContainer.current) return;
 
         const options = {

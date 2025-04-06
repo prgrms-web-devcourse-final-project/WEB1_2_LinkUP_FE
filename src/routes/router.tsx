@@ -33,7 +33,6 @@ import PaymentCompletePage from '../components/pages/Payment/PaymentCompletePage
 import PostManagementPage from '../components/pages/admin/PostManagementPage';
 import PostApprovalPage from '../components/pages/admin/PostApprovalPage';
 import PaymentFailPage from '../components/pages/Payment/PaymentFailPage';
-import ChatRoomManagementPage from '../components/pages/admin/ChatRoomManagementPage';
 import ScrollToTopButton from '../components/common/ScrollToTopButton';
 import DepositPage from '../components/pages/community/DepositPage';
 import ProtectedRoutes from './ProtectedRoutes';
@@ -124,7 +123,7 @@ const router = createBrowserRouter(
           element: <DepositPage />,
         },
         {
-          path: '/community/success/:id',
+          path: '/v1/virtual/success/:id',
           element: <PaymentCompletePage />,
         },
         {
@@ -138,15 +137,6 @@ const router = createBrowserRouter(
         {
           path: '/admin/post/approval/:communityPostId',
           element: <PostApprovalPage />,
-        },
-        {
-          path: '/admin/chatlist',
-          element: (
-            <ProtectedRoutes>
-              {' '}
-              <ChatRoomManagementPage />
-            </ProtectedRoutes>
-          ),
         },
         {
           path: '/mypage',

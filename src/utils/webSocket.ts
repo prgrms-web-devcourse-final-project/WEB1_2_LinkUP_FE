@@ -94,5 +94,5 @@ export class WebSocketService<T = unknown> {
 }
 
 export const webSocketService = new WebSocketService<string>(
-  'ws://15.164.5.135:8080/websocket'
+  'wss://goodbuyus.store:8080/websocket'
 );

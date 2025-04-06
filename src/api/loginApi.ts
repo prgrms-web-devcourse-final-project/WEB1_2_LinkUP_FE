@@ -1,3 +1,4 @@
+import { UserInfo } from '../context/UserContext';
 import axiosInstance from './axiosInstance';
 
 export const postSignUp = async (body: {
@@ -24,19 +25,14 @@ export const postSignUpNickname = async (body: { nickname: string }) => {
   return response.data;
 };
 
-export const postSignUpLast = async (profile: File | null) => {
-  const email = localStorage.getItem('email');
-  const password = localStorage.getItem('password');
-  const password_confirm = localStorage.getItem('password_confirm');
-  const name = localStorage.getItem('name');
-  const phone = localStorage.getItem('phone');
-  const nickname = localStorage.getItem('nickname');
-  const address = localStorage.getItem('address');
+export const postSignUpLast = async (user: UserInfo, profile: File | null) => {
+  const { email, password, passwordConfirm, name, phone, nickname, address } =
+    user;
 
-  const user = {
+  const userInfo = {
     email,
     password,
-    password_confirm,
+    password_confirm: passwordConfirm,
     name,
     phone,
     nickname,
@@ -46,14 +42,13 @@ export const postSignUpLast = async (profile: File | null) => {
   const formData = new FormData();
   formData.append(
     'user',
-    new Blob([JSON.stringify(user)], { type: 'application/json' })
+    new Blob([JSON.stringify(userInfo)], { type: 'application/json' })
   );
 
   if (profile) {
     formData.append('profile', profile);
   } else {
-    const defaultImageUrl = '/public/images/origin.png';
-
+    const defaultImageUrl = '/images/origin.png'; // ✅ '/public'은 필요 없음
     const defaultImageBlob = await fetch(defaultImageUrl).then((res) =>
       res.blob()
     );
@@ -82,7 +77,6 @@ export const postSignIn = async (body: { email: string; password: string }) => {
 
   if (token) {
     sessionStorage.setItem('token', token);
-    localStorage.setItem('token', token);
     sessionStorage.setItem('role', role);
     sessionStorage.setItem('userid', userId);
   }

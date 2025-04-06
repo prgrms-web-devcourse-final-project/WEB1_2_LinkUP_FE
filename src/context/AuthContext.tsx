@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = (token: string, role: string) => {
     sessionStorage.setItem('token', token);
-    localStorage.setItem('token', token);
+
     sessionStorage.setItem('role', role);
     setIsLoggedIn(true);
     setIsAdmin(role === 'ROLE_ADMIN');
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('role');
-    localStorage.removeItem('role');
+
     setIsLoggedIn(false);
     setIsAdmin(false);
   };

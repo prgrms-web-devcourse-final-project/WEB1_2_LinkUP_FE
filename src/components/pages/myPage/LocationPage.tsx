@@ -18,7 +18,6 @@ function LocationPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [mapScriptLoaded, setMapScriptLoaded] = useState<boolean>(false);
 
-  // Get address from coordinates
   const getAddressFromCoords = useCallback(
     (longitude: number, latitude: number) => {
       if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
@@ -52,7 +51,6 @@ function LocationPage() {
     [setRegion]
   );
 
-  // Load Kakao map script
   useEffect(() => {
     const appKey = import.meta.env.VITE_KAKAO_KEY;
     if (!appKey) {
@@ -71,10 +69,8 @@ function LocationPage() {
       });
   }, []);
 
-  // Get current position
   useEffect(() => {
     if (!navigator.geolocation) {
-      console.error('Geolocation이 지원되지 않는 브라우저입니다');
       setIsLoading(false);
       return;
     }
@@ -95,7 +91,6 @@ function LocationPage() {
     );
   }, [called]);
 
-  // Get address when both location and map script are ready
   useEffect(() => {
     if (location && mapScriptLoaded && !called) {
       getAddressFromCoords(location.longitude, location.latitude);

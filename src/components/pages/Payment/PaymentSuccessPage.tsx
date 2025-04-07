@@ -12,7 +12,7 @@ const PaymentSuccessPage = () => {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
 
-  const price = urlParams.get('amount');
+  const price = urlParams.get('totalAmount');
 
   const { data: product, isLoading, isError } = useProductQuery(productId);
 

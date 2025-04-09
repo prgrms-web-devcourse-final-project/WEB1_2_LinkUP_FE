@@ -1,13 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { handlePayment } from './api/paymentApi';
 import { QueryHandler, useProductQuery } from '../../../hooks/useGetProduct';
-import { useQuantity } from '../../../context/QuantityContext';
 import { useDaumPostcodePopup } from 'react-daum-postcode';
 
 const PaymentForm = () => {
-  const { quantity } = useQuantity();
+  const location = useLocation();
+  const quantity = location.state;
   const { id } = useParams();
   const postcodeScriptUrl =
     'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';

@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { getUser } from '../../../api/mypageApi';
-
+import default_profile from '../../../../public/images/origin.png';
+import { getImageSrc } from '../../../utils/GetImageSrc';
 const Sidemenu = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
+  const [nickname, setNickname] = useState('');
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -15,7 +17,7 @@ const Sidemenu = () => {
     const fetchUser = async () => {
       try {
         const response = await getUser();
-
+        setNickname(response.nickname);
         setProfileImage(response.profile);
         setNewName(response.name);
       } catch (error) {
@@ -29,12 +31,15 @@ const Sidemenu = () => {
     <Wrapper>
       <ProfileSection>
         <ProfileImage
-          src={profileImage || '/images/origin.png'}
+          src={getImageSrc(profileImage) || default_profile}
           alt="Profile"
         />
         <ProfileText>
           <Hello>Hello 👋</Hello>
-          <Username>{newName}</Username>
+          <DisplayName>{nickname || newName}님</DisplayName>
+          {nickname && newName && nickname !== newName && (
+            <RealName>{newName}님</RealName>
+          )}
         </ProfileText>
       </ProfileSection>
       <Line />
@@ -175,19 +180,23 @@ const ProfileText = styled.div`
   display: flex;
   flex-direction: column;
 `;
-
 const Hello = styled.div`
   font-size: 14px;
   color: #6f8ca7;
+  margin-bottom: 4px;
 `;
 
-const Username = styled.div`
-  margin-top: 8px;
+const DisplayName = styled.div`
   font-size: 16px;
   font-weight: bold;
   color: #2a5985;
 `;
 
+const RealName = styled.div`
+  font-size: 13px;
+  color: #6f8ca7;
+  margin-top: 2px;
+`;
 const Menu = styled.div`
   display: flex;
   flex-direction: column;

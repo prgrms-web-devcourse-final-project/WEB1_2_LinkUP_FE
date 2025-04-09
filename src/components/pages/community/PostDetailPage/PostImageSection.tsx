@@ -34,6 +34,7 @@ const PostImageSection: React.FC<PostImageSectionProps> = ({
   const handleDotClick = (index: number) => {
     setCurrentIndex(index);
   };
+
   return (
     <FormContainer>
       <ImageAndDetailsContainer>

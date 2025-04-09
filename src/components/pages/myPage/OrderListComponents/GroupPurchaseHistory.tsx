@@ -38,7 +38,7 @@ const GroupPurchaseHistory = () => {
     const fetchPost = async () => {
       try {
         const response = await getCommunity();
-
+        console.log(response);
         setGroupPurchaseList(response);
       } catch (error) {
         console.error('failed', error);

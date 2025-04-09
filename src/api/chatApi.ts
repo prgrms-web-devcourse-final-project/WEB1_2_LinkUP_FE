@@ -2,7 +2,7 @@ import { formatDateWithOffset } from '../utils/formatDate';
 import axiosInstance from './axiosInstance';
 import { webSocketService } from '../utils/webSocket';
 
-export interface ChatRoom {
+export interface Chat {
   postId: number;
   capacity: number;
   roomName: string;
@@ -38,7 +38,7 @@ export const fetchMyChatRooms = async () => {
 };
 
 // 전체 채팅방 목록 조회 (관리자)
-export const fetchAllChatRooms = async (): Promise<ChatRoom[]> => {
+export const fetchAllChatRooms = async (): Promise<Chat[]> => {
   const response = await axiosInstance.get('/api/admin/chatlist');
 
   if (response.status !== 200) {

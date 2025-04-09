@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAtom } from 'jotai';
-import { joinQuantityAtom } from '../../../store/postStore';
 import styled from 'styled-components';
 import {
   joinPost,
@@ -13,8 +11,6 @@ import { POST_STATUS } from '../../../types/postTypes';
 import PostImageSection from './PostDetailPage/PostImageSection';
 import PostDetailsSection from './PostDetailPage/PostDetailsSection';
 import PostCommentsSection from './PostDetailPage/PostCommentsSection';
-import SSEHandler from '../../../utils/SSEHandler';
-import ParticipantList from './ParticipantList';
 import { useRemainingTime } from '../../../hooks/useGetPage';
 import { usePostQuery } from '../../../hooks/useGetPost';
 import { QueryHandler } from '../../../hooks/useGetProduct';
@@ -24,10 +20,7 @@ const PostDetailPage: React.FC = () => {
   const { communityPostId } = useParams<{ communityPostId: string }>();
   const navigate = useNavigate();
   const postId = Number(communityPostId);
-  const isAdmin = localStorage.getItem('role') === 'ROLE_ADMIN';
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [joinQuantity] = useAtom(joinQuantityAtom);
-  const { quantity, setQuantity } = useQuantity();
+  const userId = localStorage.getItem('userid');
 
   // React Query로 데이터 가져오기
   const [checkParticiapant, setParticiapant] = useState(false);
@@ -36,6 +29,20 @@ const PostDetailPage: React.FC = () => {
     isLoading,
     isError,
   } = usePostQuery(postId, checkParticiapant);
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const { saveQuantity, getQuantity } = useQuantity();
+
+  const joinQuantity = getQuantity(userId!, String(postId));
+
+  // 초기 수량 설정 (참여 상태 확인)
+  useEffect(() => {
+    if (post?.participationStatus === 'JOIN') {
+      setQuantity(joinQuantity);
+    }
+  }, [post?.participationStatus, joinQuantity]);
+
+  const [quantity, setQuantity] = useState<number>(joinQuantity);
 
   const isParticipant =
     post?.participationStatus === 'JOIN' ||
@@ -64,6 +71,7 @@ const PostDetailPage: React.FC = () => {
 
     try {
       await joinPost(postId, quantity);
+      saveQuantity(userId!, String(postId), quantity);
       alert('공구에 성공적으로 참여했습니다.');
       setParticiapant(true);
     } catch {
@@ -87,13 +95,6 @@ const PostDetailPage: React.FC = () => {
     }
   };
 
-  // 초기 수량 설정 (참여 상태 확인)
-  useEffect(() => {
-    if (post?.participationStatus === 'JOIN' && joinQuantity !== null) {
-      setQuantity(joinQuantity);
-    }
-  }, [post?.participationStatus, joinQuantity]);
-
   // 수량 변경
   const handleQuantityChange = (change: number) => {
     const newQuantity = quantity + change;
@@ -112,21 +113,14 @@ const PostDetailPage: React.FC = () => {
       alert('현재 결제할 수 없는 상태입니다.');
       return;
     }
-    const paymentState = {
-      post: {
-        title: post?.communityPost.title,
-        unitAmount: post?.communityPost.unitAmount,
-        imageUrls: post?.communityPost.imageUrls,
-      },
-      quantity,
-    };
+
     if (post?.isWriter) {
       navigate(`/community/post/${communityPostId}/payment/author`, {
-        state: paymentState,
+        state: quantity,
       });
     } else {
       navigate(`/community/post/${communityPostId}/payment/participant`, {
-        state: paymentState,
+        state: quantity,
       });
     }
   };
@@ -185,12 +179,6 @@ const PostDetailPage: React.FC = () => {
             {/* 댓글 컨테이너 */}
             <PostCommentsSection communityPostId={postId} />
           </FormContainer>
-          {isAdmin && (
-            <>
-              <SSEHandler communityPostId={postId} />
-              <ParticipantList />
-            </>
-          )}
         </ContentWrapper>
       </PostDetailContainer>
     </QueryHandler>

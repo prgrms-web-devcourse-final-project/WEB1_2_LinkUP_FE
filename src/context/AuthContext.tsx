@@ -36,7 +36,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = (token: string, role: string) => {
     sessionStorage.setItem('token', token);
-
     sessionStorage.setItem('role', role);
     setIsLoggedIn(true);
     setIsAdmin(role === 'ROLE_ADMIN');

@@ -28,7 +28,6 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
   const userId = parseInt(localStorage.getItem('userid') || '0', 10);
   const { data: post, isLoading, isError } = usePostQuery(communityPostId);
   const queryClient = useQueryClient();
-
   const handleAddComment = async () => {
     if (!newCommentContent.trim()) {
       alert('댓글 내용을 입력해주세요.');

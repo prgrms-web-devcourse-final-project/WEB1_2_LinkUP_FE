@@ -20,7 +20,7 @@ const PostDetailPage: React.FC = () => {
   const { communityPostId } = useParams<{ communityPostId: string }>();
   const navigate = useNavigate();
   const postId = Number(communityPostId);
-  const userId = localStorage.getItem('userid');
+  const userId = sessionStorage.getItem('userid');
 
   // React Query로 데이터 가져오기
   const [checkParticiapant, setParticiapant] = useState(false);

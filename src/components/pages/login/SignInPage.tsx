@@ -22,7 +22,7 @@ const SignInPage = () => {
     const searchParams = new URLSearchParams(location.search);
     const accessToken = searchParams.get('accessToken');
     if (accessToken) {
-      localStorage.setItem('token', accessToken);
+      sessionStorage.setItem('token', accessToken);
       navigate('/');
     }
   }, [location, navigate]);
@@ -87,23 +87,26 @@ const SignInPage = () => {
                 alert('올바른 비밀번호 형식이 아닙니다.');
                 return;
               }
-              const response = await postSignIn({
-                email: email,
-                password: pw,
-              });
-              if (response.status === 200) {
-                const token =
-                  response.headers['authorization'] ||
-                  response.headers['Authorization'];
-                const role = response.data.roles;
-                const userId = response.data.userid;
-                localStorage.setItem('userid', userId);
-                if (token) {
+
+              try {
+                const response = await postSignIn({
+                  email: email,
+                  password: pw,
+                });
+
+                if (response.status === 200) {
+                  const token =
+                    response.headers['authorization'] ||
+                    response.headers['Authorization'];
+                  const role = response.data.roles;
+                  const userId = response.data.userid;
+
+                  sessionStorage.setItem('userid', userId);
                   login(token, role);
                   navigate('/');
                 }
-              } else {
-                alert('틀렸습니다.');
+              } catch {
+                alert('아이디 또는 비밀번호가 올바르지 않습니다.');
               }
             }}
           >

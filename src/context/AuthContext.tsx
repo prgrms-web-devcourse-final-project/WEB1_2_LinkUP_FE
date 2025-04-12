@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('role');
-
+    sessionStorage.removeItem('userid');
     setIsLoggedIn(false);
     setIsAdmin(false);
   };

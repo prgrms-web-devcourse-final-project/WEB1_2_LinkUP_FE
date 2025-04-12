@@ -1,131 +1,234 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { FaRegComment, FaTimes } from 'react-icons/fa';
-import { fetchChatMessages } from '../../api/chatApi';
-import { webSocketService } from '../../utils/webSocket';
+
+import {
+  WebSocketService,
+  webSocketService as defaultWebSocketService,
+} from '../../utils/webSocket';
 
 interface Message {
-  senderId: string;
-  content: string;
-  timestamp: string | null;
+  roomId?: number;
+  userName: string;
+  message: string;
+  time: string;
+  // 백엔드와 호환성을 위한 추가 속성들
+  senderId?: string;
+  content?: string;
+  timestamp?: string | null;
   type?: string;
 }
 
 interface ChatRoomProps {
   chatRoomId: number;
-  isAdmin?: boolean; // 관리자 여부
   isOpen: boolean;
   onClose: () => void;
+  webSocketService?: WebSocketService<Message>;
 }
 
 const ChatRoom: React.FC<ChatRoomProps> = ({
   chatRoomId,
-  isAdmin = false,
   isOpen,
   onClose,
+  webSocketService: externalWebSocketService,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const chatBoxRef = useRef<HTMLDivElement>(null);
-  const currentUserId = 'user-00001'; // Mock 로그인 사용자 ID
+  const [currentUserId, setCurrentUserId] = useState<string>('');
+
+  // 외부에서 webSocketService가 제공되지 않으면 기본 서비스 사용
+  const webSocketService = externalWebSocketService || defaultWebSocketService;
 
   useEffect(() => {
-    if (!isOpen) return;
+    // 웹소켓 연결 상태 확인 및 연결
+    if (!webSocketService.isConnected()) {
+      console.log('WebSocket을 내부에서 초기화합니다.');
+      // Mock 모드 비활성화
+      // webSocketService.enableMockMode();
+    }
+  }, [webSocketService]);
 
-    // 채팅방 초기 메시지 및 채팅 메시지 가져오기
+  useEffect(() => {
+    if (!chatRoomId || isNaN(chatRoomId)) {
+      console.error('유효하지 않은 채팅방 ID입니다.');
+      return;
+    }
+
+    console.log('Using chatRoomId:', chatRoomId);
+    const accessToken =
+      sessionStorage.getItem('token') || localStorage.getItem('token');
     const fetchMessages = async () => {
-      const fetchedMessages = await fetchChatMessages(chatRoomId);
+      try {
+        // API 경로 수정
+        console.log('Fetching messages for room ID:', chatRoomId);
 
-      // 입장 메시지 추가
-      const joinMessage: Message = {
-        senderId: 'system',
-        content: `윤성님이 입장하셨습니다.`,
-        timestamp: null, // timestamp 표시하지 않음
-      };
+        const response = await fetch(
+          `https://goodbuyus.store/api/chat/${chatRoomId}`,
+          {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
 
-      // 그룹 채팅 안내 메시지 추가
-      const groupChatNotice: Message = {
-        senderId: 'system',
-        content: `
-안내사항: 환불 및 이탈 관련 정책
-  1. 환불 및 수령 시간/위치 조율
-    - 공구 진행 중(최종 승인 이후)인 채팅방에서
-    수령 위치 및 시간을 조율합니다.
-    - 이탈자가 발생하거나 환불 요청이 있을 경우,
-      이탈자는 채팅방에서 환불 의사를 명확히
-      표시해야 하며, 모든 참여 인원이 동의한
-      경우에 한해 환불이 진행됩니다.
-  2. 환불 및 비용 부담
-    - 환불 진행 시, 전체 환불 처리 및 해당 인원에
-      대한 신고 접수가 이루어지며, 이로 인해
-      발생하는 모든 비용(공구 물품 반송 등)은
-      이탈자 본인이 전액 부담합니다.
-  3. 이탈자에 대한 페널티 제도
-    - 이탈 행위가 반복될 경우, 아래와 같은
-      경고 시스템이 적용됩니다.
-      - 1회 경고: 계정 일주일 정지
-      - 3회 경고: 계정 한 달 정지
-      - 5회 경고: 계정 영구 정지
+        if (!response.ok) {
+          throw new Error(
+            `메시지를 가져오는데 실패했습니다. 상태 코드: ${response.status}`
+          );
+        }
 
-  💡 주의: 본 안내사항을 숙지하지 않아 발생하는
-              불이익은 본인에게 책임이 있습니다.
-
-공구 진행에 차질이 없도록 적극적인 협조
-부탁드립니다. 😊`,
-        timestamp: null,
-      };
-
-      setMessages([joinMessage, groupChatNotice, ...fetchedMessages]);
+        const data = await response.json();
+        console.log('Fetched messages data:', data);
+        setMessages(data);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
     };
 
     fetchMessages();
-  }, [chatRoomId, isOpen]);
-
-  const getNicknameDisplay = (senderId: string): string => {
-    if (senderId === 'system') return '';
-    return senderId === currentUserId ? '나' : senderId;
-  };
-
-  useEffect(() => {
-    if (!isOpen) return;
 
     // WebSocket 연결
-    const handleIncomingMessage = (data: Message) => {
-      setMessages((prev) => [...prev, data]);
-    };
+    webSocketService.connect(
+      (message) => {
+        console.log('수신된 메시지:', message);
+        if (message && typeof message === 'object') {
+          // 이미 있는 메시지인지 확인하여 중복 방지
+          setMessages((prevMessages) => {
+            // 메시지에 고유 식별자가 없으므로 내용과 시간으로 비교
+            const isDuplicate = prevMessages.some(
+              (m) => m.message === message.message && m.time === message.time
+            );
 
-    webSocketService.connect(() => {
-      console.log('연결 성공');
-      // webSocketService.subscribe(
-      //   `/sub/message/${chatRoomId}`,
-      //   (messageOutput) => {
-      //     try {
-      //       // messageOutput이 string이므로 JSON.parse() 수행
-      //       const parsedMessage = JSON.parse(messageOutput);
+            if (isDuplicate) {
+              console.log('중복 메시지 무시:', message);
+              return prevMessages;
+            }
 
-      //       // 'body' 속성이 있는지 확인 후 처리
-      //       if (
-      //         parsedMessage &&
-      //         typeof parsedMessage === 'object' &&
-      //         'body' in parsedMessage
-      //       ) {
-      //         const data = JSON.parse(parsedMessage.body);
-      //         handleIncomingMessage(data);
-      //       } else {
-      //         console.error('Invalid message format:', parsedMessage);
-      //       }
-      //     } catch (error) {
-      //       console.error('Failed to parse WebSocket message:', error);
-      //     }
-      //   }
-      // );
-    });
+            console.log('새 메시지 추가:', message);
+            return [...prevMessages, message];
+          });
+        }
+      },
+      () => {
+        console.log('WebSocket connected - 채팅방 ID:', chatRoomId);
+        // 채팅방 구독 - 반드시 chatRoomId.toString()으로 문자열 변환
+        const roomIdStr = chatRoomId.toString();
+        console.log(`채팅방 구독 시작: ${roomIdStr}`);
+
+        webSocketService.subscribe(roomIdStr, (message) => {
+          console.log('구독 채널에서 메시지 수신:', message);
+          if (message && typeof message === 'object') {
+            // 중복 메시지 방지
+            setMessages((prevMessages) => {
+              // 메시지에 고유 식별자가 없으므로 내용과 시간으로 비교
+              const isDuplicate = prevMessages.some(
+                (m) => m.message === message.message && m.time === message.time
+              );
+
+              if (isDuplicate) {
+                console.log('중복 메시지 무시:', message);
+                return prevMessages;
+              }
+
+              console.log('새 메시지 추가:', message);
+              return [...prevMessages, message];
+            });
+          }
+        });
+      },
+      () => {
+        console.log('WebSocket disconnected');
+      },
+      (error) => {
+        console.error('WebSocket error:', error);
+      }
+    );
 
     return () => {
-      webSocketService.unsubscribe(`/sub/message/${chatRoomId}`);
-      webSocketService.close();
+      const roomIdStr = chatRoomId.toString();
+      console.log(`채팅방 구독 해제: ${roomIdStr}`);
+      webSocketService.unsubscribe(roomIdStr);
+      webSocketService.disconnect();
     };
-  }, [chatRoomId, isOpen]);
+  }, [chatRoomId]);
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        // 세션 스토리지 또는 로컬 스토리지에서 사용자 정보 가져오기
+        const accessToken =
+          sessionStorage.getItem('accessToken') ||
+          localStorage.getItem('accessToken');
+        const nickname =
+          sessionStorage.getItem('nickname') ||
+          localStorage.getItem('nickname');
+
+        if (nickname) {
+          console.log('저장된 닉네임 사용:', nickname);
+          setCurrentUserId(nickname);
+          return;
+        }
+
+        if (!accessToken) {
+          console.warn('로그인 정보가 없습니다. 임시 닉네임을 사용합니다.');
+          const tempNickname =
+            prompt('채팅에 사용할 닉네임을 입력해주세요:') || '손님';
+          sessionStorage.setItem('nickname', tempNickname);
+          setCurrentUserId(tempNickname);
+          return;
+        }
+
+        // JWT 토큰에서 사용자 정보 추출 시도
+        try {
+          const payload = JSON.parse(atob(accessToken.split('.')[1]));
+          // 닉네임 필드가 있으면 우선 사용, 없으면 이메일 사용
+          const userNickname =
+            payload.nickname || payload.name || payload.email || payload.sub;
+          console.log('토큰에서 추출한 사용자 정보:', userNickname);
+          setCurrentUserId(userNickname);
+          // 닉네임 저장
+          sessionStorage.setItem('nickname', userNickname);
+        } catch (err) {
+          console.error('토큰 디코딩 오류:', err);
+          const tempNickname =
+            prompt('채팅에 사용할 닉네임을 입력해주세요:') || '손님';
+          sessionStorage.setItem('nickname', tempNickname);
+          setCurrentUserId(tempNickname);
+        }
+      } catch (error) {
+        console.error('사용자 정보를 가져오는데 실패했습니다:', error);
+        const tempNickname =
+          prompt('채팅에 사용할 닉네임을 입력해주세요:') || '손님';
+        sessionStorage.setItem('nickname', tempNickname);
+        setCurrentUserId(tempNickname);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
+  const formatMessageContent = (message: Message) => {
+    // message.message 필드가 있으면 사용, 없으면 content 필드 사용 (호환성 유지)
+    return message.message || message.content;
+  };
+
+  const formatSenderName = (message: Message) => {
+    // userName 필드가 있으면 사용, 없으면 senderId 필드 사용 (호환성 유지)
+    const sender = message.userName || message.senderId;
+    if (!sender || sender === 'system') return '';
+    return sender === currentUserId ? '나' : sender;
+  };
+
+  const formatMessageTime = (message: Message) => {
+    // time 필드가 있으면 사용, 없으면 timestamp 필드 사용 (호환성 유지)
+    const timestamp = message.time || message.timestamp;
+    if (!timestamp) return null;
+    return new Date(timestamp).toLocaleTimeString();
+  };
 
   useEffect(() => {
     // 채팅 박스 스크롤 관리
@@ -137,17 +240,37 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
   const handleSendMessage = () => {
     if (!input.trim()) return;
 
+    if (!chatRoomId) {
+      console.error('채팅방 ID가 없어 메시지를 보낼 수 없습니다.');
+      return;
+    }
+
+    if (!currentUserId) {
+      console.error('닉네임이 없어 메시지를 보낼 수 없습니다.');
+      const tempNickname =
+        prompt('채팅에 사용할 닉네임을 입력해주세요:') || '손님';
+      sessionStorage.setItem('nickname', tempNickname);
+      setCurrentUserId(tempNickname);
+      if (!tempNickname) return;
+    }
+
+    console.log(
+      '메시지 전송 시도. 채팅방 ID:',
+      chatRoomId,
+      '닉네임:',
+      currentUserId
+    );
+
     const message: Message = {
-      senderId: isAdmin ? 'system' : currentUserId,
-      content: isAdmin ? `[관리자 메시지] ${input.trim()}` : input.trim(),
-      timestamp: new Date().toISOString(),
+      roomId: chatRoomId,
+      userName: currentUserId, // 닉네임 사용
+      message: input.trim(), // 메시지 내용
+      time: new Date().toISOString(), // ISO 8601 형식의 시간
     };
 
-    webSocketService.send(
-      `/pub/message/${chatRoomId}`,
-      JSON.stringify(message)
-    );
-    setMessages((prev) => [...prev, message]);
+    console.log('전송할 메시지 내용:', message);
+    // 채팅방 ID를 문자열로 변환하여 전송
+    webSocketService.send(chatRoomId.toString(), message);
     setInput('');
   };
 
@@ -166,15 +289,17 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
     let lastDate = '';
 
     for (const message of messages) {
-      const messageDate = message.timestamp
-        ? formatDate(message.timestamp)
-        : null;
+      const messageDate = message.time ? formatDate(message.time) : null;
       if (messageDate && messageDate !== lastDate) {
+        // 날짜 구분자 추가
         result.push({
           type: 'date',
           content: messageDate,
           senderId: 'system',
           timestamp: null,
+          userName: 'system',
+          message: messageDate,
+          time: new Date().toISOString(),
         });
         lastDate = messageDate;
       }
@@ -186,14 +311,12 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
 
   const formattedMessages = addDateSeparators(messages);
 
-  if (!isOpen) return null;
-
   return (
     <ModalOverlay>
       <ModalContainer>
         <ModalHeader>
           <ModalTitle>채팅</ModalTitle>
-          <CloseButton onClick={onClose}>
+          <CloseButton onClick={() => {}}>
             <FaTimes />
           </CloseButton>
         </ModalHeader>
@@ -220,21 +343,17 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
                   $isSystemMessage={msg.senderId === 'system'}
                 >
                   <SenderName>
-                    {msg.senderId === 'system'
-                      ? ''
-                      : getNicknameDisplay(msg.senderId)}
+                    {msg.senderId === 'system' ? '' : formatSenderName(msg)}
                   </SenderName>
                   <MessageContent
                     $isCurrentUser={msg.senderId === currentUserId}
                     $isGroupNotice={isGroupNotice}
                     $isSystemMessage={msg.senderId === 'system'}
                   >
-                    {msg.content}
+                    {formatMessageContent(msg)}
                   </MessageContent>
-                  {msg.timestamp && msg.senderId !== 'system' && (
-                    <Timestamp>
-                      {new Date(msg.timestamp).toLocaleTimeString()}
-                    </Timestamp>
+                  {formatMessageTime(msg) && msg.senderId !== 'system' && (
+                    <Timestamp>{formatMessageTime(msg)}</Timestamp>
                   )}
                 </MessageWrapper>
               );
@@ -247,9 +366,9 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="메시지를 입력하세요."
-              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()} // Enter 키 처리
+              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
             />
-            <SendButton onClick={handleSendMessage} disabled={!input.trim()}>
+            <SendButton onClick={handleSendMessage}>
               <FaRegComment />
             </SendButton>
           </MessageInputContainer>

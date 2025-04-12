@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { getCommunity, GroupPurchaseType } from '../../../../api/mypageApi';
 import ReviewModal, { Question } from '../../../common/ReviewModal';
 import { reviewUser } from '../../../../api/reviewApi';
+import { getImageSrc } from '../../../../utils/GetImageSrc';
 
 const GroupPurchaseHistory = () => {
   const [groupPurchaseList, setGroupPurchaseList] = useState<
@@ -60,7 +61,7 @@ const GroupPurchaseHistory = () => {
               <ImageContainer>
                 {groupPurchase.imageUrls[0] !== '' ? (
                   <img
-                    src={groupPurchase.imageUrls[0]}
+                    src={getImageSrc(groupPurchase.imageUrls[0])}
                     width={60}
                     height={60}
                   />
@@ -173,8 +174,8 @@ const ImageContainer = styled.div`
 `;
 
 const ImagePlaceholder = styled.div`
-  width: 60px;
-  height: 60px;
+  width: 100px;
+  height: 100px;
   background-color: #e8f0fe;
   border-radius: 10px;
   border: 1px dashed #a0c0ff;

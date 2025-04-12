@@ -62,7 +62,7 @@ export const sendMessage = (
   };
 
   // JSON.stringify()로 문자열 변환
-  webSocketService.send(`/pub/message/${chatRoomId}`, JSON.stringify(payload));
+  webSocketService.send(`/pub/message/${chatRoomId}`, payload);
 };
 
 // 채팅 메시지 구독

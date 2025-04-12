@@ -25,7 +25,7 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
   const [newCommentContent, setNewCommentContent] = useState<string>('');
   const [editCommentId, setEditCommentId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState<string>('');
-  const userId = parseInt(localStorage.getItem('userid') || '0', 10);
+  const userId = parseInt(sessionStorage.getItem('userid') || '0', 10);
   const { data: post, isLoading, isError } = usePostQuery(communityPostId);
   const queryClient = useQueryClient();
   const handleAddComment = async () => {

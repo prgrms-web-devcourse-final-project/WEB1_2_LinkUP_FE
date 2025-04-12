@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), tsconfigPaths()],
     define: {
       'process.env': env,
-      global: {},
+      global: 'globalThis',
     },
     server: {
       proxy: {
@@ -28,7 +28,12 @@ export default defineConfig(({ mode }) => {
           target: env.VITE_WEBSOCKET_URL,
           ws: true,
           changeOrigin: true,
-          secure: false,
+          secure: true,
+          rewrite: (path) => path.replace(/^\/websocket/, ''),
+          headers: {
+            Connection: 'Upgrade',
+            Upgrade: 'websocket',
+          },
         },
       },
     },

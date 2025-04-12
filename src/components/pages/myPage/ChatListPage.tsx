@@ -7,6 +7,7 @@ import { QueryHandler } from '../../../hooks/useGetProduct';
 import styled from 'styled-components';
 import ChatRoom from '../../common/ChatRoom';
 import { Chat } from '../../../api/chatApi';
+import { webSocketService } from '../../../utils/webSocket';
 
 const ChatListPage: React.FC = () => {
   const {
@@ -15,11 +16,9 @@ const ChatListPage: React.FC = () => {
     isError: ErrorChat,
   } = useChatQuery();
 
-  const [isModalOpenc, setModalOpenc] = useState(false);
-  // const handleEnterChat = (postId) => {
-  //   // 채팅방 입장 함수 - 실제 구현 시 적절한 경로로 변경해주세요
-  //   navigate(`/chat/${postId}`);
-  // };
+  const [selectedChatRoomId, setSelectedChatRoomId] = useState<number | null>(
+    null
+  );
 
   return (
     <QueryHandler isLoading={LoadingChat} isError={ErrorChat}>
@@ -59,17 +58,22 @@ const ChatListPage: React.FC = () => {
                   </ChatRoomInfo>
 
                   <ButtonsContainer>
-                    <EnterButton onClick={() => setModalOpenc(true)}>
+                    <EnterButton
+                      onClick={() => setSelectedChatRoomId(chat.postId)}
+                    >
                       입장하기
                     </EnterButton>
                   </ButtonsContainer>
                 </ChatRoomCard>
-              ))}{' '}
-              <ChatRoom
-                chatRoomId={4}
-                isOpen={isModalOpenc}
-                onClose={() => setModalOpenc(false)}
-              />
+              ))}
+              {selectedChatRoomId && (
+                <ChatRoom
+                  chatRoomId={selectedChatRoomId}
+                  isOpen={true}
+                  onClose={() => setSelectedChatRoomId(null)}
+                  webSocketService={webSocketService}
+                />
+              )}
             </ChatListContainer>
           ) : (
             <EmptyState>

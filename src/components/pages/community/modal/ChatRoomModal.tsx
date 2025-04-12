@@ -4,7 +4,6 @@ import ChatRoom from '../../../common/ChatRoom'; // 채팅방 컴포넌트
 import { FaTrashAlt } from 'react-icons/fa';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { deleteChatRoom } from '../../../../api/chatApi';
-import { webSocketService } from '../../../../utils/webSocket';
 
 interface ChatRoomModalProps {
   chatRoomId: number;
@@ -69,11 +68,7 @@ const ChatRoomModal: React.FC<ChatRoomModalProps> = ({
           </HeaderButtons>
         </ModalHeader>
         <ModalContent>
-          <ChatRoom
-            webSocketService={webSocketService}
-            chatRoomId={chatRoomId}
-            isAdmin={isAdminPage}
-          />
+          <ChatRoom chatRoomId={chatRoomId} isAdmin={isAdminPage} />
         </ModalContent>
       </ModalContainer>
     </ModalOverlay>

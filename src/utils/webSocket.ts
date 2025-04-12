@@ -1,98 +1,132 @@
-interface WebSocketMessage<T = unknown> {
-  destination: string;
-  message: T;
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+
+interface Message {
+  roomId?: number;
+  userName: string;
+  message: string;
+  time: string;
 }
 
-export class WebSocketService<T = unknown> {
-  private socket: WebSocket | null = null;
-  private subscriptions: Map<string, (data: T) => void> = new Map();
-  private reconnectSubscriptions: Set<string> = new Set();
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
+export class WebSocketService<T = Message> {
+  private stompClient: Client | null = null;
+  private connectionStatus = false;
 
-  constructor(private url: string) {}
+  constructor() {
+    this.stompClient = null;
+  }
 
   connect(
-    onMessage: (data: WebSocketMessage<T>) => void,
+    onMessage: (data: T) => void,
     onOpen?: () => void,
     onClose?: () => void,
     onError?: (error: Event) => void
   ) {
-    this.socket = new WebSocket(this.url);
+    try {
+      console.log('WebSocket 연결 시도 시작');
 
-    this.socket.onopen = () => {
-      onOpen?.();
-      this.reconnectAttempts = 0;
-      this.resubscribe();
-    };
+      const accessToken =
+        sessionStorage.getItem('token') || localStorage.getItem('token');
 
-    this.socket.onmessage = (event) => {
-      try {
-        const data: WebSocketMessage<T> = JSON.parse(event.data);
-        const callback = this.subscriptions.get(data.destination);
-        callback?.(data.message);
-      } catch (error) {
-        console.error('Invalid WebSocket message format', error);
-      }
-    };
+      // SockJS 인스턴스 생성
+      const socket = new SockJS('https://goodbuyus.store/websocket/', null, {
+        transports: ['websocket', 'xhr-streaming', 'xhr-polling'],
+        timeout: 10000,
+        sessionId: () => {
+          return 'websocket-' + Math.random().toString(36).substring(2, 9);
+        },
+      });
 
-    this.socket.onclose = () => {
-      onClose?.();
-      this.reconnect();
-    };
+      // STOMP 클라이언트 생성
+      this.stompClient = new Client({
+        webSocketFactory: () => socket,
+        connectHeaders: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        debug: (str) => {
+          console.log('STOMP Debug:', str);
+        },
+        reconnectDelay: 5000,
+        heartbeatIncoming: 4000,
+        heartbeatOutgoing: 4000,
+        brokerURL: 'https://goodbuyus.store/websocket/',
+        onStompError: (frame) => {
+          console.error('STOMP 에러:', frame);
+        },
+        onWebSocketError: (event) => {
+          console.error('WebSocket 에러:', event);
+        },
+        onWebSocketClose: (event) => {
+          console.log('WebSocket 연결 종료:', event);
+        },
+      });
 
-    this.socket.onerror = (error) => {
-      onError?.(error);
-    };
-  }
+      // 연결 이벤트 핸들러 설정
+      this.stompClient.onConnect = (frame) => {
+        console.log('WebSocket 연결 성공:', frame);
+        this.connectionStatus = true;
+        onOpen?.();
+      };
 
-  subscribe(
-    destination: string,
-    callback: (data: T) => void,
-    enableReconnect = false
-  ) {
-    this.subscriptions.set(destination, callback);
-    if (enableReconnect) {
-      this.reconnectSubscriptions.add(destination);
+      // 연결 활성화
+      this.stompClient.activate();
+      console.log('WebSocket 연결 시도 완료');
+    } catch (error) {
+      console.error('WebSocket 연결 시도 중 에러:', error);
+      onError?.(error as Event);
     }
   }
 
-  unsubscribe(destination: string) {
-    this.subscriptions.delete(destination);
-    this.reconnectSubscriptions.delete(destination);
+  subscribe(destination: string, callback: (data: T) => void) {
+    if (!this.stompClient?.connected) {
+      console.error('WebSocket이 연결되지 않았습니다');
+      return;
+    }
+
+    try {
+      console.log(`채널 구독 시도: ${destination}`);
+      this.stompClient.subscribe(`/sub/${destination}`, (message) => {
+        try {
+          const data = JSON.parse(message.body);
+          callback(data);
+        } catch (error) {
+          console.error('메시지 파싱 오류:', error);
+        }
+      });
+    } catch (error) {
+      console.error('구독 오류:', error);
+    }
   }
 
-  send(destination: string, message: T) {
-    if (!this.socket || this.socket.readyState !== WebSocket.OPEN) return;
-    const payload: WebSocketMessage<T> = { destination, message };
-    this.socket.send(JSON.stringify(payload));
+  send(destination: string, data: T) {
+    if (!this.stompClient?.connected) {
+      console.error('WebSocket이 연결되지 않았습니다');
+      return;
+    }
+
+    try {
+      console.log(`메시지 전송: ${destination}`);
+      this.stompClient.publish({
+        destination: `/pub/${destination}`,
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      console.error('메시지 전송 오류:', error);
+    }
+  }
+
+  disconnect() {
+    if (this.stompClient) {
+      console.log('WebSocket 연결 해제');
+      this.stompClient.deactivate();
+      this.stompClient = null;
+      this.connectionStatus = false;
+    }
   }
 
   isConnected(): boolean {
-    return this.socket?.readyState === WebSocket.OPEN;
-  }
-
-  close() {
-    this.socket?.close();
-  }
-
-  private reconnect() {
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnectAttempts++;
-      setTimeout(() => this.connect(() => {}), 3000);
-    }
-  }
-
-  private resubscribe() {
-    this.reconnectSubscriptions.forEach((destination) => {
-      const callback = this.subscriptions.get(destination);
-      if (callback) {
-        this.subscribe(destination, callback);
-      }
-    });
+    return this.connectionStatus;
   }
 }
 
-export const webSocketService = new WebSocketService<string>(
-  'wss://goodbuyus.store:8080/websocket'
-);
+export const webSocketService = new WebSocketService<Message>();

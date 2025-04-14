@@ -4,6 +4,44 @@ import styled from 'styled-components';
 import { getUser } from '../../../api/mypageApi';
 import default_profile from '../../../../public/images/origin.png';
 import { getImageSrc } from '../../../utils/GetImageSrc';
+
+const ProfileImage = styled.img`
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  margin-right: 15px;
+
+  box-shadow: 0 0 5px rgba(78, 138, 201, 0.3);
+  object-fit: cover;
+`;
+
+const ProfileImageContainer = styled.div`
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+`;
+
+const ProfileImageWithFallback = ({
+  src,
+  alt,
+}: {
+  src: string | null;
+  alt: string;
+}) => {
+  const [imgSrc, setImgSrc] = useState(src || default_profile);
+
+  const handleError = () => {
+    setImgSrc(default_profile);
+  };
+
+  return (
+    <ProfileImageContainer>
+      <ProfileImage src={imgSrc} alt={alt} onError={handleError} />
+    </ProfileImageContainer>
+  );
+};
+
 const Sidemenu = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -18,10 +56,11 @@ const Sidemenu = () => {
       try {
         const response = await getUser();
         setNickname(response.nickname);
-        setProfileImage(response.profile);
+        setProfileImage(response.profile || default_profile);
         setNewName(response.name);
       } catch (error) {
         console.error('failed', error);
+        setProfileImage(default_profile);
       }
     };
     fetchUser();
@@ -30,8 +69,8 @@ const Sidemenu = () => {
   return (
     <Wrapper>
       <ProfileSection>
-        <ProfileImage
-          src={getImageSrc(profileImage) || default_profile}
+        <ProfileImageWithFallback
+          src={getImageSrc(profileImage)}
           alt="Profile"
         />
         <ProfileText>
@@ -98,21 +137,6 @@ const Sidemenu = () => {
           />
           동네인증
         </MenuItem>
-
-        {/* <MenuItem
-          $isActive={isActive('/mypage/notification')}
-          onClick={() => navigate('/mypage/notification')}
-        >
-          <img
-            src={`/images/notification${
-              isActive('/mypage/notification') ? '_on' : ''
-            }.png`}
-            width={24}
-            height={24}
-            alt="Icon"
-          />
-          알림내역
-        </MenuItem> */}
         <MenuItem
           $isActive={isActive('/mypage/myposts')}
           onClick={() => navigate('/mypage/myposts')}
@@ -167,17 +191,9 @@ const ProfileSection = styled.div`
   border-radius: 10px 10px 0 0;
 `;
 
-const ProfileImage = styled.img`
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  margin-right: 15px;
-  border: 2px solid #4e8ac9;
-  box-shadow: 0 0 5px rgba(78, 138, 201, 0.3);
-`;
-
 const ProfileText = styled.div`
   display: flex;
+  margin-left: 10px;
   flex-direction: column;
 `;
 const Hello = styled.div`

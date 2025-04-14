@@ -20,6 +20,14 @@ export const editComment = async (reviewId: number, payload: Review) => {
 export const deleteComment = async (reviewId: number) => {
   const URL = `/api/review/remove/${reviewId}`;
   const response = await axiosInstance.put(URL);
-  console.log(response);
   return response;
+};
+
+export const getComments = async (productId: number) => {
+  try {
+    const response = await axiosInstance.get(`/api/comments/${productId}`);
+    return response.data;
+  } catch (error) {
+    console.error('failed', error);
+  }
 };

@@ -7,7 +7,6 @@ import { QueryHandler } from '../../../hooks/useGetProduct';
 import styled from 'styled-components';
 import ChatRoom from '../../common/ChatRoom';
 import { Chat } from '../../../api/chatApi';
-import { webSocketService } from '../../../utils/webSocket';
 
 const ChatListPage: React.FC = () => {
   const {
@@ -71,7 +70,6 @@ const ChatListPage: React.FC = () => {
                   chatRoomId={selectedChatRoomId}
                   isOpen={true}
                   onClose={() => setSelectedChatRoomId(null)}
-                  webSocketService={webSocketService}
                 />
               )}
             </ChatListContainer>

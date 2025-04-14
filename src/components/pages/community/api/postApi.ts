@@ -179,7 +179,6 @@ export const joinPost = async (communityPostId: number, quantity: number) => {
   try {
     const URL = `/api/community/post/${communityPostId}/join`;
     const response = await axiosInstance.post(URL, { number: quantity });
-    console.log(response);
     return response.data;
   } catch {
     throw new Error('공구 참여에 실패했습니다.');

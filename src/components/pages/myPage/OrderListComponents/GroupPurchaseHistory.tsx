@@ -36,16 +36,15 @@ const GroupPurchaseHistory = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchGroupPurchaseHistory = async () => {
       try {
         const response = await getCommunity();
-        console.log(response);
         setGroupPurchaseList(response);
       } catch (error) {
         console.error('failed', error);
       }
     };
-    fetchPost();
+    fetchGroupPurchaseHistory();
   }, []);
 
   const getStatusLabel = (status: string): string => {

@@ -1,4 +1,3 @@
-import { formatDateWithOffset } from '../utils/formatDate';
 import axiosInstance from './axiosInstance';
 import { webSocketService } from '../utils/webSocket';
 
@@ -52,17 +51,17 @@ export const fetchAllChatRooms = async (): Promise<Chat[]> => {
 export const sendMessage = (
   chatRoomId: number,
   userName: string,
-  message: string
+  message: string,
+  time: string
 ) => {
   const payload = {
     roomId: chatRoomId,
-    userName,
-    message,
-    time: formatDateWithOffset(new Date().toISOString()),
+    userName: userName,
+    message: message,
+    time: time,
   };
 
-  // JSON.stringify()로 문자열 변환
-  webSocketService.send(`/pub/message/${chatRoomId}`, payload);
+  webSocketService.send(`${chatRoomId}`, payload);
 };
 
 // 채팅 메시지 구독
@@ -86,6 +85,21 @@ export const fetchChatMessages = async (chatRoomId: number) => {
   if (response.status !== 200) {
     throw new Error('Failed to fetch chat messages');
   }
-
   return response.data;
+};
+
+// WebSocket 연결 관리
+export const connectWebSocket = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onMessage: (message: any) => void,
+  onOpen?: () => void,
+  onClose?: () => void,
+  onError?: (error: Event) => void
+) => {
+  webSocketService.connect(onMessage, onOpen, onClose, onError);
+};
+
+// WebSocket 연결 해제
+export const disconnectWebSocket = () => {
+  webSocketService.disconnect();
 };

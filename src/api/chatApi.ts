@@ -1,8 +1,7 @@
-import { formatDateWithOffset } from '../utils/formatDate';
 import axiosInstance from './axiosInstance';
 import { webSocketService } from '../utils/webSocket';
 
-export interface ChatRoom {
+export interface Chat {
   postId: number;
   capacity: number;
   roomName: string;
@@ -38,7 +37,7 @@ export const fetchMyChatRooms = async () => {
 };
 
 // 전체 채팅방 목록 조회 (관리자)
-export const fetchAllChatRooms = async (): Promise<ChatRoom[]> => {
+export const fetchAllChatRooms = async (): Promise<Chat[]> => {
   const response = await axiosInstance.get('/api/admin/chatlist');
 
   if (response.status !== 200) {
@@ -52,17 +51,17 @@ export const fetchAllChatRooms = async (): Promise<ChatRoom[]> => {
 export const sendMessage = (
   chatRoomId: number,
   userName: string,
-  message: string
+  message: string,
+  time: string
 ) => {
   const payload = {
     roomId: chatRoomId,
-    userName,
-    message,
-    time: formatDateWithOffset(new Date().toISOString()),
+    userName: userName,
+    message: message,
+    time: time,
   };
 
-  // JSON.stringify()로 문자열 변환
-  webSocketService.send(`/pub/message/${chatRoomId}`, JSON.stringify(payload));
+  webSocketService.send(`${chatRoomId}`, payload);
 };
 
 // 채팅 메시지 구독
@@ -86,6 +85,21 @@ export const fetchChatMessages = async (chatRoomId: number) => {
   if (response.status !== 200) {
     throw new Error('Failed to fetch chat messages');
   }
-
   return response.data;
+};
+
+// WebSocket 연결 관리
+export const connectWebSocket = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onMessage: (message: any) => void,
+  onOpen?: () => void,
+  onClose?: () => void,
+  onError?: (error: Event) => void
+) => {
+  webSocketService.connect(onMessage, onOpen, onClose, onError);
+};
+
+// WebSocket 연결 해제
+export const disconnectWebSocket = () => {
+  webSocketService.disconnect();
 };

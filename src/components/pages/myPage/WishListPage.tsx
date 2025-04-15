@@ -37,39 +37,52 @@ const WishListPage: React.FC = () => {
         <GS.Content>
           <PageTitle>찜한 상품</PageTitle>
           <Container>
-            <CardGrid>
-              {wish?.map((wish, index) => (
-                <Card key={index}>
-                  <ImageContainer>
-                    <img
-                      src={wish.productImage || DEFAULT_IMG}
-                      alt={wish.productName}
+            {wish && wish.length > 0 ? (
+              <CardGrid>
+                {wish.map((wish, index) => (
+                  <Card key={index}>
+                    <ImageContainer>
+                      <img
+                        src={wish.productImage || DEFAULT_IMG}
+                        alt={wish.productName}
+                        onClick={() =>
+                          navigate(`/products/${wish.productPostId}`)
+                        }
+                        onError={(e) => {
+                          e.currentTarget.src = DEFAULT_IMG;
+                        }}
+                      />
+                      <LikeButtonWrapper>
+                        {' '}
+                        <LikeButton
+                          likes={likedProducts.includes(wish.productPostId)}
+                          onClick={() => {
+                            changeLike(wish.productPostId);
+                          }}
+                        />
+                      </LikeButtonWrapper>
+                    </ImageContainer>
+                    <CardContent
                       onClick={() =>
                         navigate(`/products/${wish.productPostId}`)
                       }
-                      onError={(e) => {
-                        e.currentTarget.src = DEFAULT_IMG;
-                      }}
-                    />
-                    <LikeButtonWrapper>
-                      {' '}
-                      <LikeButton
-                        likes={likedProducts.includes(wish.productPostId)}
-                        onClick={() => {
-                          changeLike(wish.productPostId);
-                        }}
-                      />
-                    </LikeButtonWrapper>
-                  </ImageContainer>
-                  <CardContent
-                    onClick={() => navigate(`/products/${wish.productPostId}`)}
-                  >
-                    <ProductName>{wish.productName}</ProductName>
-                    <Price>{wish.productPrice}원</Price>
-                  </CardContent>
-                </Card>
-              ))}
-            </CardGrid>
+                    >
+                      <ProductName>{wish.productName}</ProductName>
+                      <Price>{wish.productPrice}원</Price>
+                    </CardContent>
+                  </Card>
+                ))}
+              </CardGrid>
+            ) : (
+              <EmptyMessage>
+                <EmptyIcon>❤️</EmptyIcon>
+                <EmptyText>찜한 상품이 없습니다</EmptyText>
+                <EmptySubText>관심있는 상품을 찜해보세요!</EmptySubText>
+                <GoToProductsButton onClick={() => navigate('/')}>
+                  상품 찜하러 가기
+                </GoToProductsButton>
+              </EmptyMessage>
+            )}
           </Container>
         </GS.Content>
       </GS.Wrapper>
@@ -169,6 +182,50 @@ const Price = styled.div`
   padding: 6px 12px;
   border-radius: 20px;
   display: inline-block;
+`;
+
+const EmptyMessage = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+`;
+
+const EmptyIcon = styled.div`
+  font-size: 48px;
+  margin-bottom: 16px;
+`;
+
+const EmptyText = styled.div`
+  font-size: 18px;
+  font-weight: bold;
+  color: #1e40af;
+  margin-bottom: 8px;
+`;
+
+const EmptySubText = styled.div`
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 20px;
+`;
+
+const GoToProductsButton = styled.button`
+  background-color: #1e40af;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #1e3a8a;
+    transform: translateY(-2px);
+  }
 `;
 
 export default WishListPage;

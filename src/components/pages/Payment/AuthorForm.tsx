@@ -1,14 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { handleCommunityPayment } from './api/paymentApi';
 import { QueryHandler } from '../../../hooks/useGetProduct';
-import { useQuantity } from '../../../context/QuantityContext';
 import { usePostQuery } from '../../../hooks/useGetPost';
 import { useDaumPostcodePopup } from 'react-daum-postcode';
 
 const AuthorForm = () => {
-  const { quantity } = useQuantity();
   const { id } = useParams();
   const postcodeScriptUrl =
     'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
@@ -29,6 +27,8 @@ const AuthorForm = () => {
   if (!post) {
     return <p>해당 게시글을 찾을 수 없습니다.</p>;
   }
+  const location = useLocation();
+  const quantity = typeof location.state === 'number' ? location.state : 1;
 
   const [userName, setName] = useState('');
   const [basicAddress, setBasicAddress] = useState('');

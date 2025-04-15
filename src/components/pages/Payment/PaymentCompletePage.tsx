@@ -1,51 +1,42 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
-
-// import { createChatRoom } from '../../../api/chatApi';
-// import ChatRoomModal from '../community/modal/ChatRoomModal';
-// import { webSocketService } from '../../../utils/webSocket';
 import { useQuantity } from '../../../context/QuantityContext';
 import { usePostQuery } from '../../../hooks/useGetPost';
 import { QueryHandler } from '../../../hooks/useGetProduct';
 
 const PaymentCompletePage: React.FC = () => {
   const navigate = useNavigate();
-  const { quantity } = useQuantity();
+  const { getQuantity } = useQuantity();
   const { id } = useParams();
   if (!id) {
     return <p>상품 번호가 유실되었습니다.</p>;
   }
   const postId = Number(id);
+  const userId = localStorage.getItem('userid');
+  const quantity = getQuantity(userId!, id);
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
 
   const price = urlParams.get('amount');
+  const accountNumber = urlParams.get('accountNumber');
+  const bankId = urlParams.get('bankId');
   const { data: post, isLoading, isError } = usePostQuery(postId);
 
-  // const [isChatOpen, setIsChatOpen] = useState(false);
-  // const [chatRoom, setChatRoom] = useState<{
-  //   id: number;
-  //   roomName: string;
-  // } | null>(null);
-
-  // const handleChatRoomCreation = async () => {
-  //   try {
-  //     // const chatRoom = await createChatRoom(parseInt(id));
-  //     // setChatRoom(chatRoom);
-  //   } catch {
-  //     alert('채팅방을 생성할 수 없습니다.');
-  //   }
-  // };
-
-  // const openChat = async () => {
-  //   if (!chatRoom) {
-  //     await handleChatRoomCreation();
-  //   }
-  //   setIsChatOpen(true);
-  // };
-
-  // const closeChat = () => setIsChatOpen(false);
+  const bankCodeToName = (code: string): string => {
+    const bankMap: { [key: string]: string } = {
+      '04': 'KB국민은행',
+      '06': 'KB국민은행',
+      '45': 'MG새마을금고',
+      '34': '광주은행',
+      '11': 'NH농협은행',
+      '03': 'IBK기업은행',
+      '88': '신한은행',
+      '20': '우리은행',
+      '07': '수협은행',
+    };
+    return bankMap[code];
+  };
 
   return (
     <QueryHandler isLoading={isLoading} isError={isError}>
@@ -61,11 +52,17 @@ const PaymentCompletePage: React.FC = () => {
             </SummaryRow>
             <SummaryRow>
               <Label>수량</Label>
-              <Value>{quantity}</Value>
+              <Value>{quantity}개</Value>
             </SummaryRow>
             <SummaryRow>
               <Label>결제 금액</Label>
               <Value>{price}원</Value>
+            </SummaryRow>
+            <SummaryRow>
+              <Label>가상 계좌번호</Label>
+              <Value>
+                {bankId ? bankCodeToName(bankId) : ''} {accountNumber}
+              </Value>
             </SummaryRow>
           </OrderSummary>
         </SuccessSection>
@@ -78,17 +75,6 @@ const PaymentCompletePage: React.FC = () => {
             주문내역 보기
           </BackButton>
         </ButtonGroup>
-
-        {/* {chatRoom && (
-          <ChatRoomModal
-            isOpen={isChatOpen}
-            onClose={closeChat}
-            chatRoomId={chatRoom.id.toString()}
-            chatRoomTitle={chatRoom.roomName}
-            webSocketService={webSocketService}
-            isAdminPage={false}
-          />
-        )} */}
       </Container>
     </QueryHandler>
   );

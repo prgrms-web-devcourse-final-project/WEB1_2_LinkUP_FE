@@ -1,13 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { handleCommunityPayment } from './api/paymentApi';
 import { QueryHandler } from '../../../hooks/useGetProduct';
-import { useQuantity } from '../../../context/QuantityContext';
 import { usePostQuery } from '../../../hooks/useGetPost';
 
 const ParticipantsForm = () => {
-  const { quantity } = useQuantity();
   const { id } = useParams();
   const [payment, setPayment] = useState('');
 
@@ -22,6 +20,9 @@ const ParticipantsForm = () => {
     return <p>잘못된 상품 ID입니다.</p>;
   }
   const { data: post, isLoading, isError } = usePostQuery(postId);
+
+  const location = useLocation();
+  const quantity = typeof location.state === 'number' ? location.state : 1;
 
   if (!post) {
     return <p>해당 상품을 찾을 수 없습니다.</p>;

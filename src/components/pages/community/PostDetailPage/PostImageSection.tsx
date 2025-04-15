@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import { getImageSrc } from '../../../../utils/GetImageSrc';
+import DEFAULT_IMG from '../../../../assets/icons/default-featured-image.png.jpg';
 
 interface PostImageSectionProps {
   selectedPost: {
@@ -34,6 +35,7 @@ const PostImageSection: React.FC<PostImageSectionProps> = ({
   const handleDotClick = (index: number) => {
     setCurrentIndex(index);
   };
+
   return (
     <FormContainer>
       <ImageAndDetailsContainer>
@@ -52,6 +54,9 @@ const PostImageSection: React.FC<PostImageSectionProps> = ({
               <img
                 src={getImageSrc(selectedPost.imageUrls[currentIndex])}
                 alt={`이미지 ${currentIndex + 1}`}
+                onError={(e) => {
+                  e.currentTarget.src = DEFAULT_IMG;
+                }}
               />
             </ImagePreview>
 

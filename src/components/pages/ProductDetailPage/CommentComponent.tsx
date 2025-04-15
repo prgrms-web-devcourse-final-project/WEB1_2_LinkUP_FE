@@ -21,11 +21,11 @@ const CommentComponent: React.FC<CommentProps> = ({ productId }) => {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [nickname, setNickname] = useState<string | undefined>();
   const [profile, setProfile] = useState<string | undefined>();
-  console.log(product);
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const userId = localStorage.getItem('userid');
+        const userId = sessionStorage.getItem('userid');
         setCurrentUserId(Number(userId));
         const response = await getUser();
         setNickname(response.nickname);

@@ -1,98 +1,134 @@
-interface WebSocketMessage<T = unknown> {
-  destination: string;
-  message: T;
+import { Client, StompSubscription } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+
+interface Message {
+  roomId?: number;
+  userName: string;
+  message: string;
+  time: string;
 }
 
-export class WebSocketService<T = unknown> {
+export class WebSocketService<T = Message> {
   private socket: WebSocket | null = null;
-  private subscriptions: Map<string, (data: T) => void> = new Map();
-  private reconnectSubscriptions: Set<string> = new Set();
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
+  private stompClient: Client | null = null;
+  private subscriptions: Map<string, StompSubscription> = new Map();
+  private messageHandlers: Map<string, (message: T) => void> = new Map();
 
-  constructor(private url: string) {}
+  private readonly SOCKET_URL = 'https://goodbuyus.store/websocket/';
+
+  constructor() {
+    this.socket = null;
+    this.stompClient = null;
+  }
 
   connect(
-    onMessage: (data: WebSocketMessage<T>) => void,
+    onMessage: (data: T) => void,
     onOpen?: () => void,
     onClose?: () => void,
     onError?: (error: Event) => void
   ) {
-    this.socket = new WebSocket(this.url);
+    this.stompClient = new Client({
+      webSocketFactory: () =>
+        new SockJS(this.SOCKET_URL, {
+          transports: ['websocket', 'xhr-streaming', 'xhr-polling'],
+          timeout: 60000,
+          sessionId: () => {
+            return Math.random().toString(36).substring(2, 15);
+          },
+        }),
+      connectHeaders: {
+        login: 'user',
+        passcode: 'password',
+      },
+      debug: function (str) {
+        console.log('STOMP Debug:', str);
+      },
+      heartbeatIncoming: 4000,
+      heartbeatOutgoing: 4000,
+      connectionTimeout: 30000,
+      onStompError: () => {
+        onError?.(new Event('WebSocket error'));
+      },
+      onWebSocketError: (event) => {
+        onError?.(event);
+      },
+      onWebSocketClose: () => {
+        onClose?.();
+      },
+      onConnect: () => {
+        onOpen?.();
+      },
+      onDisconnect: () => {
+        onClose?.();
+      },
+    });
 
-    this.socket.onopen = () => {
-      onOpen?.();
-      this.reconnectAttempts = 0;
-      this.resubscribe();
-    };
-
-    this.socket.onmessage = (event) => {
-      try {
-        const data: WebSocketMessage<T> = JSON.parse(event.data);
-        const callback = this.subscriptions.get(data.destination);
-        callback?.(data.message);
-      } catch (error) {
-        console.error('Invalid WebSocket message format', error);
-      }
-    };
-
-    this.socket.onclose = () => {
-      onClose?.();
-      this.reconnect();
-    };
-
-    this.socket.onerror = (error) => {
-      onError?.(error);
-    };
+    this.stompClient.activate();
   }
 
-  subscribe(
-    destination: string,
-    callback: (data: T) => void,
-    enableReconnect = false
-  ) {
-    this.subscriptions.set(destination, callback);
-    if (enableReconnect) {
-      this.reconnectSubscriptions.add(destination);
+  subscribe(destination: string, callback: (data: T) => void) {
+    if (!this.stompClient?.connected) {
+      this.messageHandlers.set(destination, callback);
+      return;
+    }
+
+    try {
+      const subscription = this.stompClient.subscribe(
+        `/sub/message/${destination}`,
+        (message) => {
+          try {
+            const data = JSON.parse(message.body);
+            callback(data);
+          } catch {
+            //에러 무시
+          }
+        }
+      );
+
+      this.subscriptions.set(destination, subscription);
+      this.messageHandlers.set(destination, callback);
+    } catch (error) {
+      console.error('Error subscribing to destination:', error);
     }
   }
 
   unsubscribe(destination: string) {
-    this.subscriptions.delete(destination);
-    this.reconnectSubscriptions.delete(destination);
-  }
-
-  send(destination: string, message: T) {
-    if (!this.socket || this.socket.readyState !== WebSocket.OPEN) return;
-    const payload: WebSocketMessage<T> = { destination, message };
-    this.socket.send(JSON.stringify(payload));
-  }
-
-  isConnected(): boolean {
-    return this.socket?.readyState === WebSocket.OPEN;
-  }
-
-  close() {
-    this.socket?.close();
-  }
-
-  private reconnect() {
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnectAttempts++;
-      setTimeout(() => this.connect(() => {}), 3000);
+    try {
+      const subscription = this.subscriptions.get(destination);
+      if (subscription) {
+        subscription.unsubscribe();
+        this.subscriptions.delete(destination);
+      }
+      this.messageHandlers.delete(destination);
+    } catch (error) {
+      console.error('Error unsubscribing from destination:', error);
     }
   }
 
-  private resubscribe() {
-    this.reconnectSubscriptions.forEach((destination) => {
-      const callback = this.subscriptions.get(destination);
-      if (callback) {
-        this.subscribe(destination, callback);
-      }
+  send(destination: string, data: T) {
+    if (!this.stompClient?.connected) {
+      return;
+    }
+
+    this.stompClient.publish({
+      destination: `/pub/message/${destination}`,
+      body: JSON.stringify(data),
     });
+  }
+
+  isConnected(): boolean {
+    return this.stompClient?.connected || false;
+  }
+
+  close() {
+    this.stompClient?.deactivate();
+  }
+
+  disconnect() {
+    this.close();
+    this.subscriptions.clear();
+    this.messageHandlers.clear();
   }
 }
 
-export const webSocketService = new WebSocketService<string>(
-  'wss://goodbuyus.store:8080/websocket'
-);
+export const webSocketService = new WebSocketService<Message>();

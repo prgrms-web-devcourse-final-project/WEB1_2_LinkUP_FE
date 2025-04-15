@@ -1,196 +1,200 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { FaRegComment, FaTimes } from 'react-icons/fa';
-import { fetchChatMessages } from '../../api/chatApi';
-import { webSocketService } from '../../utils/webSocket';
+import {
+  fetchChatMessages,
+  connectWebSocket,
+  disconnectWebSocket,
+  subscribeToChatMessages,
+  unsubscribeFromChatMessages,
+  sendMessage,
+} from '../../api/chatApi';
+import { getUser } from '../../api/mypageApi';
 
 interface Message {
-  senderId: string;
-  content: string;
-  timestamp: string | null;
+  roomId?: number;
+  userName: string;
+  message: string;
+  time: string;
+  // 백엔드와 호환성을 위한 추가 속성들
+  senderId?: string;
+  content?: string;
+  timestamp?: string | null;
   type?: string;
+  isGuide?: boolean;
 }
 
 interface ChatRoomProps {
   chatRoomId: number;
-  isAdmin?: boolean; // 관리자 여부
   isOpen: boolean;
   onClose: () => void;
 }
 
-const ChatRoom: React.FC<ChatRoomProps> = ({
-  chatRoomId,
-  isAdmin = false,
-  isOpen,
-  onClose,
-}) => {
+const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId, isOpen, onClose }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatBoxRef = useRef<HTMLDivElement>(null);
-  const currentUserId = 'user-00001'; // Mock 로그인 사용자 ID
+  const [currentUserId, setCurrentUserId] = useState<string>('');
+  const [isConnected, setIsConnected] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isSubscribing, setIsSubscribing] = useState(false);
 
   useEffect(() => {
-    if (!isOpen) return;
-
-    // 채팅방 초기 메시지 및 채팅 메시지 가져오기
-    const fetchMessages = async () => {
-      const fetchedMessages = await fetchChatMessages(chatRoomId);
-
-      // 입장 메시지 추가
-      const joinMessage: Message = {
-        senderId: 'system',
-        content: `윤성님이 입장하셨습니다.`,
-        timestamp: null, // timestamp 표시하지 않음
-      };
-
-      // 그룹 채팅 안내 메시지 추가
-      const groupChatNotice: Message = {
-        senderId: 'system',
-        content: `
-안내사항: 환불 및 이탈 관련 정책
-  1. 환불 및 수령 시간/위치 조율
-    - 공구 진행 중(최종 승인 이후)인 채팅방에서
-    수령 위치 및 시간을 조율합니다.
-    - 이탈자가 발생하거나 환불 요청이 있을 경우,
-      이탈자는 채팅방에서 환불 의사를 명확히
-      표시해야 하며, 모든 참여 인원이 동의한
-      경우에 한해 환불이 진행됩니다.
-  2. 환불 및 비용 부담
-    - 환불 진행 시, 전체 환불 처리 및 해당 인원에
-      대한 신고 접수가 이루어지며, 이로 인해
-      발생하는 모든 비용(공구 물품 반송 등)은
-      이탈자 본인이 전액 부담합니다.
-  3. 이탈자에 대한 페널티 제도
-    - 이탈 행위가 반복될 경우, 아래와 같은
-      경고 시스템이 적용됩니다.
-      - 1회 경고: 계정 일주일 정지
-      - 3회 경고: 계정 한 달 정지
-      - 5회 경고: 계정 영구 정지
-
-  💡 주의: 본 안내사항을 숙지하지 않아 발생하는
-              불이익은 본인에게 책임이 있습니다.
-
-공구 진행에 차질이 없도록 적극적인 협조
-부탁드립니다. 😊`,
-        timestamp: null,
-      };
-
-      setMessages([joinMessage, groupChatNotice, ...fetchedMessages]);
+    const fetchUserNickname = async () => {
+      const response = await getUser();
+      setCurrentUserId(response.nickname);
     };
 
-    fetchMessages();
-  }, [chatRoomId, isOpen]);
+    fetchUserNickname();
+  }, []);
 
-  const getNicknameDisplay = (senderId: string): string => {
-    if (senderId === 'system') return '';
-    return senderId === currentUserId ? '나' : senderId;
+  // 스크롤을 맨 아래로 이동시키는 함수
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // 메시지 배열이 변경될 때마다 스크롤을 아래로 이동
   useEffect(() => {
-    if (!isOpen) return;
-
-    // WebSocket 연결
-    const handleIncomingMessage = (data: Message) => {
-      setMessages((prev) => [...prev, data]);
-    };
-
-    webSocketService.connect(() => {
-      console.log('연결 성공');
-      // webSocketService.subscribe(
-      //   `/sub/message/${chatRoomId}`,
-      //   (messageOutput) => {
-      //     try {
-      //       // messageOutput이 string이므로 JSON.parse() 수행
-      //       const parsedMessage = JSON.parse(messageOutput);
-
-      //       // 'body' 속성이 있는지 확인 후 처리
-      //       if (
-      //         parsedMessage &&
-      //         typeof parsedMessage === 'object' &&
-      //         'body' in parsedMessage
-      //       ) {
-      //         const data = JSON.parse(parsedMessage.body);
-      //         handleIncomingMessage(data);
-      //       } else {
-      //         console.error('Invalid message format:', parsedMessage);
-      //       }
-      //     } catch (error) {
-      //       console.error('Failed to parse WebSocket message:', error);
-      //     }
-      //   }
-      // );
-    });
-
-    return () => {
-      webSocketService.unsubscribe(`/sub/message/${chatRoomId}`);
-      webSocketService.close();
-    };
-  }, [chatRoomId, isOpen]);
-
-  useEffect(() => {
-    // 채팅 박스 스크롤 관리
-    if (chatBoxRef.current) {
-      chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
-    }
+    scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = () => {
-    if (!input.trim()) return;
+  useEffect(() => {
+    if (!chatRoomId || isNaN(chatRoomId)) return;
 
-    const message: Message = {
-      senderId: isAdmin ? 'system' : currentUserId,
-      content: isAdmin ? `[관리자 메시지] ${input.trim()}` : input.trim(),
-      timestamp: new Date().toISOString(),
+    const handleMessage = (message: Message) => {
+      if (message && typeof message === 'object') {
+        setMessages((prevMessages) => [...prevMessages, message]);
+      }
     };
 
-    webSocketService.send(
-      `/pub/message/${chatRoomId}`,
-      JSON.stringify(message)
-    );
-    setMessages((prev) => [...prev, message]);
-    setInput('');
-  };
+    const connectAndSubscribe = async () => {
+      if (isConnecting || isSubscribing) return;
 
-  const formatDate = (timestamp: string) => {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      weekday: 'short',
-    });
-  };
-
-  const addDateSeparators = (messages: Message[]) => {
-    const result: Message[] = [];
-    let lastDate = '';
-
-    for (const message of messages) {
-      const messageDate = message.timestamp
-        ? formatDate(message.timestamp)
-        : null;
-      if (messageDate && messageDate !== lastDate) {
-        result.push({
-          type: 'date',
-          content: messageDate,
-          senderId: 'system',
-          timestamp: null,
-        });
-        lastDate = messageDate;
+      try {
+        setIsConnecting(true);
+        await connectWebSocket(
+          handleMessage,
+          async () => {
+            try {
+              setIsSubscribing(true);
+              await subscribeToChatMessages(chatRoomId, handleMessage);
+              setIsSubscribed(true);
+              setIsConnected(true);
+            } catch (error) {
+              console.error('채팅방 구독 실패:', error);
+              setIsSubscribed(false);
+              setIsConnected(false);
+              disconnectWebSocket();
+            } finally {
+              setIsSubscribing(false);
+            }
+          },
+          () => {
+            setIsConnected(false);
+            setIsSubscribed(false);
+          },
+          (error) => {
+            console.error('WebSocket 에러:', error);
+            setIsConnected(false);
+            setIsSubscribed(false);
+          }
+        );
+      } catch (error) {
+        console.error('WebSocket 연결 실패:', error);
+        setIsConnected(false);
+        setIsSubscribed(false);
+      } finally {
+        setIsConnecting(false);
       }
-      result.push(message);
+    };
+
+    const disconnectAndUnsubscribe = async () => {
+      if (isSubscribed) {
+        try {
+          await unsubscribeFromChatMessages(chatRoomId);
+        } catch (error) {
+          console.error('채팅방 구독 해제 실패:', error);
+        }
+      }
+
+      if (isConnected) {
+        try {
+          await disconnectWebSocket();
+        } catch (error) {
+          console.error('WebSocket 연결 해제 실패:', error);
+        }
+      }
+
+      setIsConnected(false);
+      setIsSubscribed(false);
+    };
+
+    if (isOpen) {
+      connectAndSubscribe();
+    } else {
+      disconnectAndUnsubscribe();
     }
 
-    return result;
-  };
+    return () => {
+      disconnectAndUnsubscribe();
+    };
+  }, [chatRoomId, isOpen]);
 
-  const formattedMessages = addDateSeparators(messages);
+  // WebSocket 연결과 구독이 완료된 후에 채팅 내역을 불러옵니다
+  useEffect(() => {
+    const loadMessages = async () => {
+      if (
+        isConnected &&
+        isSubscribed &&
+        chatRoomId &&
+        !isConnecting &&
+        !isSubscribing
+      ) {
+        try {
+          const chatMessages = await fetchChatMessages(chatRoomId);
+
+          // 안내사항을 항상 첫 번째로 표시
+          const guideMessage = {
+            userName: '시스템',
+            message:
+              '안내사항:\n1. 상대방을 존중하는 대화를 나누어주세요.\n2. 개인정보는 절대 공유하지 마세요.\n3. 거래는 채팅방 외에서 진행해주세요.',
+            time: new Date().toISOString(),
+            isGuide: true,
+          };
+
+          setMessages([guideMessage, ...chatMessages]);
+        } catch (error) {
+          console.error('메시지 불러오기 실패:', error);
+        }
+      }
+    };
+
+    loadMessages();
+  }, [isConnected, isSubscribed, chatRoomId, isConnecting, isSubscribing]);
+
+  const handleSendMessage = () => {
+    if (!input.trim() || !chatRoomId || !currentUserId) return;
+
+    const messageTime = new Date().toISOString();
+    const newMessage = {
+      roomId: chatRoomId,
+      userName: currentUserId,
+      message: input.trim(),
+      time: messageTime,
+    };
+
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    sendMessage(chatRoomId, currentUserId, input.trim(), messageTime);
+    setInput('');
+  };
 
   if (!isOpen) return null;
 
   return (
-    <ModalOverlay>
-      <ModalContainer>
+    <ModalOverlay onClick={onClose}>
+      <ModalContainer onClick={(e) => e.stopPropagation()}>
         <ModalHeader>
           <ModalTitle>채팅</ModalTitle>
           <CloseButton onClick={onClose}>
@@ -199,47 +203,33 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
         </ModalHeader>
 
         <ChatRoomContainer>
-          <ChatMessagesContainer>
-            {formattedMessages.map((msg, index) => {
-              const isGroupNotice =
-                msg.senderId === 'system' &&
-                msg.content?.includes('안내사항: 환불 및 이탈 관련 정책');
-
-              if (msg.type === 'date') {
-                return (
-                  <DateSeparator key={`date-${index}`}>
-                    {msg.content}
-                  </DateSeparator>
-                );
-              }
-
-              return (
-                <MessageWrapper
-                  key={index}
-                  $isCurrentUser={msg.senderId === currentUserId}
-                  $isSystemMessage={msg.senderId === 'system'}
-                >
+          <ChatMessagesContainer ref={chatBoxRef}>
+            {messages.map((msg, index) => (
+              <MessageWrapper
+                key={index}
+                $isCurrentUser={msg.userName === currentUserId}
+                $isGuide={msg.isGuide}
+              >
+                {!msg.isGuide && (
                   <SenderName>
-                    {msg.senderId === 'system'
-                      ? ''
-                      : getNicknameDisplay(msg.senderId)}
+                    {msg.userName === currentUserId ? '나' : msg.userName}
                   </SenderName>
-                  <MessageContent
-                    $isCurrentUser={msg.senderId === currentUserId}
-                    $isGroupNotice={isGroupNotice}
-                    $isSystemMessage={msg.senderId === 'system'}
-                  >
-                    {msg.content}
-                  </MessageContent>
-                  {msg.timestamp && msg.senderId !== 'system' && (
-                    <Timestamp>
-                      {new Date(msg.timestamp).toLocaleTimeString()}
-                    </Timestamp>
-                  )}
-                </MessageWrapper>
-              );
-            })}
-            <div ref={chatBoxRef}></div>
+                )}
+                <MessageContent
+                  $isCurrentUser={msg.userName === currentUserId}
+                  $isGuide={msg.isGuide}
+                >
+                  {msg.message}
+                </MessageContent>
+                {!msg.isGuide && (
+                  <Timestamp>
+                    {new Date(msg.time).toLocaleTimeString()}
+                  </Timestamp>
+                )}
+              </MessageWrapper>
+            ))}
+            {/* 스크롤을 맨 아래로 이동시키기 위한 빈 div */}
+            <div ref={messagesEndRef} />
           </ChatMessagesContainer>
           <MessageInputContainer>
             <MessageInput
@@ -247,9 +237,9 @@ const ChatRoom: React.FC<ChatRoomProps> = ({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="메시지를 입력하세요."
-              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()} // Enter 키 처리
+              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
             />
-            <SendButton onClick={handleSendMessage} disabled={!input.trim()}>
+            <SendButton onClick={handleSendMessage}>
               <FaRegComment />
             </SendButton>
           </MessageInputContainer>
@@ -331,43 +321,17 @@ const ChatMessagesContainer = styled.div`
   padding: 16px;
   overflow-y: auto;
   background-color: #f8fafc;
-`;
-
-const DateSeparator = styled.div`
-  text-align: center;
-  margin: 16px 0;
-  font-size: 0.85rem;
-  color: #64748b;
-  font-weight: 500;
-  position: relative;
-
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    width: 40%;
-    height: 1px;
-    background-color: #e2e8f0;
-  }
-
-  &::before {
-    left: 0;
-  }
-
-  &::after {
-    right: 0;
-  }
+  scroll-behavior: smooth;
 `;
 
 const MessageWrapper = styled.div<{
   $isCurrentUser: boolean;
-  $isSystemMessage?: boolean;
+  $isGuide?: boolean;
 }>`
   display: flex;
   flex-direction: column;
-  align-items: ${({ $isCurrentUser, $isSystemMessage }) =>
-    $isSystemMessage ? 'center' : $isCurrentUser ? 'flex-end' : 'flex-start'};
+  align-items: ${({ $isCurrentUser, $isGuide }) =>
+    $isGuide ? 'center' : $isCurrentUser ? 'flex-end' : 'flex-start'};
   margin-bottom: 12px;
   width: 100%;
 `;
@@ -382,29 +346,25 @@ const SenderName = styled.div`
 
 const MessageContent = styled.div<{
   $isCurrentUser: boolean;
-  $isGroupNotice?: boolean;
-  $isSystemMessage?: boolean;
+  $isGuide?: boolean;
 }>`
   max-width: 75%;
-  background-color: ${({ $isCurrentUser, $isGroupNotice, $isSystemMessage }) =>
-    $isGroupNotice || $isSystemMessage
-      ? '#f1f5f9'
-      : $isCurrentUser
-        ? '#2563eb'
-        : '#e2e8f0'};
-  color: ${({ $isCurrentUser }) => ($isCurrentUser ? '#ffffff' : '#1e293b')};
+  background-color: ${({ $isCurrentUser, $isGuide }) =>
+    $isGuide ? '#f0f7ff' : $isCurrentUser ? '#2563eb' : '#e2e8f0'};
+  color: ${({ $isCurrentUser, $isGuide }) =>
+    $isGuide ? '#2d3748' : $isCurrentUser ? '#ffffff' : '#1e293b'};
   padding: 12px 16px;
   border-radius: 16px;
-  border-top-left-radius: ${({ $isCurrentUser }) =>
-    $isCurrentUser ? '16px' : '4px'};
-  border-top-right-radius: ${({ $isCurrentUser }) =>
-    $isCurrentUser ? '4px' : '16px'};
+  border-top-left-radius: ${({ $isCurrentUser, $isGuide }) =>
+    $isGuide ? '16px' : $isCurrentUser ? '16px' : '4px'};
+  border-top-right-radius: ${({ $isCurrentUser, $isGuide }) =>
+    $isGuide ? '16px' : $isCurrentUser ? '4px' : '16px'};
   word-wrap: break-word;
   font-size: 0.95rem;
   line-height: 1.4;
-  white-space: pre-wrap; /* 줄바꿈 유지 */
+  white-space: pre-wrap;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  text-align: ${({ $isGroupNotice }) => ($isGroupNotice ? 'left' : 'inherit')};
+  text-align: ${({ $isGuide }) => ($isGuide ? 'center' : 'left')};
 `;
 
 const Timestamp = styled.div`

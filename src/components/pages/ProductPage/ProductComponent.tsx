@@ -24,7 +24,6 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
     '판매 상품' | '기한 마감 상품'
   >('판매 상품');
   const PRODUCT_PER_PAGE = 16;
-  console.log(products);
   const startIndex = (currentPage - 1) * PRODUCT_PER_PAGE;
   const filteredProducts =
     selectedText === '기한 마감 상품'

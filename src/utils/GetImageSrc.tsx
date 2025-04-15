@@ -5,7 +5,7 @@ export const getImageSrc = (
     return '';
   }
 
-  const baseUrl = process.env.VITE_API_URL || 'http://15.164.5.135:8080';
+  const baseUrl = process.env.VITE_API_URL;
 
   if (typeof image === 'string') {
     if (image.startsWith('http')) {

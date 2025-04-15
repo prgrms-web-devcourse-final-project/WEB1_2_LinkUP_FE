@@ -1,23 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Sidemenu from './SideMenu';
 import GS from './GS';
 import { PageTitle } from './OrderListPage';
 import { useChatQuery } from '../../../hooks/useGetChatRoom';
 import { QueryHandler } from '../../../hooks/useGetProduct';
 import styled from 'styled-components';
-import { ChatRoom } from '../../../api/chatApi';
+import ChatRoom from '../../common/ChatRoom';
+import { Chat } from '../../../api/chatApi';
 
-function ChatListPage() {
+const ChatListPage: React.FC = () => {
   const {
     data: chats,
     isLoading: LoadingChat,
     isError: ErrorChat,
   } = useChatQuery();
 
-  // const handleEnterChat = (postId) => {
-  //   // 채팅방 입장 함수 - 실제 구현 시 적절한 경로로 변경해주세요
-  //   navigate(`/chat/${postId}`);
-  // };
+  const [selectedChatRoomId, setSelectedChatRoomId] = useState<number | null>(
+    null
+  );
 
   return (
     <QueryHandler isLoading={LoadingChat} isError={ErrorChat}>
@@ -28,7 +28,7 @@ function ChatListPage() {
 
           {chats && chats.length > 0 ? (
             <ChatListContainer>
-              {chats.map((chat: ChatRoom, index: number) => (
+              {chats.map((chat: Chat, index: number) => (
                 <ChatRoomCard key={index}>
                   <ChatRoomHeader>
                     <ChatRoomName>{chat.roomName}</ChatRoomName>
@@ -58,13 +58,20 @@ function ChatListPage() {
 
                   <ButtonsContainer>
                     <EnterButton
-                    //  onClick={() => handleEnterChat(chat.postId)}
+                      onClick={() => setSelectedChatRoomId(chat.postId)}
                     >
                       입장하기
                     </EnterButton>
                   </ButtonsContainer>
                 </ChatRoomCard>
               ))}
+              {selectedChatRoomId && (
+                <ChatRoom
+                  chatRoomId={selectedChatRoomId}
+                  isOpen={true}
+                  onClose={() => setSelectedChatRoomId(null)}
+                />
+              )}
             </ChatListContainer>
           ) : (
             <EmptyState>
@@ -76,7 +83,7 @@ function ChatListPage() {
       </GS.Wrapper>
     </QueryHandler>
   );
-}
+};
 
 const ChatListContainer = styled.div`
   display: flex;

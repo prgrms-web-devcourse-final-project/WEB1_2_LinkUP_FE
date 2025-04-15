@@ -10,7 +10,6 @@ import {
 } from '../../../hooks/useGetProduct';
 import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
 import CommentComponent from './CommentComponent';
-import { useQuantity } from '../../../context/QuantityContext';
 import { postWishProduct } from '../HomePage/api/wish';
 
 const ProductDetail: React.FC = () => {
@@ -25,7 +24,7 @@ const ProductDetail: React.FC = () => {
   }
 
   const { data: product, isLoading, isError } = useProductQuery(productId || 0);
-  const { quantity, setQuantity } = useQuantity();
+  const [quantity, setQuantity] = useState<number>(1);
   const [remainingTime, setRemainingTime] = useState('');
   const navigate = useNavigate();
   const isSoldOut = product
@@ -91,7 +90,7 @@ const ProductDetail: React.FC = () => {
 
   const handleSubmit = async () => {
     await submitOrder(productId, quantity);
-    navigate(`/products/payment/${productId}`);
+    navigate(`/products/payment/${productId}`, { state: quantity });
   };
 
   if (!product) {

@@ -63,6 +63,5 @@ export const handleCommunityPayment = async (
 export const handleRefund = async (postId: number, payload: RefundForm) => {
   const URL = `/api/v1/virtual/cancel-payment/${postId}`;
   const response = await axiosInstance.post(URL, payload);
-  console.log(response.data);
   return response.data;
 };

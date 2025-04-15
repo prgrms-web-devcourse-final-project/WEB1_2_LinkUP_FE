@@ -5,6 +5,7 @@ import { getCommunity, GroupPurchaseType } from '../../../../api/mypageApi';
 import ReviewModal, { Question } from '../../../common/ReviewModal';
 import { reviewUser } from '../../../../api/reviewApi';
 import { getImageSrc } from '../../../../utils/GetImageSrc';
+import DEFAULT_IMG from '../../../../assets/icons/default-featured-image.png.jpg';
 
 const GroupPurchaseHistory = () => {
   const [groupPurchaseList, setGroupPurchaseList] = useState<
@@ -58,21 +59,24 @@ const GroupPurchaseHistory = () => {
           <GroupPurchaseItem key={idx}>
             <GroupPurchaseWrapper>
               <ImageContainer>
-                {groupPurchase.imageUrls[0] !== '' ? (
-                  <img
-                    src={getImageSrc(groupPurchase.imageUrls[0])}
-                    width={60}
-                    height={60}
-                  />
-                ) : (
-                  <ImagePlaceholder />
-                )}
+                <ProductImage
+                  src={
+                    groupPurchase.imageUrls[0]
+                      ? getImageSrc(groupPurchase.imageUrls[0])
+                      : DEFAULT_IMG
+                  }
+                  alt={groupPurchase.title}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = DEFAULT_IMG;
+                  }}
+                />
               </ImageContainer>
               <GroupPurchaseDetails>
-                <ProductName>{groupPurchase.title}</ProductName>
-                <ProductInfo>
-                  Quantity: {groupPurchase.availableNumber}
-                </ProductInfo>
+                <ProductName>
+                  공동구매 글 제목 : {groupPurchase.title}
+                </ProductName>
+                <ProductInfo>수량: {groupPurchase.availableNumber}</ProductInfo>
                 <StatusBadge status={groupPurchase.status}>
                   {getStatusLabel(groupPurchase.status)}
                 </StatusBadge>
@@ -90,7 +94,6 @@ const GroupPurchaseHistory = () => {
               {(groupPurchase.status === 'APPROVED' ||
                 groupPurchase.status === 'PAYMENT_COMPLETED') && (
                 <>
-                  <QRCodeButton>QR 코드 확인</QRCodeButton>
                   <ReviewLink onClick={() => setIsModalOpen(true)}>
                     <ReviewIcon src="/images/qricon.png" alt="review icon" />
                     <span>리뷰 작성하기</span>
@@ -119,42 +122,37 @@ const GroupPurchaseHistory = () => {
 const STATUS_MAP: { [key: string]: string } = {
   NOT_APPROVED: '승인대기',
   APPROVED: '승인완료',
-  PAYMENT_STANDBY: '결제 대기',
+  PAYMENT_STANDBY: '결제 대기 중',
   PAYMENT_COMPLETED: '결제 완료',
   REJECTED: '승인 거절',
   DELETED: '글 삭제',
 };
 
-const GroupPurchaseWrapper = styled.div`
-  display: inline-flex;
-  flex-direction: row;
-  width: 400px;
-`;
-
 const Container = styled.div`
   width: 97%;
-  margin: 20px 0;
+  margin: 20px auto;
   background-color: #f5f9ff;
-  padding: 20px;
+  padding: 24px;
   border-radius: 12px;
 `;
 
 const OrderList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 `;
 
 const GroupPurchaseItem = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px;
+  padding: 16px;
   border: 1px solid #e0e8f7;
   border-radius: 12px;
   background-color: #fff;
   box-shadow: 0 4px 12px rgba(0, 83, 219, 0.05);
   transition: transform 0.2s ease;
+  gap: 24px;
 
   &:hover {
     transform: translateY(-4px);
@@ -162,26 +160,34 @@ const GroupPurchaseItem = styled.div`
   }
 `;
 
-const ImageContainer = styled.div`
-  flex-shrink: 0;
-
-  img {
-    border-radius: 10px;
-    object-fit: cover;
-    border: 1px solid #e0e8f7;
-  }
+const GroupPurchaseWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1;
 `;
 
-const ImagePlaceholder = styled.div`
+const ImageContainer = styled.div`
+  flex-shrink: 0;
   width: 100px;
   height: 100px;
-  background-color: #e8f0fe;
   border-radius: 10px;
-  border: 1px dashed #a0c0ff;
+  overflow: hidden;
+  border: 1px solid #e0e8f7;
+`;
+
+const ProductImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 `;
 
 const GroupPurchaseDetails = styled.div`
-  margin-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
 `;
 
 const ProductName = styled.div`
@@ -193,16 +199,18 @@ const ProductName = styled.div`
 const ProductInfo = styled.div`
   font-size: 14px;
   color: #5b7aac;
-  margin-top: 4px;
 `;
 
 const StatusBadge = styled.div<{ status: string }>`
-  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
   font-size: 12px;
   font-weight: bold;
-  display: inline-block;
-  padding: 4px 10px;
   border-radius: 20px;
+  width: 100px;
+  box-sizing: border-box;
 
   ${({ status }) => {
     if (status === 'APPROVED' || status === 'PAYMENT_COMPLETED') {
@@ -230,46 +238,47 @@ const StatusBadge = styled.div<{ status: string }>`
 const Price = styled.div`
   font-size: 16px;
   font-weight: bold;
-  color: #1a3b7a;
+  color: #2a5985;
+  margin-right: 30%;
 `;
 
 const Actions = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  min-width: 140px;
 `;
 
-const ActionButton = styled.div`
+const ActionButton = styled.button`
   background: #fff;
-  color: #0053db;
-  border: 1px solid #0053db;
-  padding: 10px 15px;
-  border-radius: 8px;
+  color: #3b7fc4;
+  border: 1px solid #3b7fc4;
+  padding: 8px 12px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 13px;
   font-weight: 500;
-  text-align: center;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 
   &:hover {
-    background-color: #0053db;
+    background: #3b7fc4;
     color: #fff;
   }
 `;
 
-const CancelButton = styled.div`
+const CancelButton = styled.button`
   background: #fff;
-  color: #ff3a4c;
-  border: 1px solid #ff3a4c;
-  padding: 10px 15px;
-  border-radius: 8px;
+  color: #d35858;
+  border: 1px solid #d35858;
+  padding: 8px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  display: inline-flex;
-  justify-content: center;
+  font-size: 13px;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 
   &:hover {
-    background: #ff3a4c;
+    background: #d35858;
     color: #fff;
   }
 `;
@@ -277,22 +286,23 @@ const CancelButton = styled.div`
 const ReviewLink = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
   cursor: pointer;
-  margin-top: 8px;
-  color: #0053db;
-  transition: color 0.2s ease;
+  margin-top: 6px;
+  font-size: 14px;
+  color: #3b7fc4;
+  padding: 4px 0;
 
   span {
-    border-bottom: 1px solid #0053db;
+    border-bottom: 1px solid #3b7fc4;
+    font-weight: 500;
   }
 
   &:hover {
-    color: #003ca0;
+    color: #2d6cae;
 
     span {
-      border-bottom: 1px solid #003ca0;
+      border-bottom: 1px solid #2d6cae;
     }
   }
 `;
@@ -300,24 +310,6 @@ const ReviewLink = styled.div`
 const ReviewIcon = styled.img`
   width: 16px;
   height: 16px;
-`;
-
-const QRCodeButton = styled.div`
-  background: #0053db;
-  color: #fff;
-  border: 1px solid #0053db;
-  padding: 10px 15px;
-  border-radius: 8px;
-  cursor: pointer;
-  display: inline-flex;
-  justify-content: center;
-  font-weight: 500;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: #003ca0;
-    border-color: #003ca0;
-  }
 `;
 
 export default GroupPurchaseHistory;

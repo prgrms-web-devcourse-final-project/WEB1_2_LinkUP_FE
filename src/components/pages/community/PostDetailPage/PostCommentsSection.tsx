@@ -25,10 +25,12 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
   const [newCommentContent, setNewCommentContent] = useState<string>('');
   const [editCommentId, setEditCommentId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState<string>('');
+  const [replyToCommentId, setReplyToCommentId] = useState<number | null>(null);
   const userId = parseInt(sessionStorage.getItem('userid') || '0', 10);
   const { data: post, isLoading, isError } = usePostQuery(communityPostId);
   const queryClient = useQueryClient();
-  const handleAddComment = async () => {
+  console.log(post?.comment);
+  const handleAddComment = async (parentId: number | null = null) => {
     if (!newCommentContent.trim()) {
       alert('댓글 내용을 입력해주세요.');
       return;
@@ -39,13 +41,14 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
     }
     await addComment(communityPostId, {
       content: newCommentContent,
-      parentId: null,
+      parentId: parentId,
     });
 
     alert('댓글이 등록되었습니다.');
     queryClient.invalidateQueries({ queryKey: ['post', communityPostId] });
 
     setNewCommentContent('');
+    setReplyToCommentId(null);
   };
 
   const handleDeleteComment = async (commentId: number) => {
@@ -81,61 +84,121 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
       <CommentsContainer>
         <CommentsHeader>댓글</CommentsHeader>
         <CommentsWrapper>
-          {post?.comment?.map((comment) => (
-            <Comment
-              key={comment.id}
-              $isEditing={editCommentId === Number(comment.id)}
-            >
-              <CommentHeader>
-                <CommentAuthor>{comment.nickname}</CommentAuthor>
-                <CommentDate>
-                  {formatDateWithOffset(comment.createdAt).toLocaleString()}
-                </CommentDate>
-              </CommentHeader>
-              {editCommentId === Number(comment.id) ? (
-                <EditCommentContainer>
-                  <EditCommentInput
-                    value={editContent}
-                    onChange={(e) => setEditContent(e.target.value)}
-                    autoFocus
-                  />
-                  <EditActionButtonsWrapper>
-                    <CharacterCount $overLimit={editContent.length > 300}>
-                      ({editContent.length}/300)
-                    </CharacterCount>
-                    <EditActionButtons>
-                      <ConfirmEditButton onClick={handleUpdateComment}>
-                        수정 완료
-                      </ConfirmEditButton>
-                      <CancelEditButton onClick={() => setEditCommentId(null)}>
-                        취소
-                      </CancelEditButton>
-                    </EditActionButtons>
-                  </EditActionButtonsWrapper>
-                </EditCommentContainer>
-              ) : (
-                <>
-                  <CommentContent>{comment.content}</CommentContent>
-                  {comment.userId === userId && (
-                    <CommentActions>
-                      <ActionButton
-                        onClick={() =>
-                          handleEditComment(comment.id, comment.content)
-                        }
-                      >
-                        수정
-                      </ActionButton>
-                      <ActionButton
-                        onClick={() => handleDeleteComment(comment.id)}
-                      >
-                        삭제
-                      </ActionButton>
-                    </CommentActions>
-                  )}
-                </>
-              )}
-            </Comment>
-          ))}
+          {post?.comment
+            ?.filter((comment) => comment.parentId === null)
+            .map((comment) => (
+              <Comment
+                key={comment.id}
+                $isEditing={editCommentId === Number(comment.id)}
+              >
+                <CommentHeader>
+                  <CommentAuthor>{comment.nickname}</CommentAuthor>
+                  <CommentDate>
+                    {formatDateWithOffset(comment.createdAt).toLocaleString()}
+                  </CommentDate>
+                </CommentHeader>
+                {editCommentId === Number(comment.id) ? (
+                  <EditCommentContainer>
+                    <EditCommentInput
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      autoFocus
+                    />
+                    <EditActionButtonsWrapper>
+                      <CharacterCount $overLimit={editContent.length > 300}>
+                        ({editContent.length}/300)
+                      </CharacterCount>
+                      <EditActionButtons>
+                        <ConfirmEditButton onClick={handleUpdateComment}>
+                          수정 완료
+                        </ConfirmEditButton>
+                        <CancelEditButton
+                          onClick={() => setEditCommentId(null)}
+                        >
+                          취소
+                        </CancelEditButton>
+                      </EditActionButtons>
+                    </EditActionButtonsWrapper>
+                  </EditCommentContainer>
+                ) : (
+                  <>
+                    <CommentContent>{comment.content}</CommentContent>
+                    {comment.userId === userId && (
+                      <CommentActions>
+                        <ActionButton
+                          onClick={() =>
+                            handleEditComment(comment.id, comment.content)
+                          }
+                        >
+                          수정
+                        </ActionButton>
+                        <ActionButton
+                          onClick={() => handleDeleteComment(comment.id)}
+                        >
+                          삭제
+                        </ActionButton>
+                      </CommentActions>
+                    )}
+                    <ReplyButton
+                      onClick={() => setReplyToCommentId(comment.id)}
+                    >
+                      답글 달기
+                    </ReplyButton>
+                    {replyToCommentId === comment.id && (
+                      <ReplyInputContainer>
+                        <CommentInput
+                          value={newCommentContent}
+                          onChange={(e) => setNewCommentContent(e.target.value)}
+                          placeholder="답글을 입력하세요."
+                          maxLength={300}
+                        />
+                        <ActionButtonsWrapper>
+                          <CharacterCount
+                            $overLimit={newCommentContent.length > 300}
+                          >
+                            ({newCommentContent.length}/300)
+                          </CharacterCount>
+                          <ReplyActionButtons>
+                            <CancelReplyButton
+                              onClick={() => setReplyToCommentId(null)}
+                            >
+                              취소
+                            </CancelReplyButton>
+                            <SubmitCommentButton
+                              onClick={() => handleAddComment(comment.id)}
+                            >
+                              작성
+                            </SubmitCommentButton>
+                          </ReplyActionButtons>
+                        </ActionButtonsWrapper>
+                      </ReplyInputContainer>
+                    )}
+                    {post?.comment &&
+                      post.comment.filter(
+                        (reply) => reply.parentId === comment.id
+                      ).length > 0 && (
+                        <RepliesContainer>
+                          {post.comment
+                            .filter((reply) => reply.parentId === comment.id)
+                            .map((reply) => (
+                              <Reply key={reply.id}>
+                                <ReplyHeader>
+                                  <ReplyAuthor>{reply.nickname}</ReplyAuthor>
+                                  <ReplyDate>
+                                    {formatDateWithOffset(
+                                      reply.createdAt
+                                    ).toLocaleString()}
+                                  </ReplyDate>
+                                </ReplyHeader>
+                                <ReplyContent>{reply.content}</ReplyContent>
+                              </Reply>
+                            ))}
+                        </RepliesContainer>
+                      )}
+                  </>
+                )}
+              </Comment>
+            ))}
           <CommentInputContainer>
             <CommentInput
               value={newCommentContent}
@@ -147,7 +210,7 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
               <CharacterCount $overLimit={newCommentContent.length > 300}>
                 ({newCommentContent.length}/300)
               </CharacterCount>
-              <SubmitCommentButton onClick={handleAddComment}>
+              <SubmitCommentButton onClick={() => handleAddComment(null)}>
                 작성
               </SubmitCommentButton>
             </ActionButtonsWrapper>
@@ -347,6 +410,81 @@ const CommentActions = styled.div`
   display: flex;
   gap: 8px;
   align-self: flex-end;
+`;
+
+const ReplyButton = styled.button`
+  background: none;
+  border: none;
+  color: #007bff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-top: 8px;
+  align-self: flex-start;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const ReplyInputContainer = styled.div`
+  margin-top: 12px;
+  padding: 12px;
+  background-color: #f8faff;
+  border-radius: 8px;
+  border: 1px solid #e6f3ff;
+`;
+
+const RepliesContainer = styled.div`
+  margin-top: 12px;
+  padding-left: 20px;
+  border-left: 2px solid #e6f3ff;
+`;
+
+const Reply = styled.div`
+  padding: 12px;
+  background-color: #f8faff;
+  border-radius: 8px;
+  margin-bottom: 8px;
+`;
+
+const ReplyHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+`;
+
+const ReplyAuthor = styled.div`
+  font-weight: 600;
+  color: #007bff;
+  font-size: 0.9rem;
+`;
+
+const ReplyDate = styled.div`
+  font-size: 0.8rem;
+  color: #6c757d;
+`;
+
+const ReplyContent = styled.p`
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #2c3e50;
+  word-break: break-word;
+`;
+
+const ReplyActionButtons = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const CancelReplyButton = styled(ActionButton)`
+  background: #6c757d;
+
+  &:hover {
+    background: #545b62;
+  }
 `;
 
 export default PostCommentsSection;

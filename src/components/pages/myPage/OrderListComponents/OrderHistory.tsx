@@ -6,6 +6,8 @@ import {
   OrderType,
   postProductCancel,
 } from '../../../../api/mypageApi';
+import DEFAULT_IMG from '../../../../assets/icons/default-featured-image.png.jpg';
+
 const getStatusColor = (status: string): string => {
   switch (status) {
     case 'DONE':
@@ -30,13 +32,33 @@ const OrderHistory = () => {
   const [pk, setPk] = useState<string>('');
   const navigate = useNavigate();
 
+  const fetchOrderList = async () => {
+    try {
+      const response = await getOrderList();
+      setOrderList(response);
+    } catch (error) {
+      console.error('주문 목록을 불러오는데 실패했습니다:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrderList();
+  }, []);
+
   const handleCancelClick = () => {
     setIsModalOpen(true);
   };
 
   const handleConfirm = async () => {
-    await postProductCancel({ paymentKey: pk, cancelReason: 'test' });
-    setIsModalOpen(false);
+    try {
+      await postProductCancel({ paymentKey: pk, cancelReason: 'test' });
+      setIsModalOpen(false);
+      // 주문 목록을 다시 불러와서 상태 업데이트
+      await fetchOrderList();
+    } catch (error) {
+      console.error('주문 취소에 실패했습니다:', error);
+      alert('주문 취소에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   const handleClose = () => {
@@ -72,13 +94,6 @@ const OrderHistory = () => {
       second: '2-digit',
     });
   };
-  useEffect(() => {
-    const fetchOrderList = async () => {
-      const response = await getOrderList();
-      setOrderList(response);
-    };
-    fetchOrderList();
-  }, []);
 
   return (
     <Container>
@@ -102,7 +117,14 @@ const OrderHistory = () => {
               <OrderContent>
                 <OrderWrapper>
                   <ImageContainer>
-                    <ImagePlaceholder />
+                    <ProductImage
+                      src={order.url || DEFAULT_IMG}
+                      alt={order.productName}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = DEFAULT_IMG;
+                      }}
+                    />
                   </ImageContainer>
                   <OrderDetails>
                     <ProductName>{order.productName}</ProductName>
@@ -246,14 +268,17 @@ const OrderWrapper = styled.div`
 
 const ImageContainer = styled.div`
   flex-shrink: 0;
+  width: 100px;
+  height: 100px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e0e8f7;
 `;
 
-const ImagePlaceholder = styled.div`
-  width: 70px;
-  height: 70px;
-  background-color: #e6f0fa;
-  border-radius: 8px;
-  border: 1px solid #dae8f2;
+const ProductImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 `;
 
 const OrderDetails = styled.div`
@@ -274,13 +299,17 @@ const ProductInfo = styled.div`
 `;
 
 const StatusBadge = styled.div<{ status: string }>`
-  display: inline-block;
-  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
   font-size: 12px;
-  font-weight: 500;
-  color: white;
-  background-color: ${(props) => getStatusColor(props.status)};
+  font-weight: bold;
   border-radius: 20px;
+  width: 100px;
+  color: white;
+  box-sizing: border-box;
+  background-color: ${(props) => getStatusColor(props.status)};
 `;
 
 const Price = styled.div`

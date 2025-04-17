@@ -129,12 +129,9 @@ export const postProductCancel = async (body: {
   return response.data;
 };
 
-export const putEditProfile = async (file: File) => {
-  const formData = new FormData();
-
-  formData.append('profile', file);
+export const putEditProfile = async (formData: FormData) => {
   const response = await axiosInstance.put(
-    `/api/mypage/editprofile`,
+    '/api/mypage/editprofile',
     formData,
     {
       headers: {
@@ -142,7 +139,6 @@ export const putEditProfile = async (file: File) => {
       },
     }
   );
-
   return response.data;
 };
 

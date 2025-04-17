@@ -5,15 +5,29 @@ export const getImageSrc = (
     return '';
   }
 
-  const baseUrl = process.env.VITE_API_URL;
+  const baseUrl = process.env.VITE_API_URL || 'https://goodbuyus.store/';
 
   if (typeof image === 'string') {
     if (image.startsWith('http')) {
       return image;
     }
-    // "upload/" 이전의 모든 부분을 제거하고 baseUrl과 결합
-    const cleanedImagePath = image.substring(image.indexOf('upload/'));
-    return `${baseUrl}/${cleanedImagePath}`;
+    // /app/upload/로 시작하는 경우 처리
+    if (image.startsWith('/app/upload/')) {
+      return `${baseUrl}/api/upload/${image.substring('/app/upload/'.length)}`;
+    }
+    // 이미 upload/로 시작하는 경우 baseUrl만 추가
+    if (image.startsWith('upload/')) {
+      return `${baseUrl}/api/upload/${image.substring('upload/'.length)}`;
+    }
+    // upload/가 포함된 경우 해당 부분부터 사용
+    if (image.includes('upload/')) {
+      const cleanedImagePath = image.substring(
+        image.indexOf('upload/') + 'upload/'.length
+      );
+      return `${baseUrl}/api/upload/${cleanedImagePath}`;
+    }
+    // 그 외의 경우 그대로 사용
+    return `${baseUrl}/api/upload/${image}`;
   } else if (image instanceof File) {
     return URL.createObjectURL(image);
   } else {

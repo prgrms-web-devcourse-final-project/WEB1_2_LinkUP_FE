@@ -78,15 +78,27 @@ const router = createBrowserRouter(
         },
         {
           path: '/products/payment/:id',
-          element: <PaymentForm />,
+          element: (
+            <ProtectedRoutes>
+              <PaymentForm />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: '/products/payment-success/:id',
-          element: <PaymentSuccessPage />,
+          element: (
+            <ProtectedRoutes>
+              <PaymentSuccessPage />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: '/products/payment-fail/:id',
-          element: <PaymentFailPage />,
+          element: (
+            <ProtectedRoutes>
+              <PaymentFailPage />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: '/community/post',
@@ -98,27 +110,51 @@ const router = createBrowserRouter(
         },
         {
           path: '/community/post/create',
-          element: <PostCreatePage />,
+          element: (
+            <ProtectedRoutes>
+              <PostCreatePage />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: '/community/post/:communityPostId',
-          element: <PostDetailPage />,
+          element: (
+            <ProtectedRoutes>
+              <PostDetailPage />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: '/community/post/:communityPostId/edit',
-          element: <PostEditPage />,
+          element: (
+            <ProtectedRoutes>
+              <PostEditPage />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: '/community/post/:id/payment/author',
-          element: <AuthorForm />,
+          element: (
+            <ProtectedRoutes>
+              <AuthorForm />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: '/community/post/:id/payment/participant',
-          element: <ParticipantsForm />,
+          element: (
+            <ProtectedRoutes>
+              <ParticipantsForm />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: '/community/success/:id',
-          element: <PaymentCompletePage />,
+          element: (
+            <ProtectedRoutes>
+              <PaymentCompletePage />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: '/admin/post',
@@ -130,42 +166,78 @@ const router = createBrowserRouter(
         },
         {
           path: '/admin/post/approval/:communityPostId',
-          element: <PostApprovalPage />,
+          element: (
+            <ProtectedRoutes>
+              <PostApprovalPage />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: '/mypage',
           children: [
             {
               path: 'setting',
-              element: <SettingPage />,
+              element: (
+                <ProtectedRoutes>
+                  <SettingPage />
+                </ProtectedRoutes>
+              ),
             },
             {
               path: 'orderlist',
-              element: <OrderListPage />,
+              element: (
+                <ProtectedRoutes>
+                  <OrderListPage />
+                </ProtectedRoutes>
+              ),
             },
             {
               path: 'wishlist',
-              element: <WishListPage />,
+              element: (
+                <ProtectedRoutes>
+                  <WishListPage />
+                </ProtectedRoutes>
+              ),
             },
             {
               path: 'location',
-              element: <LocationPage />,
+              element: (
+                <ProtectedRoutes>
+                  <LocationPage />
+                </ProtectedRoutes>
+              ),
             },
             {
               path: 'refund',
-              element: <RefundPage />,
+              element: (
+                <ProtectedRoutes>
+                  <RefundPage />
+                </ProtectedRoutes>
+              ),
             },
             {
               path: 'notification',
-              element: <NotificationPage />,
+              element: (
+                <ProtectedRoutes>
+                  <NotificationPage />
+                </ProtectedRoutes>
+              ),
             },
             {
               path: 'myposts',
-              element: <MyPostsPage />,
+              element: (
+                <ProtectedRoutes>
+                  <MyPostsPage />
+                </ProtectedRoutes>
+              ),
             },
             {
               path: 'chatlist',
-              element: <ChatListPage />,
+              element: (
+                <ProtectedRoutes>
+                  <ChatListPage />
+                </ProtectedRoutes>
+              ),
             },
           ],
         },

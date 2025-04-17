@@ -31,6 +31,14 @@ const ProfileImageWithFallback = ({
 }) => {
   const [imgSrc, setImgSrc] = useState(src || default_profile);
 
+  useEffect(() => {
+    if (src) {
+      setImgSrc(getImageSrc(src));
+    } else {
+      setImgSrc(default_profile);
+    }
+  }, [src]);
+
   const handleError = () => {
     setImgSrc(default_profile);
   };
@@ -51,26 +59,39 @@ const Sidemenu = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const fetchUser = async () => {
+    try {
+      const response = await getUser();
+      setNickname(response.nickname);
+      setProfileImage(response.profile);
+      setNewName(response.name);
+    } catch (error) {
+      console.error('failed', error);
+      setProfileImage(default_profile);
+    }
+  };
+
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await getUser();
-        setNickname(response.nickname);
-        setProfileImage(response.profile || default_profile);
-        setNewName(response.name);
-      } catch (error) {
-        console.error('failed', error);
-        setProfileImage(default_profile);
-      }
-    };
     fetchUser();
+  }, []);
+
+  // 프로필 이미지 변경 이벤트 리스너 추가
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      fetchUser();
+    };
+
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
+    };
   }, []);
 
   return (
     <Wrapper>
       <ProfileSection>
         <ProfileImageWithFallback
-          src={getImageSrc(profileImage)}
+          src={profileImage ? getImageSrc(profileImage) : default_profile}
           alt="Profile"
         />
         <ProfileText>

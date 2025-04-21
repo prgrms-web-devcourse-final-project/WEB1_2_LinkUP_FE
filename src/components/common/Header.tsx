@@ -55,7 +55,7 @@ const Header = () => {
 
             {/* 로그인 시 표시되는 메뉴 */}
             {isLoggedIn && (
-              <NavItem>
+              <NavItem data-testid="mypage-link">
                 <StyledLink to={isAdmin ? '/admin/post' : '/mypage/setting'}>
                   {isAdmin ? 'Admin Page' : 'My Page'}
                 </StyledLink>

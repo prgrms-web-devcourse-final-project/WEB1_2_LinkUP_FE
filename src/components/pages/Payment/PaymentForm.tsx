@@ -82,9 +82,11 @@ const PaymentForm = () => {
       needed: needed,
     },
   };
+
   const handleRadio = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPayment(e.target.value);
   };
+
   const onPaymentSubmit = async () => {
     if (!validateForm()) {
       return;
@@ -129,11 +131,13 @@ const PaymentForm = () => {
                       type="text"
                       placeholder="이름 입력"
                       value={userName}
+                      data-testid="name"
                       onChange={(e) => setName(e.target.value)}
                     />
                   </InputWrapper>
                 </Label>
               </FormGroup>
+
               <FormGroup>
                 <Label>배송지</Label>
                 <InputWrapper>
@@ -141,8 +145,9 @@ const PaymentForm = () => {
                     type="text"
                     placeholder="기본 주소를 선택해주세요"
                     value={basicAddress}
+                    data-testid="address"
                     readOnly
-                    onClick={handleAddressSearch} // 클릭 시 주소 검색 팝업 실행
+                    onClick={handleAddressSearch}
                   />
                 </InputWrapper>
                 <InputWrapper>
@@ -150,10 +155,12 @@ const PaymentForm = () => {
                     type="text"
                     placeholder="상세 주소를 입력해주세요"
                     value={detailAddress}
+                    data-testid="detail"
                     onChange={(e) => setDetailAddress(e.target.value)}
                   />
                 </InputWrapper>
               </FormGroup>
+
               <FormGroup>
                 <Label>
                   배송 시 요청사항
@@ -162,6 +169,7 @@ const PaymentForm = () => {
                       rows={2}
                       placeholder="요청사항 입력"
                       value={needed}
+                      data-testid="needed"
                       onChange={(e) => setNeeded(e.target.value)}
                     />
                   </InputWrapper>
@@ -179,6 +187,7 @@ const PaymentForm = () => {
                     type="radio"
                     name="payment-method"
                     value="카드"
+                    data-testid="card"
                     onChange={handleRadio}
                   />
                   <RadioText>카드 결제</RadioText>
@@ -188,11 +197,7 @@ const PaymentForm = () => {
           </Section>
 
           <ButtonGroup>
-            <PayButton
-              onClick={() => {
-                onPaymentSubmit();
-              }}
-            >
+            <PayButton onClick={onPaymentSubmit} data-testid="submit">
               결제하기
             </PayButton>
             <BackButton to={`/products/${product.id}`}>뒤로 가기</BackButton>

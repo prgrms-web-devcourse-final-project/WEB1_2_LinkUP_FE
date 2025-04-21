@@ -559,7 +559,7 @@ const CancelButton = styled.button`
 
 const SaveButton = styled.button`
   padding: 12px 20px;
-  background-color: #48bb78;
+  background-color: #3182ce;
   color: #fff;
   border-radius: 6px;
   font-size: 14px;
@@ -570,7 +570,7 @@ const SaveButton = styled.button`
   border: none;
 
   &:hover {
-    background-color: #38a169;
+    background-color: #2c5282;
   }
 
   &:disabled {

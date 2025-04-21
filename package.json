@@ -65,6 +65,7 @@
     "@types/react-slick": "^0.23.13",
     "@types/sockjs-client": "^1.5.4",
     "@types/stompjs": "^2.3.9",
+    "cypress": "^14.3.1",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-config-react": "^1.1.7",

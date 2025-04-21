@@ -114,7 +114,7 @@ const CommentComponent: React.FC<CommentProps> = ({ productId }) => {
 
   return (
     <QueryHandler isLoading={isLoading} isError={isError}>
-      <CommentSection>
+      <CommentSection data-testid="comment-component">
         <CommentForm onSubmit={handleCommentSubmit}>
           <CommentInputWrapper>
             <CommentInput

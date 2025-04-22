@@ -104,6 +104,7 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
               <Card
                 key={product.productPostId}
                 selected={selectedText === '판매 상품'}
+                data-testid="product-item"
               >
                 <StyledLink to={`/products/${product.productPostId}`}>
                   <ProductImg

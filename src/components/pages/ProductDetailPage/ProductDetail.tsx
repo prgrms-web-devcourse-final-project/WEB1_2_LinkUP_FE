@@ -110,6 +110,7 @@ const ProductDetail: React.FC = () => {
           <ContentWrapper>
             <ImageSection>
               <Image
+                data-testid="product-image"
                 src={product.url || DEFAULT_IMG}
                 alt={product.name}
                 onError={(e) => (e.currentTarget.src = DEFAULT_IMG)}
@@ -119,13 +120,13 @@ const ProductDetail: React.FC = () => {
               </Stars>
             </ImageSection>
             <InfoSection>
-              <Title>{product.name}</Title>
+              <Title data-testid="product-title">{product.name}</Title>
               <PriceWrapper>
                 {product.available ? (
                   <>
                     <OriginalPrice>{product.originalprice}원</OriginalPrice>
                     <DiscountWrapper>
-                      <DiscountedPrice>
+                      <DiscountedPrice data-testid="product-price">
                         {product.discountprice}원
                       </DiscountedPrice>
                       <DiscountInfo>
@@ -143,7 +144,9 @@ const ProductDetail: React.FC = () => {
                 )}
               </PriceWrapper>{' '}
               {product.available && (
-                <Description>{product.description}</Description>
+                <Description data-testid="product-description">
+                  {product.description}
+                </Description>
               )}
               <DeadlineLabel>{remainingTime}</DeadlineLabel>
               <StockWrapper>
@@ -165,18 +168,21 @@ const ProductDetail: React.FC = () => {
                     min="1"
                     value={quantity}
                     onChange={handleQuantityChange}
+                    data-testid="quantity-input"
                   />
                 </QuantityWrapper>
                 <ButtonWrapper>
                   <PurchaseButton
                     disabled={isButtonDisabled}
                     onClick={handleSubmit}
+                    data-testid="buy-now"
                   >
                     구매하기
                   </PurchaseButton>
                   <WishButton
                     onClick={() => changeLike(productId)}
                     $isLiked={likedProducts.includes(productId)}
+                    data-testid="wish-button"
                   >
                     {likedProducts.includes(productId) ? '찜 취소' : '찜하기'}
                   </WishButton>
@@ -184,7 +190,10 @@ const ProductDetail: React.FC = () => {
               </ActionWrapper>
             </InfoSection>
           </ContentWrapper>
-          <CommentComponent productId={productId} />
+          <CommentComponent
+            data-testid="comment-component"
+            productId={productId}
+          />
         </Container>
       </QueryHandler>
     </>

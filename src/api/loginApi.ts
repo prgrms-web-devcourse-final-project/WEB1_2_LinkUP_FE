@@ -48,7 +48,7 @@ export const postSignUpLast = async (user: UserInfo, profile: File | null) => {
   if (profile) {
     formData.append('profile', profile);
   } else {
-    const defaultImageUrl = '/images/origin.png'; // ✅ '/public'은 필요 없음
+    const defaultImageUrl = '/images/origin.png'; //
     const defaultImageBlob = await fetch(defaultImageUrl).then((res) =>
       res.blob()
     );

@@ -28,10 +28,12 @@ const HomePage: React.FC = () => {
   return (
     <>
       <QueryHandler isLoading={isLoading} isError={isError}>
-        <ContainerBox>
+        <ContainerBox data-testid="container-box">
           <Container>
-            <StyledLink to={`/products/${popularProduct?.productPostId}`}>
-              {' '}
+            <StyledLink
+              to={`/products/${popularProduct?.productPostId}`}
+              data-testid="popular-product"
+            >
               <PopularProduct
                 productId={popularProduct?.productPostId}
                 category={popularProduct?.category}
@@ -39,19 +41,23 @@ const HomePage: React.FC = () => {
             </StyledLink>
           </Container>
         </ContainerBox>
-        <ContainerBox>
+        <ContainerBox data-testid="container-box">
           <Container>
-            <RecommendProduct products={availableProduct} />
+            <div data-testid="recommend-product">
+              <RecommendProduct products={availableProduct} />
+            </div>
           </Container>
         </ContainerBox>
-        <ContainerBox>
+        <ContainerBox data-testid="container-box">
           <Container>
-            <CategoryProduct
-              categories={categories}
-              products={availableProduct}
-            />
+            <div data-testid="category-product">
+              <CategoryProduct
+                categories={categories}
+                products={availableProduct}
+              />
+            </div>
           </Container>
-          <ScrollToTopButton />
+          <ScrollToTopButton data-testid="scroll-to-top" />
         </ContainerBox>
       </QueryHandler>
     </>

@@ -150,14 +150,13 @@ const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  right: 0;
+  bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  backdrop-filter: blur(2px);
 `;
 
 const Modal = styled.div`
@@ -186,14 +185,15 @@ const ModalHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  background-color: #3182ce;
+
   color: white;
 `;
 
-const ModalTitle = styled.h3`
-  margin: 0;
+const ModalTitle = styled.h2`
   font-size: 18px;
   font-weight: 600;
+  margin-bottom: -10px;
+  color: #2d3748;
 `;
 
 const CloseButton = styled.button`
@@ -212,14 +212,17 @@ const CloseButton = styled.button`
 `;
 
 const ModalContent = styled.div`
-  padding: 20px;
+  background-color: white;
+  padding: 24px;
+  border-radius: 8px;
+  width: 400px;
 `;
 
 const Title = styled.div`
   font-size: 15px;
   font-weight: 600;
-  margin-bottom: 10px;
   color: #2d3748;
+  margin-bottom: 10px;
 `;
 
 const InputWrapper = styled.div`
@@ -227,19 +230,18 @@ const InputWrapper = styled.div`
 `;
 
 const Input = styled.input`
-  width: 93%;
+  width: 100%;
   padding: 12px;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
   font-size: 14px;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
 
   &:focus {
     outline: none;
     border-color: #3182ce;
-    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+    box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.1);
   }
 
   &::placeholder {
@@ -255,22 +257,19 @@ const ButtonWrapper = styled.div`
 `;
 
 const Button = styled.button`
-  padding: 10px 20px;
+  padding: 12px 20px;
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
-
-  &:active {
-    transform: translateY(1px);
-  }
+  transition: all 0.2s ease;
+  flex: 1;
+  border: none;
 `;
 
 const SubmitButton = styled(Button)`
   background-color: #3182ce;
   color: white;
-  border: none;
 
   &:hover {
     background-color: #2c5282;
@@ -278,20 +277,18 @@ const SubmitButton = styled(Button)`
 `;
 
 const CancelButton = styled(Button)`
-  background-color: transparent;
+  background-color: #e2e8f0;
   color: #4a5568;
-  border: 1px solid #e2e8f0;
 
   &:hover {
-    background-color: #f7fafc;
+    background-color: #cbd5e0;
   }
 `;
 
 const ErrorMessage = styled.div`
   color: #e53e3e;
-  font-size: 13px;
-  margin: -15px 0 20px 0;
-  padding-left: 2px;
+  font-size: 14px;
+  margin-top: 8px;
 `;
 
 export default PasswordModal;

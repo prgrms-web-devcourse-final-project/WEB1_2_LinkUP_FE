@@ -82,7 +82,7 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
     <QueryHandler isLoading={isLoading} isError={isError}>
       <Recommend>
         <CategoryWrapper>
-          <RecommendTitle onClick={handleToggle}>
+          <RecommendTitle onClick={handleToggle} data-testid="category-title">
             {selectedCategory}
           </RecommendTitle>
           <CategoryContainer expanded={isExpanded}>
@@ -91,6 +91,7 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
                 key={`${category}-${index}`}
                 selected={category == selectedCategory}
                 onClick={() => handleCategoryClick(category)}
+                data-testid="category-button"
               >
                 {category}
               </CategoryItem>
@@ -99,7 +100,10 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
         </CategoryWrapper>
         <CardWrapper>
           {displayedProducts.map((product, index) => (
-            <Card key={product.productPostId || `product-${index}`}>
+            <Card
+              key={product.productPostId || `product-${index}`}
+              data-testid="product-item"
+            >
               <StyledLink to={`/products/${product.productPostId}`}>
                 <ProductImg
                   src={product.url || DEFAULT_IMG}
@@ -130,7 +134,10 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
           ))}
         </CardWrapper>
         <MoreButtonWrapper>
-          <StyledMoreButton to={`/products?category=${selectedCategory}`}>
+          <StyledMoreButton
+            to={`/products?category=${selectedCategory}`}
+            data-testid="more-button"
+          >
             더보기
           </StyledMoreButton>
         </MoreButtonWrapper>

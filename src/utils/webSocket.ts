@@ -40,8 +40,8 @@ export class WebSocketService<T = Message> {
         login: 'user',
         passcode: 'password',
       },
-      debug: function (str) {
-        console.log('STOMP Debug:', str);
+      debug: () => {
+        // console.log('STOMP Debug:', str);
       },
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import {
@@ -29,7 +29,14 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
   const userId = parseInt(sessionStorage.getItem('userid') || '0', 10);
   const { data: post, isLoading, isError } = usePostQuery(communityPostId);
   const queryClient = useQueryClient();
-  console.log(post?.comment);
+  const [comments, setComments] = useState(post?.comment || []);
+
+  useEffect(() => {
+    if (post) {
+      setComments(post.comment || []);
+    }
+  }, [post]);
+
   const handleAddComment = async (parentId: number | null = null) => {
     if (!newCommentContent.trim()) {
       alert('댓글 내용을 입력해주세요.');
@@ -84,7 +91,7 @@ const PostCommentsSection: React.FC<PostCommentsSectionProps> = ({
       <CommentsContainer>
         <CommentsHeader>댓글</CommentsHeader>
         <CommentsWrapper>
-          {post?.comment
+          {comments
             ?.filter((comment) => comment.parentId === null)
             .map((comment) => (
               <Comment

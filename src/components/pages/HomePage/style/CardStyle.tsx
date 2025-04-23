@@ -194,139 +194,161 @@ export const CategoryItem = styled.div<{ $selected: boolean }>`
 `;
 export const Recommend = ProductSection;
 export const RecommendTitle = SectionTitle;
+export const PageContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  padding: 2rem;
+`;
 
 export const BannerWrapper = styled.div`
-  width: 80%;
+  width: 100%;
+  max-width: 1120px;
   margin: 0 auto;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
 `;
 
 export const BannerContainer = styled.div`
-  height: 300px;
-  width: 100%;
   display: flex;
-  background-color: #f5f5f5;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease-in-out;
+  flex-direction: column;
 
-  &:hover {
-    cursor: pointer;
-    transform: translateY(-5px);
-  }
-
-  @media (max-width: 1024px) {
-    height: 250px;
-  }
-
-  @media (max-width: 767px) {
-    height: 200px;
+  @media (min-width: 768px) {
+    flex-direction: row;
+    height: 280px;
   }
 `;
 
 export const BannerImageWrapper = styled.div`
-  width: 300px;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: white;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
 
-  @media (max-width: 767px) {
-    width: 200px;
+  @media (min-width: 768px) {
+    width: 40%;
+    height: 100%;
   }
 `;
 
 export const BannerImage = styled.img`
-  height: 100%;
   width: 100%;
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
 `;
 
 export const BannerInfoSection = styled.div`
-  background: linear-gradient(to top, rgba(155, 155, 155, 0.2), transparent);
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 0 50px;
-  position: relative;
+  padding: 1.5rem;
+  flex: 1;
+  background: linear-gradient(to right, #ffffff, #f8f9fa);
 
-  @media (max-width: 767px) {
-    padding: 0 20px;
+  @media (min-width: 768px) {
+    padding: 2rem;
   }
 `;
 
 export const BannerStar = styled.div`
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  font-size: 20px;
+  margin-bottom: 1rem;
 
-  @media (max-width: 767px) {
-    font-size: 15px;
-    top: 10px;
-    right: 10px;
+  svg {
+    color: #ffc107;
+    font-size: 1.2rem;
   }
 `;
 
 export const BannerHeader = styled.div`
   display: flex;
   flex-direction: column;
-  width: 100%;
+  height: 100%;
 `;
 
 export const BannerTitleArea = styled.div`
-  display: flex;
-  align-items: baseline;
-  margin-bottom: 15px;
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    margin-bottom: 10px;
-  }
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 1rem;
 `;
 
-export const BannerProductName = styled.h3`
-  font-size: 24px;
+export const BannerProductName = styled.h2`
+  font-size: 1.5rem;
   font-weight: 700;
-  color: #333;
-  margin-right: 15px;
-  margin-bottom: 0;
+  color: #343a40;
+  margin: 0 0 0.5rem 0;
 
-  @media (max-width: 767px) {
-    font-size: 18px;
-    margin-bottom: 2px;
+  @media (min-width: 768px) {
+    font-size: 1.8rem;
   }
 `;
 
 export const BannerProductCategory = styled.p`
-  font-size: 16px;
-  color: #666;
+  font-size: 0.9rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
   margin: 0;
-
-  @media (max-width: 767px) {
-    font-size: 12px;
-  }
 `;
 
 export const BannerDescription = styled.p`
-  font-size: 14px;
-  color: #555;
+  font-size: 1rem;
   line-height: 1.6;
+  color: #495057;
+  flex-grow: 1;
+  margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin: 0;
 
-  @media (max-width: 1024px) {
-    -webkit-line-clamp: 2;
+  @media (min-width: 768px) {
+    -webkit-line-clamp: 6;
   }
+`;
 
-  @media (max-width: 767px) {
-    display: none;
+export const BannerPriceSection = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+`;
+
+export const BannerPrice = styled.p`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #343a40;
+  margin: 0;
+`;
+
+export const BannerButton = styled.button`
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #0069d9;
   }
 `;
 

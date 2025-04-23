@@ -10,7 +10,7 @@ import { ContainerBox, Container } from '../HomePage/style/CardStyle';
 const ProductPage: React.FC = () => {
   const { data: products, isLoading, isError } = useProductsQuery();
   const [input, setInput] = useState('');
-  console.log(products);
+
   const location = useLocation();
 
   useEffect(() => {

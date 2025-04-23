@@ -11,6 +11,7 @@ import { categories } from './model/categories';
 
 const HomePage: React.FC = () => {
   const { data: products, isLoading, isError } = useProductsQuery();
+
   const availableProduct = products?.filter(
     (p) =>
       p.available === true &&

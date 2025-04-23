@@ -70,7 +70,7 @@ export const subscribeToChatMessages = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   callback: (message: any) => void
 ) => {
-  webSocketService.subscribe(`/sub/message/${chatRoomId}`, callback);
+  webSocketService.subscribe(`${chatRoomId}`, callback);
 };
 
 // 채팅 메시지 구독 취소

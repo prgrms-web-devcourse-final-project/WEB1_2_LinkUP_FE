@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -21,29 +21,48 @@ const PostEditPage: React.FC = () => {
   const { communityPostId } = useParams<{ communityPostId: string }>();
   const navigate = useNavigate();
   const postId = Number(communityPostId);
+
   const { data: post, isLoading, isError } = usePostQuery(postId);
   const queryClient = useQueryClient();
 
+  // post 데이터가 있을 때만 초기 상태 설정
   const [selectedCategory, setSelectedCategory] = useState(
-    post?.communityPost.category
+    post?.communityPost?.category ?? ''
   );
   const [availableNumber, setAvailableNumber] = useState(
-    post?.communityPost.availableNumber
+    post?.communityPost?.availableNumber ?? 0
   );
   const [totalAmount, setTotalAmount] = useState(
-    post?.communityPost.totalAmount
+    post?.communityPost?.totalAmount ?? 0
   );
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [deadline, setDeadline] = useState(`${post?.communityPost.period}일`);
+  const [deadline, setDeadline] = useState(
+    post?.communityPost?.period ? `${post.communityPost.period}일` : '마감 기한'
+  );
 
-  const [title, setTitle] = useState(post?.communityPost.title);
+  const [title, setTitle] = useState(post?.communityPost?.title ?? '');
   const [description, setDescription] = useState(
-    post?.communityPost.description
+    post?.communityPost?.description ?? ''
   );
   const [imageUrls, setImageUrls] = useState<Array<File>>([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
-  const [urlInput, setUrlInput] = useState(post?.communityPost.productUrl);
+  const [urlInput, setUrlInput] = useState(
+    post?.communityPost?.productUrl ?? ''
+  );
   const [urlError, setUrlError] = useState(false);
+
+  // post 데이터가 변경될 때마다 상태 업데이트
+  useEffect(() => {
+    if (post?.communityPost) {
+      setSelectedCategory(post.communityPost.category);
+      setAvailableNumber(post.communityPost.availableNumber);
+      setTotalAmount(post.communityPost.totalAmount);
+      setDeadline(`${post.communityPost.period}일`);
+      setTitle(post.communityPost.title);
+      setDescription(post.communityPost.description);
+      setUrlInput(post.communityPost.productUrl);
+    }
+  }, [post]);
 
   const createPostMutation = useMutation({
     mutationFn: (payload: CreatePostData) => createPost(payload),
@@ -144,13 +163,11 @@ const PostEditPage: React.FC = () => {
   const handleNumberChange = useCallback(
     (
       e: React.ChangeEvent<HTMLInputElement>,
-      setter: React.Dispatch<React.SetStateAction<number | undefined>> // 타입 변경
+      setter: React.Dispatch<React.SetStateAction<number>>
     ) => {
-      const value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 남기기
-      const numericValue = Number(value); // 숫자 변환
-
-      // 빈 값이거나 0 이하일 때는 undefined로 처리, 그 외에는 숫자로 설정
-      setter(value === '' || numericValue <= 0 ? undefined : numericValue);
+      const value = e.target.value.replace(/[^0-9]/g, '');
+      const numericValue = Number(value);
+      setter(numericValue || 0);
     },
     []
   );
@@ -229,6 +246,20 @@ const PostEditPage: React.FC = () => {
     },
     [isValidUrl]
   );
+
+  if (isLoading) {
+    return <LoadingSpinner>로딩 중...</LoadingSpinner>;
+  }
+
+  if (isError) {
+    return (
+      <ErrorMessage>데이터를 불러오는 중 오류가 발생했습니다.</ErrorMessage>
+    );
+  }
+
+  if (!post?.communityPost) {
+    return <ErrorMessage>게시물을 찾을 수 없습니다.</ErrorMessage>;
+  }
 
   return (
     <QueryHandler isLoading={isLoading} isError={isError}>
@@ -654,10 +685,13 @@ const URLInput = styled.input<{ $isError: boolean }>`
   }
 `;
 
-const ErrorMessage = styled.span`
-  color: #ef4444;
-  font-size: 0.75rem;
-  margin-top: 4px;
+const ErrorMessage = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 1.2rem;
+  color: #ff4d4f;
 `;
 
 const DetailsAndInfoContainer = styled.div`
@@ -894,6 +928,15 @@ const Button = styled.button<{ $primary?: boolean }>`
   &:hover {
     background: ${({ $primary }) => ($primary ? '#1d4ed8' : '#eff6ff')};
   }
+`;
+
+const LoadingSpinner = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 1.2rem;
+  color: #666;
 `;
 
 export default PostEditPage;

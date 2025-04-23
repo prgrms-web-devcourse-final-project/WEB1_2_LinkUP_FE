@@ -110,7 +110,6 @@ const ProductDetail: React.FC = () => {
           <ContentWrapper>
             <ImageSection>
               <Image
-                data-testid="product-image"
                 src={product.url || DEFAULT_IMG}
                 alt={product.name}
                 onError={(e) => (e.currentTarget.src = DEFAULT_IMG)}
@@ -120,13 +119,13 @@ const ProductDetail: React.FC = () => {
               </Stars>
             </ImageSection>
             <InfoSection>
-              <Title data-testid="product-title">{product.name}</Title>
+              <Title>{product.name}</Title>
               <PriceWrapper>
                 {product.available ? (
                   <>
                     <OriginalPrice>{product.originalprice}원</OriginalPrice>
                     <DiscountWrapper>
-                      <DiscountedPrice data-testid="product-price">
+                      <DiscountedPrice>
                         {product.discountprice}원
                       </DiscountedPrice>
                       <DiscountInfo>
@@ -144,9 +143,7 @@ const ProductDetail: React.FC = () => {
                 )}
               </PriceWrapper>{' '}
               {product.available && (
-                <Description data-testid="product-description">
-                  {product.description}
-                </Description>
+                <Description>{product.description}</Description>
               )}
               <DeadlineLabel>{remainingTime}</DeadlineLabel>
               <StockWrapper>
@@ -168,21 +165,18 @@ const ProductDetail: React.FC = () => {
                     min="1"
                     value={quantity}
                     onChange={handleQuantityChange}
-                    data-testid="quantity-input"
                   />
                 </QuantityWrapper>
                 <ButtonWrapper>
                   <PurchaseButton
                     disabled={isButtonDisabled}
                     onClick={handleSubmit}
-                    data-testid="buy-now"
                   >
                     구매하기
                   </PurchaseButton>
                   <WishButton
                     onClick={() => changeLike(productId)}
                     $isLiked={likedProducts.includes(productId)}
-                    data-testid="wish-button"
                   >
                     {likedProducts.includes(productId) ? '찜 취소' : '찜하기'}
                   </WishButton>
@@ -190,10 +184,7 @@ const ProductDetail: React.FC = () => {
               </ActionWrapper>
             </InfoSection>
           </ContentWrapper>
-          <CommentComponent
-            data-testid="comment-component"
-            productId={productId}
-          />
+          <CommentComponent productId={productId} />
         </Container>
       </QueryHandler>
     </>
@@ -216,9 +207,20 @@ const ContentWrapper = styled.div`
 const ImageSection = styled.div`
   position: relative;
   flex: 1;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  height: 500px;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+
   @media (min-width: 576px) and (max-width: 767px) {
-    height: 300px;
-    width: 300px;
+    height: 400px;
+    width: 100%;
   }
 `;
 
@@ -228,12 +230,12 @@ const InfoSection = styled.div`
 
 const Image = styled.img`
   width: 100%;
-  height: 400px;
-  background-color: #f5f5f5;
+  height: 100%;
   object-fit: cover;
-  @media (min-width: 576px) and (max-width: 767px) {
-    height: 300px;
-    width: 300px;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.05);
   }
 `;
 
@@ -245,16 +247,33 @@ const Title = styled.h2`
 
 const Stars = styled.div`
   position: absolute;
-  font-size: 20px;
-  color: #ffaa00;
-  bottom: 13%;
-  right: 2%;
+  bottom: 30px;
+  right: 30px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.85) 100%
+  );
+  padding: 12px 16px;
+  border-radius: 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1;
 
   @media (min-width: 768px) and (max-width: 1024px) {
-    bottom: 80px;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 14px;
   }
   @media (min-width: 576px) and (max-width: 767px) {
-    bottom: 10px;
+    bottom: 15px;
+    right: 15px;
+    padding: 8px 12px;
   }
 `;
 

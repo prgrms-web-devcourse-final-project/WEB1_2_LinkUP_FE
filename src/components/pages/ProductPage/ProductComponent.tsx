@@ -1,14 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import styled from 'styled-components';
 import Pagination from '../../common/Pagination';
 import StarRating from '../../common/StarRating';
-import Heart from '../../../assets/icons/heart.png';
-import FilledHeart from '../../../assets/icons/filled-heart.png';
 import { AllProducts } from '../HomePage/model/productSchema';
 import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
 import { QueryHandler, useWishQuery } from '../../../hooks/useGetProduct';
 import { postWishProduct } from '../HomePage/api/wish';
+import {
+  Card,
+  CardWrapper,
+  DiscountedPrice,
+  OriginalPrice,
+  PriceWrapper,
+  ProductImg,
+  ProductName,
+  ProductStar,
+  ProductWrapper,
+  Recommend,
+  StyledLink,
+} from '../HomePage/style/CardStyle';
+import styled from 'styled-components';
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
 
 type ProductComponentProps = {
   input: string;
@@ -51,6 +62,7 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
       setLikedProducts(wish.map((item) => item.productPostId));
     }
   }, [wish]);
+
   const changeLike = async (productPostId: number) => {
     setLikedProducts(
       (prev) =>
@@ -67,32 +79,34 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedText]);
+
   const currentProducts = filteredProducts.slice(
     startIndex,
     startIndex + PRODUCT_PER_PAGE
   );
+
   return (
     <QueryHandler isLoading={isLoading} isError={isError}>
       <Recommend>
-        <RecommendTitle>
+        <ProductHeader>
           <TextWrapper>
-            <Text
+            <TabText
               selected={selectedText === '판매 상품'}
               onClick={() => setSelectedText('판매 상품')}
             >
               판매 상품
-            </Text>
-            <Text
+            </TabText>
+            <TabText
               selected={selectedText === '기한 마감 상품'}
               onClick={() => setSelectedText('기한 마감 상품')}
             >
               기한 마감 상품
-            </Text>
+            </TabText>
           </TextWrapper>
-          {input ? `${input}에 대한 검색 결과` : ''}
-        </RecommendTitle>
+          {input && <SearchTitle>{input}에 대한 검색 결과</SearchTitle>}
+        </ProductHeader>
 
-        <CardWrapper>
+        <ProductCardWrapper>
           {currentProducts.length === 0 ? (
             <NoProductMessage>
               {selectedText === '판매 상품'
@@ -101,10 +115,9 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
             </NoProductMessage>
           ) : (
             currentProducts.map((product) => (
-              <Card
+              <ProductCard
                 key={product.productPostId}
-                selected={selectedText === '판매 상품'}
-                data-testid="product-item"
+                $isAvailable={selectedText === '판매 상품'}
               >
                 <StyledLink to={`/products/${product.productPostId}`}>
                   <ProductImg
@@ -136,15 +149,21 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
                   </ProductWrapper>
                 </StyledLink>
                 <LikeButton
-                  likes={likedProducts.includes(product.productPostId)}
+                  $likes={likedProducts.includes(product.productPostId)}
                   onClick={() => {
                     changeLike(product.productPostId);
                   }}
-                />
-              </Card>
+                >
+                  {likedProducts.includes(product.productPostId) ? (
+                    <FaHeart />
+                  ) : (
+                    <FaRegHeart />
+                  )}
+                </LikeButton>
+              </ProductCard>
             ))
           )}
-        </CardWrapper>
+        </ProductCardWrapper>
 
         {totalPages > 1 && (
           <PagenationWrapper>
@@ -160,13 +179,37 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
   );
 };
 
-const Recommend = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  width: 80%;
-  height: auto;
-  margin: 0 auto;
+// Additional styled components specific to ProductComponent
+const ProductHeader = styled.div`
+  width: 100%;
+  margin-bottom: 20px;
 `;
+
+const TextWrapper = styled.div`
+  display: flex;
+  gap: 25px;
+  margin-bottom: 15px;
+`;
+
+const TabText = styled.h2<{ selected: boolean }>`
+  cursor: pointer;
+  font-size: 16px;
+  margin: 0;
+  color: ${({ selected }) => (selected ? '#333' : '#666')};
+  text-decoration: ${({ selected }) => (selected ? 'underline' : 'none')};
+  font-weight: ${({ selected }) => (selected ? '600' : '400')};
+
+  &:hover {
+    color: #333;
+  }
+`;
+
+const SearchTitle = styled.h3`
+  font-size: 18px;
+  color: #333;
+  margin: 10px 0;
+`;
+
 const NoProductMessage = styled.div`
   width: 100%;
   text-align: center;
@@ -176,57 +219,17 @@ const NoProductMessage = styled.div`
   margin: 50px 0;
 `;
 
-const RecommendTitle = styled.h2`
-  margin-left: 10px;
-  margin-bottom: 20px;
-  font-size: 1.5rem;
-  color: #333;
-`;
-
-const TextWrapper = styled.div`
-  width: 200px;
-  display: flex;
-  gap: 25px;
-  margin-top: -15%;
-  margin-bottom: 5%;
-`;
-const Text = styled.h2.withConfig({
-  shouldForwardProp: (prop) => prop !== 'selected',
-})<{ selected: boolean }>`
-  cursor: pointer;
-  text-decoration: ${({ selected }) => (selected ? 'underline' : 'none')};
-  font-size: 16px;
-`;
-const CardWrapper = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  width: 100%;
-  gap: 20px;
+const ProductCardWrapper = styled(CardWrapper)`
   margin-top: 20px;
-  @media (min-width: 576px) and (max-width: 767px) {
-    gap: 5px;
-  }
 `;
 
-const Card = styled.div.withConfig({
-  shouldForwardProp: (prop) => prop !== 'selected',
-})<{ selected: boolean }>`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 15px;
-  margin: 10px;
-  width: 200px;
-  background-color: ${({ selected }) => (selected ? 'white' : '#474545')};
-  border-radius: 8px;
-  box-shadow: ${({ selected }) =>
-    selected ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none'};
-  opacity: ${({ selected }) => (selected ? 1 : 0.6)};
-  align-items: center;
-  position: relative;
-  transition: all 0.3s ease-in-out;
+const ProductCard = styled(Card)<{ $isAvailable: boolean }>`
+  background-color: ${({ $isAvailable }) =>
+    $isAvailable ? 'white' : '#f5f5f5'};
+  opacity: ${({ $isAvailable }) => ($isAvailable ? 1 : 0.8)};
+
   &::after {
-    content: ${({ selected }) => (selected ? '""' : '"판매 종료"')};
+    content: ${({ $isAvailable }) => ($isAvailable ? '""' : '"판매 종료"')};
     position: absolute;
     top: 10px;
     left: 50%;
@@ -236,136 +239,50 @@ const Card = styled.div.withConfig({
     font-weight: bold;
     padding: 5px 10px;
     border-radius: 5px;
-  }
-  &:hover {
-    cursor: pointer;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.4);
-    transform: translateY(-5px);
-  }
-  @media (min-width: 768px) and (max-width: 1024px) {
-    width: 130px;
-  }
-  @media (min-width: 576px) and (max-width: 767px) {
-    width: 90px;
-  }
-`;
-const StyledLink = styled(Link)`
-  text-decoration: none;
-  &:link {
-    color: inherit;
-  }
-  &:visited {
-    color: inherit;
-  }
-  &:active {
-    color: inherit;
-  }
-`;
-const ProductImg = styled.img`
-  width: 90%;
-  height: 200px;
-  background-color: #e0e0e0;
-  border-radius: 8px;
-  object-fit: cover;
-  @media (min-width: 576px) and (max-width: 767px) {
-    width: 110px;
-    height: 110px;
+    background-color: ${({ $isAvailable }) =>
+      $isAvailable ? 'transparent' : 'rgba(255, 255, 255, 0.7)'};
   }
 `;
 
-const ProductWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 90%;
-`;
-
-const ProductName = styled.div`
-  font-size: 16px;
-  font-weight: bold;
-  margin-top: 10px;
-  text-align: left;
-  @media (min-width: 576px) and (max-width: 767px) {
-    font-size: 12px;
-  }
-`;
-
-const ProductStar = styled.div`
-  font-size: 20px;
-  color: #ffaa00;
-  text-align: left;
-  margin-left: -5px;
-  margin-top: 5px;
-  @media (min-width: 576px) and (max-width: 767px) {
-    display: none;
-  }
-`;
-
-const PriceWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  margin-top: 30px;
-  text-align: left;
-`;
-
-const OriginalPrice = styled.div`
-  text-decoration: line-through;
-  color: #999;
-  font-size: 14px;
-  @media (min-width: 576px) and (max-width: 767px) {
-    font-size: 10px;
-    position: absolute;
-    bottom: 25px;
-  }
-`;
-
-const DiscountedPrice = styled.div`
-  font-size: 16px;
-  font-weight: bold;
-  color: #ff4d4f;
-  @media (min-width: 576px) and (max-width: 767px) {
-    font-size: 12px;
-    position: absolute;
-    bottom: 10px;
-  }
-`;
 const UnavailablePrice = styled.div`
-  font-size: 20px;
-  color: gray;
-  @media (min-width: 576px) and (max-width: 767px) {
-    font-size: 12px;
-    position: absolute;
-    bottom: 10px;
-  }
-`;
-const LikeButton = styled.img.withConfig({
-  shouldForwardProp: (prop) => prop !== 'likes',
-})<{ likes: boolean }>`
-  position: absolute;
-  bottom: 20px;
-  right: 30px;
-  width: 25px;
-  height: 25px;
-  cursor: pointer;
-  content: ${({ likes }) => `url(${likes ? FilledHeart : Heart})`};
-  color: ${({ likes }) => (likes ? 'red ' : 'transparent')};
+  font-size: 16px;
+  font-weight: bold;
+  color: #999;
 
-  &:hover {
-    cursor: pointer;
-    transform: scale(1.2);
-    transition: transform 0.2s ease-in-out;
-  }
-  @media (min-width: 576px) and (max-width: 767px) {
-    bottom: 10px;
-    right: 10px;
-    width: 18px;
-    height: 18px;
+  @media (max-width: 767px) {
+    font-size: 14px;
   }
 `;
+
 const PagenationWrapper = styled.div`
-  margin-top: 100px;
+  margin-top: 60px;
+  margin-bottom: 40px;
   display: flex;
   justify-content: center;
   width: 100%;
 `;
+
+const LikeButton = styled.button<{ $likes: boolean }>`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.8);
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: scale(1.1);
+  }
+
+  svg {
+    color: ${({ $likes }) => ($likes ? '#ff4d4f' : '#999')};
+    font-size: 20px;
+  }
+`;
+
 export default ProductComponent;

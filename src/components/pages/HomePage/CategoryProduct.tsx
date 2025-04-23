@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
 import StarRating from '../../common/StarRating';
 import DEFAULT_IMG from '../../../assets/icons/default-featured-image.png.jpg';
 import { AllProducts } from './model/productSchema';
@@ -18,6 +17,8 @@ import {
   ProductName,
   ProductStar,
   ProductWrapper,
+  Recommend,
+  RecommendTitle,
   StyledLink,
   StyledMoreButton,
 } from './style/CardStyle';
@@ -82,16 +83,15 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
     <QueryHandler isLoading={isLoading} isError={isError}>
       <Recommend>
         <CategoryWrapper>
-          <RecommendTitle onClick={handleToggle} data-testid="category-title">
+          <RecommendTitle onClick={handleToggle}>
             {selectedCategory}
           </RecommendTitle>
-          <CategoryContainer expanded={isExpanded}>
+          <CategoryContainer $expanded={isExpanded}>
             {categories.map((category, index) => (
               <CategoryItem
                 key={`${category}-${index}`}
-                selected={category == selectedCategory}
+                $selected={category === selectedCategory}
                 onClick={() => handleCategoryClick(category)}
-                data-testid="category-button"
               >
                 {category}
               </CategoryItem>
@@ -100,10 +100,7 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
         </CategoryWrapper>
         <CardWrapper>
           {displayedProducts.map((product, index) => (
-            <Card
-              key={product.productPostId || `product-${index}`}
-              data-testid="product-item"
-            >
+            <Card key={product.productPostId || `product-${index}`}>
               <StyledLink to={`/products/${product.productPostId}`}>
                 <ProductImg
                   src={product.url || DEFAULT_IMG}
@@ -115,7 +112,6 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
                 <ProductWrapper>
                   <ProductName>{product.name}</ProductName>
                   <ProductStar>
-                    {' '}
                     <StarRating rating={product.rating} />
                   </ProductStar>
                   <PriceWrapper>
@@ -125,7 +121,7 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
                 </ProductWrapper>
               </StyledLink>
               <LikeButton
-                likes={likedProducts.includes(product.productPostId)}
+                $likes={likedProducts.includes(product.productPostId)}
                 onClick={() => {
                   changeLike(product.productPostId);
                 }}
@@ -134,10 +130,7 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
           ))}
         </CardWrapper>
         <MoreButtonWrapper>
-          <StyledMoreButton
-            to={`/products?category=${selectedCategory}`}
-            data-testid="more-button"
-          >
+          <StyledMoreButton to={`/products?category=${selectedCategory}`}>
             더보기
           </StyledMoreButton>
         </MoreButtonWrapper>
@@ -145,23 +138,5 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
     </QueryHandler>
   );
 };
-const Recommend = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  width: 80%;
-  height: auto;
-  margin: 0 auto;
-`;
-
-const RecommendTitle = styled.h2`
-  text-decoration: underline;
-  margin-left: 10px;
-  margin-bottom: 20px;
-  font-size: 1.5rem;
-  color: #333;
-  &:hover {
-    cursor: pointer;
-  }
-`;
 
 export default CategoryProduct;

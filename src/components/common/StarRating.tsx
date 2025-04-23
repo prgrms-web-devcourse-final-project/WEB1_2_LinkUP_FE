@@ -3,6 +3,13 @@ import React from 'react';
 
 const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
   const renderStars = () => {
+    // rating이 0이면 빈 별 5개 표시
+    if (rating === 0) {
+      return Array(5)
+        .fill(null)
+        .map((_, i) => <EmptyStar key={`empty-${i}`}>⭐</EmptyStar>);
+    }
+
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.3 && rating % 1 <= 0.7;
@@ -50,7 +57,9 @@ const FullStar = styled(StarBase)`
 `;
 
 const EmptyStar = styled(StarBase)`
-  color: #e0e0e0;
+  background: linear-gradient(90deg, #e0e0e0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 `;
 
 const QuarterStar = styled(StarBase)`

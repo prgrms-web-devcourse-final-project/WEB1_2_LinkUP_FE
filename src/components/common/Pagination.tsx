@@ -11,21 +11,22 @@ const PaginationContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
   margin-top: 20px;
+  gap: 8px;
 `;
 
-const PageButton = styled.button<{ active?: boolean }>`
+const PageButton = styled.button<{ $active?: boolean }>`
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  margin: 0 4px;
+  border: 1px solid ${({ $active }) => ($active ? '#2563eb' : '#e5e7eb')};
+  background-color: ${({ $active }) => ($active ? '#2563eb' : 'white')};
+  color: ${({ $active }) => ($active ? 'white' : '#4b5563')};
   border-radius: 4px;
-  background-color: ${({ active }) => (active ? '#007bff' : 'white')};
-  color: ${({ active }) => (active ? 'white' : '#333')};
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover {
-    background-color: ${({ active }) => (active ? '#0056b3' : '#f5f5f5')};
+    background-color: ${({ $active }) => ($active ? '#1d4ed8' : '#f3f4f6')};
   }
 
   &:disabled {
@@ -52,8 +53,9 @@ const Pagination: React.FC<PaginationProps> = ({
       {pages.map((page) => (
         <PageButton
           key={page}
-          active={currentPage === page}
           onClick={() => onPageChange(page)}
+          $active={currentPage === page}
+          disabled={currentPage === page}
         >
           {page}
         </PageButton>

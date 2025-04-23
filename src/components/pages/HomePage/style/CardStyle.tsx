@@ -1,9 +1,7 @@
 import styled from 'styled-components';
-import Heart from '../../../../assets/icons/heart.png';
-import FilledHeart from '../../../../assets/icons/filled-heart.png';
 import { Link } from 'react-router-dom';
 
-export const Recommend = styled.div`
+export const ProductSection = styled.div`
   display: flex;
   flex-wrap: wrap;
   width: 80%;
@@ -11,195 +9,340 @@ export const Recommend = styled.div`
   margin: 0 auto;
 `;
 
-export const RecommendTitle = styled.h2`
+export const SectionTitle = styled.h2`
+  text-decoration: underline;
   margin-left: 10px;
   margin-bottom: 20px;
   font-size: 1.5rem;
   color: #333;
+  &:hover {
+    cursor: pointer;
+  }
 `;
+
 export const CardWrapper = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  width: 100%;
   gap: 20px;
-  margin-top: 20px;
-  @media (min-width: 768px) and (max-width: 1024px) {
-    gap: 5px;
+  width: 100%;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr);
   }
-  @media (min-width: 576px) and (max-width: 767px) {
+
+  @media (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
-    gap: 35px;
-    max-width: 400px;
+  }
+
+  @media (max-width: 576px) {
+    grid-template-columns: repeat(1, 1fr);
   }
 `;
 
 export const Card = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 15px;
-  margin: 10px;
-  width: 200px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  align-items: center;
   position: relative;
-  transition: all 0.3s ease-in-out;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  background-color: white;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+
   &:hover {
-    cursor: pointer;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.4);
     transform: translateY(-5px);
-  }
-  @media (min-width: 768px) and (max-width: 1024px) {
-    width: 130px;
-  }
-  @media (min-width: 576px) and (max-width: 767px) {
-    width: 200px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   }
 `;
+
 export const StyledLink = styled(Link)`
   text-decoration: none;
-  &:link {
-    color: inherit;
-  }
-  &:visited {
-    color: inherit;
-  }
+  color: inherit;
+  width: 100%;
+  display: block;
+
+  &:link,
+  &:visited,
+  &:hover,
   &:active {
     color: inherit;
+    text-decoration: none;
   }
 `;
+
 export const ProductImg = styled.img`
   width: 100%;
   height: 200px;
-  background-color: #e0e0e0;
-  border-radius: 8px;
-  object-fit: cover;
-  @media (min-width: 768px) and (max-width: 1024px) {
-    width: 130px;
-    height: 140px;
-  }
+  object-fit: contain;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #eee;
 `;
 
 export const ProductWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 90%;
+  padding: 12px;
 `;
 
-export const ProductName = styled.div`
+export const ProductName = styled.h3`
   font-size: 16px;
-  font-weight: bold;
-  margin-top: 10px;
-  text-align: left;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  height: 40px;
 `;
 
 export const ProductStar = styled.div`
-  font-size: 20px;
-  color: #ffaa00;
-  text-align: left;
-  margin-left: -5px;
-  margin-top: 5px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
 `;
 
 export const PriceWrapper = styled.div`
   display: flex;
-  flex-direction: column;
-  width: 100%;
-  margin-top: 30px;
-  text-align: left;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 4px;
 `;
 
-export const OriginalPrice = styled.div`
-  text-decoration: line-through;
-  color: #999;
+export const OriginalPrice = styled.span`
   font-size: 14px;
+  color: #888;
+  text-decoration: line-through;
 `;
 
-export const DiscountedPrice = styled.div`
+export const DiscountedPrice = styled.span`
   font-size: 16px;
-  font-weight: bold;
-  color: #ff4d4f;
+  font-weight: 700;
+  color: #e74c3c;
 `;
-
-export const LikeButton = styled.img.withConfig({
-  shouldForwardProp: (prop) => prop !== 'likes',
-})<{ likes: boolean }>`
+export const LikeButton = styled.button<{ $likes: boolean }>`
   position: absolute;
-  bottom: 20px;
-  right: 30px;
-  width: 25px;
-  height: 25px;
-  cursor: pointer;
-  content: ${({ likes }) => `url(${likes ? FilledHeart : Heart})`};
-  color: ${({ likes }) => (likes ? 'red ' : 'transparent')};
-
-  &:hover {
-    cursor: pointer;
-    transform: scale(1.2);
-    transition: transform 0.2s ease-in-out;
-  }
-`;
-export const CategoryWrapper = styled.div`
-  width: 100%;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: ${(props) => (props.$likes ? '#e74c3c' : 'white')};
+  border: 1px solid #ddd;
   display: flex;
   align-items: center;
-  position: relative;
-`;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
 
-export const CategoryContainer = styled.div.withConfig({
-  shouldForwardProp: (prop) => prop !== 'expanded',
-})<{ expanded: boolean }>`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  position: absolute;
-  top: 15px;
-  left: 190px;
-  padding: 10px 20px;
-  z-index: 10;
-  visibility: ${(props) => (props.expanded ? 'visible' : 'hidden')};
-  opacity: ${(props) => (props.expanded ? 1 : 0)};
-  transition:
-    opacity 0.3s ease,
-    visibility 0.3s ease;
-`;
+  &:before {
+    content: '♥';
+    color: ${(props) => (props.$likes ? 'white' : '#999')};
+    font-size: 16px;
+  }
 
-export const CategoryItem = styled.div<{ selected: boolean }>`
-  padding: 5px 10px;
-  border-radius: 5px;
-  width: 120px;
-  font-weight: ${(props) => (props.selected ? 'bold' : 'normal')};
-  text-decoration: ${(props) => (props.selected ? 'underline' : 'none')};
   &:hover {
-    cursor: pointer;
-    text-decoration: underline;
+    background-color: ${(props) => (props.$likes ? '#c0392b' : '#f8f8f8')};
   }
 `;
 export const MoreButtonWrapper = styled.div`
-  position: relative;
-  margin-top: 30px;
-  display: flex;
-  justify-content: flex-end;
   width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 40px;
 `;
 
 export const StyledMoreButton = styled(Link)`
-  position: absolute;
-  right: 20px;
-  display: inline-block;
-  padding: 10px 30px;
-  background-color: black;
-  color: white;
-  border-radius: 8px;
+  padding: 10px 20px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  color: #333;
+  font-weight: 600;
   text-decoration: none;
-  font-weight: bold;
-  font-size: 16px;
-  transition: background-color 0.3s;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #eee;
+    color: #111;
+  }
+`;
+
+export const CategoryWrapper = styled.div`
+  width: 100%;
+  position: relative;
+`;
+
+export const CategoryContainer = styled.div<{ $expanded: boolean }>`
+  display: ${(props) => (props.$expanded ? 'flex' : 'none')};
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+`;
+export const CategoryItem = styled.div<{ $selected: boolean }>`
+  padding: 6px 15px;
+  border-radius: 20px;
+  background-color: ${(props) => (props.$selected ? '#333' : '#f5f5f5')};
+  color: ${(props) => (props.$selected ? 'white' : '#333')};
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: ${(props) => (props.$selected ? '#222' : '#eee')};
+  }
+`;
+export const Recommend = ProductSection;
+export const RecommendTitle = SectionTitle;
+
+export const BannerWrapper = styled.div`
+  width: 80%;
+  margin: 0 auto;
+`;
+
+export const BannerContainer = styled.div`
+  height: 300px;
+  width: 100%;
+  display: flex;
+  background-color: #f5f5f5;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
 
   &:hover {
     cursor: pointer;
-    background-color: gray;
+    transform: translateY(-5px);
   }
+
+  @media (max-width: 1024px) {
+    height: 250px;
+  }
+
+  @media (max-width: 767px) {
+    height: 200px;
+  }
+`;
+
+export const BannerImageWrapper = styled.div`
+  width: 300px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+
+  @media (max-width: 767px) {
+    width: 200px;
+  }
+`;
+
+export const BannerImage = styled.img`
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+`;
+
+export const BannerInfoSection = styled.div`
+  background: linear-gradient(to top, rgba(155, 155, 155, 0.2), transparent);
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 50px;
+  position: relative;
+
+  @media (max-width: 767px) {
+    padding: 0 20px;
+  }
+`;
+
+export const BannerStar = styled.div`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 20px;
+
+  @media (max-width: 767px) {
+    font-size: 15px;
+    top: 10px;
+    right: 10px;
+  }
+`;
+
+export const BannerHeader = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
+
+export const BannerTitleArea = styled.div`
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 15px;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    margin-bottom: 10px;
+  }
+`;
+
+export const BannerProductName = styled.h3`
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin-right: 15px;
+  margin-bottom: 0;
+
+  @media (max-width: 767px) {
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+`;
+
+export const BannerProductCategory = styled.p`
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+
+  @media (max-width: 767px) {
+    font-size: 12px;
+  }
+`;
+
+export const BannerDescription = styled.p`
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+
+  @media (max-width: 1024px) {
+    -webkit-line-clamp: 2;
+  }
+
+  @media (max-width: 767px) {
+    display: none;
+  }
+`;
+
+export const ContainerBox = styled.div`
+  display: flex;
+  margin-top: 5vh;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+`;
+
+export const Container = styled.div`
+  display: flex;
+  align-items: center;
+  width: 100%;
 `;

@@ -8,6 +8,15 @@ export interface Chat {
   chatMembers: string[];
 }
 
+export interface ChatListType {
+  chatId: string;
+  productId: string;
+  productName: string;
+  productImage: string;
+  lastMessage: string;
+  lastMessageTime: string;
+}
+
 // 채팅방 삭제
 export const deleteChatRoom = async (chatRoomId: number) => {
   const response = await axiosInstance.delete(`/api/chat/${chatRoomId}`, {
@@ -70,7 +79,7 @@ export const subscribeToChatMessages = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   callback: (message: any) => void
 ) => {
-  webSocketService.subscribe(`/sub/message/${chatRoomId}`, callback);
+  webSocketService.subscribe(`${chatRoomId}`, callback);
 };
 
 // 채팅 메시지 구독 취소
@@ -102,4 +111,17 @@ export const connectWebSocket = (
 // WebSocket 연결 해제
 export const disconnectWebSocket = () => {
   webSocketService.disconnect();
+};
+
+export const getChatList = async (): Promise<ChatListType[]> => {
+  try {
+    const response = await fetch('/api/chats');
+    if (!response.ok) {
+      throw new Error('채팅 목록을 불러오는데 실패했습니다.');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('채팅 목록 조회 중 오류 발생:', error);
+    throw error;
+  }
 };

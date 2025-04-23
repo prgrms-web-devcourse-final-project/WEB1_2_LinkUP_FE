@@ -9,11 +9,16 @@ import Heart from '../../../assets/icons/heart.png';
 import FilledHeart from '../../../assets/icons/filled-heart.png';
 import { PageTitle } from './OrderListPage';
 import { useNavigate } from 'react-router-dom';
+import Pagination from '../../../components/common/Pagination';
+
 const WishListPage: React.FC = () => {
   const { data: wish, isLoading, isError } = useWishQuery();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const [likedProducts, setLikedProducts] = useState<number[]>([]);
   const navigate = useNavigate();
+
   useEffect(() => {
     if (wish) {
       setLikedProducts(wish.map((item) => item.productPostId));
@@ -30,6 +35,10 @@ const WishListPage: React.FC = () => {
     await postWishProduct({ productPostId });
   };
 
+  const paginatedWish =
+    wish?.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) ||
+    [];
+
   return (
     <QueryHandler isLoading={isLoading} isError={isError}>
       <GS.Wrapper>
@@ -38,41 +47,48 @@ const WishListPage: React.FC = () => {
           <PageTitle>찜한 상품</PageTitle>
           <Container>
             {wish && wish.length > 0 ? (
-              <CardGrid>
-                {wish.map((wish, index) => (
-                  <Card key={index}>
-                    <ImageContainer>
-                      <img
-                        src={wish.productImage || DEFAULT_IMG}
-                        alt={wish.productName}
+              <>
+                <CardGrid>
+                  {paginatedWish.map((wish, index) => (
+                    <Card key={index}>
+                      <ImageContainer>
+                        <img
+                          src={wish.productImage || DEFAULT_IMG}
+                          alt={wish.productName}
+                          onClick={() =>
+                            navigate(`/products/${wish.productPostId}`)
+                          }
+                          onError={(e) => {
+                            e.currentTarget.src = DEFAULT_IMG;
+                          }}
+                        />
+                        <LikeButtonWrapper>
+                          {' '}
+                          <LikeButton
+                            likes={likedProducts.includes(wish.productPostId)}
+                            onClick={() => {
+                              changeLike(wish.productPostId);
+                            }}
+                          />
+                        </LikeButtonWrapper>
+                      </ImageContainer>
+                      <CardContent
                         onClick={() =>
                           navigate(`/products/${wish.productPostId}`)
                         }
-                        onError={(e) => {
-                          e.currentTarget.src = DEFAULT_IMG;
-                        }}
-                      />
-                      <LikeButtonWrapper>
-                        {' '}
-                        <LikeButton
-                          likes={likedProducts.includes(wish.productPostId)}
-                          onClick={() => {
-                            changeLike(wish.productPostId);
-                          }}
-                        />
-                      </LikeButtonWrapper>
-                    </ImageContainer>
-                    <CardContent
-                      onClick={() =>
-                        navigate(`/products/${wish.productPostId}`)
-                      }
-                    >
-                      <ProductName>{wish.productName}</ProductName>
-                      <Price>{wish.productPrice}원</Price>
-                    </CardContent>
-                  </Card>
-                ))}
-              </CardGrid>
+                      >
+                        <ProductName>{wish.productName}</ProductName>
+                        <Price>{wish.productPrice}원</Price>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </CardGrid>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={Math.ceil(wish.length / itemsPerPage)}
+                  onPageChange={setCurrentPage}
+                />
+              </>
             ) : (
               <EmptyMessage>
                 <EmptyIcon>❤️</EmptyIcon>

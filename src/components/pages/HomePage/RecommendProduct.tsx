@@ -30,6 +30,7 @@ const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => {
   if (!products) {
     return <div>No products available</div>;
   }
+
   const getTopProducts = (products: AllProducts[]): AllProducts[] => {
     // 마감임박순서
     const sortedByDeadline = [...products].sort(
@@ -93,7 +94,7 @@ const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => {
                 </ProductWrapper>
               </StyledLink>
               <LikeButton
-                likes={likedProducts.includes(product.productPostId)}
+                $likes={likedProducts.includes(product.productPostId)}
                 onClick={() => {
                   changeLike(product.productPostId);
                 }}

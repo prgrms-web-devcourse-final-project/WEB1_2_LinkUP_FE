@@ -51,6 +51,7 @@ const SetNicknamePage = () => {
                 placeholder="닉네임을 입력해주세요"
                 value={nickname}
                 onChange={handleInputChange}
+                maxLength={15}
               />
               <NicknameCondition isValid={isValidLength}>
                 최소 2자 이상 ~ 15자 이내

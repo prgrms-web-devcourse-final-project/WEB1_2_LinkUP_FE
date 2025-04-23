@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom';
 import { UserInfo } from '../context/UserContext';
 import axiosInstance from './axiosInstance';
 
@@ -104,6 +105,11 @@ export const postResetPassword = async (
 
 export const postSignInSNS = async () => {
   const response = await axiosInstance.post(`/api/users/sociallogin`);
-
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const token = queryParams.get('accessToken');
+  if (token) {
+    sessionStorage.setItem('token', token);
+  }
   return response.data;
 };

@@ -139,6 +139,7 @@ export const putEditProfile = async (formData: FormData) => {
       },
     }
   );
+
   return response.data;
 };
 

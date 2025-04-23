@@ -123,7 +123,7 @@ const SettingPage = () => {
             </AddressInfo>
 
             <EditButton onClick={() => setIsNicknameModalOpen(true)}>
-              수정
+              닉네임 변경
             </EditButton>
           </AddressItem>
         </AddressList>
@@ -239,6 +239,7 @@ const SettingPage = () => {
                   value={newNickname}
                   onChange={(e) => setNewNickname(e.target.value)}
                   placeholder="새 닉네임을 입력하세요"
+                  maxLength={15}
                 />
               </InputContainer>
               <ButtonRow>
@@ -343,19 +344,21 @@ const Phone = styled.div`
 `;
 
 const EditButton = styled.button`
-  background-color: transparent;
-  color: #3182ce;
-  border: 1px solid #3182ce;
+  background-color: #3182ce;
+  color: white;
+  border: none;
   border-radius: 4px;
   padding: 6px 12px;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  position: absolute;
+  right: 16px;
+  top: 16px;
 
   &:hover {
-    background-color: #3182ce;
-    color: white;
+    background-color: #2c5282;
   }
 `;
 

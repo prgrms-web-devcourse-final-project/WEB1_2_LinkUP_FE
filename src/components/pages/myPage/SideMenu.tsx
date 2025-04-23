@@ -29,7 +29,16 @@ const ProfileImageWithFallback = ({
   src: string | null;
   alt: string;
 }) => {
-  const [imgSrc, setImgSrc] = useState(src || default_profile);
+  const [imgSrc, setImgSrc] = useState<string>(default_profile);
+
+  useEffect(() => {
+    if (src) {
+      const imageUrl = getImageSrc(src);
+      if (imageUrl) {
+        setImgSrc(imageUrl);
+      }
+    }
+  }, [src]);
 
   const handleError = () => {
     setImgSrc(default_profile);
@@ -51,28 +60,37 @@ const Sidemenu = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const fetchUserData = async () => {
+    try {
+      const response = await getUser();
+      setNickname(response.nickname);
+      setProfileImage(response.profile);
+      setNewName(response.name);
+    } catch (error) {
+      console.error('failed', error);
+      setProfileImage(null);
+    }
+  };
+
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await getUser();
-        setNickname(response.nickname);
-        setProfileImage(response.profile || default_profile);
-        setNewName(response.name);
-      } catch (error) {
-        console.error('failed', error);
-        setProfileImage(default_profile);
-      }
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      fetchUserData();
     };
-    fetchUser();
+
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    return () => {
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
+    };
   }, []);
 
   return (
     <Wrapper>
       <ProfileSection>
-        <ProfileImageWithFallback
-          src={getImageSrc(profileImage)}
-          alt="Profile"
-        />
+        <ProfileImageWithFallback src={profileImage} alt="Profile" />
         <ProfileText>
           <Hello>Hello 👋</Hello>
           <DisplayName>{nickname || newName}님</DisplayName>

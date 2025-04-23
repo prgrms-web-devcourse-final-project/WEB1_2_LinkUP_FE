@@ -200,7 +200,7 @@ const PaymentForm = () => {
             <PayButton onClick={onPaymentSubmit} data-testid="submit">
               결제하기
             </PayButton>
-            <BackButton to={`/products/${product.id}`}>뒤로 가기</BackButton>
+            <BackButton to={`/products/${productId}`}>뒤로 가기</BackButton>
           </ButtonGroup>
         </Container>
       </QueryHandler>

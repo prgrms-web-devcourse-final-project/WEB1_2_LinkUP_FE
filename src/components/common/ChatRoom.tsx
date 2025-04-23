@@ -178,7 +178,6 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId, isOpen, onClose }) => {
     if (!input.trim() || !chatRoomId || !currentUserId) return;
 
     const messageTime = new Date().toISOString();
-
     sendMessage(chatRoomId, currentUserId, input.trim(), messageTime);
     setInput('');
   };

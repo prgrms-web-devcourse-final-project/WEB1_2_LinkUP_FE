@@ -182,25 +182,6 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId, isOpen, onClose }) => {
     setInput('');
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  const isNewDay = (currentDate: string, previousDate: string) => {
-    const current = new Date(currentDate);
-    const previous = new Date(previousDate);
-    return (
-      current.getDate() !== previous.getDate() ||
-      current.getMonth() !== previous.getMonth() ||
-      current.getFullYear() !== previous.getFullYear()
-    );
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -215,42 +196,31 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ chatRoomId, isOpen, onClose }) => {
 
         <ChatRoomContainer>
           <ChatMessagesContainer ref={chatBoxRef}>
-            {messages.map((msg, index) => {
-              const showDateDivider =
-                index === 0 ||
-                (index > 0 && isNewDay(msg.time, messages[index - 1].time));
-
-              return (
-                <React.Fragment key={index}>
-                  {showDateDivider && (
-                    <DateDivider>
-                      <DateText>{formatDate(msg.time)}</DateText>
-                    </DateDivider>
-                  )}
-                  <MessageWrapper
-                    $isCurrentUser={msg.userName === currentUserId}
-                    $isGuide={msg.isGuide}
-                  >
-                    {!msg.isGuide && (
-                      <SenderName>
-                        {msg.userName === currentUserId ? '나' : msg.userName}
-                      </SenderName>
-                    )}
-                    <MessageContent
-                      $isCurrentUser={msg.userName === currentUserId}
-                      $isGuide={msg.isGuide}
-                    >
-                      {msg.message}
-                    </MessageContent>
-                    {!msg.isGuide && (
-                      <Timestamp>
-                        {new Date(msg.time).toLocaleTimeString()}
-                      </Timestamp>
-                    )}
-                  </MessageWrapper>
-                </React.Fragment>
-              );
-            })}
+            {messages.map((msg, index) => (
+              <MessageWrapper
+                key={index}
+                $isCurrentUser={msg.userName === currentUserId}
+                $isGuide={msg.isGuide}
+              >
+                {!msg.isGuide && (
+                  <SenderName>
+                    {msg.userName === currentUserId ? '나' : msg.userName}
+                  </SenderName>
+                )}
+                <MessageContent
+                  $isCurrentUser={msg.userName === currentUserId}
+                  $isGuide={msg.isGuide}
+                >
+                  {msg.message}
+                </MessageContent>
+                {!msg.isGuide && (
+                  <Timestamp>
+                    {new Date(msg.time).toLocaleTimeString()}
+                  </Timestamp>
+                )}
+              </MessageWrapper>
+            ))}
+            {/* 스크롤을 맨 아래로 이동시키기 위한 빈 div */}
             <div ref={messagesEndRef} />
           </ChatMessagesContainer>
           <MessageInputContainer>
@@ -447,31 +417,4 @@ const SendButton = styled.button`
     background-color: #94a3b8;
     cursor: not-allowed;
   }
-`;
-
-const DateDivider = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 16px 0;
-  position: relative;
-  width: 100%;
-
-  &::before,
-  &::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background-color: #e2e8f0;
-    margin: 0 8px;
-  }
-`;
-
-const DateText = styled.span`
-  font-size: 0.75rem;
-  color: #94a3b8;
-  background-color: #f8fafc;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-weight: 500;
 `;

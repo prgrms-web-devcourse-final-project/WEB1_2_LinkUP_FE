@@ -6,11 +6,14 @@ import ReviewModal, { Question } from '../../../common/ReviewModal';
 import { reviewUser } from '../../../../api/reviewApi';
 import { getImageSrc } from '../../../../utils/GetImageSrc';
 import DEFAULT_IMG from '../../../../assets/icons/default-featured-image.png.jpg';
+import Pagination from '../../../common/Pagination';
 
 const GroupPurchaseHistory = () => {
   const [groupPurchaseList, setGroupPurchaseList] = useState<
     GroupPurchaseType[]
   >([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   //사용자 리뷰 모달
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -52,10 +55,15 @@ const GroupPurchaseHistory = () => {
     return STATUS_MAP[status] || '알 수 없는 상태';
   };
 
+  const paginatedGroupPurchases = groupPurchaseList.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <Container>
       <OrderList>
-        {groupPurchaseList.map((groupPurchase, idx) => (
+        {paginatedGroupPurchases.map((groupPurchase, idx) => (
           <GroupPurchaseItem key={idx}>
             <GroupPurchaseWrapper>
               <ImageContainer>
@@ -109,12 +117,17 @@ const GroupPurchaseHistory = () => {
             </Actions>
           </GroupPurchaseItem>
         ))}
-        <ReviewModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleSubmit}
-        />
       </OrderList>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={Math.ceil(groupPurchaseList.length / itemsPerPage)}
+        onPageChange={setCurrentPage}
+      />
+      <ReviewModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleSubmit}
+      />
     </Container>
   );
 };

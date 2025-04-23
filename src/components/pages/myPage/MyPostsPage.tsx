@@ -9,12 +9,15 @@ import {
 } from '../../../api/mypageApi';
 import { useNavigate } from 'react-router-dom';
 import { PageTitle } from './OrderListPage';
+import Pagination from '../../../components/common/Pagination';
 
 const MyPostsPage: React.FC = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [myPostList, setMyPostList] = useState<MyPostType[]>([]);
   const [deleteId, setDeleteId] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const handleDeleteClick = () => {
     setIsModalOpen(true);
@@ -49,6 +52,11 @@ const MyPostsPage: React.FC = () => {
     fetchPost();
   }, []);
 
+  const paginatedPosts = myPostList.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <GS.Wrapper>
       <Sidemenu />
@@ -64,7 +72,7 @@ const MyPostsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {myPostList.map((myPost, index) => (
+              {paginatedPosts.map((myPost, index) => (
                 <tr key={index}>
                   <Td
                     onClick={() =>
@@ -106,6 +114,11 @@ const MyPostsPage: React.FC = () => {
             </tbody>
           </Table>
         </TableWrapper>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={Math.ceil(myPostList.length / itemsPerPage)}
+          onPageChange={setCurrentPage}
+        />
         {isModalOpen && (
           <ModalOverlay>
             <ModalContent>

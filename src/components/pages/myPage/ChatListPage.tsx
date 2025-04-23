@@ -7,6 +7,7 @@ import { QueryHandler } from '../../../hooks/useGetProduct';
 import styled from 'styled-components';
 import ChatRoom from '../../common/ChatRoom';
 import { Chat } from '../../../api/chatApi';
+import Pagination from '../../../components/common/Pagination';
 
 const ChatListPage: React.FC = () => {
   const {
@@ -18,6 +19,14 @@ const ChatListPage: React.FC = () => {
   const [selectedChatRoomId, setSelectedChatRoomId] = useState<number | null>(
     null
   );
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const paginatedChats =
+    chats?.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    ) || [];
 
   return (
     <QueryHandler isLoading={LoadingChat} isError={ErrorChat}>
@@ -27,52 +36,61 @@ const ChatListPage: React.FC = () => {
           <PageTitle>나의 채팅방 목록</PageTitle>
 
           {chats && chats.length > 0 ? (
-            <ChatListContainer>
-              {chats.map((chat: Chat, index: number) => (
-                <ChatRoomCard key={index}>
-                  <ChatRoomHeader>
-                    <ChatRoomName>{chat.roomName}</ChatRoomName>
-                    <ParticipantCount>
-                      <ParticipantIcon>👥</ParticipantIcon>
-                      {chat.chatMembers.length}/{chat.capacity}
-                    </ParticipantCount>
-                  </ChatRoomHeader>
+            <>
+              <ChatListContainer>
+                {paginatedChats.map((chat: Chat, index: number) => (
+                  <ChatRoomCard key={index}>
+                    <ChatRoomHeader>
+                      <ChatRoomName>{chat.roomName}</ChatRoomName>
+                      <ParticipantCount>
+                        <ParticipantIcon>👥</ParticipantIcon>
+                        {chat.chatMembers.length}/{chat.capacity}
+                      </ParticipantCount>
+                    </ChatRoomHeader>
 
-                  <ChatRoomInfo>
-                    <InfoItem>
-                      <InfoLabel>상품번호:</InfoLabel>
-                      <InfoValue>{chat.postId}</InfoValue>
-                    </InfoItem>
+                    <ChatRoomInfo>
+                      <InfoItem>
+                        <InfoLabel>상품번호:</InfoLabel>
+                        <InfoValue>{chat.postId}</InfoValue>
+                      </InfoItem>
 
-                    <InfoItem>
-                      <InfoLabel>참여자:</InfoLabel>
-                      <MemberList>
-                        {chat.chatMembers.map(
-                          (member: string, memberIndex: number) => (
-                            <MemberTag key={memberIndex}>{member}</MemberTag>
-                          )
-                        )}
-                      </MemberList>
-                    </InfoItem>
-                  </ChatRoomInfo>
+                      <InfoItem>
+                        <InfoLabel>참여자:</InfoLabel>
+                        <MemberList>
+                          {chat.chatMembers.map(
+                            (member: string, memberIndex: number) => (
+                              <MemberTag key={memberIndex}>{member}</MemberTag>
+                            )
+                          )}
+                        </MemberList>
+                      </InfoItem>
+                    </ChatRoomInfo>
 
-                  <ButtonsContainer>
-                    <EnterButton
-                      onClick={() => setSelectedChatRoomId(chat.postId)}
-                    >
-                      입장하기
-                    </EnterButton>
-                  </ButtonsContainer>
-                </ChatRoomCard>
-              ))}
-              {selectedChatRoomId && (
-                <ChatRoom
-                  chatRoomId={selectedChatRoomId}
-                  isOpen={true}
-                  onClose={() => setSelectedChatRoomId(null)}
+                    <ButtonsContainer>
+                      <EnterButton
+                        onClick={() => setSelectedChatRoomId(chat.postId)}
+                      >
+                        입장하기
+                      </EnterButton>
+                    </ButtonsContainer>
+                  </ChatRoomCard>
+                ))}
+                {selectedChatRoomId && (
+                  <ChatRoom
+                    chatRoomId={selectedChatRoomId}
+                    isOpen={true}
+                    onClose={() => setSelectedChatRoomId(null)}
+                  />
+                )}
+              </ChatListContainer>
+              <PaginationContainer>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={Math.ceil(chats.length / itemsPerPage)}
+                  onPageChange={setCurrentPage}
                 />
-              )}
-            </ChatListContainer>
+              </PaginationContainer>
+            </>
           ) : (
             <EmptyState>
               <EmptyIcon>💬</EmptyIcon>
@@ -219,6 +237,13 @@ const EmptyIcon = styled.div`
 const EmptyText = styled.p`
   font-size: 16px;
   color: #888;
+`;
+
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 20px 0;
 `;
 
 export default ChatListPage;

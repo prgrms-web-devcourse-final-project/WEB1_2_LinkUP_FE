@@ -7,6 +7,7 @@ import {
   postProductCancel,
 } from '../../../../api/mypageApi';
 import DEFAULT_IMG from '../../../../assets/icons/default-featured-image.png.jpg';
+import Pagination from '../../../common/Pagination';
 
 const getStatusColor = (status: string): string => {
   switch (status) {
@@ -30,6 +31,8 @@ const OrderHistory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [orderList, setOrderList] = useState<OrderType[]>([]);
   const [pk, setPk] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
   const navigate = useNavigate();
 
   const fetchOrderList = async () => {
@@ -95,6 +98,11 @@ const OrderHistory = () => {
     });
   };
 
+  const paginatedOrders = orderList.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <Container>
       {orderList.length === 0 ? (
@@ -103,73 +111,84 @@ const OrderHistory = () => {
           <EmptyText>주문 내역이 없습니다.</EmptyText>
         </EmptyState>
       ) : (
-        <OrderList>
-          {orderList.map((order, index) => (
-            <OrderItem key={index}>
-              <OrderHeader>
-                <OrderDate>주문일자: {formatDate(order.orderDate)}</OrderDate>
-                {order.paymentStatus === 'DONE' && (
-                  <OrderNumber>
-                    주문번호: {order.payment_key?.substring(0, 8) || '00000000'}
-                  </OrderNumber>
-                )}
-              </OrderHeader>
-              <OrderContent>
-                <OrderWrapper>
-                  <ImageContainer>
-                    <ProductImage
-                      src={order.url || DEFAULT_IMG}
-                      alt={order.productName}
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = DEFAULT_IMG;
-                      }}
-                    />
-                  </ImageContainer>
-                  <OrderDetails>
-                    <ProductName>{order.productName}</ProductName>
-                    <ProductInfo>수량: {order.quantity}개</ProductInfo>
-                    <StatusBadge status={order.paymentStatus}>
-                      {getStatusLabel(order.paymentStatus)}
-                    </StatusBadge>
-                  </OrderDetails>
-                </OrderWrapper>
-                <Price>{order.price.toLocaleString()}원</Price>
-                <Actions>
-                  <ActionButton
-                    onClick={() => {
-                      navigate(`/products/${order.postId}`);
-                    }}
-                  >
-                    상품 페이지 이동
-                  </ActionButton>
+        <>
+          <OrderList>
+            {paginatedOrders.map((order, index) => (
+              <OrderItem key={index}>
+                <OrderHeader>
+                  <OrderDate>주문일자: {formatDate(order.orderDate)}</OrderDate>
                   {order.paymentStatus === 'DONE' && (
-                    <CancelButton
-                      onClick={() => {
-                        handleCancelClick();
-                        if (order.payment_key) {
-                          setPk(order.payment_key);
-                        }
-                      }}
-                    >
-                      주문 취소/환불
-                    </CancelButton>
+                    <OrderNumber>
+                      주문번호:{' '}
+                      {order.payment_key?.substring(0, 8) || '00000000'}
+                    </OrderNumber>
                   )}
-                  {order.paymentStatus === 'DONE' && (
-                    <ReviewLink
+                </OrderHeader>
+                <OrderContent>
+                  <OrderWrapper>
+                    <ImageContainer>
+                      <ProductImage
+                        src={order.url || DEFAULT_IMG}
+                        alt={order.productName}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = DEFAULT_IMG;
+                        }}
+                      />
+                    </ImageContainer>
+                    <OrderDetails>
+                      <ProductName>{order.productName}</ProductName>
+                      <ProductInfo>수량: {order.quantity}개</ProductInfo>
+                      <StatusBadge status={order.paymentStatus}>
+                        {getStatusLabel(order.paymentStatus)}
+                      </StatusBadge>
+                    </OrderDetails>
+                  </OrderWrapper>
+                  <Price>{order.price.toLocaleString()}원</Price>
+                  <Actions>
+                    <ActionButton
                       onClick={() => {
                         navigate(`/products/${order.postId}`);
                       }}
                     >
-                      <ReviewIcon src="/images/qricon.png" alt="review icon" />
-                      <span>리뷰 작성하기</span>
-                    </ReviewLink>
-                  )}
-                </Actions>
-              </OrderContent>
-            </OrderItem>
-          ))}
-        </OrderList>
+                      상품 페이지 이동
+                    </ActionButton>
+                    {order.paymentStatus === 'DONE' && (
+                      <CancelButton
+                        onClick={() => {
+                          handleCancelClick();
+                          if (order.payment_key) {
+                            setPk(order.payment_key);
+                          }
+                        }}
+                      >
+                        주문 취소/환불
+                      </CancelButton>
+                    )}
+                    {order.paymentStatus === 'DONE' && (
+                      <ReviewLink
+                        onClick={() => {
+                          navigate(`/products/${order.postId}`);
+                        }}
+                      >
+                        <ReviewIcon
+                          src="/images/qricon.png"
+                          alt="review icon"
+                        />
+                        <span>리뷰 작성하기</span>
+                      </ReviewLink>
+                    )}
+                  </Actions>
+                </OrderContent>
+              </OrderItem>
+            ))}
+          </OrderList>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={Math.ceil(orderList.length / itemsPerPage)}
+            onPageChange={setCurrentPage}
+          />
+        </>
       )}
 
       {isModalOpen && (

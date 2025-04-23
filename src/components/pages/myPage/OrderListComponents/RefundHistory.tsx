@@ -2,23 +2,31 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { getRefundList, RefundType } from '../../../../api/mypageApi';
+import Pagination from '../../../common/Pagination';
 
 const RefundHistory = () => {
   const [refundList, setRefundList] = useState<RefundType[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOrderList = async () => {
       const response = await getRefundList();
-
       setRefundList(response);
     };
     fetchOrderList();
   }, []);
+
+  const paginatedRefunds = refundList.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <Container>
       <RefundList>
-        {refundList.map((refund, idx) => (
+        {paginatedRefunds.map((refund, idx) => (
           <RefundItem key={idx}>
             <RefundWrapper>
               <ImageContainer>
@@ -45,6 +53,11 @@ const RefundHistory = () => {
           </RefundItem>
         ))}
       </RefundList>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={Math.ceil(refundList.length / itemsPerPage)}
+        onPageChange={setCurrentPage}
+      />
     </Container>
   );
 };

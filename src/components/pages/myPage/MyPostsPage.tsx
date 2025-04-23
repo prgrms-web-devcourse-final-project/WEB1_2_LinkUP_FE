@@ -17,6 +17,7 @@ const MyPostsPage: React.FC = () => {
   const [myPostList, setMyPostList] = useState<MyPostType[]>([]);
   const [deleteId, setDeleteId] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [shouldRefresh, setShouldRefresh] = useState(false);
   const itemsPerPage = 10;
 
   const handleDeleteClick = () => {
@@ -39,18 +40,18 @@ const MyPostsPage: React.FC = () => {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
 
-  useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const response = await getMyPostList();
+  const fetchPost = async () => {
+    try {
+      const response = await getMyPostList();
+      setMyPostList(response);
+    } catch (error) {
+      console.error('failed', error);
+    }
+  };
 
-        setMyPostList(response);
-      } catch (error) {
-        console.error('failed', error);
-      }
-    };
+  useEffect(() => {
     fetchPost();
-  }, []);
+  }, [shouldRefresh]);
 
   const paginatedPosts = myPostList.slice(
     (currentPage - 1) * itemsPerPage,
@@ -128,6 +129,7 @@ const MyPostsPage: React.FC = () => {
                   onClick={async () => {
                     setIsModalOpen(false);
                     await deleteMyPost(deleteId);
+                    setShouldRefresh((prev) => !prev); // 삭제 후 리프레시
                   }}
                 >
                   예
@@ -148,6 +150,7 @@ const TableWrapper = styled.div`
   margin-top: 24px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  background-color: white;
 `;
 
 const Table = styled.table`
@@ -155,7 +158,7 @@ const Table = styled.table`
   border-collapse: separate;
   border-spacing: 0;
   text-align: left;
-  overflow: hidden;
+  table-layout: fixed;
 `;
 
 const Th = styled.th`
@@ -166,6 +169,15 @@ const Th = styled.th`
   color: #4a90e2;
   text-align: center;
   border-bottom: 1px solid #e1efff;
+  &:first-child {
+    width: 50%;
+  }
+  &:nth-child(2) {
+    width: 30%;
+  }
+  &:last-child {
+    width: 20%;
+  }
 `;
 
 const Td = styled.td`
@@ -176,6 +188,12 @@ const Td = styled.td`
   text-align: center;
   transition: background-color 0.2s ease;
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  &:first-child {
+    text-align: center;
+  }
   &:hover {
     background-color: #f8fbff;
   }

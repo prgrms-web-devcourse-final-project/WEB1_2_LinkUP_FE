@@ -14,7 +14,7 @@ export class WebSocketService<T = Message> {
   private subscriptions: Map<string, StompSubscription> = new Map();
   private messageHandlers: Map<string, (message: T) => void> = new Map();
 
-  private readonly SOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL;
+  private readonly SOCKET_URL = 'https://goodbuyus.store/websocket/';
 
   constructor() {
     this.socket = null;
@@ -40,7 +40,9 @@ export class WebSocketService<T = Message> {
         login: 'user',
         passcode: 'password',
       },
-      debug: () => {},
+      debug: () => {
+        // console.log('STOMP Debug:', str);
+      },
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
       connectionTimeout: 30000,

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { FiShoppingCart } from 'react-icons/fi';
+import { FiShoppingCart, FiLogOut, FiLogIn } from 'react-icons/fi';
 import logo from '../../assets/icons/goodbuyus-logo.svg';
 import menu from '../../assets/icons/menu.svg';
 import { useAuth } from '../../context/AuthContext';
@@ -64,30 +64,32 @@ const Header = () => {
 
             {/* 비로그인 시 로그인 버튼 */}
             {!isLoggedIn ? (
-              <Login>
-                <Link to="/signin" onClick={toggleMobileMenu}>
-                  Login
-                </Link>
-              </Login>
+              <ActionButton>
+                <StyledActionLink to="/signin" onClick={toggleMobileMenu}>
+                  <FiLogIn size={18} />
+                  <span>Login</span>
+                </StyledActionLink>
+              </ActionButton>
             ) : (
-              <>
-                <LogOut onClick={logout}>
-                  <a>LogOut</a>
-                </LogOut>
+              <ActionButtonGroup>
+                <ActionButton onClick={logout}>
+                  <LogoutButton>
+                    <FiLogOut size={18} />
+                    <span>Logout</span>
+                  </LogoutButton>
+                </ActionButton>
                 {/* 관리자가 아닐 때만 장바구니 표시 */}
                 {!isAdmin && (
-                  <LogOut>
-                    <CartIcon>
-                      <StyledLink
-                        to="/mypage/wishlist"
-                        onClick={toggleMobileMenu}
-                      >
-                        <FiShoppingCart size={22} color="white" />
-                      </StyledLink>
-                    </CartIcon>
-                  </LogOut>
+                  <CartButton>
+                    <StyledActionLink
+                      to="/mypage/wishlist"
+                      onClick={toggleMobileMenu}
+                    >
+                      <FiShoppingCart size={18} />
+                    </StyledActionLink>
+                  </CartButton>
                 )}
-              </>
+              </ActionButtonGroup>
             )}
           </NavList>
         </NavBar>
@@ -243,68 +245,93 @@ const NavItem = styled.li`
   }
 `;
 
-const Login = styled.li`
-  background-color: black;
-  height: 30px;
-  width: 70px;
-  border-radius: 5px;
-  overflow: hidden;
+// Redesigned buttons
+const ActionButtonGroup = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
+`;
 
-  a {
-    color: white;
-    text-decoration: none;
-    display: block;
-    text-align: center;
-    margin-top: 5px;
-    font-weight: bold;
-  }
+const ActionButton = styled.li`
+  list-style: none;
+  margin: 0;
+`;
+
+const StyledActionLink = styled(Link)`
+  background-color: #000;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
 
   &:hover {
     background-color: #333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 
   @media (min-width: 576px) and (max-width: 767px) {
-    width: 130px;
-    height: 40px;
-    margin-left: 10px;
-    a {
-      margin-top: 10px;
-      font-size: 16px;
-    }
+    padding: 12px 20px;
+    font-size: 16px;
   }
 `;
 
-const LogOut = styled.li`
-  background-color: black;
-  height: 30px;
-  border-radius: 5px;
-  overflow: hidden;
-  display: inline-flex;
+const LogoutButton = styled.a`
+  background-color: #000;
+  color: white;
+  display: flex;
   align-items: center;
-  padding: 0px 10px;
-
-  a {
-    font-size: 15px;
-    color: white;
-    text-decoration: none;
-    display: block;
-    text-align: center;
-    font-weight: bold;
-  }
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
 
   &:hover {
     background-color: #333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 
   @media (min-width: 576px) and (max-width: 767px) {
-    width: 130px;
-    height: 40px;
-    margin-left: 10px;
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+`;
 
+const CartButton = styled.li`
+  list-style: none;
+  margin: 0;
+
+  a {
+    background-color: #000;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #333;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  @media (min-width: 576px) and (max-width: 767px) {
     a {
-      margin-top: -1px;
-      margin-left: -8px;
-      font-size: 16px;
+      padding: 12px;
     }
   }
 `;
@@ -322,20 +349,5 @@ const StyledLink = styled(Link)`
     padding: 10px;
     width: 100%;
     text-align: center;
-  }
-`;
-
-const CartIcon = styled.div`
-  img {
-    margin-top: -4px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (min-width: 576px) and (max-width: 767px) {
-    img {
-      width: 25px;
-      height: 25px;
-    }
   }
 `;

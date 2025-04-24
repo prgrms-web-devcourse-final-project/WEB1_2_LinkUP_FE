@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Pagination from '../../common/Pagination';
 import StarRating from '../../common/StarRating';
 import { AllProducts } from '../HomePage/model/productSchema';
@@ -24,37 +25,28 @@ import { FaHeart, FaRegHeart } from 'react-icons/fa';
 type ProductComponentProps = {
   input: string;
   products: AllProducts[];
+  initialCategory: 'ALL' | 'LIFESTYLE' | 'FOOD' | 'FASHION';
 };
 
 const ProductComponent: React.FC<ProductComponentProps> = ({
   input,
   products,
+  initialCategory,
 }) => {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedText, setSelectedText] = useState<
     '판매 상품' | '기한 마감 상품'
   >('판매 상품');
+  const [sortBy, setSortBy] = useState<'rating' | 'discountprice'>('rating');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedCategory, setSelectedCategory] = useState<
+    'ALL' | 'LIFESTYLE' | 'FOOD' | 'FASHION'
+  >(initialCategory);
   const PRODUCT_PER_PAGE = 16;
   const startIndex = (currentPage - 1) * PRODUCT_PER_PAGE;
-  const filteredProducts =
-    selectedText === '기한 마감 상품'
-      ? products.filter(
-          (p) =>
-            p.available === false ||
-            (new Date(p.deadline) < new Date() && p.discountprice > 1)
-        )
-      : products.filter(
-          (p) =>
-            p.available === true &&
-            new Date(p.deadline) > new Date() &&
-            p.discountprice > 1
-        );
-
-  const totalPages = Math.ceil(filteredProducts.length / PRODUCT_PER_PAGE);
 
   const { data: wish, isLoading, isError } = useWishQuery();
-
-  // 상태를 관리하기 위한 useState 훅. 초기값은 빈 배열로 설정.
   const [likedProducts, setLikedProducts] = useState<number[]>([]);
 
   useEffect(() => {
@@ -63,27 +55,83 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
     }
   }, [wish]);
 
-  const changeLike = async (productPostId: number) => {
-    setLikedProducts(
-      (prev) =>
-        prev.includes(productPostId) // productPostId가 이미 likedProducts에 포함되어 있으면
-          ? prev.filter((id) => id !== productPostId) // 제거
-          : [...prev, productPostId] // 추가
-    );
+  useEffect(() => {
+    setSelectedCategory(initialCategory);
+  }, [initialCategory]);
 
-    // 서버에 좋아요 요청 전송
+  const getSortedProducts = (products: AllProducts[]): AllProducts[] => {
+    const sortedProducts = [...products];
+    switch (sortBy) {
+      case 'rating':
+        return sortedProducts.sort((a, b) =>
+          sortOrder === 'desc' ? b.rating - a.rating : a.rating - b.rating
+        );
+      case 'discountprice':
+        return sortedProducts.sort((a, b) =>
+          sortOrder === 'desc'
+            ? b.discountprice - a.discountprice
+            : a.discountprice - b.discountprice
+        );
+      default:
+        return sortedProducts;
+    }
+  };
+
+  const filteredProducts = useMemo(() => {
+    const baseFiltered =
+      selectedText === '기한 마감 상품'
+        ? products.filter(
+            (p) =>
+              p.available === false ||
+              (new Date(p.deadline) < new Date() && p.discountprice > 1)
+          )
+        : products.filter(
+            (p) =>
+              p.available === true &&
+              new Date(p.deadline) > new Date() &&
+              p.discountprice > 1
+          );
+
+    const categoryFiltered =
+      selectedCategory === 'ALL'
+        ? baseFiltered
+        : baseFiltered.filter(
+            (product) => product.category.toUpperCase() === selectedCategory
+          );
+
+    return getSortedProducts(categoryFiltered);
+  }, [products, selectedText, sortBy, sortOrder, selectedCategory]);
+
+  const totalPages = Math.ceil(filteredProducts.length / PRODUCT_PER_PAGE);
+
+  const changeLike = async (productPostId: number) => {
+    setLikedProducts((prev) =>
+      prev.includes(productPostId)
+        ? prev.filter((id) => id !== productPostId)
+        : [...prev, productPostId]
+    );
     await postWishProduct({ productPostId });
   };
 
-  // 선택된 탭이 변경되면 페이지를 1로 초기화
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedText]);
+  }, [selectedText, sortBy, sortOrder]);
 
   const currentProducts = filteredProducts.slice(
     startIndex,
     startIndex + PRODUCT_PER_PAGE
   );
+
+  const handleCategoryClick = (
+    category: 'ALL' | 'LIFESTYLE' | 'FOOD' | 'FASHION'
+  ) => {
+    setSelectedCategory(category);
+    if (category === 'ALL') {
+      navigate('/products');
+    } else {
+      navigate(`/products?category=${category}`);
+    }
+  };
 
   return (
     <QueryHandler isLoading={isLoading} isError={isError}>
@@ -104,6 +152,70 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
             </TabText>
           </TextWrapper>
           {input && <SearchTitle>{input}에 대한 검색 결과</SearchTitle>}
+          <CategoryButtons>
+            <CategoryButton
+              onClick={() => handleCategoryClick('ALL')}
+              $active={selectedCategory === 'ALL'}
+            >
+              전체
+            </CategoryButton>
+            <CategoryButton
+              onClick={() => handleCategoryClick('FOOD')}
+              $active={selectedCategory === 'FOOD'}
+            >
+              FOOD
+            </CategoryButton>
+            <CategoryButton
+              onClick={() => handleCategoryClick('LIFESTYLE')}
+              $active={selectedCategory === 'LIFESTYLE'}
+            >
+              LIFESTYLE
+            </CategoryButton>
+            <CategoryButton
+              onClick={() => handleCategoryClick('FASHION')}
+              $active={selectedCategory === 'FASHION'}
+            >
+              FASHION
+            </CategoryButton>
+          </CategoryButtons>
+          <SortButtons>
+            <SortButton
+              onClick={() => {
+                setSortBy('rating');
+                setSortOrder('desc');
+              }}
+              $active={sortBy === 'rating' && sortOrder === 'desc'}
+            >
+              별점 높은순
+            </SortButton>
+            <SortButton
+              onClick={() => {
+                setSortBy('rating');
+                setSortOrder('asc');
+              }}
+              $active={sortBy === 'rating' && sortOrder === 'asc'}
+            >
+              별점 낮은순
+            </SortButton>
+            <SortButton
+              onClick={() => {
+                setSortBy('discountprice');
+                setSortOrder('desc');
+              }}
+              $active={sortBy === 'discountprice' && sortOrder === 'desc'}
+            >
+              가격 높은순
+            </SortButton>
+            <SortButton
+              onClick={() => {
+                setSortBy('discountprice');
+                setSortOrder('asc');
+              }}
+              $active={sortBy === 'discountprice' && sortOrder === 'asc'}
+            >
+              가격 낮은순
+            </SortButton>
+          </SortButtons>
         </ProductHeader>
 
         <ProductCardWrapper>
@@ -179,7 +291,6 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
   );
 };
 
-// Additional styled components specific to ProductComponent
 const ProductHeader = styled.div`
   width: 100%;
   margin-bottom: 20px;
@@ -208,6 +319,32 @@ const SearchTitle = styled.h3`
   font-size: 18px;
   color: #333;
   margin: 10px 0;
+`;
+
+const SortButtons = styled.div`
+  display: flex;
+  gap: 8px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  width: 100%;
+`;
+
+const SortButton = styled.button<{ $active: boolean }>`
+  padding: 6px 12px;
+  border: 1px solid ${({ $active }) => ($active ? '#2563eb' : '#e5e7eb')};
+  border-radius: 4px;
+  background-color: ${({ $active }) => ($active ? '#2563eb' : 'white')};
+  color: ${({ $active }) => ($active ? 'white' : '#4b5563')};
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: ${({ $active }) => ($active ? '#1d4ed8' : '#f3f4f6')};
+    border-color: ${({ $active }) => ($active ? '#1d4ed8' : '#d1d5db')};
+  }
 `;
 
 const NoProductMessage = styled.div`
@@ -282,6 +419,30 @@ const LikeButton = styled.button<{ $likes: boolean }>`
   svg {
     color: ${({ $likes }) => ($likes ? '#ff4d4f' : '#999')};
     font-size: 20px;
+  }
+`;
+
+const CategoryButtons = styled.div`
+  display: flex;
+  gap: 8px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+`;
+
+const CategoryButton = styled.button<{ $active: boolean }>`
+  padding: 8px 16px;
+  border: 1px solid ${({ $active }) => ($active ? '#2563eb' : '#e5e7eb')};
+  border-radius: 20px;
+  background-color: ${({ $active }) => ($active ? '#2563eb' : 'white')};
+  color: ${({ $active }) => ($active ? 'white' : '#4b5563')};
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: ${({ $active }) => ($active ? '#1d4ed8' : '#f3f4f6')};
+    border-color: ${({ $active }) => ($active ? '#1d4ed8' : '#d1d5db')};
   }
 `;
 

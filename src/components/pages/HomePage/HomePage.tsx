@@ -17,8 +17,13 @@ const HomePage: React.FC = () => {
       p.discountprice > 1
   );
 
-  //할인율이 가장 높은 물건을 인기 상품으로
-  const popularProduct = availableProduct?.sort(
+  // 별점이 높은 순서로 정렬
+  const recommendProduct = availableProduct?.sort(
+    (a, b) => b.rating - a.rating
+  );
+
+  // recommendProduct 중 가격 할인율이 높은 순서로 정렬
+  const popularProduct = recommendProduct?.sort(
     (a, b) =>
       (b.originalprice - b.discountprice) / b.originalprice -
       (a.originalprice - a.discountprice) / a.originalprice
@@ -42,7 +47,7 @@ const HomePage: React.FC = () => {
       <ContainerBox data-testid="container-box">
         <Container>
           <div data-testid="recommend-product">
-            <RecommendProduct products={availableProduct} />
+            <RecommendProduct products={recommendProduct} />
           </div>
         </Container>
       </ContainerBox>

@@ -18,7 +18,7 @@ import {
   ProductStar,
   ProductWrapper,
   Recommend,
-  RecommendTitle,
+  SectionTitle,
   StyledLink,
   StyledMoreButton,
 } from './style/CardStyle';
@@ -83,9 +83,7 @@ const CategoryProduct: React.FC<CategoryProductsProps> = ({
     <QueryHandler isLoading={isLoading} isError={isError}>
       <Recommend>
         <CategoryWrapper>
-          <RecommendTitle onClick={handleToggle}>
-            {selectedCategory}
-          </RecommendTitle>
+          <SectionTitle onClick={handleToggle}>{selectedCategory}</SectionTitle>
           <CategoryContainer $expanded={isExpanded}>
             {categories.map((category, index) => (
               <CategoryItem

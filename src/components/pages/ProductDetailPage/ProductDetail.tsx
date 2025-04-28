@@ -33,6 +33,14 @@ const ProductDetail: React.FC = () => {
   const isOutOfStock = product ? product.currentStock <= 0 || isSoldOut : false;
   const isDeadlinePassed = remainingTime === '마감되었습니다.';
   const isButtonDisabled = isOutOfStock || isDeadlinePassed;
+
+  // 리뷰들의 평균 별점 계산
+  const averageRating = useMemo(() => {
+    if (!product?.reviews || product.reviews.length === 0) return 0;
+    const sum = product.reviews.reduce((acc, review) => acc + review.rating, 0);
+    return sum / product.reviews.length;
+  }, [product?.reviews]);
+
   useEffect(() => {
     if (!product) return;
 
@@ -115,7 +123,7 @@ const ProductDetail: React.FC = () => {
                 onError={(e) => (e.currentTarget.src = DEFAULT_IMG)}
               />
               <Stars>
-                <StarRating rating={product.rating} />
+                <StarRating rating={averageRating} />
               </Stars>
             </ImageSection>
             <InfoSection>

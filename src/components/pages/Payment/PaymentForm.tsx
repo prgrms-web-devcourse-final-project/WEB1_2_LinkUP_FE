@@ -56,10 +56,6 @@ const PaymentForm = () => {
       alert('상세 주소를 입력해주세요.');
       return false;
     }
-    if (!needed.trim()) {
-      alert('배송 시 요청사항을 입력해주세요.');
-      return false;
-    }
     if (!payment) {
       alert('결제 방법을 선택해주세요.');
       return false;
@@ -163,11 +159,11 @@ const PaymentForm = () => {
 
               <FormGroup>
                 <Label>
-                  배송 시 요청사항
+                  배송 시 요청사항 (선택)
                   <InputWrapper>
                     <TextArea
                       rows={2}
-                      placeholder="요청사항 입력"
+                      placeholder="요청사항을 입력해주세요 (선택사항)"
                       value={needed}
                       data-testid="needed"
                       onChange={(e) => setNeeded(e.target.value)}
@@ -316,10 +312,32 @@ const InputWrapper = styled.div`
 const BasicAddressInput = styled(Input)`
   flex-grow: 1;
   cursor: pointer;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 12px;
+  position: relative;
+
+  &::after {
+    content: '🔍';
+    color: #94a3b8;
+    font-size: 1rem;
+    position: absolute;
+    right: 12px;
+  }
+
+  &:hover {
+    background-color: #f1f5f9;
+    border-color: #2563eb;
+  }
 `;
 
 const DetailAddressInput = styled(Input)`
   margin-top: 8px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
 `;
 const TextArea = styled.textarea`
   width: 100%;

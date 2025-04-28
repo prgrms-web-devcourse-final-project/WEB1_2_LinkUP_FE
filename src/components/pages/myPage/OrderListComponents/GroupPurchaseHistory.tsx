@@ -71,13 +71,29 @@ const GroupPurchaseHistory = () => {
     const fetchGroupPurchaseHistory = async () => {
       try {
         const response = await getCommunity();
-        setGroupPurchaseList(response);
+        // 작성일자가 최신순으로 정렬
+        const sortedGroupPurchases = response.sort(
+          (a: GroupPurchaseType, b: GroupPurchaseType) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        setGroupPurchaseList(sortedGroupPurchases);
       } catch (error) {
         console.error('failed', error);
       }
     };
     fetchGroupPurchaseHistory();
   }, []);
+
+  const formatDate = (isoString: string) => {
+    const date = new Date(isoString);
+    return date.toLocaleString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   const getStatusLabel = (status: string): string => {
     return STATUS_MAP[status] || '알 수 없는 상태';
@@ -113,6 +129,9 @@ const GroupPurchaseHistory = () => {
                   공동구매 글 제목 : {groupPurchase.title}
                 </ProductName>
                 <ProductInfo>수량: {groupPurchase.availableNumber}</ProductInfo>
+                <ProductInfo>
+                  작성일: {formatDate(groupPurchase.createdAt)}
+                </ProductInfo>
                 <StatusBadge status={groupPurchase.status}>
                   {getStatusLabel(groupPurchase.status)}
                 </StatusBadge>

@@ -5,7 +5,7 @@ export const getImageSrc = (
     return '';
   }
 
-  const baseUrl = process.env.VITE_API_URL || 'https://goodbuyus.store/';
+  const baseUrl = process.env.VITE_API_URL || 'https://goodbuyus.store';
 
   if (typeof image === 'string') {
     if (image.startsWith('http')) {
@@ -26,7 +26,7 @@ export const getImageSrc = (
       );
       return `${baseUrl}/api/upload/${cleanedImagePath}`;
     }
-    // 그 외의 경우 그대로 사용
+    // 그 외의 경우 /api/upload/ 경로를 추가
     return `${baseUrl}/api/upload/${image}`;
   } else if (image instanceof File) {
     return URL.createObjectURL(image);

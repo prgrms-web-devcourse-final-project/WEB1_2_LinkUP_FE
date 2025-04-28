@@ -14,14 +14,26 @@ const GroupPurchaseHistory = () => {
   >([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-
+  const myId = sessionStorage.getItem('userid');
   //사용자 리뷰 모달
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // 리뷰 제출
+  const [selectedGroupPurchase, setSelectedGroupPurchase] =
+    useState<GroupPurchaseType | null>(null);
+  const [reviewedPosts, setReviewedPosts] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    const savedReviewedPosts = sessionStorage.getItem('reviewedPosts');
+    if (savedReviewedPosts) {
+      setReviewedPosts(new Set(JSON.parse(savedReviewedPosts)));
+    }
+  }, []);
+
   const handleSubmit = async (ratings: Question[], review: string) => {
+    if (!selectedGroupPurchase) return;
+
     const reviewContent = {
-      reviewerId: 2,
-      hostId: 2,
+      reviewerId: Number(myId),
+      hostId: selectedGroupPurchase.userId,
       question1Score: ratings[0]?.rating ?? null,
       question2Score: ratings[1]?.rating ?? null,
       question3Score: ratings[2]?.rating ?? null,
@@ -30,11 +42,27 @@ const GroupPurchaseHistory = () => {
 
     try {
       await reviewUser(reviewContent);
+      const newReviewedPosts = new Set(reviewedPosts);
+      newReviewedPosts.add(selectedGroupPurchase.communityPostId);
+      setReviewedPosts(newReviewedPosts);
+      sessionStorage.setItem(
+        'reviewedPosts',
+        JSON.stringify(Array.from(newReviewedPosts))
+      );
       alert('리뷰가 성공적으로 제출되었습니다.');
-      setIsModalOpen(false); // 모달 닫기
+      setIsModalOpen(false);
     } catch {
       alert('리뷰 제출에 실패했습니다. 다시 시도해주세요.');
     }
+  };
+
+  const handleReviewClick = (groupPurchase: GroupPurchaseType) => {
+    if (reviewedPosts.has(groupPurchase.communityPostId)) {
+      alert('이미 작성한 리뷰입니다.');
+      return;
+    }
+    setSelectedGroupPurchase(groupPurchase);
+    setIsModalOpen(true);
   };
 
   const navigate = useNavigate();
@@ -100,14 +128,17 @@ const GroupPurchaseHistory = () => {
                 상품 페이지 이동
               </ActionButton>
               {(groupPurchase.status === 'APPROVED' ||
-                groupPurchase.status === 'PAYMENT_COMPLETED') && (
-                <>
-                  <ReviewLink onClick={() => setIsModalOpen(true)}>
-                    <ReviewIcon src="/images/qricon.png" alt="review icon" />
-                    <span>리뷰 작성하기</span>
-                  </ReviewLink>
-                </>
-              )}
+                groupPurchase.status === 'PAYMENT_COMPLETED') &&
+                Number(groupPurchase.userId) !== Number(myId) && (
+                  <>
+                    <ReviewLink
+                      onClick={() => handleReviewClick(groupPurchase)}
+                    >
+                      <ReviewIcon src="/images/qricon.png" alt="review icon" />
+                      <span>리뷰 작성하기</span>
+                    </ReviewLink>
+                  </>
+                )}
 
               {groupPurchase.status === 'NOT_APPROVED' && (
                 <>
@@ -125,7 +156,10 @@ const GroupPurchaseHistory = () => {
       />
       <ReviewModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedGroupPurchase(null);
+        }}
         onSubmit={handleSubmit}
       />
     </Container>

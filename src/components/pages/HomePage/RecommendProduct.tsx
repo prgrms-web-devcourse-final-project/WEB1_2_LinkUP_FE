@@ -32,8 +32,11 @@ const RecommendProduct: React.FC<PopularProductsListProps> = ({ products }) => {
   }
 
   const getTopProducts = (products: AllProducts[]): AllProducts[] => {
+    // 별점이 높은 순서로 정렬
+    const sortedByRating = [...products].sort((a, b) => b.rating - a.rating);
+
     // 상위 8개 선택
-    return products.slice(0, 8);
+    return sortedByRating.slice(0, 8);
   };
 
   const displayedProducts = useMemo(() => getTopProducts(products), [products]);

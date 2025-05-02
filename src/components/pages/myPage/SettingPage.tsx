@@ -36,7 +36,6 @@ const SettingPage = () => {
     const fetchUser = async () => {
       try {
         const response = await getUser();
-        console.log(response);
         setName(response.name);
         setNickname(response.nickname);
         setNumber(formatPhoneNumber(response.phoneNum));

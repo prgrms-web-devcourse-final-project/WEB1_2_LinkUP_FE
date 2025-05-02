@@ -19,15 +19,6 @@ const GroupPurchaseHistory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGroupPurchase, setSelectedGroupPurchase] =
     useState<GroupPurchaseType | null>(null);
-  const [reviewedPosts, setReviewedPosts] = useState<Set<number>>(new Set());
-
-  useEffect(() => {
-    const savedReviewedPosts = sessionStorage.getItem('reviewedPosts');
-    if (savedReviewedPosts) {
-      setReviewedPosts(new Set(JSON.parse(savedReviewedPosts)));
-    }
-  }, []);
-
   const handleSubmit = async (ratings: Question[], review: string) => {
     if (!selectedGroupPurchase) return;
 
@@ -42,25 +33,13 @@ const GroupPurchaseHistory = () => {
 
     try {
       await reviewUser(reviewContent);
-      const newReviewedPosts = new Set(reviewedPosts);
-      newReviewedPosts.add(selectedGroupPurchase.communityPostId);
-      setReviewedPosts(newReviewedPosts);
-      sessionStorage.setItem(
-        'reviewedPosts',
-        JSON.stringify(Array.from(newReviewedPosts))
-      );
-      alert('리뷰가 성공적으로 제출되었습니다.');
       setIsModalOpen(false);
     } catch {
-      alert('리뷰 제출에 실패했습니다. 다시 시도해주세요.');
+      // 에러는 reviewApi에서 처리
     }
   };
 
   const handleReviewClick = (groupPurchase: GroupPurchaseType) => {
-    if (reviewedPosts.has(groupPurchase.communityPostId)) {
-      alert('이미 작성한 리뷰입니다.');
-      return;
-    }
     setSelectedGroupPurchase(groupPurchase);
     setIsModalOpen(true);
   };
@@ -132,7 +111,7 @@ const GroupPurchaseHistory = () => {
                 <ProductInfo>
                   작성일: {formatDate(groupPurchase.createdAt)}
                 </ProductInfo>
-                <StatusBadge status={groupPurchase.status}>
+                <StatusBadge $status={groupPurchase.status}>
                   {getStatusLabel(groupPurchase.status)}
                 </StatusBadge>
               </GroupPurchaseDetails>
@@ -149,20 +128,14 @@ const GroupPurchaseHistory = () => {
               {(groupPurchase.status === 'APPROVED' ||
                 groupPurchase.status === 'PAYMENT_COMPLETED') &&
                 Number(groupPurchase.userId) !== Number(myId) && (
-                  <>
-                    <ReviewLink
-                      onClick={() => handleReviewClick(groupPurchase)}
-                    >
-                      <ReviewIcon src="/images/qricon.png" alt="review icon" />
-                      <span>리뷰 작성하기</span>
-                    </ReviewLink>
-                  </>
+                  <ReviewLink onClick={() => handleReviewClick(groupPurchase)}>
+                    <ReviewIcon src="/images/qricon.png" alt="review icon" />
+                    <span>리뷰 작성하기</span>
+                  </ReviewLink>
                 )}
 
               {groupPurchase.status === 'NOT_APPROVED' && (
-                <>
-                  <CancelButton>주문 취소하기</CancelButton>
-                </>
+                <CancelButton>주문 취소하기</CancelButton>
               )}
             </Actions>
           </GroupPurchaseItem>
@@ -267,7 +240,7 @@ const ProductInfo = styled.div`
   color: #5b7aac;
 `;
 
-const StatusBadge = styled.div<{ status: string }>`
+const StatusBadge = styled.div<{ $status: string }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -278,14 +251,14 @@ const StatusBadge = styled.div<{ status: string }>`
   width: 100px;
   box-sizing: border-box;
 
-  ${({ status }) => {
-    if (status === 'APPROVED' || status === 'PAYMENT_COMPLETED') {
+  ${({ $status }) => {
+    if ($status === 'APPROVED' || $status === 'PAYMENT_COMPLETED') {
       return `
         color: #0062ff;
         background-color: rgba(0, 98, 255, 0.1);
         border: 1px solid rgba(0, 98, 255, 0.3);
       `;
-    } else if (status === 'REJECTED' || status === 'DELETED') {
+    } else if ($status === 'REJECTED' || $status === 'DELETED') {
       return `
         color: #ff3a4c;
         background-color: rgba(255, 58, 76, 0.1);

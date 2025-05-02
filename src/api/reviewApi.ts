@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios';
 import axiosInstance from './axiosInstance';
 
 interface reviewForm {
@@ -8,12 +9,22 @@ interface reviewForm {
   question3Score: number | null;
   content: string;
 }
+
 export const reviewUser = async (payload: reviewForm) => {
   try {
     const URL = `/api/community/review`;
     const response = await axiosInstance.post(URL, payload);
     return response.data;
-  } catch {
-    throw new Error('상품 정보를 가져오는 데 실패했습니다.');
+  } catch (error: unknown) {
+    if (
+      error instanceof AxiosError &&
+      error.response?.data?.error ===
+        '이미 이 사용자에 대한 리뷰를 작성하였습니다.'
+    ) {
+      alert('이미 리뷰를 작성하셨습니다.');
+    } else {
+      alert('리뷰 제출에 실패했습니다. 다시 시도해주세요.');
+    }
+    throw error;
   }
 };

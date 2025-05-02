@@ -20,7 +20,6 @@ const PostList: React.FC<PostListProps> = ({ selectedCategory }) => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const { data: posts, isLoading, isError } = usePostsQuery();
-  console.log(posts);
   // 선택된 카테고리에 따른 게시글 필터링
   const categoryFilteredPosts = posts
     ? posts

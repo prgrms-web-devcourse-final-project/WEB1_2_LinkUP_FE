@@ -9,7 +9,8 @@ import { categories } from './model/categories';
 
 const HomePage: React.FC = () => {
   const { data: products, isLoading, isError } = useProductsQuery();
-  console.log(products);
+  // 상품 데이터 처리
+
   const availableProduct = products?.filter(
     (p) =>
       p.available === true &&

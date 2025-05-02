@@ -114,6 +114,18 @@ const Sidemenu = () => {
           설정
         </MenuItem>
         <MenuItem
+          $isActive={isActive('/mypage/review')}
+          onClick={() => navigate('/mypage/review')}
+        >
+          <img
+            src={`/images/review${isActive('/mypage/review') ? '_on' : ''}.png`}
+            width={24}
+            height={24}
+            alt="Icon"
+          />
+          내 리뷰
+        </MenuItem>
+        <MenuItem
           $isActive={isActive('/mypage/orderlist')}
           onClick={() => navigate('/mypage/orderlist')}
         >

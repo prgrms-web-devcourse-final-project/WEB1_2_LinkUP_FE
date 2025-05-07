@@ -3,12 +3,10 @@ import styled from 'styled-components';
 import WriteButton from './WriteButton';
 import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
-
-import { formatDateWithOffset } from '../../utils/formatDate';
-import { getImageSrc } from '../../utils/GetImageSrc';
 import { usePostsQuery } from '../../hooks/useGetPost';
 import { QueryHandler } from '../../hooks/useGetProduct';
 import { AdminPost } from '../../types/postTypes';
+import PostItem from './PostItem';
 
 interface PostListProps {
   selectedCategory: string;
@@ -20,6 +18,7 @@ const PostList: React.FC<PostListProps> = ({ selectedCategory }) => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const { data: posts, isLoading, isError } = usePostsQuery();
+
   // 선택된 카테고리에 따른 게시글 필터링
   const categoryFilteredPosts = posts
     ? posts
@@ -75,35 +74,13 @@ const PostList: React.FC<PostListProps> = ({ selectedCategory }) => {
             선택된 카테고리에 해당하는 게시글이 없습니다.
           </NoPostMessage>
         ) : (
-          currentPosts.map((post: AdminPost) => (
+          currentPosts.map((post) => (
             <PostItem
               key={post.communityPostId}
+              post={post}
+              selectedCategory={selectedCategory}
               onClick={() => handlePostClick(post.communityPostId)}
-            >
-              <PostImage
-                src={getImageSrc(post.imageUrls[0])}
-                alt={`post.title`}
-              />
-              <PostContent>
-                <PostTitle>글 제목 : {post.title}</PostTitle>
-                <PostDetails>
-                  <PostMeta>
-                    <PostAuthor>작성자 : {post.nickname}</PostAuthor>
-                    <PostDate>{formatDateWithOffset(post.createdAt)}</PostDate>
-                  </PostMeta>
-                  {selectedCategory !== 'NOT_APPROVED' && (
-                    <PostDate>
-                      <PostAuthor>
-                        마감 기한 : 글 작성으로부터 {post.period}일
-                      </PostAuthor>
-                    </PostDate>
-                  )}
-                  <PostJoinStatus>
-                    최대 참여 : {post.availableNumber}
-                  </PostJoinStatus>
-                </PostDetails>
-              </PostContent>
-            </PostItem>
+            />
           ))
         )}
 
@@ -132,73 +109,6 @@ const ActionsContainer = styled.div`
   justify-content: flex-end;
   align-items: center;
   margin-bottom: 24px;
-`;
-
-const PostItem = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  margin-bottom: 24px;
-  background-color: white;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-  }
-`;
-
-const PostImage = styled.img`
-  width: 172px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-right: 16px;
-`;
-const PostContent = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 6px; /* 요소 간 간격 */
-`;
-
-const PostTitle = styled.h3`
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 4px;
-`;
-
-const PostAuthor = styled.span`
-  color: #475569;
-`;
-
-const PostDetails = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-`;
-
-const PostMeta = styled.div`
-  display: flex;
-  justify-content: space-between; /* 작성자 & 날짜 한 줄 배치 */
-  align-items: center;
-  font-size: 0.875rem;
-  color: #64748b;
-`;
-
-const PostDate = styled.span`
-  font-size: 0.75rem;
-  color: #94a3b8;
-`;
-
-const PostJoinStatus = styled.div`
-  color: #2563eb;
-  font-weight: 600;
 `;
 
 const NoPostMessage = styled.p`

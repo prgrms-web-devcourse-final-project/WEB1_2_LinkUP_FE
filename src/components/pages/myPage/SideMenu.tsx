@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { getUser } from '../../../api/mypageApi';
 import default_profile from '../../../../public/images/origin.png';
 import { getImageSrc } from '../../../utils/GetImageSrc';
+import { MdOutlineRateReview } from 'react-icons/md';
 
 const ProfileImage = styled.img`
   width: 100%;
@@ -117,11 +118,9 @@ const Sidemenu = () => {
           $isActive={isActive('/mypage/review')}
           onClick={() => navigate('/mypage/review')}
         >
-          <img
-            src={`/images/review${isActive('/mypage/review') ? '_on' : ''}.png`}
-            width={24}
-            height={24}
-            alt="Icon"
+          <MdOutlineRateReview
+            size={24}
+            color={isActive('/mypage/review') ? '#fff' : '#4a6b8a'}
           />
           내 리뷰
         </MenuItem>

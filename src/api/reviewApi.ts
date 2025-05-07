@@ -43,7 +43,6 @@ export const getMyReviews = async (userId: number): Promise<ReviewType> => {
   try {
     const URL = `/api/mypage/${userId}/reviews`;
     const response = await axiosInstance.get<ReviewType>(URL);
-    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error('리뷰를 불러오는데 실패했습니다.', error);

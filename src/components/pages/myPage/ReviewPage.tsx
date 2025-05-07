@@ -5,9 +5,96 @@ import { ReviewType } from '../../../types/review';
 import SideMenu from './SideMenu';
 import GS from './GS';
 import Pagination from '../../common/Pagination';
-import StarRating from '../../common/StarRating';
+import { PageTitle } from './OrderListPage';
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10; // 한 페이지에 표시할 카드 수
+const MAX_CONTENT_LENGTH = 80; // 내용 미리보기 최대 길이 (글자수)
+
+// 모달 컴포넌트 인터페이스 정의
+interface ReviewModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  review: {
+    reviewerId: number;
+    nickname: string;
+    reviewContent: string;
+  };
+}
+
+// 모달 컴포넌트
+const ReviewModal: React.FC<ReviewModalProps> = ({
+  isOpen,
+  onClose,
+  review,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <ModalOverlay onClick={onClose}>
+      <ModalContent onClick={(e) => e.stopPropagation()}>
+        <ModalHeader>
+          <ProfileInitial>{review.nickname.charAt(0)}</ProfileInitial>
+          <ReviewerName>{review.nickname}</ReviewerName>
+          <CloseButton onClick={onClose}>&times;</CloseButton>
+        </ModalHeader>
+        <ModalBody>
+          <FullReviewContent>{review.reviewContent}</FullReviewContent>
+        </ModalBody>
+      </ModalContent>
+    </ModalOverlay>
+  );
+};
+
+// 리뷰 카드를 위한 인터페이스 정의
+interface ReviewCardProps {
+  review: {
+    reviewerId: number;
+    nickname: string;
+    reviewContent: string;
+  };
+}
+
+// 리뷰 카드 컴포넌트
+const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 글자 수 기준으로 내용이 긴지 확인
+  const isLongContent = review.reviewContent.length > MAX_CONTENT_LENGTH;
+
+  // 표시할 내용 처리 (글자 수 제한)
+  const displayContent = isLongContent
+    ? `${review.reviewContent.substring(0, MAX_CONTENT_LENGTH)}...`
+    : review.reviewContent;
+
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  return (
+    <>
+      <ReviewItem>
+        <ReviewHeader>
+          <ProfileInitial>{review.nickname.charAt(0)}</ProfileInitial>
+          <ReviewerName>{review.nickname}</ReviewerName>
+        </ReviewHeader>
+
+        <ReviewContentWrapper>
+          <ReviewContent>{displayContent}</ReviewContent>
+
+          {isLongContent && (
+            <ShowMoreButton onClick={openModal}>더보기</ShowMoreButton>
+          )}
+        </ReviewContentWrapper>
+      </ReviewItem>
+
+      <ReviewModal isOpen={isModalOpen} onClose={closeModal} review={review} />
+    </>
+  );
+};
 
 const ReviewPage = () => {
   const [reviewData, setReviewData] = useState<ReviewType | null>(null);
@@ -34,6 +121,7 @@ const ReviewPage = () => {
   const totalPages = reviewData
     ? Math.ceil(reviewData.reviews.length / ITEMS_PER_PAGE)
     : 0;
+
   const currentReviews = reviewData?.reviews.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
@@ -49,7 +137,7 @@ const ReviewPage = () => {
       <SideMenu />
       <GS.Content>
         <PageHeader>
-          <Title>내가 받은 리뷰</Title>
+          <PageTitle>내가 받은 리뷰</PageTitle>
           <SubTitle>
             다른 사용자들이 나에게 남긴 리뷰 내역을 확인해보세요.
           </SubTitle>
@@ -71,36 +159,14 @@ const ReviewPage = () => {
           </EmptyState>
         ) : (
           <>
-            <AverageRatingCard>
-              <AverageRatingHeader>
-                <AverageLabel>평균 평점</AverageLabel>
-                <Badge>{reviewData.reviews.length}개의 리뷰</Badge>
-              </AverageRatingHeader>
-              <AverageRatingContent>
-                <BigRatingValue>{reviewData.rating.toFixed(1)}</BigRatingValue>
-                <BigStarsContainer>
-                  <StarRating rating={reviewData.rating} />
-                </BigStarsContainer>
-              </AverageRatingContent>
-            </AverageRatingCard>
-
-            <ReviewList>
+            <ReviewGrid>
               {currentReviews?.map((review, index) => (
-                <ReviewItem key={`${review.reviewerId}-${index}`}>
-                  <ReviewLeft>
-                    <ReviewerProfile>
-                      <ProfileInitial>
-                        {review.nickname.charAt(0)}
-                      </ProfileInitial>
-                    </ReviewerProfile>
-                    <ReviewerName>{review.nickname}</ReviewerName>
-                  </ReviewLeft>
-                  <ReviewRight>
-                    <ReviewContent>{review.reviewContent}</ReviewContent>
-                  </ReviewRight>
-                </ReviewItem>
+                <ReviewCard
+                  key={`${review.reviewerId}-${index}`}
+                  review={review}
+                />
               ))}
-            </ReviewList>
+            </ReviewGrid>
 
             {totalPages > 1 && (
               <PaginationWrapper>
@@ -120,13 +186,6 @@ const ReviewPage = () => {
 
 const PageHeader = styled.div`
   margin-bottom: 32px;
-`;
-
-const Title = styled.h1`
-  font-size: 26px;
-  font-weight: 700;
-  color: #3b82f6;
-  margin-bottom: 8px;
 `;
 
 const SubTitle = styled.p`
@@ -190,87 +249,45 @@ const EmptyDescription = styled.p`
   max-width: 400px;
 `;
 
-const AverageRatingCard = styled.div`
-  background: linear-gradient(145deg, #60a5fa, #93c5fd);
-  color: white;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-`;
-
-const AverageRatingHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-`;
-
-const AverageLabel = styled.span`
-  font-size: 16px;
-  font-weight: 500;
-`;
-
-const Badge = styled.span`
-  background-color: rgba(255, 255, 255, 0.2);
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-`;
-
-const AverageRatingContent = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-`;
-
-const BigRatingValue = styled.span`
-  font-size: 48px;
-  font-weight: 700;
-  line-height: 1;
-`;
-
-const BigStarsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
-
-const ReviewList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+// 그리드 레이아웃
+const ReviewGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
   margin-bottom: 32px;
 `;
 
+// 카드 스타일
 const ReviewItem = styled.div`
-  padding: 16px;
+  width: 250px;
+  aspect-ratio: 1.9 / 0.9;
+  padding: 20px;
   background-color: white;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid #e5e7eb;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   transition: all 0.2s ease;
   display: flex;
-  gap: 20px;
+  flex-direction: column;
+  overflow: hidden;
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(59, 130, 246, 0.15);
     border-color: #bfdbfe;
   }
 `;
 
-const ReviewLeft = styled.div`
+const ReviewHeader = styled.div`
   display: flex;
-  flex-direction: column;
   align-items: center;
-  min-width: 100px;
-  border-right: 1px solid #e5e7eb;
-  padding-right: 16px;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 16px;
 `;
 
-const ReviewerProfile = styled.div`
+const ProfileInitial = styled.div`
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -278,41 +295,129 @@ const ReviewerProfile = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 8px;
-`;
-
-const ProfileInitial = styled.span`
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: white;
   text-transform: uppercase;
 `;
 
 const ReviewerName = styled.h3`
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  color: #3b82f6;
-  margin-bottom: 6px;
-  text-align: center;
+  color: #1e3a8a;
+  margin: 0;
 `;
 
-const ReviewRight = styled.div`
-  flex: 1;
+const ReviewContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+  flex: 1;
+  overflow: hidden;
 `;
 
 const ReviewContent = styled.p`
   font-size: 14px;
   color: #334155;
-  line-height: 1.5;
+  line-height: 1.6;
+  margin: 0;
+  overflow: hidden;
+  flex: 1;
+`;
+
+const ShowMoreButton = styled.button`
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0;
+  cursor: pointer;
+  align-self: flex-start;
+  margin-top: auto;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 const PaginationWrapper = styled.div`
   display: flex;
   justify-content: center;
   margin-top: 16px;
+`;
+
+// 모달 스타일
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  border-radius: 12px;
+  padding: 0;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  position: relative;
+`;
+
+const CloseButton = styled.button`
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+
+  &:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+  }
+`;
+
+const ModalBody = styled.div`
+  padding: 20px;
+  overflow-y: auto;
+  max-height: calc(80vh - 80px);
+`;
+
+const FullReviewContent = styled.p`
+  font-size: 16px;
+  color: #334155;
+  line-height: 1.8;
+  margin: 0;
+  white-space: pre-wrap;
 `;
 
 export default ReviewPage;

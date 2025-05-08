@@ -17,13 +17,6 @@ const StarRating: React.FC<StarRatingProps> = ({
   emptyColor = '#e0e0e0',
   maxStars = 5,
 }) => {
-  // 콘솔에 디버깅 정보 출력 (개발 중에만 사용)
-  console.log('StarRating received:', {
-    originalRating: rating,
-
-    type: typeof rating,
-  });
-
   const renderStars = () => {
     const stars = [];
 

@@ -193,7 +193,14 @@ export const CategoryItem = styled.div<{ $selected: boolean }>`
   }
 `;
 export const Recommend = ProductSection;
-export const RecommendTitle = SectionTitle;
+
+export const RecommendTitle = styled.h2`
+  text-decoration: none;
+  margin-left: 10px;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  color: #333;
+`;
 export const PageContainer = styled.div`
   display: flex;
   justify-content: center;
@@ -269,7 +276,6 @@ export const BannerStar = styled.div`
   margin-bottom: 1rem;
 
   svg {
-    color: #ffc107;
     font-size: 1.2rem;
   }
 `;

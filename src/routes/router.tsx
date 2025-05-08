@@ -38,6 +38,7 @@ import ProtectedRoutes from './ProtectedRoutes';
 import ParticipantsForm from '../components/pages/Payment/ParticipantsForm';
 import AuthorForm from '../components/pages/Payment/AuthorForm';
 import PaymentSuccessPage from '../components/pages/Payment/PaymentSuccessPage';
+import ReviewPage from '../components/pages/myPage/ReviewPage';
 
 const router = createBrowserRouter(
   [
@@ -180,6 +181,14 @@ const router = createBrowserRouter(
               element: (
                 <ProtectedRoutes>
                   <SettingPage />
+                </ProtectedRoutes>
+              ),
+            },
+            {
+              path: 'review',
+              element: (
+                <ProtectedRoutes>
+                  <ReviewPage />
                 </ProtectedRoutes>
               ),
             },

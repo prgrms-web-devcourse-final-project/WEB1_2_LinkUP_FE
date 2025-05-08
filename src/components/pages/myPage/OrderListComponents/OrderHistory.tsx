@@ -38,7 +38,12 @@ const OrderHistory = () => {
   const fetchOrderList = async () => {
     try {
       const response = await getOrderList();
-      setOrderList(response);
+      // 주문일자가 최신순으로 정렬
+      const sortedOrders = response.sort(
+        (a: OrderType, b: OrderType) =>
+          new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime()
+      );
+      setOrderList(sortedOrders);
     } catch (error) {
       console.error('주문 목록을 불러오는데 실패했습니다:', error);
     }

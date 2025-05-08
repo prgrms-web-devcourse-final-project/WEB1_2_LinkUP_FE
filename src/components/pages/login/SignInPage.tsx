@@ -27,10 +27,6 @@ const SignInPage = () => {
     }
   }, [location, navigate]);
 
-  const handleSnsLogin = () => {
-    window.location.href = 'https://goodbuyus.store/api/users/sociallogin';
-  };
-
   return (
     <Wrapper>
       <LeftContent>
@@ -117,15 +113,6 @@ const SignInPage = () => {
             Login
           </LoginButton>
 
-          <SNSButton onClick={handleSnsLogin}>
-            <img
-              src="/images/naverlogo.png"
-              alt="Naver Logo"
-              style={{ width: '50px', height: '15px' }}
-            />
-            계정으로 로그인
-          </SNSButton>
-
           <AuthButtonWrapper>
             <AuthButton
               onClick={() => {
@@ -208,26 +195,6 @@ const AuthButtonWrapper = styled.div`
   display: flex;
   justify-content: space-around;
   align-items: center;
-`;
-
-const SNSButton = styled.div`
-  border: 1px solid #3498db;
-  width: 100%;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 16px;
-  border-radius: 50px;
-  font-size: 14px;
-  cursor: pointer;
-  gap: 10px;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background-color: rgba(52, 152, 219, 0.05);
-    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
-  }
 `;
 
 const LoginButton = styled.div`

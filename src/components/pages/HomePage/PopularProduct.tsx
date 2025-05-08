@@ -17,11 +17,13 @@ import {
 } from './style/CardStyle';
 
 interface PopularProductProps {
+  productRating: number | undefined;
   productId: number | undefined;
   category: string | undefined;
 }
 
 const PopularProduct: React.FC<PopularProductProps> = ({
+  productRating,
   productId,
   category,
 }) => {
@@ -50,7 +52,7 @@ const PopularProduct: React.FC<PopularProductProps> = ({
           </BannerImageWrapper>
           <BannerInfoSection>
             <BannerStar>
-              <StarRating rating={product.rating} />
+              <StarRating rating={productRating!} />
             </BannerStar>
             <BannerHeader>
               <BannerTitleArea>

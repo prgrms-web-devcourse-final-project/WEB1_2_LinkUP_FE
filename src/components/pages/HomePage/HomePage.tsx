@@ -10,7 +10,6 @@ import { categories } from './model/categories';
 const HomePage: React.FC = () => {
   const { data: products, isLoading, isError } = useProductsQuery();
   // 상품 데이터 처리
-
   const availableProduct = products?.filter(
     (p) =>
       p.available === true &&
@@ -24,11 +23,15 @@ const HomePage: React.FC = () => {
   );
 
   // recommendProduct 중 가격 할인율이 높은 순서로 정렬
-  const popularProduct = recommendProduct?.sort(
-    (a, b) =>
-      (b.originalprice - b.discountprice) / b.originalprice -
-      (a.originalprice - a.discountprice) / a.originalprice
-  )[0];
+  const now = new Date();
+
+  // 인기상품 -> 마감임박 순서 중 평점 4점 이상 상품 추천으로 변경
+  const popularProduct = availableProduct
+    ?.filter((product) => product.rating >= 4)
+    ?.sort(
+      (a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
+    )
+    ?.find((product) => new Date(product.deadline).getTime() > now.getTime());
 
   return (
     <QueryHandler isLoading={isLoading} isError={isError}>
@@ -39,6 +42,7 @@ const HomePage: React.FC = () => {
             data-testid="popular-product"
           >
             <PopularProduct
+              productRating={popularProduct?.rating}
               productId={popularProduct?.productPostId}
               category={popularProduct?.category}
             />

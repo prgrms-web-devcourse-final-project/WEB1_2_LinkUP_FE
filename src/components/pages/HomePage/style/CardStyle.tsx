@@ -276,7 +276,6 @@ export const BannerStar = styled.div`
   margin-bottom: 1rem;
 
   svg {
-    color: #ffc107;
     font-size: 1.2rem;
   }
 `;

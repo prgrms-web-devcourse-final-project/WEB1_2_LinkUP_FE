@@ -20,12 +20,20 @@ const PostList: React.FC<PostListProps> = ({ selectedCategory }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const { data: posts, isLoading, isError } = usePostsQuery();
   const [ratingsMap, setRatingsMap] = useState<Record<number, number>>({}); // userId -> rating
+  const myId = sessionStorage.getItem('userid');
+  const numericMyId = Number(myId);
   // 리뷰 데이터 fetch
   useEffect(() => {
     const fetchRatings = async () => {
       if (!posts) return;
 
-      const userIds = [...new Set(posts.map((post) => post.userId))];
+      const userIds = [
+        ...new Set(
+          posts
+            .filter((post) => post.userId !== numericMyId)
+            .map((post) => post.userId)
+        ),
+      ];
 
       const results = await Promise.all(
         userIds.map(async (userId) => {
@@ -49,7 +57,6 @@ const PostList: React.FC<PostListProps> = ({ selectedCategory }) => {
     fetchRatings();
   }, [posts]);
 
-  // 선택된 카테고리에 따른 게시글 필터링
   const categoryFilteredPosts = posts
     ? posts
         .filter((post: AdminPost) => {
@@ -63,11 +70,20 @@ const PostList: React.FC<PostListProps> = ({ selectedCategory }) => {
             post.status !== 'REJECTED'
           );
         })
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        )
-    : []; // 최신순 정렬
+        .sort((a, b) => {
+          const aIsMine = a.userId === numericMyId;
+          const bIsMine = b.userId === numericMyId;
+
+          // 내 게시글이면 무조건 앞으로
+          if (aIsMine && !bIsMine) return -1;
+          if (!aIsMine && bIsMine) return 1;
+
+          // 둘 다 내 글 or 둘 다 다른 글이면 평점순
+          const aRating = ratingsMap[a.userId] ?? 0;
+          const bRating = ratingsMap[b.userId] ?? 0;
+          return bRating - aRating;
+        })
+    : [];
 
   useEffect(() => {
     window.scrollTo({

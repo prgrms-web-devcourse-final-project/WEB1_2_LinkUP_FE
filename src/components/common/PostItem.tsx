@@ -20,8 +20,11 @@ const PostItem: React.FC<Props> = ({
   onClick,
   rating,
 }) => {
-  const isHighRated = rating && rating >= 4.0;
+  // rating이 없는 경우 0으로 설정
+  const normalizedRating = rating ?? 0;
 
+  // 높은 평점 사용자 여부 판단
+  const isHighRated = normalizedRating >= 4.0;
   return (
     <Wrapper onClick={() => onClick(post.communityPostId)}>
       <PostImage src={getImageSrc(post.imageUrls[0])} alt={`post.title`} />

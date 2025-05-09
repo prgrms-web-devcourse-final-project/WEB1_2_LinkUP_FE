@@ -6,23 +6,27 @@ import { getImageSrc } from '../../utils/GetImageSrc';
 
 import { AdminPost } from '../../types/postTypes';
 import { FaMedal } from 'react-icons/fa'; // 이모티콘 (배지용)
-import { useUserReview } from '../../hooks/useUserReview';
 
 interface Props {
   post: AdminPost;
   selectedCategory: string;
   onClick: (id: number) => void;
+  rating?: number;
 }
 
-const PostItem: React.FC<Props> = ({ post, selectedCategory, onClick }) => {
-  const { data: review } = useUserReview(post.userId);
-  const isHighRated = review && review.rating >= 4.0;
+const PostItem: React.FC<Props> = ({
+  post,
+  selectedCategory,
+  onClick,
+  rating,
+}) => {
+  const isHighRated = rating && rating >= 4.0;
 
   return (
     <Wrapper onClick={() => onClick(post.communityPostId)}>
       <PostImage src={getImageSrc(post.imageUrls[0])} alt={`post.title`} />
       <PostContent>
-        <PostTitle>글 제목 : {post.title}</PostTitle>
+        <PostTitle>{post.title}</PostTitle>
         <PostDetails>
           <PostMeta>
             <PostAuthor>

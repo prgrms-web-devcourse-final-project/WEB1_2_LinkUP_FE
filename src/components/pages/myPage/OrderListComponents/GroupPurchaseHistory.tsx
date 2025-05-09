@@ -78,6 +78,17 @@ const GroupPurchaseHistory = () => {
     return STATUS_MAP[status] || '알 수 없는 상태';
   };
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, [currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   const paginatedGroupPurchases = groupPurchaseList.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -144,7 +155,7 @@ const GroupPurchaseHistory = () => {
       <Pagination
         currentPage={currentPage}
         totalPages={Math.ceil(groupPurchaseList.length / itemsPerPage)}
-        onPageChange={setCurrentPage}
+        onPageChange={handlePageChange}
       />
       <ReviewModal
         isOpen={isModalOpen}

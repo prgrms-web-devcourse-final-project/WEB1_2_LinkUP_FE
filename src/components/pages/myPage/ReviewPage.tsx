@@ -6,6 +6,7 @@ import SideMenu from './SideMenu';
 import GS from './GS';
 import Pagination from '../../common/Pagination';
 import { PageTitle } from './OrderListPage';
+import { Container } from './WishListPage';
 
 const ITEMS_PER_PAGE = 10; // 한 페이지에 표시할 카드 수
 const MAX_CONTENT_LENGTH = 80; // 내용 미리보기 최대 길이 (글자수)
@@ -118,6 +119,16 @@ const ReviewPage = () => {
     fetchReviews();
   }, []);
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, [currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
   const totalPages = reviewData
     ? Math.ceil(reviewData.reviews.length / ITEMS_PER_PAGE)
     : 0;
@@ -126,11 +137,6 @@ const ReviewPage = () => {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo(0, 0); // 페이지 변경 시 상단으로 스크롤
-  };
 
   return (
     <GS.Wrapper>
@@ -158,7 +164,7 @@ const ReviewPage = () => {
             </EmptyDescription>
           </EmptyState>
         ) : (
-          <>
+          <Container>
             <ReviewGrid>
               {currentReviews?.map((review, index) => (
                 <ReviewCard
@@ -177,7 +183,7 @@ const ReviewPage = () => {
                 />
               </PaginationWrapper>
             )}
-          </>
+          </Container>
         )}
       </GS.Content>
     </GS.Wrapper>

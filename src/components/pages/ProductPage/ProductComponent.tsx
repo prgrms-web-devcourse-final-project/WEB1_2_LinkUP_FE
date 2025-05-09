@@ -59,6 +59,13 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
     setSelectedCategory(initialCategory);
   }, [initialCategory]);
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, [currentPage]);
+
   const getSortedProducts = (products: AllProducts[]): AllProducts[] => {
     const sortedProducts = [...products];
     switch (sortBy) {
@@ -131,6 +138,10 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
     } else {
       navigate(`/products?category=${category}`);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -282,7 +293,7 @@ const ProductComponent: React.FC<ProductComponentProps> = ({
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
-              onPageChange={(page) => setCurrentPage(page)}
+              onPageChange={handlePageChange}
             />
           </PagenationWrapper>
         )}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidemenu from './SideMenu';
 import GS from './GS';
 import { PageTitle } from './OrderListPage';
@@ -21,6 +21,17 @@ const ChatListPage: React.FC = () => {
   );
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, [currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const paginatedChats =
     chats?.slice(
@@ -87,7 +98,7 @@ const ChatListPage: React.FC = () => {
                 <Pagination
                   currentPage={currentPage}
                   totalPages={Math.ceil(chats.length / itemsPerPage)}
-                  onPageChange={setCurrentPage}
+                  onPageChange={handlePageChange}
                 />
               </PaginationContainer>
             </>

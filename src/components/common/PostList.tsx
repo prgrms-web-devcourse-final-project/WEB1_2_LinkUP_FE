@@ -7,6 +7,7 @@ import { usePostsQuery } from '../../hooks/useGetPost';
 import { QueryHandler } from '../../hooks/useGetProduct';
 import { AdminPost } from '../../types/postTypes';
 import PostItem from './PostItem';
+import { getMyReviews } from '../../api/reviewApi';
 
 interface PostListProps {
   selectedCategory: string;
@@ -18,6 +19,35 @@ const PostList: React.FC<PostListProps> = ({ selectedCategory }) => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const { data: posts, isLoading, isError } = usePostsQuery();
+  const [ratingsMap, setRatingsMap] = useState<Record<number, number>>({}); // userId -> rating
+  // 리뷰 데이터 fetch
+  useEffect(() => {
+    const fetchRatings = async () => {
+      if (!posts) return;
+
+      const userIds = [...new Set(posts.map((post) => post.userId))];
+
+      const results = await Promise.all(
+        userIds.map(async (userId) => {
+          try {
+            const data = await getMyReviews(userId);
+            return { userId, rating: data.rating ?? 0 };
+          } catch {
+            return { userId, rating: 0 };
+          }
+        })
+      );
+
+      const newRatingsMap: Record<number, number> = {};
+      results.forEach(({ userId, rating }) => {
+        newRatingsMap[userId] = rating;
+      });
+
+      setRatingsMap(newRatingsMap);
+    };
+
+    fetchRatings();
+  }, [posts]);
 
   // 선택된 카테고리에 따른 게시글 필터링
   const categoryFilteredPosts = posts
@@ -39,6 +69,16 @@ const PostList: React.FC<PostListProps> = ({ selectedCategory }) => {
         )
     : []; // 최신순 정렬
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, [currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
   // 페이지네이션 계산
   const totalPages = Math.ceil(categoryFilteredPosts.length / POSTS_PER_PAGE);
   const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
@@ -80,6 +120,7 @@ const PostList: React.FC<PostListProps> = ({ selectedCategory }) => {
               post={post}
               selectedCategory={selectedCategory}
               onClick={() => handlePostClick(post.communityPostId)}
+              rating={ratingsMap[post.userId]}
             />
           ))
         )}
@@ -88,7 +129,7 @@ const PostList: React.FC<PostListProps> = ({ selectedCategory }) => {
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={(page) => setCurrentPage(page)}
+            onPageChange={handlePageChange}
           />
         )}
       </Container>

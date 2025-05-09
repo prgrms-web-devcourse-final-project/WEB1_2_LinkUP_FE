@@ -8,6 +8,7 @@ import { QueryHandler } from '../../hooks/useGetProduct';
 import { AdminPost } from '../../types/postTypes';
 import PostItem from './PostItem';
 import { getMyReviews } from '../../api/reviewApi';
+import SearchPostBar from './SearchPostBar';
 
 interface PostListProps {
   selectedCategory: string;
@@ -18,10 +19,12 @@ const POSTS_PER_PAGE = 6; // 한 페이지에 표시할 게시글 수
 const PostList: React.FC<PostListProps> = ({ selectedCategory }) => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
   const { data: posts, isLoading, isError } = usePostsQuery();
   const [ratingsMap, setRatingsMap] = useState<Record<number, number>>({}); // userId -> rating
   const myId = sessionStorage.getItem('userid');
   const numericMyId = Number(myId);
+
   // 리뷰 데이터 fetch
   useEffect(() => {
     const fetchRatings = async () => {
@@ -57,18 +60,25 @@ const PostList: React.FC<PostListProps> = ({ selectedCategory }) => {
     fetchRatings();
   }, [posts]);
 
-  const categoryFilteredPosts = posts
+  // 검색어에 따라 필터링
+  const filteredPosts = posts
     ? posts
         .filter((post: AdminPost) => {
           if (!post) return false;
-          if (selectedCategory === 'NOT_APPROVED') {
-            return post.status === 'NOT_APPROVED' || post.status === 'REJECTED';
-          }
-          return (
-            post.category === selectedCategory &&
-            post.status !== 'NOT_APPROVED' &&
-            post.status !== 'REJECTED'
-          );
+          // 카테고리 필터링
+          const categoryMatch =
+            selectedCategory === 'NOT_APPROVED'
+              ? post.status === 'NOT_APPROVED' || post.status === 'REJECTED'
+              : post.category === selectedCategory &&
+                post.status !== 'NOT_APPROVED' &&
+                post.status !== 'REJECTED';
+
+          // 검색어 필터링 (대소문자 구분 없이)
+          const searchMatch =
+            searchTerm === '' ||
+            post.title.toLowerCase().includes(searchTerm.toLowerCase());
+
+          return categoryMatch && searchMatch;
         })
         .sort((a, b) => {
           const aIsMine = a.userId === numericMyId;
@@ -92,21 +102,26 @@ const PostList: React.FC<PostListProps> = ({ selectedCategory }) => {
     });
   }, [currentPage]);
 
+  // 검색어 또는 카테고리 변경 시 페이지 초기화
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchTerm]);
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+  };
+
   // 페이지네이션 계산
-  const totalPages = Math.ceil(categoryFilteredPosts.length / POSTS_PER_PAGE);
+  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
   const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
-  const currentPosts = categoryFilteredPosts.slice(
+  const currentPosts = filteredPosts.slice(
     startIndex,
     startIndex + POSTS_PER_PAGE
   );
-
-  // 카테고리 변경 시 페이지 초기화
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedCategory]);
 
   // 글 작성 버튼 클릭 핸들러
   const handleWriteButtonClick = () => {
@@ -121,13 +136,20 @@ const PostList: React.FC<PostListProps> = ({ selectedCategory }) => {
   return (
     <QueryHandler isLoading={isLoading} isError={isError}>
       <Container>
-        <ActionsContainer>
-          {<WriteButton onClick={handleWriteButtonClick} />}
-        </ActionsContainer>
+        <TopActionsContainer>
+          <SearchPostBar
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchChange}
+            placeholder="제목으로 검색"
+          />
+          <WriteButton onClick={handleWriteButtonClick} />
+        </TopActionsContainer>
 
-        {categoryFilteredPosts.length === 0 ? (
+        {filteredPosts.length === 0 ? (
           <NoPostMessage>
-            선택된 카테고리에 해당하는 게시글이 없습니다.
+            {searchTerm
+              ? `"${searchTerm}" 검색 결과가 없습니다.`
+              : '선택된 카테고리에 해당하는 게시글이 없습니다.'}
           </NoPostMessage>
         ) : (
           currentPosts.map((post) => (
@@ -161,11 +183,12 @@ const Container = styled.div`
   background-color: #f8fafc;
 `;
 
-const ActionsContainer = styled.div`
+const TopActionsContainer = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  gap: 16px;
 `;
 
 const NoPostMessage = styled.p`
@@ -176,4 +199,5 @@ const NoPostMessage = styled.p`
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 `;
+
 export default PostList;

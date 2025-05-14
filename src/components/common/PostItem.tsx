@@ -22,7 +22,9 @@ const PostItem: React.FC<Props> = ({
 }) => {
   // rating이 없는 경우 0으로 설정
   const normalizedRating = rating ?? 0;
-
+  const myId = sessionStorage.getItem('userid');
+  const numericMyId = Number(myId);
+  const isMine = post.userId === numericMyId;
   // 높은 평점 사용자 여부 판단
   const isHighRated = normalizedRating >= 4.0;
   return (
@@ -33,7 +35,7 @@ const PostItem: React.FC<Props> = ({
         <PostDetails>
           <PostMeta>
             <PostAuthor>
-              작성자 : {post.nickname}
+              {isMine ? '내가 작성한 글' : `작성자 : ${post.nickname}`}
               {isHighRated && (
                 <Badge title="평점 4.0 이상 유저">
                   <FaMedal color="#facc15" size={14} />

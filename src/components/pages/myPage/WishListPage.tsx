@@ -35,6 +35,17 @@ const WishListPage: React.FC = () => {
     await postWishProduct({ productPostId });
   };
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, [currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   const paginatedWish =
     wish?.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage) ||
     [];
@@ -86,7 +97,7 @@ const WishListPage: React.FC = () => {
                 <Pagination
                   currentPage={currentPage}
                   totalPages={Math.ceil(wish.length / itemsPerPage)}
-                  onPageChange={setCurrentPage}
+                  onPageChange={handlePageChange}
                 />
               </>
             ) : (
@@ -106,7 +117,7 @@ const WishListPage: React.FC = () => {
   );
 };
 
-const Container = styled.div`
+export const Container = styled.div`
   width: 97%;
   margin: 20px 0;
   background-color: #f0f7ff;

@@ -53,6 +53,17 @@ const MyPostsPage: React.FC = () => {
     fetchPost();
   }, [shouldRefresh]);
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, [currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   const paginatedPosts = myPostList.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -118,7 +129,7 @@ const MyPostsPage: React.FC = () => {
         <Pagination
           currentPage={currentPage}
           totalPages={Math.ceil(myPostList.length / itemsPerPage)}
-          onPageChange={setCurrentPage}
+          onPageChange={handlePageChange}
         />
         {isModalOpen && (
           <ModalOverlay>

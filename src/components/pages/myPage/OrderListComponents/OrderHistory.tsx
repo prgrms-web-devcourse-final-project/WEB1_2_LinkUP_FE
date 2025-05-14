@@ -103,6 +103,17 @@ const OrderHistory = () => {
     });
   };
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }, [currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   const paginatedOrders = orderList.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -191,7 +202,7 @@ const OrderHistory = () => {
           <Pagination
             currentPage={currentPage}
             totalPages={Math.ceil(orderList.length / itemsPerPage)}
-            onPageChange={setCurrentPage}
+            onPageChange={handlePageChange}
           />
         </>
       )}

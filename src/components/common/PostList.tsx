@@ -37,7 +37,6 @@ const PostList: React.FC<PostListProps> = ({ selectedCategory }) => {
             .map((post) => post.userId)
         ),
       ];
-
       const results = await Promise.all(
         userIds.map(async (userId) => {
           try {
